@@ -192,6 +192,84 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-bert对词输入求平均" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/06/25/bert对词输入求平均/">bert对词输入求平均</a>
+    </h1>
+  
+
+        
+        <a href="/2021/06/25/bert对词输入求平均/" class="archive-article-date">
+  	<time datetime="2021-06-25T09:02:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-25</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="1-word-preprocess"><a href="#1-word-preprocess" class="headerlink" title="1. word preprocess."></a>1. word preprocess.</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> AutoTokenizer</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">encoder_texts</span><span class="params">(texts, tokenizer)</span>:</span></span><br><span class="line"></span><br><span class="line">    texts = [list(text) <span class="keyword">for</span> text <span class="keyword">in</span> texts]</span><br><span class="line">    <span class="comment"># 句子最大长度</span></span><br><span class="line">    max_seq_len = max([len(i) <span class="keyword">for</span> i <span class="keyword">in</span> texts])  </span><br><span class="line">    <span class="comment"># 统计句子中最大的词长度</span></span><br><span class="line">    fix_len = max([max([len(word) <span class="keyword">for</span> word <span class="keyword">in</span> text]) <span class="keyword">for</span> text <span class="keyword">in</span> texts])</span><br><span class="line"></span><br><span class="line">    pad_index = tokenizer.pad_token_id</span><br><span class="line"></span><br><span class="line">    texts_matrix = []</span><br><span class="line">    <span class="keyword">for</span> text <span class="keyword">in</span> texts:</span><br><span class="line">        text_matrix = []</span><br><span class="line">        text = [<span class="string">'[CLS]'</span>, *text]</span><br><span class="line">        tmp = tokenizer.batch_encode_plus(text, add_special_tokens=<span class="literal">False</span>)</span><br><span class="line">        <span class="comment"># padding到句子最大长度</span></span><br><span class="line">        tmp_input_ids = tmp[<span class="string">'input_ids'</span>] + [[pad_index]] * (max_seq_len + <span class="number">1</span> - len(text))</span><br><span class="line">        <span class="keyword">for</span> input_ids <span class="keyword">in</span> tmp_input_ids:</span><br><span class="line">            <span class="comment"># padding到词最大长度</span></span><br><span class="line">            pad_input_ids = input_ids + (fix_len - len(input_ids)) * [pad_index]</span><br><span class="line">            text_matrix.append(pad_input_ids)</span><br><span class="line">        texts_matrix.append(text_matrix)</span><br><span class="line">    <span class="comment"># 获取到subwords matrix.</span></span><br><span class="line">    <span class="keyword">return</span> torch.tensor(texts_matrix)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    texts = [</span><br><span class="line">        [<span class="string">'我'</span>, <span class="string">'爱中国'</span>],</span><br><span class="line">        [<span class="string">'我'</span>, <span class="string">'爱'</span>, <span class="string">'中国'</span>]</span><br><span class="line">    ]</span><br><span class="line">    tokenizer = AutoTokenizer.from_pretrained(<span class="string">'ckiplab/albert-tiny-chinese'</span>)</span><br><span class="line">    print(encoder_texts(texts, tokenizer))</span><br></pre></td></tr></table></figure>
+<p>output：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">tensor([[[ 101,    0,    0],</span><br><span class="line">         [2769,    0,    0],</span><br><span class="line">         [4263,  704, 1744],</span><br><span class="line">         [   0,    0,    0]],</span><br><span class="line"></span><br><span class="line">        [[ 101,    0,    0],</span><br><span class="line">         [2769,    0,    0],</span><br><span class="line">         [4263,    0,    0],</span><br><span class="line">         [ 704, 1744,    0]]])</span><br></pre></td></tr></table></figure>
+<h3 id="2-transformer-layer"><a href="#2-transformer-layer" class="headerlink" title="2. transformer layer."></a>2. transformer layer.</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">from</span> supar.modules.scalar_mix <span class="keyword">import</span> ScalarMix</span><br><span class="line"><span class="keyword">from</span> supar.utils.fn <span class="keyword">import</span> pad</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TransformerEmbedding</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="string">r"""</span></span><br><span class="line"><span class="string">    A module that directly utilizes the pretrained models in `transformers`_ to produce BERT representations.</span></span><br><span class="line"><span class="string">    While mainly tailored to provide input preparation and post-processing for the BERT model,</span></span><br><span class="line"><span class="string">    it is also compatible with other pretrained language models like XLNet, RoBERTa and ELECTRA, etc.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        model (str):</span></span><br><span class="line"><span class="string">            Path or name of the pretrained models registered in `transformers`_, e.g., ``'bert-base-cased'``.</span></span><br><span class="line"><span class="string">        n_layers (int):</span></span><br><span class="line"><span class="string">            The number of BERT layers to use. If 0, uses all layers.</span></span><br><span class="line"><span class="string">        n_out (int):</span></span><br><span class="line"><span class="string">            The requested size of the embeddings. If 0, uses the size of the pretrained embedding model. Default: 0.</span></span><br><span class="line"><span class="string">        stride (int):</span></span><br><span class="line"><span class="string">            A sequence longer than max length will be splitted into several small pieces</span></span><br><span class="line"><span class="string">            with a window size of ``stride``. Default: 10.</span></span><br><span class="line"><span class="string">        pooling (str):</span></span><br><span class="line"><span class="string">            Pooling way to get from token piece embeddings to token embedding.</span></span><br><span class="line"><span class="string">            ``first``: take the first subtoken. ``last``: take the last subtoken. ``mean``: take a mean over all.</span></span><br><span class="line"><span class="string">            Default: ``mean``.</span></span><br><span class="line"><span class="string">        pad_index (int):</span></span><br><span class="line"><span class="string">            The index of the padding token in BERT vocabulary. Default: 0.</span></span><br><span class="line"><span class="string">        dropout (float):</span></span><br><span class="line"><span class="string">            The dropout ratio of BERT layers. Default: 0. This value will be passed into the :class:`ScalarMix` layer.</span></span><br><span class="line"><span class="string">        requires_grad (bool):</span></span><br><span class="line"><span class="string">            If ``True``, the model parameters will be updated together with the downstream task. Default: ``False``.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    .. _transformers:</span></span><br><span class="line"><span class="string">        https://github.com/huggingface/transformers</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, model, n_layers=<span class="number">4</span>, n_out=<span class="number">0</span>, stride=<span class="number">256</span>, pooling=<span class="string">'mean'</span>, pad_index=<span class="number">0</span>, dropout=<span class="number">0</span>, requires_grad=True)</span>:</span></span><br><span class="line">        super().__init__()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">from</span> transformers <span class="keyword">import</span> AutoConfig, AutoModel, AutoTokenizer</span><br><span class="line">        self.bert = AutoModel.from_pretrained(model, config=AutoConfig.from_pretrained(model, output_hidden_states=<span class="literal">True</span>))</span><br><span class="line">        self.bert = self.bert.requires_grad_(requires_grad)</span><br><span class="line"></span><br><span class="line">        self.model = model</span><br><span class="line">        self.n_layers = n_layers <span class="keyword">or</span> self.bert.config.num_hidden_layers</span><br><span class="line">        self.hidden_size = self.bert.config.hidden_size</span><br><span class="line">        self.n_out = n_out <span class="keyword">or</span> self.hidden_size</span><br><span class="line">        self.stride = stride</span><br><span class="line">        self.pooling = pooling</span><br><span class="line">        self.pad_index = pad_index</span><br><span class="line">        self.dropout = dropout</span><br><span class="line">        self.requires_grad = requires_grad</span><br><span class="line">        self.max_len = int(max(<span class="number">0</span>, self.bert.config.max_position_embeddings) <span class="keyword">or</span> <span class="number">1e12</span>) - <span class="number">2</span></span><br><span class="line"></span><br><span class="line">        self.tokenizer = AutoTokenizer.from_pretrained(model)</span><br><span class="line"></span><br><span class="line">        self.scalar_mix = ScalarMix(self.n_layers, dropout)</span><br><span class="line">        self.projection = nn.Linear(self.hidden_size, self.n_out, <span class="literal">False</span>) <span class="keyword">if</span> self.hidden_size != n_out <span class="keyword">else</span> nn.Identity()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span></span><br><span class="line">        s = <span class="string">f"<span class="subst">&#123;self.model&#125;</span>, n_layers=<span class="subst">&#123;self.n_layers&#125;</span>, n_out=<span class="subst">&#123;self.n_out&#125;</span>, "</span></span><br><span class="line">        s += <span class="string">f"stride=<span class="subst">&#123;self.stride&#125;</span>, pooling=<span class="subst">&#123;self.pooling&#125;</span>, pad_index=<span class="subst">&#123;self.pad_index&#125;</span>"</span></span><br><span class="line">        <span class="keyword">if</span> self.dropout &gt; <span class="number">0</span>:</span><br><span class="line">            s += <span class="string">f", dropout=<span class="subst">&#123;self.dropout&#125;</span>"</span></span><br><span class="line">        <span class="keyword">if</span> self.requires_grad:</span><br><span class="line">            s += <span class="string">f", requires_grad=<span class="subst">&#123;self.requires_grad&#125;</span>"</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="string">f"<span class="subst">&#123;self.__class__.__name__&#125;</span>(<span class="subst">&#123;s&#125;</span>)"</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, subwords)</span>:</span></span><br><span class="line">        <span class="string">r"""</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            subwords (~torch.Tensor): ``[batch_size, seq_len, fix_len]``.</span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            ~torch.Tensor:</span></span><br><span class="line"><span class="string">                BERT embeddings of shape ``[batch_size, seq_len, n_out]``.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line"></span><br><span class="line">        mask = subwords.ne(self.pad_index)</span><br><span class="line">        lens = mask.sum((<span class="number">1</span>, <span class="number">2</span>))</span><br><span class="line">        <span class="comment"># [batch_size, n_subwords]</span></span><br><span class="line">        subwords = pad(subwords[mask].split(lens.tolist()), self.pad_index, padding_side=self.tokenizer.padding_side)</span><br><span class="line">        bert_mask = pad(mask[mask].split(lens.tolist()), <span class="number">0</span>, padding_side=self.tokenizer.padding_side)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># return the hidden states of all layers</span></span><br><span class="line">        bert = self.bert(subwords[:, :self.max_len], attention_mask=bert_mask[:, :self.max_len].float())[<span class="number">-1</span>]</span><br><span class="line">        <span class="comment"># [n_layers, batch_size, max_len, hidden_size]</span></span><br><span class="line">        bert = bert[-self.n_layers:]</span><br><span class="line">        <span class="comment"># [batch_size, max_len, hidden_size]</span></span><br><span class="line">        bert = self.scalar_mix(bert)</span><br><span class="line">        <span class="comment"># [batch_size, n_subwords, hidden_size]</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(self.stride, (subwords.shape[<span class="number">1</span>]-self.max_len+self.stride<span class="number">-1</span>)//self.stride*self.stride+<span class="number">1</span>, self.stride):</span><br><span class="line">            part = self.bert(subwords[:, i:i+self.max_len], attention_mask=bert_mask[:, i:i+self.max_len].float())[<span class="number">-1</span>]</span><br><span class="line">            bert = torch.cat((bert, self.scalar_mix(part[-self.n_layers:])[:, self.max_len-self.stride:]), <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># [batch_size, seq_len]</span></span><br><span class="line">        bert_lens = mask.sum(<span class="number">-1</span>)</span><br><span class="line">        bert_lens = bert_lens.masked_fill_(bert_lens.eq(<span class="number">0</span>), <span class="number">1</span>)</span><br><span class="line">        <span class="comment"># [batch_size, seq_len, fix_len, hidden_size]</span></span><br><span class="line">        embed = bert.new_zeros(*mask.shape, self.hidden_size).masked_scatter_(mask.unsqueeze(<span class="number">-1</span>), bert[bert_mask])</span><br><span class="line">        <span class="comment"># [batch_size, seq_len, hidden_size]</span></span><br><span class="line">        <span class="keyword">if</span> self.pooling == <span class="string">'first'</span>:</span><br><span class="line">            embed = embed[:, :, <span class="number">0</span>]</span><br><span class="line">        <span class="keyword">elif</span> self.pooling == <span class="string">'last'</span>:</span><br><span class="line">            embed = embed.gather(<span class="number">2</span>, (bert_lens<span class="number">-1</span>).unsqueeze(<span class="number">-1</span>).repeat(<span class="number">1</span>, <span class="number">1</span>, self.hidden_size).unsqueeze(<span class="number">2</span>)).squeeze(<span class="number">2</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            embed = embed.sum(<span class="number">2</span>) / bert_lens.unsqueeze(<span class="number">-1</span>)</span><br><span class="line">        embed = self.projection(embed)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> embed</span><br></pre></td></tr></table></figure>
+<p>到此，能够拿到以词为级别的output，embed.shape查看一下即可，后续就可以concat其他input做多输入。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/06/25/bert对词输入求平均/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-介绍隐马尔可夫" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1512,129 +1590,9 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-MySQL长事务导致的Table-Metadata-Lock" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/05/18/MySQL长事务导致的Table-Metadata-Lock/">MySQL长事务导致的Table Metadata Lock</a>
-    </h1>
-  
-
-        
-        <a href="/2019/05/18/MySQL长事务导致的Table-Metadata-Lock/" class="archive-article-date">
-  	<time datetime="2019-05-18T04:34:18.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-05-18</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>前几日操作<code>truncate table</code>操作时，遇到一个问题，通过<code>show processlist</code>获取关键信息，通过<a href="https://www.jianshu.com/p/683bd7fcb7a0" target="_blank" rel="noopener">此文章</a>了解更多，故记录于此。</p>
-<img src="/2019/05/18/MySQL长事务导致的Table-Metadata-Lock/mysql-locktable.jpg" title="show-processlist">
-<h2 id="什么是Table-Metadata-Lock"><a href="#什么是Table-Metadata-Lock" class="headerlink" title="什么是Table Metadata Lock"></a>什么是Table Metadata Lock</h2><p>在MySQL以前的版本中，存在这样一个Bug：</p>
-<img src="/2019/05/18/MySQL长事务导致的Table-Metadata-Lock/issue.png" title="bug">
-<p>大致意思如下:</p>
-<blockquote>
-<p>如果user1存在一个操作table的事务，而user2要删除这张表，当user1提交这个事务时，binlog表现出来的行为类似如下:</p>
-</blockquote>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> t;</span><br><span class="line"><span class="keyword">BEGIN</span>;</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t ...;</span><br><span class="line"><span class="keyword">COMMIT</span>;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>这样就导致这个问题出现了。</p>
-</blockquote>
-<blockquote>
-<p>所以MySQL在后续版本中增加了Metadata Lock,只有在事务结束后才会释放Metadata lock，因此在事务提交或回滚前，是无法进行DDL(不仅仅是DDL哦)操作的。</p>
-</blockquote>
-<p>MySQL官方文档地址:</p>
-<p><a href="http://dev.mysql.com/doc/refman/5.6/en/metadata-locking.html" target="_blank" rel="noopener">http://dev.mysql.com/doc/refman/5.6/en/metadata-locking.html</a></p>
-<img src="/2019/05/18/MySQL长事务导致的Table-Metadata-Lock/metadata-lock-desc.png" title="desc">
-<h2 id="如何解决"><a href="#如何解决" class="headerlink" title="如何解决"></a>如何解决</h2><blockquote>
-<p>查询当前正在运行的事务（下面为拷贝过来的，仅作参考）</p>
-</blockquote>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select * from information_schema.innodb_trx\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">                    trx_id: 7202</span><br><span class="line">                 trx_state: RUNNING                 <span class="comment">-- 事务状态，一般为RUNNING</span></span><br><span class="line">               trx_started: 2016-07-20 23:02:53     <span class="comment">-- 事务执行的起始时间，若时间较长，则要分析该事务是否合理</span></span><br><span class="line">     trx_requested_lock_id: NULL</span><br><span class="line">          trx_wait_started: NULL</span><br><span class="line">                trx_weight: 0</span><br><span class="line">       trx_mysql_thread_id: 52402                   <span class="comment">-- MySQL的线程ID，用于kill</span></span><br><span class="line">                 trx_query: NULL                    <span class="comment">-- 事务中的SQL</span></span><br><span class="line">       trx_operation_state: NULL</span><br><span class="line">         trx_tables_in_use: 0</span><br><span class="line">         trx_tables_locked: 0</span><br><span class="line">          trx_lock_structs: 0</span><br><span class="line">     trx_lock_memory_bytes: 360</span><br><span class="line">           trx_rows_locked: 0</span><br><span class="line">         trx_rows_modified: 0</span><br><span class="line">   trx_concurrency_tickets: 0</span><br><span class="line">       trx_isolation_level: READ COMMITTED</span><br><span class="line">         trx_unique_checks: 1</span><br><span class="line">    trx_foreign_key_checks: 1</span><br><span class="line">trx_last_foreign_key_error: NULL</span><br><span class="line"> trx_adaptive_hash_latched: 0</span><br><span class="line"> trx_adaptive_hash_timeout: 10000</span><br><span class="line">          trx_is_read_only: 0</span><br><span class="line">trx_autocommit_non_locking: 0</span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>查看运行的SQL语句</p>
-</blockquote>
-<p>根据查询到的trx_started时间以及trx_mysql_thread_id到MySQL的general log中查找，当然前提是开启了general log的功能，对于这句话我有一个疑惑点，如果没有开启general log时那么无法查看对应操作的SQL语句了？？？</p>
-<p>所以此处给出排查方式：</p>
-<ol>
-<li>如果开启了general log，那么根据这个方式</li>
-<li>给出两个SQL语句如下,<a href="https://www.itcodemonkey.com/article/3771.html" target="_blank" rel="noopener">参考文章</a>:</li>
-</ol>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 这条语句用于查看哪个线程被另外哪一个线程阻塞， 分别为 阻塞的线程ID、阻塞的SQL的语句、谁阻塞的、阻塞者的SQL语句</span></span><br><span class="line"><span class="keyword">SELECT</span> b.trx_mysql_thread_id             <span class="keyword">AS</span> <span class="string">'blocked_thread_id'</span></span><br><span class="line">      ,b.trx_query                      <span class="keyword">AS</span> <span class="string">'blocked_sql_text'</span></span><br><span class="line">      ,c.trx_mysql_thread_id             <span class="keyword">AS</span> <span class="string">'blocker_thread_id'</span></span><br><span class="line">      ,c.trx_query                       <span class="keyword">AS</span> <span class="string">'blocker_sql_text'</span></span><br><span class="line">      ,( <span class="keyword">Unix_timestamp</span>() - <span class="keyword">Unix_timestamp</span>(c.trx_started) )</span><br><span class="line">                              <span class="keyword">AS</span> <span class="string">'blocked_time'</span></span><br><span class="line"><span class="keyword">FROM</span>   information_schema.innodb_lock_waits a</span><br><span class="line">    <span class="keyword">INNER</span> <span class="keyword">JOIN</span> information_schema.innodb_trx b</span><br><span class="line">         <span class="keyword">ON</span> a.requesting_trx_id = b.trx_id</span><br><span class="line">    <span class="keyword">INNER</span> <span class="keyword">JOIN</span> information_schema.innodb_trx c</span><br><span class="line">         <span class="keyword">ON</span> a.blocking_trx_id = c.trx_id</span><br><span class="line"><span class="keyword">WHERE</span>  ( <span class="keyword">Unix_timestamp</span>() - <span class="keyword">Unix_timestamp</span>(c.trx_started) ) &gt; <span class="number">4</span>; <span class="comment">-- 时长</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 这条语句用于获取具体的阻塞语句</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> a.sql_text,</span><br><span class="line">       c.id,</span><br><span class="line">       d.trx_started</span><br><span class="line"><span class="keyword">FROM</span>   performance_schema.events_statements_current a</span><br><span class="line">       <span class="keyword">join</span> performance_schema.threads b</span><br><span class="line">         <span class="keyword">ON</span> a.thread_id = b.thread_id</span><br><span class="line">       <span class="keyword">join</span> information_schema.processlist c</span><br><span class="line">         <span class="keyword">ON</span> b.processlist_id = c.id</span><br><span class="line">       <span class="keyword">join</span> information_schema.innodb_trx d</span><br><span class="line">         <span class="keyword">ON</span> c.id = d.trx_mysql_thread_id</span><br><span class="line"><span class="keyword">where</span> c.id=<span class="number">17</span> <span class="comment">-- 17 对应blocker_thread_id，</span></span><br><span class="line"><span class="keyword">ORDER</span>  <span class="keyword">BY</span> d.trx_started\G;</span><br></pre></td></tr></table></figure>
-<p>但是方式2不一定能够打印出具体阻塞的语句，<a href="http://www.cnblogs.com/kerrycode/p/5821413.html" target="_blank" rel="noopener">为什么</a>,如果出现此类问题，可以先看下autocommit，哈哈…</p>
-<p>如果还是无法定位SQL，那么还是暴力一点:</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; kill 52402;</span><br></pre></td></tr></table></figure>
-<p>如何复现这种情况（另外对于主主/主从复制也会出现），<a href="https://www.jianshu.com/p/683bd7fcb7a0" target="_blank" rel="noopener">可参考文章</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/05/18/MySQL长事务导致的Table-Metadata-Lock/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
     </nav>
   
 
@@ -1737,11 +1695,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1757,11 +1715,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">算法</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">python</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">CI</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">git</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1773,15 +1739,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">git</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">机器学习</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
             
             <div class="clearfix"></div>

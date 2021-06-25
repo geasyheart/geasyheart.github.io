@@ -192,6 +192,104 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-SQLAlchemy字段类型" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/10/SQLAlchemy字段类型/">SQLAlchemy字段类型</a>
+    </h1>
+  
+
+        
+        <a href="/2018/04/10/SQLAlchemy字段类型/" class="archive-article-date">
+  	<time datetime="2018-04-10T02:31:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-10</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="基本类型"><a href="#基本类型" class="headerlink" title="基本类型"></a>基本类型</h3><p>字段类型是在定义模型时, 对每个<code>Column</code>的类型约定. 不同类型的字段类型在输入输出上, 及支持的操作方面, 有所区别.<br>这里只介绍<code>sqlalchemy.types.*</code>中的类型, SQL 标准类型方面, 是写什么最后生成的<code>DDL</code>语句就是什么, 比如 <code>BIGINT</code>, <code>BLOG</code> 这些, 但是这些类型并不一定在所有数据库中都有支持. 除此而外, <code>SQLAlchemy</code> 也支持一些特定数据库的特定类型, 这些需要从具体的 <code>dialects</code> 实现里导入.</p>
+<h4 id="Integer-BigInteger-SmallInteger"><a href="#Integer-BigInteger-SmallInteger" class="headerlink" title="Integer/BigInteger/SmallInteger"></a>Integer/BigInteger/SmallInteger</h4><p>整形.</p>
+<h4 id="Boolean"><a href="#Boolean" class="headerlink" title="Boolean"></a>Boolean</h4><p>布尔类型. Python 中表现为 True/False , 数据库根据支持情况, 表现为 BOOLEAN 或SMALLINT . 实例化时可以指定是否创建约束(默认创建).</p>
+<h4 id="Date-DateTime-Time-timezone-False"><a href="#Date-DateTime-Time-timezone-False" class="headerlink" title="Date/DateTime/Time (timezone=False)"></a>Date/DateTime/Time (timezone=False)</h4><p>日期类型, Time 和 DateTime 实例化时可以指定是否带时区信息.</p>
+<h4 id="Interval"><a href="#Interval" class="headerlink" title="Interval"></a>Interval</h4><p>时间偏差类型. 在 Python 中表现为 datetime.timedelta() , 数据库不支持此类型则存为日期.</p>
+<h4 id="Enum-enums-kw"><a href="#Enum-enums-kw" class="headerlink" title="Enum (*enums, **kw)"></a>Enum (*enums, **kw)</h4><p>枚举类型, 根据数据库支持情况, SQLAlchemy 会使用原生支持或者使用 VARCHAR 类型附加约束的方式实现. 原生支持中涉及新类型创建, 细节在实例化时控制.</p>
+<h4 id="Float"><a href="#Float" class="headerlink" title="Float"></a>Float</h4><p>浮点小数.</p>
+<h4 id="Numeric-precision-None-scale-None-decimal-return-scale-None-…"><a href="#Numeric-precision-None-scale-None-decimal-return-scale-None-…" class="headerlink" title="Numeric (precision=None, scale=None, decimal_return_scale=None, …)"></a>Numeric (precision=None, scale=None, decimal_return_scale=None, …)</h4><p>定点小数, Python 中表现为 Decimal .</p>
+<h4 id="LargeBinary-length-None"><a href="#LargeBinary-length-None" class="headerlink" title="LargeBinary (length=None)"></a>LargeBinary (length=None)</h4><p>字节数据. 根据数据库实现, 在实例化时可能需要指定大小.</p>
+<h4 id="PickleType"><a href="#PickleType" class="headerlink" title="PickleType"></a>PickleType</h4><p>Python 对象的序列化类型.</p>
+<h4 id="String-length-None-collation-None-…"><a href="#String-length-None-collation-None-…" class="headerlink" title="String (length=None, collation=None, …)"></a>String (length=None, collation=None, …)</h4><p>字符串类型, Python 中表现为 Unicode , 数据库表现为 VARCHAR , 通常都需要指定长度.</p>
+<h4 id="Unicode"><a href="#Unicode" class="headerlink" title="Unicode"></a>Unicode</h4><p>类似与字符串类型, 在某些数据库实现下, 会明确表示支持非 ASCII 字符. 同时输入输出也强制是 Unicode 类型.</p>
+<h4 id="Text"><a href="#Text" class="headerlink" title="Text"></a>Text</h4><p>长文本类型, Python 表现为 Unicode , 数据库表现为 TEXT .</p>
+<h4 id="UnicodeText"><a href="#UnicodeText" class="headerlink" title="UnicodeText"></a>UnicodeText</h4><p>参考 Unicode .</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">SQLAlchemy</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/SQLAlchemy//" class="article-tag-list-link color1">SQLAlchemy</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/04/10/SQLAlchemy字段类型/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-SQLAlchemy会话与事务控制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1269,95 +1367,9 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-django-migrate运行python函数" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/01/22/django-migrate运行python函数/">django-migrate运行python函数</a>
-    </h1>
-  
-
-        
-        <a href="/2018/01/22/django-migrate运行python函数/" class="archive-article-date">
-  	<time datetime="2018-01-22T10:26:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-01-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>之前代码里面的contact是可以重复的，现在要将其改成unique的，改代码容易，但是还要兼容之前的数据，就要想办法将之前重复的给改掉<br>方法1: 手动写SQL，在执行到具体的migrations时先执行SQL，但是这个不太统一，另外推代码时容易忘记。 </p>
-<p>方法2: 框架用的人多就是好，不要重复造轮子，如下: </p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Migration</span><span class="params">(migrations.Migration)</span>:</span> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">unique_contact</span><span class="params">(self,*args,**kwargs)</span>:</span> </span><br><span class="line">        <span class="comment"># 这个函数在更改contact字段时会先执行到这里 </span></span><br><span class="line">        <span class="comment">#将重复的contact更改掉 </span></span><br><span class="line"> </span><br><span class="line">    migrations.RunPython(unique_contact), <span class="comment"># 这个要在前面    </span></span><br><span class="line">    migrations.AlterField(model_name=<span class="string">'lofter_low'</span>,name=<span class="string">'contact'</span>,field=models.CharField(unique=<span class="literal">True</span>, max_length=<span class="number">20</span>),),]</span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/01/22/django-migrate运行python函数/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="extend next" rel="next" href="/page/5/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/5/">Next &raquo;</a>
     </nav>
   
 
@@ -1460,11 +1472,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1480,11 +1492,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">算法</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">python</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">CI</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">git</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1496,15 +1516,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">git</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">机器学习</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
             
             <div class="clearfix"></div>
