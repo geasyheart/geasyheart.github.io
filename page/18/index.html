@@ -71,7 +71,7 @@ ga('send', 'pageview');
 			
 				<li><a href="/">主页</a></li>
 	        
-				<li><a href="/tags/algo">算法</a></li>
+				<li><a href="/tags/算法">算法</a></li>
 	        
 				<li><a href="/tags/小桥流水人家/">小桥流水人家</a></li>
 	        
@@ -167,7 +167,7 @@ ga('send', 'pageview');
 				
 					<li style="width: 16.666666666666668%"><a href="/">主页</a></li>
 		        
-					<li style="width: 16.666666666666668%"><a href="/tags/algo">算法</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/算法">算法</a></li>
 		        
 					<li style="width: 16.666666666666668%"><a href="/tags/小桥流水人家/">小桥流水人家</a></li>
 		        
@@ -191,6 +191,196 @@ ga('send', 'pageview');
           </div>
           <div id="js-content" class="content-ll">
             
+  
+    <article id="post-08-02bash脚本编程之七-case语句及脚本选项进阶" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/13/08-02bash脚本编程之七-case语句及脚本选项进阶/">08_02bash脚本编程之七-case语句及脚本选项进阶</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/13/08-02bash脚本编程之七-case语句及脚本选项进阶/" class="archive-article-date">
+  	<time datetime="2015-02-13T10:42:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>面向过程： </p>
+<blockquote>
+<p>控制结构<br>顺序结构<br>选择结构<br>循环结构 </p>
+</blockquote>
+<h2 id="1"><a href="#1" class="headerlink" title="1)"></a>1)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">case: </span><br><span class="line"> case SWITCH in </span><br><span class="line"> value1) </span><br><span class="line"> statement </span><br><span class="line"> ... </span><br><span class="line"> ;; </span><br><span class="line"> value2) </span><br><span class="line"> statement </span><br><span class="line"> ... </span><br><span class="line"> ;; </span><br><span class="line"> *) </span><br><span class="line"> statement </span><br><span class="line"> ... </span><br><span class="line"> ;; </span><br><span class="line"> esac </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">case $1 in  </span><br><span class="line">[0-9]) </span><br><span class="line"> echo &quot;a digit.&quot; </span><br><span class="line"> ;; </span><br><span class="line">[a-z]) </span><br><span class="line"> echo &quot;lowercase letters&quot; </span><br><span class="line"> ;; </span><br><span class="line">[A-Z]) </span><br><span class="line"> echo &quot;capital letters&quot; </span><br><span class="line"> ;; </span><br><span class="line">*) </span><br><span class="line"> echo &quot;Special character&quot; </span><br><span class="line"> ;; </span><br><span class="line">esac</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">case $1 in </span><br><span class="line">&apos;start&apos;) </span><br><span class="line"> echo &quot;start server...&quot; </span><br><span class="line"> ;; </span><br><span class="line">&apos;stop&apos;) </span><br><span class="line"> echo &quot;stop server...&quot; </span><br><span class="line"> ;; </span><br><span class="line">&apos;restart&apos;) </span><br><span class="line"> echo &quot;restart server...&quot; </span><br><span class="line"> ;; </span><br><span class="line">&apos;status&apos;)  </span><br><span class="line"> echo &quot;Runing...&quot; </span><br><span class="line"> ;; </span><br><span class="line">*) </span><br><span class="line"> echo &quot;`basename $0` &#123;start|stop|restart|status&#125;&quot; </span><br><span class="line">esac</span><br></pre></td></tr></table></figure>
+<h2 id="练习"><a href="#练习" class="headerlink" title="练习"></a>练习</h2><p>写一个脚本，可以接受选项及参数，而后能够获取每一个选项，及选项的参数，并能根据选项及参数做出特定的操作，比如： </p>
+<blockquote>
+<p>adminusers.sh –add tom,jerry –del tom,blair -v|–verbose -h|help </p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">DEBUG=0 </span><br><span class="line">ADD=0 </span><br><span class="line">DEL=0 </span><br><span class="line">for I in `seq 0 $#`;do </span><br><span class="line">if [ $# -gt 0 ];then </span><br><span class="line">case $1 in </span><br><span class="line">-v|--verbose) </span><br><span class="line">  DEBUG=1 </span><br><span class="line">  shift </span><br><span class="line">  ;; </span><br><span class="line">  -h|help) </span><br><span class="line"> echo &quot;Usage:`basename $0` --add USER_LIST --del USER_LIST -v|--verbose -h|help&quot; </span><br><span class="line"> exit 0 </span><br><span class="line"> ;; </span><br><span class="line">--add) </span><br><span class="line"> ADD=1 </span><br><span class="line"> ADDUSERS=$2 </span><br><span class="line"> shift 2 </span><br><span class="line"> ;; </span><br><span class="line">--del) </span><br><span class="line"> DEL=1 </span><br><span class="line"> DELUSERS=$2 </span><br><span class="line"> shift 2 </span><br><span class="line"> ;; </span><br><span class="line">*) </span><br><span class="line"> echo &quot;Usage:`basename $0` --add USER_LIST --del USER_LIST -v|--verbose -h|help&quot; </span><br><span class="line"> exit 7 </span><br><span class="line">esac </span><br><span class="line">fi </span><br><span class="line">done </span><br><span class="line">if [ $ADD -eq 1 ];then </span><br><span class="line"> for USER in `echo $ADDUSERS | sed &apos;s/,/ /g&apos;`;do </span><br><span class="line"> if id $USER &amp;&gt;/dev/null ;then </span><br><span class="line">  [ $DEBUG -eq 1 ] &amp;&amp; echo &quot;$USER exited&quot; </span><br><span class="line"> else </span><br><span class="line"> useradd -m $USER &amp;&amp; echo $USER |passwd --stdin $USER &amp;&gt;/dev/null </span><br><span class="line"> [$DEBUG -eq 1 ] &amp;&amp; echo &quot;Add user $USER finished&quot; </span><br><span class="line"> fi </span><br><span class="line"> done </span><br><span class="line">fi  </span><br><span class="line">if [ $DEL -eq 1 ];then </span><br><span class="line"> for USER in `echo $DELUSERS | sed &apos;s/,/ /g&apos;`;do </span><br><span class="line">  if id $USER &amp;&gt;/dev/null;then </span><br><span class="line">    userdel -r $USER </span><br><span class="line"> [ $DEBUG -eq 1 ] &amp;&amp; echo &quot;Delete $USER finished&quot; </span><br><span class="line">  else </span><br><span class="line"> [ $USER -eq 1 ] &amp;&amp; echo &quot;$USER not exist&quot; </span><br><span class="line">  fi </span><br><span class="line"> done </span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/13/08-02bash脚本编程之七-case语句及脚本选项进阶/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-08-01facl及用户及Linux终端" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/13/08-01facl及用户及Linux终端/">08_01facl及用户及Linux终端</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/13/08-01facl及用户及Linux终端/" class="archive-article-date">
+  	<time datetime="2015-02-13T10:41:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>文件系统访问列表：<br>比如:<br> tom创建了一个文件，但是他想共享给jerry，具有可读写的权限，<br> 但是，这个意味着他要把other那加上w权限，这样就不是他所期望的<br> 那样了，所以这个地方引入facl </p>
+<p>FACL：Filesystem Access Control List<br>利用文件扩展属性保存额外的访问控制权限<br>目的：<br> jerry：rw- </p>
+<p>setfacl:<br> -m：设定额外的访问控制权限<br> u：UID：perm<br> setfacl -m u:jerry:rw test.txt<br> 可以使用 getfacl test.txt进行查看<br> g:GID:perm<br> setfacl -m g:group:rw test.txt(多了一个组可读写)<br> 对于目录，<br> setfacl -m d:u：UID：perm:rw DIR<br> 这个意味着对这个目录下的所有文件进行共享<br> -x:取消额外的访问控制权限<br> setfacl -x u:jerry test.txt<br> setfacl -x g:group test.txt<br>getfacl:查看<br> getfacl test.txt </p>
+<p>who:<br> username TTY log_time<br> -r:显示运行级别<br> -H：显示哪登陆的<br>w： log_time 空闲时间 使用cpu时间  运行当前进程使用的时间 正在干什么 </p>
+<p> 这两个命令没法查看su 过去的用户；<br>终端类型：<br> console:控制台<br> pty：物理终端<br> tty#:虚拟终端(附加在pty上)<br> ttys#:串行终端(无VGA时的名称)<br> pts#:伪终端(远程或者图形化界面) </p>
+<p> #：1，2，3… </p>
+<p>last:显示登录历史<br> 所查看的是 /var/log/wtmp文件，显示用户的登录历史及系统重启历史<br> -n:最近n次登陆<br>lastb:显示用户错误的登录尝试,即没成功的<br> /var/log/btmp文件<br> -n:最近n次登陆<br>lastlog:显示每一个用户的最近一次的成功登陆信息<br> -u：查看哪一个用户<br>basename:用于显示路径的文件名<br> 如:basename /etc/skel<br> skel </p>
+<p>mail:对应家目录mbox  (我centos的是在/var/spool/mail/下)<br>mail -s 发送<br> mail -s “Hello” root &lt; /etc/skel<br> 即主题是hello，内容是/etc/skel </p>
+<p>hostname:只是暂时的<br>永久的在 /etc/sysconfig/network </p>
+<p>练习:<br> 如果当前主机名不是<a href="http://www.geasyheart.com。就将其修改如此" target="_blank" rel="noopener">www.geasyheart.com。就将其修改如此</a><br> [ <code>hostname</code> != ‘<a href="http://www.geasyheart&#39;]" target="_blank" rel="noopener">www.geasyheart&#39;]</a> &amp;&amp;hostname <a href="http://www.geasyheart.com" target="_blank" rel="noopener">www.geasyheart.com</a><br> 如果当前主机名是localhost,就将其修改为<a href="http://www.geasyheart.com。就将其修改如此" target="_blank" rel="noopener">www.geasyheart.com。就将其修改如此</a><br> [ <code>hostname</code>  ==’localhost’ ] &amp;&amp; hostname <a href="http://www.geasyheart.com" target="_blank" rel="noopener">www.geasyheart.com</a><br> 如果当前主机的主机名为空，或none,或localhost，就将其修改为<a href="http://www.geasyheart.com" target="_blank" rel="noopener">www.geasyheart.com</a><br> [ -z <code>hostname</code> ] || [  <code>hostname</code> == ‘none’ -o <code>hostname</code> == ‘localhost’ ] &amp;&amp; hostname  <a href="http://www.geasyheart.com" target="_blank" rel="noopener">www.geasyheart.com</a><br> (这个地方要注意，选项和布尔运算不能放一起)<br>生成随机数：<br>RANDOM：0~32768<br> echo $RANDOM </p>
+<p>随机数生成器：熵池<br>/dev/random<br>/dev/urandom<br> 到熵池取随机数，如果取得多，熵池可能会被取空，这个时候，<br> 如果是random的话，会让你等半天，然后再把熵池填满，再让你取；<br> 而urandom是如果取完了，会采用软件乘胜方式，进行生成；<br> 所以，在安全方面，random更高，然而在速度方面，urandom更快； </p>
+<p>写一个脚本，利用RANDOM生成１０个随机数，并找出最大数；  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">declare -i MAX=0 </span><br><span class="line">declare -i MIN=0 </span><br><span class="line">for I in `seq 1 10`;do </span><br><span class="line"> MYRAND=$RANDOM </span><br><span class="line"> [ $I -eq 1 ] &amp;&amp; MIN=$MYRAND </span><br><span class="line"> if [ $I -le 9 ];then </span><br><span class="line">echo -n &quot;MYRAND,&quot; </span><br><span class="line"> else </span><br><span class="line">echo &quot;$MYRAND&quot; </span><br><span class="line"> fi </span><br><span class="line">[ $MYRAND -gt $MAX ] &amp;&amp; MAX=$MYRAND </span><br><span class="line">[ $MYRAND -lt $MIN ] &amp;&amp; MIN=$MYRAND </span><br><span class="line">done </span><br><span class="line">echo &quot;$MAX&quot; </span><br><span class="line">echo &quot;$MIN</span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/13/08-01facl及用户及Linux终端/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
   
     <article id="post-07-04特殊权限SUID等详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
@@ -1050,268 +1240,6 @@ else
 
 
   
-    <article id="post-05-03bash脚本编程之二条件判断" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/09/05-03bash脚本编程之二条件判断/">05_03bash脚本编程之二条件判断</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/09/05-03bash脚本编程之二条件判断/" class="archive-article-date">
-  	<time datetime="2015-02-08T16:41:08.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-09</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>条件判断： </p>
-<blockquote>
-<p>如果用户不存在：<br>添加用户，给密码并显示添加成功<br>否则：<br>显示如果已经存在，不用添加 </p>
-</blockquote>
-<p>bash中如何实现条件判断?<br>条件测试类型： </p>
-<blockquote>
-<p>整数测试<br>字符测试<br>文件测试 </p>
-</blockquote>
-<p>条件测试表达式： </p>
-<blockquote>
-<p>[expression]<br>[[expression]]<br>test expression </p>
-</blockquote>
-<p>整数测试: </p>
-<blockquote>
-<p>-eq:测试两个整数是否相等，比如[ $A -eq $B ] echo $?<br>-neq:测试两个整数是否不相等，<br>-gt(greater than):测试一个数是否大于另一个数，大于，为真；否则，为假<br>-lt(lower than):测试一个数是否小于一个数，小于，为真，否则，为假<br>-ge(greater  equal):大于或等于<br>-le:小于或等于 </p>
-</blockquote>
-<p>逻辑关系； </p>
-<blockquote>
-<p>逻辑与: &amp;&amp; id user1 &amp;&gt; /dev/null &amp;&amp; echo “Hello!”<br>逻辑或: || id user1 || useradd user6<br>逻辑非: ! </p>
-</blockquote>
-<p>变量名称： </p>
-<blockquote>
-<ol>
-<li>只能包含字母，数字和下划线，并且不能数字开头； </li>
-<li>不应该跟系统中已有的环境变量重名 </li>
-</ol>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#！/bin/bash </span></span><br><span class="line">LINES=`wc -l /etc/inittab` </span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$LINES</span> </span><br><span class="line">FINLINES=`<span class="built_in">echo</span> <span class="variable">$LINES</span> | cut -d<span class="string">' '</span> -f1` </span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$FINLINES</span> </span><br><span class="line">[ <span class="variable">$FINLINES</span> - gt 100 ] &amp;&amp;<span class="built_in">echo</span> <span class="string">"This is a large file."</span> || <span class="built_in">echo</span> <span class="string">"This is a small file."</span></span><br></pre></td></tr></table></figure>
-<p>练习： </p>
-<ol>
-<li>如果用户存在，就显示此用户已经存在，否则，就添加此用户 <blockquote>
-<p>id user2 &amp;&gt;/dev/null &amp;&amp; echo “user2 had exited” || useradd -m user2 &amp;&amp; echo “user2” | passwd –stdin user2 &amp;&gt;/dev/null &amp;&amp;echo “exited” </p>
-</blockquote>
-</li>
-<li>如果用户不存在，就添加，否则，输出已存在 <blockquote>
-<p>! id user2 &amp;&amp; useradd user2 || echo “exited” </p>
-</blockquote>
-</li>
-</ol>
-<p>给定一个用户：<br> 1.如果其UID为0，就显示此为管理员<br> 2.否则，就显示其为普通用户 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">USER=root </span><br><span class="line">USERID=`grep <span class="string">"^<span class="variable">$USER</span>"</span> /etc/passwd | cut -d: -f3` </span><br><span class="line">[ <span class="variable">$USERID</span> -eq 0 ] &amp;&amp; <span class="built_in">echo</span> <span class="string">"Administrator"</span> || <span class="built_in">echo</span> <span class="string">"Common User"</span> </span><br><span class="line"> </span><br><span class="line">或者USERID=`id -u <span class="variable">$USER</span>` </span><br><span class="line"> (补充：id -u 显示UID -g 显示GID) </span><br><span class="line"> </span><br><span class="line">条件判断，控制结构： </span><br><span class="line"> 单分支<span class="keyword">if</span>语句： </span><br><span class="line"> <span class="keyword">if</span> 判断条件; <span class="keyword">then</span> </span><br><span class="line"> statement1 </span><br><span class="line"> statement2 </span><br><span class="line"> ... </span><br><span class="line"> <span class="keyword">fi</span> </span><br><span class="line"> </span><br><span class="line"> 双分支： </span><br><span class="line"> <span class="keyword">if</span> 判断条件; <span class="keyword">then</span> </span><br><span class="line"> statement1 </span><br><span class="line"> statement2 </span><br><span class="line"> ... </span><br><span class="line"> <span class="keyword">else</span> </span><br><span class="line"> statement1 </span><br><span class="line"> statement2 </span><br><span class="line"> ... </span><br><span class="line"> <span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
-<p>练习：如上 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">user=user5 </span><br><span class="line"><span class="keyword">if</span> id <span class="variable">$user</span> &amp;&gt;/dev/null ; <span class="keyword">then</span> </span><br><span class="line"> <span class="built_in">echo</span> <span class="string">"exited"</span> </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line"> useradd -m <span class="variable">$user</span> &amp;&amp; passwd --stdin <span class="variable">$user</span> &amp;&gt;/dev/null &amp;&amp;<span class="built_in">echo</span> <span class="string">"exit"</span> </span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">USER=root </span><br><span class="line"><span class="keyword">if</span> [ `id -u <span class="variable">$USER</span>` -eq  0 ];<span class="keyword">then</span> </span><br><span class="line"> <span class="built_in">echo</span> <span class="string">"Administrator"</span> </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line"> <span class="built_in">echo</span> <span class="string">"Common User"</span></span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/09/05-03bash脚本编程之二条件判断/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-04-03管理及IO重定向" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/06/04-03管理及IO重定向/">04-03管理及IO重定向</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/06/04-03管理及IO重定向/" class="archive-article-date">
-  	<time datetime="2015-02-06T13:42:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-06</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>系统设定 </p>
-<blockquote>
-<p>默认输入设备：标准输入，STDIN,0<br>默认输出设备：标准输出，STDOUT ，1<br>标准错误输出:STDERR 2 </p>
-</blockquote>
-<p>Linux:<br> >:覆盖输出<br> >&gt;:追加输出<br> 如果覆盖输出怕已存在的文件被覆盖，可以使用命令set -C来设置关闭<br> 已存在内容的文件被覆盖，取消相应的set +C表示关闭此功能；<br> 如果要强行覆盖，可以在&gt;后面加个|<br> such as: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#cat /etc/fstab </span></span><br><span class="line"><span class="comment">#set -C </span></span><br><span class="line"><span class="comment">#cat /etc/skel &gt; /etc/fstab(禁止覆盖重定向) </span></span><br><span class="line"><span class="comment">#cat /etc/skel &gt;| /etc/fstab</span></span><br></pre></td></tr></table></figure>
-<p>2&gt;:重定向错误输出<br>2&gt;&gt;:追加定向错误输出 </p>
-<blockquote>
-<p>ls /var &gt; var.out 2&gt;var.out<br> &amp;&gt;:重定向标准输出或错误输出至同一个文件：<br>ls /var &amp;&gt; var.out </p>
-</blockquote>
-<p> &lt;:输入重定向 </p>
-<blockquote>
-<p>tr a-z A-Z &lt; /etc/inittab<br> &lt;&lt;:<br> cat &lt;&lt; END<br> 此处可编写内容<br> END </p>
-</blockquote>
-<blockquote>
-<p>cat &lt;&lt;EOF(end of file ，和END一样) </p>
-</blockquote>
-<blockquote>
-<p>cat &gt;&gt; /tmp/myfile.txt &lt;&lt; EOF<br> 这个会在当前编写的东西保存到/tmp/myfile.txt<br> 当然，有可能会遇到一种情况，就是写的内容要保存一份，但是<br>也要在当前窗口进行输出，<br>echo “Hello World.” | tee /tmp/hello.out </p>
-</blockquote>
-<p>管道:前一个命令的输出，作为后一个命令的输入<br> 命令1 | 命令2 | 命令3 … </p>
-<blockquote>
-<p>cut -d: -f3 /etc/passwd | sort -n | tr a-z A-Z  </p>
-</blockquote>
-<p>练习: </p>
-<ol>
-<li>统计/usr/bin/目录下的文件个数<blockquote>
-<p>#ls -l /usr/bin | wc -l  </p>
-</blockquote>
-</li>
-<li>取出当前系统上所有用户的shell，要求，每种shell只显示一次，并且按照顺序进行显示 <blockquote>
-<p>#cut -d: -f7 /etc/passwd | sort -u </p>
-</blockquote>
-</li>
-<li>思考，如何显示/var/log/目录下每个文件的内容类型 <blockquote>
-<p>#file /var/log/* </p>
-</blockquote>
-</li>
-<li>取出/etc/inittab文件的第6行 <blockquote>
-<p>#head -6 /etc/inittab | tail -1 (man tail -n选项)  </p>
-</blockquote>
-</li>
-<li>取出/etc/passwd文件中倒数第9个用户的用户名和shell，显示到屏幕上并将其保存至/tmp/users文件中； <blockquote>
-<p>#tail -9 /etc/passwd | head -1 | cut -d: -f 1,7 | tee /tmp/users </p>
-</blockquote>
-</li>
-<li>显示/etc/目录下所有以pa开头的文件，并统计其个数 <blockquote>
-<p>#ls /etc | grep pa | wc -l  </p>
-</blockquote>
-</li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/06/04-03管理及IO重定向/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/17/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><span class="page-number current">18</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/19/">Next &raquo;</a>
@@ -1417,11 +1345,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1445,19 +1373,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">CI</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">git</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">go</a>
+                <a href="javascript:void(0)" class="js-tag color3">CI</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">grpc</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">go</a>
               </li>
              
               <li class="article-tag-list-item">

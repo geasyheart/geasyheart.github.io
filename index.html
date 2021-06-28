@@ -71,7 +71,7 @@ ga('send', 'pageview');
 			
 				<li><a href="/">主页</a></li>
 	        
-				<li><a href="/tags/algo">算法</a></li>
+				<li><a href="/tags/算法">算法</a></li>
 	        
 				<li><a href="/tags/小桥流水人家/">小桥流水人家</a></li>
 	        
@@ -167,7 +167,7 @@ ga('send', 'pageview');
 				
 					<li style="width: 16.666666666666668%"><a href="/">主页</a></li>
 		        
-					<li style="width: 16.666666666666668%"><a href="/tags/algo">算法</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/算法">算法</a></li>
 		        
 					<li style="width: 16.666666666666668%"><a href="/tags/小桥流水人家/">小桥流水人家</a></li>
 		        
@@ -192,6 +192,166 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-批次数据处理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/06/28/批次数据处理/">批次数据处理</a>
+    </h1>
+  
+
+        
+        <a href="/2021/06/28/批次数据处理/" class="archive-article-date">
+  	<time datetime="2021-06-28T01:54:08.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-28</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在数据处理里，常使用DataSet和DataLoader，关于具体使用此处不介绍，对于每一个batch_size里的数据来讲，<br>一般数据是<code>shuffle=True</code>，即表示打乱顺序，能够使数据更无规律和更为随机。但是如果对于数据样本不定长的情况或者说分布不均匀的情况下，<br>要使其定长，做法就是pad到一个固定长度，如果长短分布差距大呢？？</p>
+<p>比如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">example1: 我有一个小摩托，我从来也不急，骑着我的小摩托，从此把它骑。</span><br><span class="line">example2: 我爱南京。</span><br></pre></td></tr></table></figure>
+<p>如果将<code>example2</code>和<code>example1</code>pad到一个固定长度，pad太多。（虽然你可以扯进来mask，但是要在model的每一layer都要设置mask,关于mask此处忽略。）</p>
+<p>如何在一个batch_size样本里面使数据分布更为接近？</p>
+<p>kmean algo for clustering the feature by length.</p>
+<p>kmeans等聚类算法就可以辅助解决，以每条数据的长度为依据。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">kmeans</span><span class="params">(x, k, max_it=<span class="number">32</span>)</span>:</span></span><br><span class="line">    <span class="string">r"""</span></span><br><span class="line"><span class="string">    KMeans algorithm for clustering the sentences by length.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        x (list[int]):</span></span><br><span class="line"><span class="string">            The list of sentence lengths.</span></span><br><span class="line"><span class="string">        k (int):</span></span><br><span class="line"><span class="string">            The number of clusters.</span></span><br><span class="line"><span class="string">            This is an approximate value. The final number of clusters can be less or equal to `k`.</span></span><br><span class="line"><span class="string">        max_it (int):</span></span><br><span class="line"><span class="string">            Maximum number of iterations.</span></span><br><span class="line"><span class="string">            If centroids does not converge after several iterations, the algorithm will be early stopped.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        list[float], list[list[int]]:</span></span><br><span class="line"><span class="string">            The first list contains average lengths of sentences in each cluster.</span></span><br><span class="line"><span class="string">            The second is the list of clusters holding indices of data points.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Examples:</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; x = torch.randint(10,20,(10,)).tolist()</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; x</span></span><br><span class="line"><span class="string">        [15, 10, 17, 11, 18, 13, 17, 19, 18, 14]</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; centroids, clusters = kmeans(x, 3)</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; centroids</span></span><br><span class="line"><span class="string">        [10.5, 14.0, 17.799999237060547]</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; clusters</span></span><br><span class="line"><span class="string">        [[1, 3], [0, 5, 9], [2, 4, 6, 7, 8]]</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># the number of clusters must not be greater than the number of datapoints</span></span><br><span class="line">    x, k = torch.tensor(x, dtype=torch.float), min(len(x), k)</span><br><span class="line">    <span class="comment"># collect unique datapoints</span></span><br><span class="line">    d = x.unique()</span><br><span class="line">    <span class="comment"># initialize k centroids randomly</span></span><br><span class="line">    c = d[torch.randperm(len(d))[:k]]</span><br><span class="line">    <span class="comment"># assign each datapoint to the cluster with the closest centroid</span></span><br><span class="line">    dists, y = torch.abs_(x.unsqueeze(<span class="number">-1</span>) - c).min(<span class="number">-1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> _ <span class="keyword">in</span> range(max_it):</span><br><span class="line">        <span class="comment"># if an empty cluster is encountered,</span></span><br><span class="line">        <span class="comment"># choose the farthest datapoint from the biggest cluster and move that the empty one</span></span><br><span class="line">        mask = torch.arange(k).unsqueeze(<span class="number">-1</span>).eq(y)</span><br><span class="line">        none = torch.where(~mask.any(<span class="number">-1</span>))[<span class="number">0</span>].tolist()</span><br><span class="line">        <span class="keyword">while</span> len(none) &gt; <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> none:</span><br><span class="line">                <span class="comment"># the biggest cluster</span></span><br><span class="line">                b = torch.where(mask[mask.sum(<span class="number">-1</span>).argmax()])[<span class="number">0</span>]</span><br><span class="line">                <span class="comment"># the datapoint farthest from the centroid of cluster b</span></span><br><span class="line">                f = dists[b].argmax()</span><br><span class="line">                <span class="comment"># update the assigned cluster of f</span></span><br><span class="line">                y[b[f]] = i</span><br><span class="line">                <span class="comment"># re-calculate the mask</span></span><br><span class="line">                mask = torch.arange(k).unsqueeze(<span class="number">-1</span>).eq(y)</span><br><span class="line">            none = torch.where(~mask.any(<span class="number">-1</span>))[<span class="number">0</span>].tolist()</span><br><span class="line">        <span class="comment"># update the centroids</span></span><br><span class="line">        c, old = (x * mask).sum(<span class="number">-1</span>) / mask.sum(<span class="number">-1</span>), c</span><br><span class="line">        <span class="comment"># re-assign all datapoints to clusters</span></span><br><span class="line">        dists, y = torch.abs_(x.unsqueeze(<span class="number">-1</span>) - c).min(<span class="number">-1</span>)</span><br><span class="line">        <span class="comment"># stop iteration early if the centroids converge</span></span><br><span class="line">        <span class="keyword">if</span> c.equal(old):</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    <span class="comment"># assign all datapoints to the new-generated clusters</span></span><br><span class="line">    <span class="comment"># the empty ones are discarded</span></span><br><span class="line">    assigned = y.unique().tolist()</span><br><span class="line">    <span class="comment"># get the centroids of the assigned clusters</span></span><br><span class="line">    centroids = c[assigned].tolist()</span><br><span class="line">    <span class="comment"># map all values of datapoints to buckets</span></span><br><span class="line">    clusters = [torch.where(y.eq(i))[<span class="number">0</span>].tolist() <span class="keyword">for</span> i <span class="keyword">in</span> assigned]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> centroids, clusters</span><br></pre></td></tr></table></figure>
+<p>这样使用的话，那么batch_size就木有啥子用处了，有可能一个batch样本量为1,也有可能为设置的上限。</p>
+<p>但是转念一想，其实也可以不用如此复杂，直接sorted by length也是可以的嘛，具体解释就忽略了。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/06/28/批次数据处理/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-数据增强" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/06/28/数据增强/">数据增强</a>
+    </h1>
+  
+
+        
+        <a href="/2021/06/28/数据增强/" class="archive-article-date">
+  	<time datetime="2021-06-28T01:40:08.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-28</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>图像常见数据增强有翻转，旋转，缩放比例等不同的transforms。<br>对于文本，可以增加噪声干扰，也可以通过添加slide window（此处重点，嘿嘿。）</p>
+<p>举个简单例子描述下滑动窗口。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">a = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>]</span><br><span class="line"></span><br><span class="line">[a[i: i + <span class="number">1</span>] <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>, len(a), <span class="number">1</span>)]</span><br><span class="line">Out[<span class="number">36</span>]: [[<span class="number">1</span>], [<span class="number">2</span>], [<span class="number">3</span>], [<span class="number">4</span>], [<span class="number">5</span>]]</span><br><span class="line"></span><br><span class="line">[a[i: i + <span class="number">2</span>] <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>, len(a), <span class="number">2</span>)]</span><br><span class="line">Out[<span class="number">37</span>]: [[<span class="number">1</span>, <span class="number">2</span>], [<span class="number">3</span>, <span class="number">4</span>], [<span class="number">5</span>]]</span><br><span class="line"></span><br><span class="line">[a[i: i + <span class="number">3</span>] <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>, len(a), <span class="number">3</span>)]</span><br><span class="line">Out[<span class="number">38</span>]: [[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>], [<span class="number">4</span>, <span class="number">5</span>]]</span><br><span class="line"></span><br><span class="line">[a[i: i + <span class="number">4</span>] <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>, len(a), <span class="number">4</span>)]</span><br><span class="line">Out[<span class="number">39</span>]: [[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], [<span class="number">5</span>]]</span><br><span class="line"></span><br><span class="line">[a[i: i + <span class="number">5</span>] <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>, len(a), <span class="number">5</span>)]</span><br><span class="line">Out[<span class="number">40</span>]: [[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]]</span><br></pre></td></tr></table></figure>
+<p>但是在某些训练结果下，其作用貌似并不大，反正可以尝试。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/06/28/数据增强/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-bert对词输入求平均" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -215,7 +375,7 @@ ga('send', 'pageview');
         <h3 id="1-word-preprocess"><a href="#1-word-preprocess" class="headerlink" title="1. word preprocess."></a>1. word preprocess.</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> AutoTokenizer</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">encoder_texts</span><span class="params">(texts, tokenizer)</span>:</span></span><br><span class="line"></span><br><span class="line">    texts = [list(text) <span class="keyword">for</span> text <span class="keyword">in</span> texts]</span><br><span class="line">    <span class="comment"># 句子最大长度</span></span><br><span class="line">    max_seq_len = max([len(i) <span class="keyword">for</span> i <span class="keyword">in</span> texts])  </span><br><span class="line">    <span class="comment"># 统计句子中最大的词长度</span></span><br><span class="line">    fix_len = max([max([len(word) <span class="keyword">for</span> word <span class="keyword">in</span> text]) <span class="keyword">for</span> text <span class="keyword">in</span> texts])</span><br><span class="line"></span><br><span class="line">    pad_index = tokenizer.pad_token_id</span><br><span class="line"></span><br><span class="line">    texts_matrix = []</span><br><span class="line">    <span class="keyword">for</span> text <span class="keyword">in</span> texts:</span><br><span class="line">        text_matrix = []</span><br><span class="line">        text = [<span class="string">'[CLS]'</span>, *text]</span><br><span class="line">        tmp = tokenizer.batch_encode_plus(text, add_special_tokens=<span class="literal">False</span>)</span><br><span class="line">        <span class="comment"># padding到句子最大长度</span></span><br><span class="line">        tmp_input_ids = tmp[<span class="string">'input_ids'</span>] + [[pad_index]] * (max_seq_len + <span class="number">1</span> - len(text))</span><br><span class="line">        <span class="keyword">for</span> input_ids <span class="keyword">in</span> tmp_input_ids:</span><br><span class="line">            <span class="comment"># padding到词最大长度</span></span><br><span class="line">            pad_input_ids = input_ids + (fix_len - len(input_ids)) * [pad_index]</span><br><span class="line">            text_matrix.append(pad_input_ids)</span><br><span class="line">        texts_matrix.append(text_matrix)</span><br><span class="line">    <span class="comment"># 获取到subwords matrix.</span></span><br><span class="line">    <span class="keyword">return</span> torch.tensor(texts_matrix)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    texts = [</span><br><span class="line">        [<span class="string">'我'</span>, <span class="string">'爱中国'</span>],</span><br><span class="line">        [<span class="string">'我'</span>, <span class="string">'爱'</span>, <span class="string">'中国'</span>]</span><br><span class="line">    ]</span><br><span class="line">    tokenizer = AutoTokenizer.from_pretrained(<span class="string">'ckiplab/albert-tiny-chinese'</span>)</span><br><span class="line">    print(encoder_texts(texts, tokenizer))</span><br></pre></td></tr></table></figure>
 <p>output：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">tensor([[[ 101,    0,    0],</span><br><span class="line">         [2769,    0,    0],</span><br><span class="line">         [4263,  704, 1744],</span><br><span class="line">         [   0,    0,    0]],</span><br><span class="line"></span><br><span class="line">        [[ 101,    0,    0],</span><br><span class="line">         [2769,    0,    0],</span><br><span class="line">         [4263,    0,    0],</span><br><span class="line">         [ 704, 1744,    0]]])</span><br></pre></td></tr></table></figure>
-<h3 id="2-transformer-layer"><a href="#2-transformer-layer" class="headerlink" title="2. transformer layer."></a>2. transformer layer.</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">from</span> supar.modules.scalar_mix <span class="keyword">import</span> ScalarMix</span><br><span class="line"><span class="keyword">from</span> supar.utils.fn <span class="keyword">import</span> pad</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TransformerEmbedding</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="string">r"""</span></span><br><span class="line"><span class="string">    A module that directly utilizes the pretrained models in `transformers`_ to produce BERT representations.</span></span><br><span class="line"><span class="string">    While mainly tailored to provide input preparation and post-processing for the BERT model,</span></span><br><span class="line"><span class="string">    it is also compatible with other pretrained language models like XLNet, RoBERTa and ELECTRA, etc.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        model (str):</span></span><br><span class="line"><span class="string">            Path or name of the pretrained models registered in `transformers`_, e.g., ``'bert-base-cased'``.</span></span><br><span class="line"><span class="string">        n_layers (int):</span></span><br><span class="line"><span class="string">            The number of BERT layers to use. If 0, uses all layers.</span></span><br><span class="line"><span class="string">        n_out (int):</span></span><br><span class="line"><span class="string">            The requested size of the embeddings. If 0, uses the size of the pretrained embedding model. Default: 0.</span></span><br><span class="line"><span class="string">        stride (int):</span></span><br><span class="line"><span class="string">            A sequence longer than max length will be splitted into several small pieces</span></span><br><span class="line"><span class="string">            with a window size of ``stride``. Default: 10.</span></span><br><span class="line"><span class="string">        pooling (str):</span></span><br><span class="line"><span class="string">            Pooling way to get from token piece embeddings to token embedding.</span></span><br><span class="line"><span class="string">            ``first``: take the first subtoken. ``last``: take the last subtoken. ``mean``: take a mean over all.</span></span><br><span class="line"><span class="string">            Default: ``mean``.</span></span><br><span class="line"><span class="string">        pad_index (int):</span></span><br><span class="line"><span class="string">            The index of the padding token in BERT vocabulary. Default: 0.</span></span><br><span class="line"><span class="string">        dropout (float):</span></span><br><span class="line"><span class="string">            The dropout ratio of BERT layers. Default: 0. This value will be passed into the :class:`ScalarMix` layer.</span></span><br><span class="line"><span class="string">        requires_grad (bool):</span></span><br><span class="line"><span class="string">            If ``True``, the model parameters will be updated together with the downstream task. Default: ``False``.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    .. _transformers:</span></span><br><span class="line"><span class="string">        https://github.com/huggingface/transformers</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, model, n_layers=<span class="number">4</span>, n_out=<span class="number">0</span>, stride=<span class="number">256</span>, pooling=<span class="string">'mean'</span>, pad_index=<span class="number">0</span>, dropout=<span class="number">0</span>, requires_grad=True)</span>:</span></span><br><span class="line">        super().__init__()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">from</span> transformers <span class="keyword">import</span> AutoConfig, AutoModel, AutoTokenizer</span><br><span class="line">        self.bert = AutoModel.from_pretrained(model, config=AutoConfig.from_pretrained(model, output_hidden_states=<span class="literal">True</span>))</span><br><span class="line">        self.bert = self.bert.requires_grad_(requires_grad)</span><br><span class="line"></span><br><span class="line">        self.model = model</span><br><span class="line">        self.n_layers = n_layers <span class="keyword">or</span> self.bert.config.num_hidden_layers</span><br><span class="line">        self.hidden_size = self.bert.config.hidden_size</span><br><span class="line">        self.n_out = n_out <span class="keyword">or</span> self.hidden_size</span><br><span class="line">        self.stride = stride</span><br><span class="line">        self.pooling = pooling</span><br><span class="line">        self.pad_index = pad_index</span><br><span class="line">        self.dropout = dropout</span><br><span class="line">        self.requires_grad = requires_grad</span><br><span class="line">        self.max_len = int(max(<span class="number">0</span>, self.bert.config.max_position_embeddings) <span class="keyword">or</span> <span class="number">1e12</span>) - <span class="number">2</span></span><br><span class="line"></span><br><span class="line">        self.tokenizer = AutoTokenizer.from_pretrained(model)</span><br><span class="line"></span><br><span class="line">        self.scalar_mix = ScalarMix(self.n_layers, dropout)</span><br><span class="line">        self.projection = nn.Linear(self.hidden_size, self.n_out, <span class="literal">False</span>) <span class="keyword">if</span> self.hidden_size != n_out <span class="keyword">else</span> nn.Identity()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span></span><br><span class="line">        s = <span class="string">f"<span class="subst">&#123;self.model&#125;</span>, n_layers=<span class="subst">&#123;self.n_layers&#125;</span>, n_out=<span class="subst">&#123;self.n_out&#125;</span>, "</span></span><br><span class="line">        s += <span class="string">f"stride=<span class="subst">&#123;self.stride&#125;</span>, pooling=<span class="subst">&#123;self.pooling&#125;</span>, pad_index=<span class="subst">&#123;self.pad_index&#125;</span>"</span></span><br><span class="line">        <span class="keyword">if</span> self.dropout &gt; <span class="number">0</span>:</span><br><span class="line">            s += <span class="string">f", dropout=<span class="subst">&#123;self.dropout&#125;</span>"</span></span><br><span class="line">        <span class="keyword">if</span> self.requires_grad:</span><br><span class="line">            s += <span class="string">f", requires_grad=<span class="subst">&#123;self.requires_grad&#125;</span>"</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="string">f"<span class="subst">&#123;self.__class__.__name__&#125;</span>(<span class="subst">&#123;s&#125;</span>)"</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, subwords)</span>:</span></span><br><span class="line">        <span class="string">r"""</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            subwords (~torch.Tensor): ``[batch_size, seq_len, fix_len]``.</span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            ~torch.Tensor:</span></span><br><span class="line"><span class="string">                BERT embeddings of shape ``[batch_size, seq_len, n_out]``.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line"></span><br><span class="line">        mask = subwords.ne(self.pad_index)</span><br><span class="line">        lens = mask.sum((<span class="number">1</span>, <span class="number">2</span>))</span><br><span class="line">        <span class="comment"># [batch_size, n_subwords]</span></span><br><span class="line">        subwords = pad(subwords[mask].split(lens.tolist()), self.pad_index, padding_side=self.tokenizer.padding_side)</span><br><span class="line">        bert_mask = pad(mask[mask].split(lens.tolist()), <span class="number">0</span>, padding_side=self.tokenizer.padding_side)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># return the hidden states of all layers</span></span><br><span class="line">        bert = self.bert(subwords[:, :self.max_len], attention_mask=bert_mask[:, :self.max_len].float())[<span class="number">-1</span>]</span><br><span class="line">        <span class="comment"># [n_layers, batch_size, max_len, hidden_size]</span></span><br><span class="line">        bert = bert[-self.n_layers:]</span><br><span class="line">        <span class="comment"># [batch_size, max_len, hidden_size]</span></span><br><span class="line">        bert = self.scalar_mix(bert)</span><br><span class="line">        <span class="comment"># [batch_size, n_subwords, hidden_size]</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(self.stride, (subwords.shape[<span class="number">1</span>]-self.max_len+self.stride<span class="number">-1</span>)//self.stride*self.stride+<span class="number">1</span>, self.stride):</span><br><span class="line">            part = self.bert(subwords[:, i:i+self.max_len], attention_mask=bert_mask[:, i:i+self.max_len].float())[<span class="number">-1</span>]</span><br><span class="line">            bert = torch.cat((bert, self.scalar_mix(part[-self.n_layers:])[:, self.max_len-self.stride:]), <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># [batch_size, seq_len]</span></span><br><span class="line">        bert_lens = mask.sum(<span class="number">-1</span>)</span><br><span class="line">        bert_lens = bert_lens.masked_fill_(bert_lens.eq(<span class="number">0</span>), <span class="number">1</span>)</span><br><span class="line">        <span class="comment"># [batch_size, seq_len, fix_len, hidden_size]</span></span><br><span class="line">        embed = bert.new_zeros(*mask.shape, self.hidden_size).masked_scatter_(mask.unsqueeze(<span class="number">-1</span>), bert[bert_mask])</span><br><span class="line">        <span class="comment"># [batch_size, seq_len, hidden_size]</span></span><br><span class="line">        <span class="keyword">if</span> self.pooling == <span class="string">'first'</span>:</span><br><span class="line">            embed = embed[:, :, <span class="number">0</span>]</span><br><span class="line">        <span class="keyword">elif</span> self.pooling == <span class="string">'last'</span>:</span><br><span class="line">            embed = embed.gather(<span class="number">2</span>, (bert_lens<span class="number">-1</span>).unsqueeze(<span class="number">-1</span>).repeat(<span class="number">1</span>, <span class="number">1</span>, self.hidden_size).unsqueeze(<span class="number">2</span>)).squeeze(<span class="number">2</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            embed = embed.sum(<span class="number">2</span>) / bert_lens.unsqueeze(<span class="number">-1</span>)</span><br><span class="line">        embed = self.projection(embed)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> embed</span><br></pre></td></tr></table></figure>
+<h3 id="2-transformer-layer"><a href="#2-transformer-layer" class="headerlink" title="2. transformer layer."></a>2. transformer layer.</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">from</span> supar.modules.scalar_mix <span class="keyword">import</span> ScalarMix</span><br><span class="line"><span class="keyword">from</span> supar.utils.fn <span class="keyword">import</span> pad</span><br><span class="line"></span><br><span class="line"><span class="comment"># pad 等价于 pad_sequence。</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># from torch.nn.utils.rnn import pad_sequence</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TransformerEmbedding</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="string">r"""</span></span><br><span class="line"><span class="string">    A module that directly utilizes the pretrained models in `transformers`_ to produce BERT representations.</span></span><br><span class="line"><span class="string">    While mainly tailored to provide input preparation and post-processing for the BERT model,</span></span><br><span class="line"><span class="string">    it is also compatible with other pretrained language models like XLNet, RoBERTa and ELECTRA, etc.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        model (str):</span></span><br><span class="line"><span class="string">            Path or name of the pretrained models registered in `transformers`_, e.g., ``'bert-base-cased'``.</span></span><br><span class="line"><span class="string">        n_layers (int):</span></span><br><span class="line"><span class="string">            The number of BERT layers to use. If 0, uses all layers.</span></span><br><span class="line"><span class="string">        n_out (int):</span></span><br><span class="line"><span class="string">            The requested size of the embeddings. If 0, uses the size of the pretrained embedding model. Default: 0.</span></span><br><span class="line"><span class="string">        stride (int):</span></span><br><span class="line"><span class="string">            A sequence longer than max length will be splitted into several small pieces</span></span><br><span class="line"><span class="string">            with a window size of ``stride``. Default: 10.</span></span><br><span class="line"><span class="string">        pooling (str):</span></span><br><span class="line"><span class="string">            Pooling way to get from token piece embeddings to token embedding.</span></span><br><span class="line"><span class="string">            ``first``: take the first subtoken. ``last``: take the last subtoken. ``mean``: take a mean over all.</span></span><br><span class="line"><span class="string">            Default: ``mean``.</span></span><br><span class="line"><span class="string">        pad_index (int):</span></span><br><span class="line"><span class="string">            The index of the padding token in BERT vocabulary. Default: 0.</span></span><br><span class="line"><span class="string">        dropout (float):</span></span><br><span class="line"><span class="string">            The dropout ratio of BERT layers. Default: 0. This value will be passed into the :class:`ScalarMix` layer.</span></span><br><span class="line"><span class="string">        requires_grad (bool):</span></span><br><span class="line"><span class="string">            If ``True``, the model parameters will be updated together with the downstream task. Default: ``False``.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    .. _transformers:</span></span><br><span class="line"><span class="string">        https://github.com/huggingface/transformers</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, model, n_layers=<span class="number">4</span>, n_out=<span class="number">0</span>, stride=<span class="number">256</span>, pooling=<span class="string">'mean'</span>, pad_index=<span class="number">0</span>, dropout=<span class="number">0</span>, requires_grad=True)</span>:</span></span><br><span class="line">        super().__init__()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">from</span> transformers <span class="keyword">import</span> AutoConfig, AutoModel, AutoTokenizer</span><br><span class="line">        self.bert = AutoModel.from_pretrained(model, config=AutoConfig.from_pretrained(model, output_hidden_states=<span class="literal">True</span>))</span><br><span class="line">        self.bert = self.bert.requires_grad_(requires_grad)</span><br><span class="line"></span><br><span class="line">        self.model = model</span><br><span class="line">        self.n_layers = n_layers <span class="keyword">or</span> self.bert.config.num_hidden_layers</span><br><span class="line">        self.hidden_size = self.bert.config.hidden_size</span><br><span class="line">        self.n_out = n_out <span class="keyword">or</span> self.hidden_size</span><br><span class="line">        self.stride = stride</span><br><span class="line">        self.pooling = pooling</span><br><span class="line">        self.pad_index = pad_index</span><br><span class="line">        self.dropout = dropout</span><br><span class="line">        self.requires_grad = requires_grad</span><br><span class="line">        self.max_len = int(max(<span class="number">0</span>, self.bert.config.max_position_embeddings) <span class="keyword">or</span> <span class="number">1e12</span>) - <span class="number">2</span></span><br><span class="line"></span><br><span class="line">        self.tokenizer = AutoTokenizer.from_pretrained(model)</span><br><span class="line"></span><br><span class="line">        self.scalar_mix = ScalarMix(self.n_layers, dropout)</span><br><span class="line">        self.projection = nn.Linear(self.hidden_size, self.n_out, <span class="literal">False</span>) <span class="keyword">if</span> self.hidden_size != n_out <span class="keyword">else</span> nn.Identity()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span></span><br><span class="line">        s = <span class="string">f"<span class="subst">&#123;self.model&#125;</span>, n_layers=<span class="subst">&#123;self.n_layers&#125;</span>, n_out=<span class="subst">&#123;self.n_out&#125;</span>, "</span></span><br><span class="line">        s += <span class="string">f"stride=<span class="subst">&#123;self.stride&#125;</span>, pooling=<span class="subst">&#123;self.pooling&#125;</span>, pad_index=<span class="subst">&#123;self.pad_index&#125;</span>"</span></span><br><span class="line">        <span class="keyword">if</span> self.dropout &gt; <span class="number">0</span>:</span><br><span class="line">            s += <span class="string">f", dropout=<span class="subst">&#123;self.dropout&#125;</span>"</span></span><br><span class="line">        <span class="keyword">if</span> self.requires_grad:</span><br><span class="line">            s += <span class="string">f", requires_grad=<span class="subst">&#123;self.requires_grad&#125;</span>"</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="string">f"<span class="subst">&#123;self.__class__.__name__&#125;</span>(<span class="subst">&#123;s&#125;</span>)"</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, subwords)</span>:</span></span><br><span class="line">        <span class="string">r"""</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            subwords (~torch.Tensor): ``[batch_size, seq_len, fix_len]``.</span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            ~torch.Tensor:</span></span><br><span class="line"><span class="string">                BERT embeddings of shape ``[batch_size, seq_len, n_out]``.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line"></span><br><span class="line">        mask = subwords.ne(self.pad_index)</span><br><span class="line">        lens = mask.sum((<span class="number">1</span>, <span class="number">2</span>))</span><br><span class="line">        <span class="comment"># [batch_size, n_subwords]</span></span><br><span class="line">        subwords = pad(subwords[mask].split(lens.tolist()), self.pad_index, padding_side=self.tokenizer.padding_side)</span><br><span class="line">        bert_mask = pad(mask[mask].split(lens.tolist()), <span class="number">0</span>, padding_side=self.tokenizer.padding_side)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># return the hidden states of all layers</span></span><br><span class="line">        bert = self.bert(subwords[:, :self.max_len], attention_mask=bert_mask[:, :self.max_len].float())[<span class="number">-1</span>]</span><br><span class="line">        <span class="comment"># [n_layers, batch_size, max_len, hidden_size]</span></span><br><span class="line">        bert = bert[-self.n_layers:]</span><br><span class="line">        <span class="comment"># [batch_size, max_len, hidden_size]</span></span><br><span class="line">        bert = self.scalar_mix(bert)</span><br><span class="line">        <span class="comment"># [batch_size, n_subwords, hidden_size]</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> range(self.stride, (subwords.shape[<span class="number">1</span>]-self.max_len+self.stride<span class="number">-1</span>)//self.stride*self.stride+<span class="number">1</span>, self.stride):</span><br><span class="line">            part = self.bert(subwords[:, i:i+self.max_len], attention_mask=bert_mask[:, i:i+self.max_len].float())[<span class="number">-1</span>]</span><br><span class="line">            bert = torch.cat((bert, self.scalar_mix(part[-self.n_layers:])[:, self.max_len-self.stride:]), <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># [batch_size, seq_len]</span></span><br><span class="line">        bert_lens = mask.sum(<span class="number">-1</span>)</span><br><span class="line">        bert_lens = bert_lens.masked_fill_(bert_lens.eq(<span class="number">0</span>), <span class="number">1</span>)</span><br><span class="line">        <span class="comment"># [batch_size, seq_len, fix_len, hidden_size]</span></span><br><span class="line">        embed = bert.new_zeros(*mask.shape, self.hidden_size).masked_scatter_(mask.unsqueeze(<span class="number">-1</span>), bert[bert_mask])</span><br><span class="line">        <span class="comment"># [batch_size, seq_len, hidden_size]</span></span><br><span class="line">        <span class="keyword">if</span> self.pooling == <span class="string">'first'</span>:</span><br><span class="line">            embed = embed[:, :, <span class="number">0</span>]</span><br><span class="line">        <span class="keyword">elif</span> self.pooling == <span class="string">'last'</span>:</span><br><span class="line">            embed = embed.gather(<span class="number">2</span>, (bert_lens<span class="number">-1</span>).unsqueeze(<span class="number">-1</span>).repeat(<span class="number">1</span>, <span class="number">1</span>, self.hidden_size).unsqueeze(<span class="number">2</span>)).squeeze(<span class="number">2</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            embed = embed.sum(<span class="number">2</span>) / bert_lens.unsqueeze(<span class="number">-1</span>)</span><br><span class="line">        embed = self.projection(embed)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> embed</span><br></pre></td></tr></table></figure>
 <p>到此，能够拿到以词为级别的output，embed.shape查看一下即可，后续就可以concat其他input做多输入。</p>
 
       
@@ -1395,201 +1555,6 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-python-sub一次性替换" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/06/28/python-sub一次性替换/">python sub一次性替换</a>
-    </h1>
-  
-
-        
-        <a href="/2019/06/28/python-sub一次性替换/" class="archive-article-date">
-  	<time datetime="2019-06-28T02:01:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-06-28</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="问题来源"><a href="#问题来源" class="headerlink" title="问题来源"></a>问题来源</h2><p>字符串一次替换，为什么不能多次替换呢，例如</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">s = <span class="string">"""</span></span><br><span class="line"><span class="string">&lt;xml&gt;</span></span><br><span class="line"><span class="string">    &lt;field name="SALARYCATALOG_ID"&gt;150&lt;/field&gt;</span></span><br><span class="line"><span class="string">    &lt;field name="SALARYCATALOG_ID"&gt;170&lt;/field&gt;</span></span><br><span class="line"><span class="string">&lt;/xml&gt;</span></span><br><span class="line"><span class="string">"""</span></span><br></pre></td></tr></table></figure>
-<p>假设150要被替换成170，而170要被替换成190，如果for循环的话，</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">s.replace(<span class="string">'&lt;field name="SALARYCATALOG_ID"&gt;150&lt;/field&gt;'</span>, <span class="string">'&lt;field name="SALARYCATALOG_ID"&gt;170&lt;/field&gt;'</span>) <span class="comment"># 第一次</span></span><br><span class="line">s.replace(<span class="string">'&lt;field name="SALARYCATALOG_ID"&gt;170&lt;/field&gt;'</span>, <span class="string">'&lt;field name="SALARYCATALOG_ID"&gt;190&lt;/field&gt;'</span>) <span class="comment"># 第二次</span></span><br></pre></td></tr></table></figure>
-<p>就会导致结果出现偏差，整个字符串都会变成190，那么应该有种方法，可以一次性的匹配完并且返回结果。</p>
-<h2 id="解决方式"><a href="#解决方式" class="headerlink" title="解决方式"></a>解决方式</h2><p>关于re.sub.</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> Dict</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">retrieve_formula</span><span class="params">(old_formula: str, field_mapping: Dict)</span>:</span></span><br><span class="line">    regexp = re.compile(</span><br><span class="line">                <span class="string">r'&lt;field name="(BUSINESSUNIT_ID|PAYVAR_ID|SALARYCATALOG_ID)"&gt;(\d+)&lt;/field&gt;'</span></span><br><span class="line">            )</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">rep</span><span class="params">(match_data)</span>:</span></span><br><span class="line">        <span class="comment"># 自定义的函数，匹配到每次都会走到，然后统一返回</span></span><br><span class="line">        <span class="comment"># import ipdb;ipdb.set_trace() # 自行加断点调试</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            field_name = match_data.group(<span class="number">1</span>)</span><br><span class="line">            replaced_id = field_mapping[field_name][match_data.group(<span class="number">2</span>)]</span><br><span class="line">        <span class="keyword">except</span> KeyError:</span><br><span class="line">            <span class="keyword">return</span> match_data.group(<span class="number">0</span>)</span><br><span class="line">        <span class="keyword">except</span> Exception:</span><br><span class="line">            <span class="keyword">return</span> match_data.group(<span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="string">'&lt;field name="&#123;&#125;"&gt;&#123;&#125;&lt;/field&gt;'</span>.format(field_name, replaced_id)</span><br><span class="line">    <span class="keyword">return</span> re.sub(regexp, rep, old_formula)</span><br></pre></td></tr></table></figure>
-<h3 id="情况一"><a href="#情况一" class="headerlink" title="情况一"></a>情况一</h3><ol>
-<li>没有一处匹配的情况</li>
-</ol>
-<blockquote>
-<p>实际会被匹配到，但是替换值时会触发KeyError，所以返回group(0)</p>
-</blockquote>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">formula_1 = <span class="string">"""</span></span><br><span class="line"><span class="string">                &lt;xml&gt;</span></span><br><span class="line"><span class="string">                    &lt;field name="SALARYCATALOG_ID"&gt;150&lt;/field&gt;</span></span><br><span class="line"><span class="string">                    &lt;field name="BUSINESSUNIT_ID"&gt;973&lt;/field&gt;</span></span><br><span class="line"><span class="string">                    &lt;field name="PAYVAR_ID"&gt;256&lt;/field&gt;</span></span><br><span class="line"><span class="string">                &lt;/xml&gt;</span></span><br><span class="line"><span class="string">                """</span></span><br><span class="line">field_mapping = &#123;</span><br><span class="line">    <span class="string">"SALARYCATALOG_ID"</span>: &#123;&#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ol start="2">
-<li>匹配到一处的情况</li>
-</ol>
-<blockquote>
-<p>由于150会被160替换，所以只有此处不会触发KeyError</p>
-</blockquote>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">formula_2 = <span class="string">"""</span></span><br><span class="line"><span class="string">        &lt;xml&gt;</span></span><br><span class="line"><span class="string">            &lt;field name="SALARYCATALOG_ID"&gt;150&lt;/field&gt;</span></span><br><span class="line"><span class="string">            &lt;field name="BUSINESSUNIT_ID"&gt;973&lt;/field&gt;</span></span><br><span class="line"><span class="string">            &lt;field name="PAYVAR_ID"&gt;256&lt;/field&gt;</span></span><br><span class="line"><span class="string">        &lt;/xml&gt;</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">field_mapping = &#123;</span><br><span class="line">    <span class="string">"SALARYCATALOG_ID"</span>: &#123;</span><br><span class="line">        <span class="string">"150"</span>: <span class="string">"160"</span>,</span><br><span class="line">        <span class="string">"170"</span>: <span class="string">"180"</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ol start="3">
-<li>匹配多处的情况，情况一：一个类别出现多次</li>
-</ol>
-<blockquote>
-<p>150会被160替换，170会被180替换，由于sub只走一次，而rep函数会被循环匹配</p>
-</blockquote>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">formula_3 = <span class="string">"""</span></span><br><span class="line"><span class="string">        &lt;xml&gt;</span></span><br><span class="line"><span class="string">            &lt;field name="SALARYCATALOG_ID"&gt;150&lt;/field&gt;</span></span><br><span class="line"><span class="string">            &lt;field name="BUSINESSUNIT_ID"&gt;973&lt;/field&gt;</span></span><br><span class="line"><span class="string">            &lt;field name="PAYVAR_ID"&gt;256&lt;/field&gt;</span></span><br><span class="line"><span class="string">            &lt;field name="SALARYCATALOG_ID"&gt;170&lt;/field&gt;</span></span><br><span class="line"><span class="string">        &lt;/xml&gt;</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">field_mapping = &#123;</span><br><span class="line">    <span class="string">"SALARYCATALOG_ID"</span>: &#123;</span><br><span class="line">        <span class="string">"150"</span>: <span class="string">"160"</span>,</span><br><span class="line">        <span class="string">"170"</span>: <span class="string">"180"</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ol start="4">
-<li>匹配多处的情况，情况二：多次匹配</li>
-</ol>
-<blockquote>
-<p>同理如上</p>
-</blockquote>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">formula_4 = <span class="string">"""</span></span><br><span class="line"><span class="string">        &lt;xml&gt;</span></span><br><span class="line"><span class="string">            &lt;field name="SALARYCATALOG_ID"&gt;150&lt;/field&gt;</span></span><br><span class="line"><span class="string">            &lt;field name="BUSINESSUNIT_ID"&gt;973&lt;/field&gt;</span></span><br><span class="line"><span class="string">            &lt;field name="PAYVAR_ID"&gt;256&lt;/field&gt;</span></span><br><span class="line"><span class="string">            &lt;field name="SALARYCATALOG_ID"&gt;170&lt;/field&gt;</span></span><br><span class="line"><span class="string">        &lt;/xml&gt;</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">field_mapping = &#123;</span><br><span class="line">    <span class="string">"SALARYCATALOG_ID"</span>: &#123;</span><br><span class="line">        <span class="string">"150"</span>: <span class="string">"160"</span>,</span><br><span class="line">        <span class="string">"170"</span>: <span class="string">"180"</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">"BUSINESSUNIT_ID"</span>: &#123;</span><br><span class="line">        <span class="string">"973"</span>: <span class="string">"900"</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">"PAYVAR_ID"</span>: &#123;</span><br><span class="line">        <span class="string">"256"</span>: <span class="string">"300"</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>sub可以传函数是一个非常有用的做法，其中rep函数会在sub匹配到多次调用，然后最终sub一次返回，这个非常有用。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/06/28/python-sub一次性替换/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-APP首页框架搭建" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/06/08/APP首页框架搭建/">APP首页框架搭建</a>
-    </h1>
-  
-
-        
-        <a href="/2019/06/08/APP首页框架搭建/" class="archive-article-date">
-  	<time datetime="2019-06-08T07:33:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-06-08</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="顶部导航栏"><a href="#顶部导航栏" class="headerlink" title="顶部导航栏"></a>顶部导航栏</h2><figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">'package:flutter/material.dart'</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TabbedAppBarSample</span> <span class="keyword">extends</span> <span class="title">StatelessWidget</span></span>&#123;</span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  Widget build(BuildContext context) &#123;</span><br><span class="line">    <span class="keyword">return</span> MaterialApp(</span><br><span class="line">      home: DefaultTabController(</span><br><span class="line">          length: choices.length,</span><br><span class="line">          child: Scaffold(</span><br><span class="line">            appBar: AppBar(</span><br><span class="line">              title: <span class="keyword">const</span> Text(<span class="string">'Tabbed AppBar'</span>),</span><br><span class="line">              bottom: TabBar(</span><br><span class="line">                  isScrollable: <span class="keyword">true</span>,</span><br><span class="line">                  tabs: choices.map((Choice choice)&#123;</span><br><span class="line">                    <span class="keyword">return</span> Tab(</span><br><span class="line">                      text: choice.title,</span><br><span class="line">                      icon: Icon(choice.icon)</span><br><span class="line">                    );</span><br><span class="line">                  &#125;).toList()</span><br><span class="line">              ),</span><br><span class="line">            ),</span><br><span class="line">            body: TabBarView(children: choices.map((Choice choice)&#123;</span><br><span class="line">              <span class="keyword">return</span> Padding(</span><br><span class="line">                padding: <span class="keyword">const</span> EdgeInsets.all(<span class="number">16.0</span>),</span><br><span class="line">                child: ChoiceCard(choice: choice),</span><br><span class="line">              );</span><br><span class="line">            &#125;).toList()),</span><br><span class="line">          )</span><br><span class="line">      ),</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Choice</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> Choice(&#123;<span class="keyword">this</span>.title, <span class="keyword">this</span>.icon&#125;);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">final</span> <span class="built_in">String</span> title;</span><br><span class="line">  <span class="keyword">final</span> IconData icon;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="built_in">List</span>&lt;Choice&gt; choices = <span class="keyword">const</span> &lt;Choice&gt;[</span><br><span class="line">  <span class="keyword">const</span> Choice(title: <span class="string">'CAR'</span>, icon: Icons.directions_car),</span><br><span class="line">  <span class="keyword">const</span> Choice(title: <span class="string">'BICYCLE'</span>, icon: Icons.directions_bike),</span><br><span class="line">  <span class="keyword">const</span> Choice(title: <span class="string">'BOAT'</span>, icon: Icons.directions_boat),</span><br><span class="line">  <span class="keyword">const</span> Choice(title: <span class="string">'TRAIN'</span>, icon: Icons.directions_railway),</span><br><span class="line">  <span class="keyword">const</span> Choice(title: <span class="string">'WALK'</span>, icon: Icons.directions_walk)</span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ChoiceCard</span> <span class="keyword">extends</span> <span class="title">StatelessWidget</span></span>&#123;</span><br><span class="line">  <span class="keyword">const</span> ChoiceCard(&#123;Key key, <span class="keyword">this</span>.choice&#125;): <span class="keyword">super</span>(key: key);</span><br><span class="line">  <span class="keyword">final</span> Choice choice;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  Widget build(BuildContext context) &#123;</span><br><span class="line">    <span class="keyword">final</span> TextStyle textStyle = Theme.of(context).textTheme.display1;</span><br><span class="line">    <span class="keyword">return</span> Card(</span><br><span class="line">      color: Colors.white,</span><br><span class="line">      child: Center(</span><br><span class="line">        child: Column(</span><br><span class="line">          mainAxisSize: MainAxisSize.min,</span><br><span class="line">          crossAxisAlignment: CrossAxisAlignment.center,</span><br><span class="line">          children: &lt;Widget&gt;[</span><br><span class="line">            Icon(choice.icon, size: <span class="number">128.0</span>, color: textStyle.color),</span><br><span class="line">            Text(choice.title, style: textStyle,)</span><br><span class="line">          ],</span><br><span class="line">        ),</span><br><span class="line">      )</span><br><span class="line"></span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> main() =&gt; runApp(TabbedAppBarSample());</span><br></pre></td></tr></table></figure>
-<p>示例图：</p>
-<img src="/2019/06/08/APP首页框架搭建/flutter-1.png" title="顶部导航图">
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">flutter</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/06/08/APP首页框架搭建/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -1695,11 +1660,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1723,19 +1688,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">CI</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">git</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">go</a>
+                <a href="javascript:void(0)" class="js-tag color3">CI</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">grpc</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">go</a>
               </li>
              
               <li class="article-tag-list-item">

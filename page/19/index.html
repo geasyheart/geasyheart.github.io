@@ -71,7 +71,7 @@ ga('send', 'pageview');
 			
 				<li><a href="/">主页</a></li>
 	        
-				<li><a href="/tags/algo">算法</a></li>
+				<li><a href="/tags/算法">算法</a></li>
 	        
 				<li><a href="/tags/小桥流水人家/">小桥流水人家</a></li>
 	        
@@ -167,7 +167,7 @@ ga('send', 'pageview');
 				
 					<li style="width: 16.666666666666668%"><a href="/">主页</a></li>
 		        
-					<li style="width: 16.666666666666668%"><a href="/tags/algo">算法</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/算法">算法</a></li>
 		        
 					<li style="width: 16.666666666666668%"><a href="/tags/小桥流水人家/">小桥流水人家</a></li>
 		        
@@ -191,6 +191,268 @@ ga('send', 'pageview');
           </div>
           <div id="js-content" class="content-ll">
             
+  
+    <article id="post-05-03bash脚本编程之二条件判断" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/09/05-03bash脚本编程之二条件判断/">05_03bash脚本编程之二条件判断</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/09/05-03bash脚本编程之二条件判断/" class="archive-article-date">
+  	<time datetime="2015-02-08T16:41:08.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-09</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>条件判断： </p>
+<blockquote>
+<p>如果用户不存在：<br>添加用户，给密码并显示添加成功<br>否则：<br>显示如果已经存在，不用添加 </p>
+</blockquote>
+<p>bash中如何实现条件判断?<br>条件测试类型： </p>
+<blockquote>
+<p>整数测试<br>字符测试<br>文件测试 </p>
+</blockquote>
+<p>条件测试表达式： </p>
+<blockquote>
+<p>[expression]<br>[[expression]]<br>test expression </p>
+</blockquote>
+<p>整数测试: </p>
+<blockquote>
+<p>-eq:测试两个整数是否相等，比如[ $A -eq $B ] echo $?<br>-neq:测试两个整数是否不相等，<br>-gt(greater than):测试一个数是否大于另一个数，大于，为真；否则，为假<br>-lt(lower than):测试一个数是否小于一个数，小于，为真，否则，为假<br>-ge(greater  equal):大于或等于<br>-le:小于或等于 </p>
+</blockquote>
+<p>逻辑关系； </p>
+<blockquote>
+<p>逻辑与: &amp;&amp; id user1 &amp;&gt; /dev/null &amp;&amp; echo “Hello!”<br>逻辑或: || id user1 || useradd user6<br>逻辑非: ! </p>
+</blockquote>
+<p>变量名称： </p>
+<blockquote>
+<ol>
+<li>只能包含字母，数字和下划线，并且不能数字开头； </li>
+<li>不应该跟系统中已有的环境变量重名 </li>
+</ol>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#！/bin/bash </span></span><br><span class="line">LINES=`wc -l /etc/inittab` </span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$LINES</span> </span><br><span class="line">FINLINES=`<span class="built_in">echo</span> <span class="variable">$LINES</span> | cut -d<span class="string">' '</span> -f1` </span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$FINLINES</span> </span><br><span class="line">[ <span class="variable">$FINLINES</span> - gt 100 ] &amp;&amp;<span class="built_in">echo</span> <span class="string">"This is a large file."</span> || <span class="built_in">echo</span> <span class="string">"This is a small file."</span></span><br></pre></td></tr></table></figure>
+<p>练习： </p>
+<ol>
+<li>如果用户存在，就显示此用户已经存在，否则，就添加此用户 <blockquote>
+<p>id user2 &amp;&gt;/dev/null &amp;&amp; echo “user2 had exited” || useradd -m user2 &amp;&amp; echo “user2” | passwd –stdin user2 &amp;&gt;/dev/null &amp;&amp;echo “exited” </p>
+</blockquote>
+</li>
+<li>如果用户不存在，就添加，否则，输出已存在 <blockquote>
+<p>! id user2 &amp;&amp; useradd user2 || echo “exited” </p>
+</blockquote>
+</li>
+</ol>
+<p>给定一个用户：<br> 1.如果其UID为0，就显示此为管理员<br> 2.否则，就显示其为普通用户 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">USER=root </span><br><span class="line">USERID=`grep <span class="string">"^<span class="variable">$USER</span>"</span> /etc/passwd | cut -d: -f3` </span><br><span class="line">[ <span class="variable">$USERID</span> -eq 0 ] &amp;&amp; <span class="built_in">echo</span> <span class="string">"Administrator"</span> || <span class="built_in">echo</span> <span class="string">"Common User"</span> </span><br><span class="line"> </span><br><span class="line">或者USERID=`id -u <span class="variable">$USER</span>` </span><br><span class="line"> (补充：id -u 显示UID -g 显示GID) </span><br><span class="line"> </span><br><span class="line">条件判断，控制结构： </span><br><span class="line"> 单分支<span class="keyword">if</span>语句： </span><br><span class="line"> <span class="keyword">if</span> 判断条件; <span class="keyword">then</span> </span><br><span class="line"> statement1 </span><br><span class="line"> statement2 </span><br><span class="line"> ... </span><br><span class="line"> <span class="keyword">fi</span> </span><br><span class="line"> </span><br><span class="line"> 双分支： </span><br><span class="line"> <span class="keyword">if</span> 判断条件; <span class="keyword">then</span> </span><br><span class="line"> statement1 </span><br><span class="line"> statement2 </span><br><span class="line"> ... </span><br><span class="line"> <span class="keyword">else</span> </span><br><span class="line"> statement1 </span><br><span class="line"> statement2 </span><br><span class="line"> ... </span><br><span class="line"> <span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+<p>练习：如上 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">user=user5 </span><br><span class="line"><span class="keyword">if</span> id <span class="variable">$user</span> &amp;&gt;/dev/null ; <span class="keyword">then</span> </span><br><span class="line"> <span class="built_in">echo</span> <span class="string">"exited"</span> </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line"> useradd -m <span class="variable">$user</span> &amp;&amp; passwd --stdin <span class="variable">$user</span> &amp;&gt;/dev/null &amp;&amp;<span class="built_in">echo</span> <span class="string">"exit"</span> </span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">USER=root </span><br><span class="line"><span class="keyword">if</span> [ `id -u <span class="variable">$USER</span>` -eq  0 ];<span class="keyword">then</span> </span><br><span class="line"> <span class="built_in">echo</span> <span class="string">"Administrator"</span> </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line"> <span class="built_in">echo</span> <span class="string">"Common User"</span></span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/09/05-03bash脚本编程之二条件判断/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-04-03管理及IO重定向" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/06/04-03管理及IO重定向/">04-03管理及IO重定向</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/06/04-03管理及IO重定向/" class="archive-article-date">
+  	<time datetime="2015-02-06T13:42:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-06</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>系统设定 </p>
+<blockquote>
+<p>默认输入设备：标准输入，STDIN,0<br>默认输出设备：标准输出，STDOUT ，1<br>标准错误输出:STDERR 2 </p>
+</blockquote>
+<p>Linux:<br> >:覆盖输出<br> >&gt;:追加输出<br> 如果覆盖输出怕已存在的文件被覆盖，可以使用命令set -C来设置关闭<br> 已存在内容的文件被覆盖，取消相应的set +C表示关闭此功能；<br> 如果要强行覆盖，可以在&gt;后面加个|<br> such as: </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#cat /etc/fstab </span></span><br><span class="line"><span class="comment">#set -C </span></span><br><span class="line"><span class="comment">#cat /etc/skel &gt; /etc/fstab(禁止覆盖重定向) </span></span><br><span class="line"><span class="comment">#cat /etc/skel &gt;| /etc/fstab</span></span><br></pre></td></tr></table></figure>
+<p>2&gt;:重定向错误输出<br>2&gt;&gt;:追加定向错误输出 </p>
+<blockquote>
+<p>ls /var &gt; var.out 2&gt;var.out<br> &amp;&gt;:重定向标准输出或错误输出至同一个文件：<br>ls /var &amp;&gt; var.out </p>
+</blockquote>
+<p> &lt;:输入重定向 </p>
+<blockquote>
+<p>tr a-z A-Z &lt; /etc/inittab<br> &lt;&lt;:<br> cat &lt;&lt; END<br> 此处可编写内容<br> END </p>
+</blockquote>
+<blockquote>
+<p>cat &lt;&lt;EOF(end of file ，和END一样) </p>
+</blockquote>
+<blockquote>
+<p>cat &gt;&gt; /tmp/myfile.txt &lt;&lt; EOF<br> 这个会在当前编写的东西保存到/tmp/myfile.txt<br> 当然，有可能会遇到一种情况，就是写的内容要保存一份，但是<br>也要在当前窗口进行输出，<br>echo “Hello World.” | tee /tmp/hello.out </p>
+</blockquote>
+<p>管道:前一个命令的输出，作为后一个命令的输入<br> 命令1 | 命令2 | 命令3 … </p>
+<blockquote>
+<p>cut -d: -f3 /etc/passwd | sort -n | tr a-z A-Z  </p>
+</blockquote>
+<p>练习: </p>
+<ol>
+<li>统计/usr/bin/目录下的文件个数<blockquote>
+<p>#ls -l /usr/bin | wc -l  </p>
+</blockquote>
+</li>
+<li>取出当前系统上所有用户的shell，要求，每种shell只显示一次，并且按照顺序进行显示 <blockquote>
+<p>#cut -d: -f7 /etc/passwd | sort -u </p>
+</blockquote>
+</li>
+<li>思考，如何显示/var/log/目录下每个文件的内容类型 <blockquote>
+<p>#file /var/log/* </p>
+</blockquote>
+</li>
+<li>取出/etc/inittab文件的第6行 <blockquote>
+<p>#head -6 /etc/inittab | tail -1 (man tail -n选项)  </p>
+</blockquote>
+</li>
+<li>取出/etc/passwd文件中倒数第9个用户的用户名和shell，显示到屏幕上并将其保存至/tmp/users文件中； <blockquote>
+<p>#tail -9 /etc/passwd | head -1 | cut -d: -f 1,7 | tee /tmp/users </p>
+</blockquote>
+</li>
+<li>显示/etc/目录下所有以pa开头的文件，并统计其个数 <blockquote>
+<p>#ls /etc | grep pa | wc -l  </p>
+</blockquote>
+</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/06/04-03管理及IO重定向/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
   
     <article id="post-04-01Linux用户管理命令详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
@@ -445,11 +707,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -473,19 +735,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">CI</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">git</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">go</a>
+                <a href="javascript:void(0)" class="js-tag color3">CI</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">grpc</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">go</a>
               </li>
              
               <li class="article-tag-list-item">

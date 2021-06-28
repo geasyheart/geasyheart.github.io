@@ -71,7 +71,7 @@ ga('send', 'pageview');
 			
 				<li><a href="/">主页</a></li>
 	        
-				<li><a href="/tags/algo">算法</a></li>
+				<li><a href="/tags/算法">算法</a></li>
 	        
 				<li><a href="/tags/小桥流水人家/">小桥流水人家</a></li>
 	        
@@ -167,7 +167,7 @@ ga('send', 'pageview');
 				
 					<li style="width: 16.666666666666668%"><a href="/">主页</a></li>
 		        
-					<li style="width: 16.666666666666668%"><a href="/tags/algo">算法</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/算法">算法</a></li>
 		        
 					<li style="width: 16.666666666666668%"><a href="/tags/小桥流水人家/">小桥流水人家</a></li>
 		        
@@ -191,6 +191,211 @@ ga('send', 'pageview');
           </div>
           <div id="js-content" class="content-ll">
             
+  
+    <article id="post-28-04iptables系列之nat及其过滤功能" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/05/04/28-04iptables系列之nat及其过滤功能/">28_04iptables系列之nat及其过滤功能</a>
+    </h1>
+  
+
+        
+        <a href="/2015/05/04/28-04iptables系列之nat及其过滤功能/" class="archive-article-date">
+  	<time datetime="2015-05-04T04:41:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-05-04</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">NAT:Network Address Translation </span><br><span class="line"> </span><br><span class="line">DNAT:目标地址转换 </span><br><span class="line">SNAT:源地址转换(POSTROUTING,OUTPUT)   </span><br><span class="line"> </span><br><span class="line">/proc/sys/net/ipv4/ip_forward 为1就可以实现路由器功能 </span><br><span class="line"> </span><br><span class="line">prerouting后面必须是-i(进站)，即指进来的数据包 </span><br><span class="line">postrouting后面必须是-o(出站)，即指出去的数据包 </span><br><span class="line">prerouting是目的地址转换(DNAT)，要把别人公网IP换成自己内部的IP，才能访问到你们内部受防火墙保护的服务器。 </span><br><span class="line">postrouting是源地址转换(SNAT),要把自己内部网络上受防火墙保护的IP地址转换成自己本地的公网IP才能够上网。 </span><br><span class="line"> </span><br><span class="line">-j SNAT </span><br><span class="line">    --to-source </span><br><span class="line">-j MASQUERADE(只能用于ADSL拨号连接) </span><br><span class="line"> </span><br><span class="line">如果公司内部有一个内网，是192.168.10.0/24的网段，有个主机192.168.10.7,服务器有两个网卡，一个指向内部网段，是192.168.10.6，另外一个是172.16.100.7,如果想访问172.16.100.0/16网段中的172.16.100.2主机，即: </span><br><span class="line"> </span><br><span class="line">192.168.10.7--&gt;192.168.10.6--&gt;172.16.100.7--&gt;172.16.100.2 </span><br><span class="line">有两种实现方案，一种是把服务器打开路由功能，即指: </span><br><span class="line"><span class="comment">#echo 1 &gt; /proc/sys/net/ipv4/ip_forward </span></span><br><span class="line">192.168.10.7: </span><br><span class="line"><span class="comment">#route add default gw 192.168.10.6 &amp;&amp; ping 192.168.10.6 </span></span><br><span class="line">这个时候192.168.10.7是可以ping通172.16.100.7这个地址，因为在Linux中是靠地址访问，而不是靠MAC地址。 </span><br><span class="line">172.16.100.2: </span><br><span class="line"><span class="comment">#route add default gw 172.16.100.7 &amp;&amp; ping 172.16.100.7 </span></span><br><span class="line">如果这时已有默认网关，route del default gw 172.16.100.1 eth0 </span><br><span class="line">这个时候192.168.10.7就可以ping通172.16.100.2网络。 </span><br><span class="line">这个是通过地址转换功能实现。 </span><br><span class="line"> </span><br><span class="line">但是这个时候就要考虑一种情况，172.16.100.2是公网IP，那么这种方式就不行: </span><br><span class="line">iptables -t nat -A POSTROUTING -s 192.168.10.0/24 -j SNAT --to-source 172.16.100.7 </span><br><span class="line"> </span><br><span class="line">如果服务器通过拨号上网，如：ADSL:123.2.3.2 </span><br><span class="line">iptables -t nat -A POSTROUTING -s 192.168.0.024  -o ppp0 -j SNAT --to-source 123.2.3.2 </span><br><span class="line">每次拨号连接，都会导致每次的IP都不一样，那么这就会导致防火墙规则就得不停的改变，这是相当复杂的， </span><br><span class="line">那么可以使用 -j MASQUERADE 会自动找到ADSL拨号可上网的IP。 </span><br><span class="line"> </span><br><span class="line">-j DNAT </span><br><span class="line">    --to-destination </span><br><span class="line">如果公司有台http服务器，放在内网中，地址是192.168.10.22,防火墙网卡1是192.168.10.6,另外一个172.16.100.7(假设公网IP)，来自172.16.100.11访问， </span><br><span class="line">iptables -t nat  -A PREROUTING -p tcp --dport 80 -d 172.6.100.7 -j DNAT --to-destination 192.168.10.22 </span><br><span class="line">如果http监听在8080端口，则 </span><br><span class="line">iptables -t nat  -A PREROUTING -p tcp --dport 80 -d 172.6.100.7 -j DNAT --to-destination 192.168.10.22：8080</span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/05/04/28-04iptables系列之nat及其过滤功能/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-28-01Iptables系列之基础原理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/28/28-01Iptables系列之基础原理/">28_01Iptables系列之基础原理</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/28/28-01Iptables系列之基础原理/" class="archive-article-date">
+  	<time datetime="2015-04-28T06:31:54.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-28</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本文有参考《Linux网络安全技术与实现(第2版)》，更多内容，可直接参阅原书。 </p>
+<p>icmp:Internet Control Message Protocol </p>
+<p>第一次<br>第一次握手：建立连接时，客户端发送syn包（syn=j）到服务器，并进入SYN_SENT状态，等待服务器确认；SYN：同步序列编号（Synchronize Sequence Numbers）。<br>第二次<br>第二次握手：服务器收到syn包，必须确认客户的SYN（ack=j+1），同时自己也发送一个SYN包（syn=k），即SYN+ACK包，此时服务器进入SYN_RECV状态；<br>第三次<br>第三次握手：客户端收到服务器的SYN+ACK包，向服务器发送确认包ACK(ack=k+1），此包发送完毕，客户端和服务器进入ESTABLISHED（TCP连接成功）状态，完成三次握手。 </p>
+<p>（1）客户端A发送一个FIN，用来关闭客户A到服务器B的数据传送（报文段4）。<br>（2）服务器B收到这个FIN，它发回一个ACK，确认序号为收到的序号加1（报文段5）。和SYN一样，一个FIN将占用一个序号。<br>（3）服务器B关闭与客户端A的连接，发送一个FIN给客户端A（报文段6）。<br>（4）客户端A发回ACK报文确认，并将确认序号设置为收到序号加1（报文段7） </p>
+<p>Framework:<br>    默认规则:<br>        开放:堵<br>        关闭:通 </p>
+<pre><code>规则:匹配标准 
+    IP:SIP,DTP 
+    TCP:SPORT,DPORT 
+    UDP:SPORT,DPORT 
+    ICMP:icmp-type 
+</code></pre><p>数据报文过滤:<br>    Linux2.0<br>        ipfw/firewall<br>    Linux2.2<br>        ipchain/firewall<br>    Linux2.4<br>        iptables/netfilter </p>
+<p>iptables在用户空间写规则，对应的是内核空间的netfilter,所以生效的也是netfilter。 </p>
+<p>hook function:钩子函数<br>    prerouting<br>    input<br>    output<br>    forward<br>    postrouting </p>
+<pre><code>---&gt;filter机制的结构图&lt;---- 
+</code></pre><p>数据包传入—&gt;路由表—&gt;FORWARD链—&gt;数据包传出<br>          |–&gt;INPUT链–&gt;本机进程–&gt;路由表–&gt;OUTPUT链–&gt;数据包传出 </p>
+<p>INPUT/OUTPUT:数据包进入主机时，该数据包即由“数据包传入”所标识的位置进入，接着被送入路由表，然后根据路由表的内容决定数据包传输的路径，假设传给本机的进程，因此，该数据包将会<br>被送入INPUT链，此时若INPUT链内的规则不允许该数据包进入，那么则会抛弃掉，同理，OUTPUT规定本机是否允许数据的传出，由此可以看到:INPUT/OUTPUT链机制是为了保护本机进程而设计的。<br>同时，这应该代表的是相同的一个接口。 </p>
+<p>FORWARD:在网关式防火墙中，防火墙部署在网关位置，当数据包要由另一个接口送出时，就会被送入FORWARD链，由此时FORWARD链内的规则决定是否允许数据包的命运~<br>规则链:<br>    PREROUTING<br>    INPUT<br>    OUTPUT<br>    FORWARD<br>    POSTROUTING </p>
+<p>filter(过滤):filter是netfilter最重要的机制，其任务是执行数据包的过滤操作，也就是起到防火墙的作用。<br>    INPUT<br>    OUTPUT<br>    FORWARD </p>
+<p>nat(地址转换):通俗讲，其功能就是IP分享器。<br>    PREROUTING<br>    POSTROUTING<br>    OUTPUT </p>
+<p>mangle(拆开/修改/封装):是一个很特殊的机制，可以通过mangle机制来修改经过防火墙内数据包的内容。<br>    PREROUTING<br>    INPUT<br>    FORWARD<br>    OUTPUT<br>    POSTROUTING </p>
+<p>raw():负责加快数据包穿过防火墙机制的速度，由此提高防火墙的性能。<br>    PREROUTING<br>    OUTPUT </p>
+<p>iptables:四个表五个链 </p>
+<p>能否使用自定义链?<br>    可以使用自定义链，但只在被调用时才能发挥作用，而且如果没有自定义链中的任何规则匹配，还应该有返回机制。 </p>
+<pre><code>用可以删除自定义的空链 
+默认链无法删除 
+</code></pre><p>每个规则都有两个内置的计数器:<br>    一个用来被匹配的报文个数    (9K)<br>    一个被匹配的报文的体积大小之和(9K) </p>
+<p>规则:匹配标准，处理动作 </p>
+<pre><code>iptables -t TABLE  COMMAND CHAIN [NUM]- 操作方式 -j 处理办法 
+    -t:filter nat mangle raw,默认是filter表 
+    操作方式:     
+        -L:将所在的表内容列出 
+        -A:在指定的链中添加新规则 
+        -F:将所选择的表内容清除掉 
+        -P:设置某个链的默认策略 
+</code></pre><p>匹配标准:<br>    通用匹配<br>        -s/–src     :源地址<br>        -d/–dst     :目标地址<br>        -p             :协议{tcp|udp|icmp}<br>        -i INTERFACE :指定数据报文流入的接口<br>            可用于定义标准的链:PREROUTING,INPUT,FORWARD<br>        -o INTERFACE :指定数据报文流出的接口<br>            可用于定义标准的链:OUTPUT,POSTROUTING,FORWARD<br>    扩展匹配<br>        隐含扩展:不用特别指明由哪个模块进行的扩展，因为此时使用-p{tcp|udp|icmp}<br>        显式扩展:必须指明由哪个模块进行的扩展，在iptables中使用-m选项可完成此功能 </p>
+<p>-j TARGET:<br>    ACCEPT<br>    DROP<br>    REJECT </p>
+<p>iptables -t filter -A INPUT -s 172.16.0.0/16 -d 172.16.100.7 -j DROP </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/28/28-01Iptables系列之基础原理/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
   
     <article id="post-22-02基于OpenSSL的https服务配置" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
@@ -1206,284 +1411,6 @@ DROP;
 
 
   
-    <article id="post-23-02数据库及MySQL" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/22/23-02数据库及MySQL/">23_02数据库及MySQL</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/22/23-02数据库及MySQL/" class="archive-article-date">
-  	<time datetime="2015-04-22T02:37:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>强烈建议看一看: </p>
-<p>B树/B-树/B+树/B*树:<br><a href="http://www.cnblogs.com/oldhorse/archive/2009/11/16/1604009.html" target="_blank" rel="noopener">http://www.cnblogs.com/oldhorse/archive/2009/11/16/1604009.html</a> </p>
-<p>比方说有个bbs，有100万个用户，一亿个帖子，怎样合理管理；<br>如查找用户，我可以使用索引，一个文件专门存放用户名，然后用户名的各种信息保存在其他的服务器中；<br>通过用户名索引查找到用户的信息，这个是索引；<br>用grep在大数据中查找，是最笨的；<br>通过二分法进行用户数据查找，100W大概14次，可以大大减少查找量，不过这种方式还是慢；<br>所以B+树索引算法是更好的<br>查找标准—-搜索码 </p>
-<p>所以开发一个程序来管理索引与数据是最为合适的；<br>叫做数据管理软件 </p>
-<blockquote>
-<p>如何管理数据是非常重要的<br>所以如何有效的查找数据是非常重要的<br>数据库管理系统最为重要</p>
-</blockquote>
-<p>DBMS：dataBase Management System<br>DBA 数据库管理员 </p>
-<p>RDBMS：relational　database management system “关系”数据库管理系统 </p>
-<ol>
-<li>数据库创建/删除； </li>
-<li>创建表、删除表、修改表； </li>
-<li>索引的创建、删除； </li>
-<li>用户和权限； </li>
-<li>数据增、删、改； </li>
-<li>查询； </li>
-</ol>
-<ul>
-<li>DML：数据操作语言 </li>
-</ul>
-<ul>
-<li>INSERT/REPLACE/UPDATE/DELETE </li>
-</ul>
-<ul>
-<li>DDL：数据定义语言 </li>
-</ul>
-<ul>
-<li>CREATE/ALTER/DROP </li>
-</ul>
-<ul>
-<li>DCL：数据控制语言 </li>
-</ul>
-<ul>
-<li>GRANT/REVOKE </li>
-</ul>
-<ul>
-<li>数据的组织结构</li>
-</ul>
-<ul>
-<li>层次型 </li>
-<li>网状型 </li>
-<li>关系型 </li>
-</ul>
-<p>SQL:结构化查询语言 </p>
-<p>RDBMS：<br>    Oracle、Sybase、infomix(IBM)、SQLServer(Sybase变种)<br>    MySQL、PostgreSQL(egreSQL的后来版本)、pgsql、EnterpriseDB </p>
-<p>一体化的公司:Oracle   IBM两大巨人<br>去IOE：IBM、Oracle、EMC </p>
-<p>为了防止MySQL被Oracle私有化，所以原作者开发了MariaDB；<br>有个组织叫做Percona根据MySQL进行改进，不收费，赚服务费，叫percona server； </p>
-<h2 id="MySQL-Connectors"><a href="#MySQL-Connectors" class="headerlink" title="MySQL Connectors"></a>MySQL Connectors</h2><p>进行数据库管理，调用API来对数据库的开发管理，如php、Java、c++等都可以，但是要想使用API，<br>就需要相应的驱动来连接，—–&gt;即你想使用其他语言完成数据库的相关应用，可以调用API来开发自己<br>想要的东西，但是调用API得有相应的驱动使数据库支持对这种编程语言的支持，这种驱动叫做<br>数据库连接器；（这个很重要，为程序员提供支持的）<br>官网有下载 </p>
-<h2 id="反关系模型"><a href="#反关系模型" class="headerlink" title="反关系模型"></a>反关系模型</h2><blockquote>
-<p>   MongoDB<br>   Redis<br>   HBase</p>
-</blockquote>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/22/23-02数据库及MySQL/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-23-01PHP相关概念及配置" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/22/23-01PHP相关概念及配置/">23_01PHP相关概念及配置</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/22/23-01PHP相关概念及配置/" class="archive-article-date">
-  	<time datetime="2015-04-22T02:35:39.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="服务器端脚本管理器"><a href="#服务器端脚本管理器" class="headerlink" title="服务器端脚本管理器"></a>服务器端脚本管理器</h2><ol>
-<li>MIME(Multipurpose Internet Mail Extensions)<br>多用途互联网邮件扩展类型就是设定某种扩展名的文件用一种应用程序来打开的方式类型，<br>当该扩展名文件被访问的时候，浏览器会自动使用指定应用程序来打开。<br>多用于指定一些客户端自定义的文件名，以及一些媒体文件打开方式。 </li>
-<li>动态网站<br>客户端动态    服务器端动态<br>在windows平台下有Activex，可以在客户端编写动态程序； </li>
-<li>CGI（通用网关接口)<br>–&gt;可以认为它是webapp； </li>
-<li>编程语言<blockquote>
-<p>静态语言；编译型语言 </p>
-<pre><code>C , C++ ,JAVA 
-</code></pre><p>优点：性能好 </p>
-<pre><code>缺点：每次都需要编译；出现错误处理比较麻烦；开发周期长；维护成本大； 
-</code></pre><p>动态语言：解释性语言 </p>
-<pre><code>shell , perl , python 
-</code></pre><p>优点：便于维护；有众多模块可共享；开发周期短，成本低； </p>
-<pre><code>缺点：性能差； 
-</code></pre><p>但是折中就是最好；如Facebook有工具可以把动态语言转换成静态语言； </p>
-</blockquote>
-<h2 id="PHP-hypertext-preprocessor超文本预处理器"><a href="#PHP-hypertext-preprocessor超文本预处理器" class="headerlink" title="PHP:hypertext preprocessor超文本预处理器"></a>PHP:hypertext preprocessor超文本预处理器</h2><blockquote>
-<p>两个以色列程序员在1997年重新php的分析器，<br>于1999年发布zend engine 1.0 ，并发布php4.0####这句很重要 </p>
-</blockquote>
-<h2 id="php-zend-engine"><a href="#php-zend-engine" class="headerlink" title="php zend engine"></a>php zend engine</h2><blockquote>
-<p>zend engine的出现将php的代码处理过程分成了两个阶段，首先是分析php代码并且将其转换为zend opcode的二进制格式，并将其储存在内存中；第二阶段是使用zend engine去执行这些转换后的opcode；（opcode：操作码）<br>php source code –&gt;编译成二进制–&gt;执行二进制格式<br>但是这种二进制只能在zend engine中运行； </p>
-</blockquote>
-<h2 id="提供加速的原理及相关软件（称为php加速器）"><a href="#提供加速的原理及相关软件（称为php加速器）" class="headerlink" title="提供加速的原理及相关软件（称为php加速器）"></a>提供加速的原理及相关软件（称为php加速器）</h2><blockquote>
-<p>用户在访问同一个php源程序时，通过zend engine编译，但是这个编译只在同一个进程内访问快，<br>例如两个用户在访问同一个php页面时，并不会整体上提高运行速度，所以这个时候把编译后的opcode<br>放在一个缓存中，不同的进程在访问这个时，就不会重新编译，大大提高性能；<br>XCache 是一个开源的 opcode 缓存器/优化器, 这意味着他能够提高您服务器上的 PHP 性能. 他通过把编译 PHP 后的数据缓冲到共享内存从而避免重复的编译过程, 能够直接使用缓冲区已编译的代码从而提高速度. 通常能够提高您的页面生成速率 2 到5 倍, 降低服务器负载. –&gt;摘自百度百科 </p>
-</blockquote>
-</li>
-</ol>
-<h2 id="而提供这种缓存功能的软件有"><a href="#而提供这种缓存功能的软件有" class="headerlink" title="而提供这种缓存功能的软件有"></a>而提供这种缓存功能的软件有</h2><blockquote>
-<p>APC<br>eAccelerator<br>Xcache  快速而且稳定的PHP opcode缓存，经过严格测试而且被大量用于生产环境。<br>Nusphere PhpExpress<br>Zend Optimizer 并非opcode加速器，而是为php5.2及以前的免费、闭源的php扩展；当然目前还在发展；使用的也不少； </p>
-</blockquote>
-<h2 id="PHP源码目录结构"><a href="#PHP源码目录结构" class="headerlink" title="PHP源码目录结构"></a>PHP源码目录结构</h2><blockquote>
-<ol>
-<li>build </li>
-<li>ext </li>
-<li>main </li>
-<li>Zend </li>
-<li>pear </li>
-<li>sapi </li>
-<li>TSRM </li>
-<li>tests </li>
-<li>win32 这个windows平台的 </li>
-</ol>
-</blockquote>
-<h2 id="HTML"><a href="#HTML" class="headerlink" title="HTML"></a>HTML</h2><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">head</span>&gt;</span> </span><br><span class="line">        <span class="tag">&lt;<span class="name">title</span>&gt;</span><span class="tag">&lt;/<span class="name">title</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">head</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span> <span class="tag">&lt;/<span class="name">h1</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>例：如何在源代码中加入bash脚本：<br>在httpd.cnf中有ScriptAlias /cgi-bin/ “/usr/local/apache2/cgi-bin/“<br>然后到上面这个目录下，编写mytest.sh </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!bin/bash </span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line">cat &lt;&lt; EOF </span><br><span class="line">Content-Type: <span class="built_in">test</span>/html </span><br><span class="line">&lt;pre&gt; </span><br><span class="line">$(/bin/date +%F) </span><br><span class="line">&lt;/pre&gt; </span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
-<p>保存加可执行权限<br>然后在浏览器上访问ip/cgi-bin/mytest.sh ，即可看到时间<br>PHP可以成为嵌入式web开发语言 </p>
-<h2 id="软件架构模式"><a href="#软件架构模式" class="headerlink" title="软件架构模式"></a>软件架构模式</h2><blockquote>
-<p>（控制器Controller）- 负责转发请求，对请求进行处理。<br>（视图View） - 界面设计人员进行图形界面设计。<br>（模型Model） - 程序员编写程序应有的功能（实现算法等等）、数据库专家进行数据管理和数据库设计(可以实现具体的功能)。 </p>
-</blockquote>
-<h2 id="web如何和php交流"><a href="#web如何和php交流" class="headerlink" title="web如何和php交流"></a>web如何和php交流</h2><p>三种方式： </p>
-<ol>
-<li>CGI </li>
-<li>Module </li>
-<li><p>FastCGI这个最重要<br>如果通过CGI做Apache和php之间调用进行200个prefork下的进程访问200个php，就要消耗至少400个进程，消耗几个G的内存；<br>所以当大量用户访问的时候，CGI并不适合Apache和php之间调用；<br>所以把php做成一个apache的一个模块，当需要调用php的时候，只需要启用200个进程就可以；<br>但是这样apache就要同时处理静态和动态内容，对服务器要求高；<br>所以出现静态和动态相分离的：<br>出现php提供进程，当Apache提供请求时，php解释器创建进程完成响应；可以把php作为服务器，Apache作为前段客户端；<br>叫做FastCGI（这个相当重要） </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#yum install php (php-mbstring对于多字节支持的，这个会在编译时支持)php-mysql(自行选择)</span></span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>这种是以模块的方式存在 </p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line">phpinfo(); </span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/22/23-01PHP相关概念及配置/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/11/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><span class="page-number current">12</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/13/">Next &raquo;</a>
@@ -1589,11 +1516,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1617,19 +1544,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">CI</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">git</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">go</a>
+                <a href="javascript:void(0)" class="js-tag color3">CI</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">grpc</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">go</a>
               </li>
              
               <li class="article-tag-list-item">

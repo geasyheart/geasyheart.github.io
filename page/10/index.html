@@ -71,7 +71,7 @@ ga('send', 'pageview');
 			
 				<li><a href="/">主页</a></li>
 	        
-				<li><a href="/tags/algo">算法</a></li>
+				<li><a href="/tags/算法">算法</a></li>
 	        
 				<li><a href="/tags/小桥流水人家/">小桥流水人家</a></li>
 	        
@@ -167,7 +167,7 @@ ga('send', 'pageview');
 				
 					<li style="width: 16.666666666666668%"><a href="/">主页</a></li>
 		        
-					<li style="width: 16.666666666666668%"><a href="/tags/algo">算法</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/算法">算法</a></li>
 		        
 					<li style="width: 16.666666666666668%"><a href="/tags/小桥流水人家/">小桥流水人家</a></li>
 		        
@@ -191,6 +191,212 @@ ga('send', 'pageview');
           </div>
           <div id="js-content" class="content-ll">
             
+  
+    <article id="post-24-04-3-实验L-A-M-P编译" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/09/20/24-04-3-实验L-A-M-P编译/">24_04_3_实验L-A-M-P编译</a>
+    </h1>
+  
+
+        
+        <a href="/2015/09/20/24-04-3-实验L-A-M-P编译/" class="archive-article-date">
+  	<time datetime="2015-09-20T02:16:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-20</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="基础"><a href="#基础" class="headerlink" title="基础"></a>基础</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">service iptables off </span><br><span class="line">setenforce 0 </span><br><span class="line">yum -y install epel-release</span><br></pre></td></tr></table></figure>
+<h2 id="httpd服务器：192-168-122-111"><a href="#httpd服务器：192-168-122-111" class="headerlink" title="httpd服务器：192.168.122.111"></a>httpd服务器：192.168.122.111</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">tar xvjf apr-1.5.1.tar.bz2                                     </span><br><span class="line">./configure --prefix=/usr/<span class="built_in">local</span>/apr </span><br><span class="line">make &amp;&amp; make install                                 </span><br><span class="line">tar xvjf apr-util-1.5.4.tar.bz2     </span><br><span class="line">./configure --prefix=/usr/<span class="built_in">local</span>/apr-util --with-apr=/usr/<span class="built_in">local</span>/apr         </span><br><span class="line">make &amp;&amp; make install                                                     </span><br><span class="line">                                                                                                 </span><br><span class="line">yum install pcre-devel openssl-devel zlib-devel </span><br><span class="line">tar xvjf httpd-2.4.10.tar.bz2     </span><br><span class="line">./configure --prefix=/usr/<span class="built_in">local</span>/apache \ </span><br><span class="line">     --sysconfdir=/etc/httpd \ </span><br><span class="line">     --<span class="built_in">enable</span>-so \ </span><br><span class="line">     --<span class="built_in">enable</span>-rewrite \ </span><br><span class="line">     --<span class="built_in">enable</span>-ssl \ </span><br><span class="line">     --<span class="built_in">enable</span>-cgi  \ </span><br><span class="line">     --<span class="built_in">enable</span>-cgid \ </span><br><span class="line">    --<span class="built_in">enable</span>-modules=most \ </span><br><span class="line">    --<span class="built_in">enable</span>-deflate \ </span><br><span class="line">    --<span class="built_in">enable</span>-mods-shared=most \ </span><br><span class="line">    --<span class="built_in">enable</span>-mpms-shared=all \ </span><br><span class="line">    --with-mpm=event \ </span><br><span class="line">    --with-apr=/usr/<span class="built_in">local</span>/apr \ </span><br><span class="line">    --with-apr-util=/usr/<span class="built_in">local</span>/apr-util </span><br><span class="line"> make &amp;&amp; make install</span><br></pre></td></tr></table></figure>
+<h2 id="php服务器：192-168-122-104"><a href="#php服务器：192-168-122-104" class="headerlink" title="php服务器：192.168.122.104"></a>php服务器：192.168.122.104</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">wget -c  http://cn2.php.net/distributions/php-5.6.12.tar.bz2 </span><br><span class="line"> </span><br><span class="line">./configure --prefix=/usr/<span class="built_in">local</span>/php --with-config-file-path=/etc --with-openssl --<span class="built_in">enable</span>-mbstring --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib  --with-libxml-dir  --<span class="built_in">enable</span>-xml --<span class="built_in">enable</span>-sockets --<span class="built_in">enable</span>-fpm --with-mcrypt  --with-config-file-scan-dir=/etc/php.d --with-bz2  --<span class="built_in">enable</span>-zip --with-mysql=mysqlnd --with-pdo-mysql=mysqlnd --with-mysqli=mysqlnd </span><br><span class="line"> </span><br><span class="line"> make &amp;&amp; make install </span><br><span class="line"> </span><br><span class="line">cp php.ini-production /etc/php.ini </span><br><span class="line"> cp sapi/fpm/init.d.php-fpm /etc/rc.d/init.d/php-fpm </span><br><span class="line">chmod +x /etc/rc.d/init.d/php-fpm </span><br><span class="line">chkconfig --add php-fpm </span><br><span class="line"> </span><br><span class="line">cp /usr/<span class="built_in">local</span>/php/etc/php-fpm.conf.default /usr/<span class="built_in">local</span>/php/etc/php-fpm.conf </span><br><span class="line">编辑php-fpm的配置文件： </span><br><span class="line">vi /usr/<span class="built_in">local</span>/php/etc/php-fpm.conf </span><br><span class="line">配置fpm的相关选项为你所需要的值，并启用pid文件： </span><br><span class="line">listen = 192.168.122.104:9000 </span><br><span class="line">pm.max_children = 50 </span><br><span class="line">pm.start_servers = 5 </span><br><span class="line">pm.min_space_servers = 2 </span><br><span class="line">pm.max_space_servers = 8 </span><br><span class="line">pid = /usr/<span class="built_in">local</span>/php/var/run/php-fpm.pid </span><br><span class="line"> </span><br><span class="line">接下来就可以启动php-fpm了： </span><br><span class="line">service php-fpm start </span><br><span class="line"> </span><br><span class="line">tar xf xcache-3.2.0.tar.gz </span><br><span class="line"> <span class="built_in">cd</span> xcache-3.2.0 </span><br><span class="line"> yum -y install autoconf </span><br><span class="line">/usr/<span class="built_in">local</span>/php/bin/phpize </span><br><span class="line">./configure --<span class="built_in">enable</span>-xcache --with-php-config=/usr/<span class="built_in">local</span>/php/bin/php-config </span><br><span class="line">make &amp;&amp; make install </span><br><span class="line"> </span><br><span class="line">cp xcache.ini /etc/php.d </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">3、启用httpd的相关模块 </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">vim /etc/httpd/httpd.conf </span><br><span class="line">LoadModule proxy_module modules/mod_proxy.so </span><br><span class="line">LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so </span><br><span class="line">在&lt;Directory <span class="string">"/usr/local/apache/htdocs"</span>&gt;外面写如下两行： </span><br><span class="line">ProxyRequests Off </span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ fcgi://192.168.122.104:9000/php/<span class="variable">$1</span> </span><br><span class="line"> </span><br><span class="line">php服务器： </span><br><span class="line">mkdir /php </span><br><span class="line">vim /php/phpinfo.php </span><br><span class="line">vim /php/mysql.php </span><br><span class="line">进行测试；； </span><br><span class="line"> </span><br><span class="line">安装phpadmin </span><br><span class="line">cp config.sample.inc.php config.inc.php </span><br><span class="line">编辑这个配置文件，修改这一项： </span><br><span class="line"><span class="variable">$cfg</span>[<span class="string">'Servers'</span>][<span class="variable">$i</span>][<span class="string">'host'</span>] = <span class="string">'192.168.236.104'</span>;</span><br></pre></td></tr></table></figure>
+<p>如果出现:<br>PEAR package PHP_Archive not installed: generated phar will require PHP’s phar extension be enabled. </p>
+<blockquote>
+<p>wget <a href="http://pear.php.net/go-pear.phar" target="_blank" rel="noopener">http://pear.php.net/go-pear.phar</a><br>/usr/local/php/bin/php go-pear.phar</p>
+</blockquote>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/09/20/24-04-3-实验L-A-M-P编译/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-39-01Linux集群系列之十一-高可用集群之heartbeat-v2-基于crm进行资源管理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/09/19/39-01Linux集群系列之十一-高可用集群之heartbeat-v2-基于crm进行资源管理/">39_01Linux集群系列之十一--高可用集群之heartbeat_v2_基于crm进行资源管理</a>
+    </h1>
+  
+
+        
+        <a href="/2015/09/19/39-01Linux集群系列之十一-高可用集群之heartbeat-v2-基于crm进行资源管理/" class="archive-article-date">
+  	<time datetime="2015-09-19T02:50:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-19</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>CIB: Cluster Information Base<br>    xml格式，为了能够简单使用CIB，提供了haresources2clib.py脚本 </p>
+<p>当在ha.cf中添加了crm  respawn选项的时候，默认的haresources配置信息就不会再被使用，但是可以执行<br>/usr/lib64/heartbeat/haresources2cib.py脚本使其保留在/var/lib/heartbeat/crm/目录下； </p>
+<p>但是haresources2cli.py的执行需要依赖同目录下的ha_propagate脚本，执行这个脚本会自动进行同步到其他节点上； </p>
+<p>当VIP挂了，备用节点抢过来VIP上线，但是在路由器中保存的是原来VIP的mac地址，那么备用节点需要进行arp欺骗：<br>/usr/lib64/heartbeat/send_arp实现mac地址伪装，进行arp欺骗； </p>
+<p>换另一种方式: </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">yum install pacemaker corosync </span><br><span class="line"><span class="comment">#vim /etc/ha.d/ha.cf </span></span><br><span class="line">mcast eth0 225.0.100.19 694 1 0 </span><br><span class="line">crm respawn    此时没有任何资源 </span><br><span class="line">ln -s /usr/libexec/pacemaker/cib /usr/lib64/heartbeat/cib </span><br><span class="line">ln -s /usr/libexec/pacemaker/stonith /usr/lib64/heartbeat/stonithd </span><br><span class="line">ln -s /usr/libexec/pacemaker/attrd /usr/lib64/heartbeat/attrd </span><br><span class="line">ln -s /usr/libexec/pacemaker/crmd /usr/lib64/heartbeat/crmd </span><br><span class="line"> </span><br><span class="line"><span class="comment">#/usr/lib64/heartbeat/ha_propagate   会自动进行同步 </span></span><br><span class="line">＃service heartbeat start </span><br><span class="line"><span class="comment">#ssh node2 "service heartbeat start" </span></span><br><span class="line"><span class="comment">#tail /var/log/message </span></span><br><span class="line">    可以看到详细信息 </span><br><span class="line">     </span><br><span class="line"><span class="comment">#netstat -ntlp | grep mgmtd </span></span><br><span class="line">    监听在5560端口</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>cibadmin<br>cibclient<br>crmmon:可用于监测这些节点状态，每15秒刷新一次<br>crmadmin<br>crm_resource:用来做资源配置<br>crm_verify:校验/usr/lib64/heartbeat/cib.xml文件是否有语法错误的；<br>crm_standby:指定让哪个节点转为备节点<br>crm_sh:crm的命令行工具<br>使用方法:     </p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt; <span class="comment">#crm_sh </span></span><br><span class="line">&gt; crm<span class="comment"># help </span></span><br><span class="line">&gt; Usage:crm (nodes|config|resources) </span><br><span class="line">&gt; crm<span class="comment">#nodes </span></span><br><span class="line">&gt; crm nodes<span class="comment"># help </span></span><br><span class="line">&gt;  Usage: nodes(status|list) </span><br><span class="line">&gt;  crm nodes<span class="comment">#list</span></span><br></pre></td></tr></table></figure>
+<p>如何使用GUI方式进行管理<br>１、tail /etc/passwd<br>默认生成hacluster用户，没有密码 </p>
+<p>#passwd hacluster ,密码随便 </p>
+<p>#tail /var/log/message  查看谁是DC:假设是node2:192.168.1.103<br>    当然连接到hb_gui上也可以进行查看 </p>
+<p>#hb_gui &amp;<br>会出现:<br>Server(:port)  192.168.1.103<br>User Name: hacluster<br>Password: hacluster </p>
+<p>添加资源<br>Resources–&gt; + –&gt; native –&gt;Resource ID:webip–&gt;Type–&gt;IPaddr(2)–&gt; Parameters–&gt;ip 192.168.1.101–&gt;Add Parameters –&gt;nic eth0–&gt;cidr_netmask 24<br>最后Patameters类似:<br>Name        Value<br>ip         192.168.1.103<br>nic        eth0<br>cidr_netmask     16 </p>
+<p>点击webip–&gt;右键–&gt;start<br>如果出现错误，webip–&gt;右键–&gt;Migrate Resource–&gt;To node:node1.test.com<br>–&gt;Force:True<br>如果仍然错误，webip–&gt;右键–&gt;Clear Migrate Constraints即可； </p>
+<p>添加资源–&gt;httpd–&gt;这里使用LSB的httpd脚本–&gt;add即可； </p>
+<p>如果用到组:应该先添加组:<br> Resources– &gt;+–&gt;group–&gt;Resoure ID: webip–&gt;Type–&gt;IPaddr(2)–&gt; Parameters–&gt;ip 192.168.1.101–&gt;Add Parameters –&gt;nic eth0–&gt;cidr_netmask 24<br> 添加资源–&gt;group–&gt;httpd–&gt;这里使用LSB的httpd脚本–&gt;add即可； </p>
+<p>将node2.test.com running(dc)右键转为standby将会转移到node1.test.com,刷新网页，将会发生改变 </p>
+<p>添加nfs文件系统<br>先停下上面哪个组 </p>
+<p>#mount -t nfs 192.168.1.105:/web/htdocs /var/www/html<br>然后<br>add –&gt;native–&gt;Filesystem–&gt;Resource ID:webstore        device 192.168.1.105:/web/htdocs<br>                                      directory /var/www/html<br>                                      fstype nfs </p>
+<p>应该注意，最后的Resources的排列顺序应该是webip–&gt;webstore–&gt;httpd，这个顺序和resources那种方式定义的顺序是一样的； </p>
+<p>如果出现错误，更多是状态信息导致的，可以重新添加；； </p>
+<p>通过资源约束使三个独立运行的节点联系到一起<br>１、定义资源约束<br>Colocations–&gt;OK–&gt;ID httpd_with_filesystem–&gt;from httpd –&gt;to webstore–&gt;Score  INFINITY(正无穷，永远在一起)–&gt;OK </p>
+<p>Colocations–&gt;OK–&gt;ID webstore_with_webip–&gt;from webstore –&gt;to webip–&gt;Score  INFINITY(正无穷，永远在一起)–&gt;OK<br>２、定义启动顺序<br>Orders–&gt;ID webstore_before_httpd–&gt;from httpd –&gt; To webstore<br>    配置好后可看Description<br>Orders–&gt;ID webip_before–&gt;from httpd –&gt; To webip </p>
+<p>设置粘性Default Resource Stickiness，可使默认DC转移到设置的主机上，只要大于0即可； </p>
+<p>如果想让某个资源运行到另外一个节点上，那么可以设定位置约束<br>Locations-&gt;add new items  item type :localtion –&gt;ID webip_on_node1 Resource:webip–&gt;OK<br>点击webip_on_node1–&gt;右面–Score : INFIINTY(设定为永远)<br>Add Expression –&gt;uname eq node1.test.com –Apply<br>会发现所有资源运行在node1.test.com上； </p>
+<p>练习说明: </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">yum install pacemaker heartbeat </span><br><span class="line"><span class="comment">#vim /etc/ha.d/ha.cf </span></span><br><span class="line">mcast eth0 225.0.100.19 694 1 0 </span><br><span class="line">crm respawn    || pacemaker respawn </span><br><span class="line"><span class="comment">#service heartbeat start </span></span><br><span class="line">会报错，tail /var/<span class="built_in">log</span>/messages出现/usr/lib64/heart目录下的一些文件没有执行: </span><br><span class="line">这个是bug,做下面即可； </span><br><span class="line">＃ln -s /usr/libexec/pacemaker/cib /usr/lib64/heartbeat/cib </span><br><span class="line">＃ln -s /usr/libexec/pacemaker/stonith /usr/lib64/heartbeat/stonithd </span><br><span class="line">＃ln -s /usr/libexec/pacemaker/attrd /usr/lib64/heartbeat/attrd </span><br><span class="line">＃ln -s /usr/libexec/pacemaker/crmd /usr/lib64/heartbeat/crmd </span><br><span class="line">启动起来了，但是执行crm_mon又失败，没搜出来解决办法。。 </span><br><span class="line">[root@node2 ha.d]<span class="comment"># crm_mon -1 </span></span><br><span class="line">Could not establish cib_ro connection: Connection refused (111) </span><br><span class="line"> </span><br><span class="line">Connection to cluster failed: Transport endpoint is not connected</span><br></pre></td></tr></table></figure>
+<p>貌似在centos6.5+这个有BUG的…,所以以后做的时候，建议使用heartbeat自带的haresources进行管理；<br>我在看pacemaker的文档时，都不再涉及heartbeat+pacemaker这种方式，而是使用了corosync+pacemaker这种，所以，建议使用后者；； </p>
+<p>更详细可直接参考这篇文章:<br><a href="http://www.linuxidc.com/Linux/2013-08/89167p3.htm" target="_blank" rel="noopener">http://www.linuxidc.com/Linux/2013-08/89167p3.htm</a><br><a href="http://www.cnblogs.com/chinacloud/archive/2010/11/18/1881056.html" target="_blank" rel="noopener">http://www.cnblogs.com/chinacloud/archive/2010/11/18/1881056.html</a><br><a href="http://wolfword.blog.51cto.com/4892126/1210647" target="_blank" rel="noopener">http://wolfword.blog.51cto.com/4892126/1210647</a><br><a href="http://wenku.baidu.com/link?url=71Xs0ZrJ6HehYNlPRfDziVImX4JvP0hM30ZTM9LxBzU0fJw7nnWrqbNE8gaFInnL50byi7-oOX3tR5qNpqJQlYO3nP-5EffJn87tAuPVUSa" target="_blank" rel="noopener">http://wenku.baidu.com/link?url=71Xs0ZrJ6HehYNlPRfDziVImX4JvP0hM30ZTM9LxBzU0fJw7nnWrqbNE8gaFInnL50byi7-oOX3tR5qNpqJQlYO3nP-5EffJn87tAuPVUSa</a><br><a href="http://blog.csdn.net/flcandclf/article/details/14520501" target="_blank" rel="noopener">http://blog.csdn.net/flcandclf/article/details/14520501</a><br><a href="http://www.tuicool.com/articles/jM7jiu" target="_blank" rel="noopener">http://www.tuicool.com/articles/jM7jiu</a><br><a href="http://www.21ops.com/linux/15178.html" target="_blank" rel="noopener">http://www.21ops.com/linux/15178.html</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/09/19/39-01Linux集群系列之十一-高可用集群之heartbeat-v2-基于crm进行资源管理/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
   
     <article id="post-2015年08月31日" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
@@ -1249,269 +1455,6 @@ MySQL服务器变量
 
 
   
-    <article id="post-32-04MySQL系列之四MySQL客户端的使用" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/07/06/32-04MySQL系列之四MySQL客户端的使用/">32_04MySQL系列之四MySQL客户端的使用</a>
-    </h1>
-  
-
-        
-        <a href="/2015/07/06/32-04MySQL系列之四MySQL客户端的使用/" class="archive-article-date">
-  	<time datetime="2015-07-06T01:09:09.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-07-06</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>mysql两种操作模式: </p>
-<blockquote>
-<p>交互式模式<br>批处理模式(两种方式)<br>mysql&lt;init.sql<br>source /root/test.sql<br>        例如: </p>
-</blockquote>
-<pre><code>#vim test.sql 
-CREATE DATABASE testdb; 
-CREATE TABLE testdb.testdb(Name VARCHAR(23)); 
-mysql&gt;source /root/test.sql 
-</code></pre><p>客户端:mysql、mysqladmin、mysqldump、mysqlimport、mysqlcheck<br>服务器:mysqld、mysqld_safe、mysqld_multi </p>
-<p>mysql&gt;命令两类:     </p>
-<pre><code>客户端命令: 
-    \d:定义语句结束符; 默认是; 
-    \c:提前终止语句执行 
-    \g:无论语句结束符是什么，直接将此语句送至服务器执行(这个可在忘记结束符是什么的时后使用 select * from testdb\g,觉得没必要，因为敲status可直接看到这些信息)         
-    \G:无论语句结束符是什么，直接将此语句送至服务器端执行，而且结果以竖排方式显示(这个用的比较多,因为很直观，select * from testdb\G)     
-
-    \! COMMAND:执行shell命令             
-    \W:语句执行结束后显示警告信息 
-    \w:语句执行结束后不显示警告信息 
-
-服务器端命令: 
-    help KEYWOAD  help SELECT 
-
-#mysqladmin 
-    create DATABASE 
-    drop DATABASE 
-    ping 
-    processlist 
-    status 
-        --sleep N:显示频率 
-        --count N:显示多个状态 
-    extended-status:显示状态变量 
-    variables:显示服务器变量 
-    flush-privileges=reload 
-    flush-tables 关闭所有已打开的表 
-    flush-threads:重置线程池 
-    flush-status:重置大多数的服务器状态变量 
-    flush-logs:二进制和中继日志滚动 
-    flush-hosts:清除主机的内部信息(例如DNS解析信息，主要例如尝试登录mysql数据库失败到一定次数了，可能无法登录了，可以使用此命令，清除这些记录信息) 
-    kill 
-    refresh=flush-hosts和flush-logs 
-    shutdown 关闭MySQL服务器 
-    start-slave:启动复制，启动从服务器复制进程 
-        SQL thread 
-        IO  thread 
-    stop-slave:关闭复制 
-
-建议在使用这些命令的时候，vim ~/.my.cnf 
-    [client] 
-    user=&apos;root&apos; 
-    host=&apos;localhost&apos; 
-    password=&apos;redhat&apos; 
-    #chmod 700 ~/.my.cnf 
-    然后再mysqladmin option,否则会提示没有输入密码，不是太方便 
-
-
-开发视角: 
-    数据类型 
-    约束 
-    数据库、表、索引、视图 
-</code></pre><p>这篇文章写的不错，更多可直接参考这个文章:<br><a href="http://blog.163.com/sir_876/blog/static/11705223201061210123570/" target="_blank" rel="noopener">http://blog.163.com/sir_876/blog/static/11705223201061210123570/</a>         </p>
-<p>解决乱码问题: </p>
-<p>#vim /etc/my.cnf </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]     </span><br><span class="line">character-set-server=utf8 </span><br><span class="line">即可; </span><br><span class="line">客户端 </span><br><span class="line">set names utf8     </span><br><span class="line">即可；；</span><br></pre></td></tr></table></figure>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> <span class="keyword">table</span> <span class="keyword">status</span> <span class="keyword">like</span> <span class="string">'tb_name'</span>; </span><br><span class="line"><span class="keyword">show</span> <span class="keyword">variables</span> <span class="keyword">like</span> <span class="string">'%char%'</span>;</span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/07/06/32-04MySQL系列之四MySQL客户端的使用/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-32-03MySQL系列之三MySQL数据库基础及编译安装" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/07/06/32-03MySQL系列之三MySQL数据库基础及编译安装/">32_03MySQL系列之三MySQL数据库基础及编译安装</a>
-    </h1>
-  
-
-        
-        <a href="/2015/07/06/32-03MySQL系列之三MySQL数据库基础及编译安装/" class="archive-article-date">
-  	<time datetime="2015-07-06T01:08:08.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-07-06</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>MySQL的优势: </p>
-<blockquote>
-<p>Speed<br>        完全多线程<br>        查询缓存<br>Reliability<br>Scalability(伸缩性)<br>Ease of use<br>Portability and Standards Compliance<br>Multiuser Support<br>Internarionalization<br>Wide,Application Support<br>Open Source </p>
-</blockquote>
-<ol>
-<li>mysql –help –verbose(可以用来查看支持的各项选项) </li>
-</ol>
-<p>指定安装文件的安装路径常用的选项:<br>-DCMAKE_INSTALL_PREFIX=/usr/local/mysql<br>-DMYSQL_DATADIR=/data/mysql<br>-DSYSCONFDIR=/etc </p>
-<p>默认编译的存储引擎包含:csv,myisam,myisammrg和heap,若要安装其他存储引擎，可以使用类似如下编译选项:<br>-DWITH_INNOBASE_STORAGE_ENGINE=1<br>-DWITH_ARCHIVE_STORAGE_ENGINE=1<br>-DWITH_BLACKHOLE_STORAGE_ENGINE=1<br>-DWITH_FEDERATED_STORAGE_ENGINE=1 </p>
-<p>若要明确指定不编译某存储引擎，可以使用类似如下的选项:<br>-DWITHOUT_<engine>_STORAGE_ENGINE=1<br>比如:<br>-DWITHOUT_EXAMPLE_STORAGE_ENGINE=1<br>-DWITHOUT_FEDERATED_STORAGE_ENGINE=1<br>-DWITHOUT_PARTITION_STORAGE_ENGINE=1 </engine></p>
-<p>若要编译进其他功能，如SSL等，可使用类似如下选项来实现编译时使用某库或不使用某库:<br>-DWITH_READLINE=1<br>-DWITH_SSL=system<br>-DWITH_ZLIB=system<br>-DWITH_LIBWRAP=0 </p>
-<p>其他常用的选项:<br>-DMYSQL_TCP_PORT=3306<br>-DMYSQL_UNIX_ADDR=/tmp/mysql.sock<br>-DENABLED_LOCAL_INFILE=1<br>-DEXTRA_CHARSETS=all<br>-DDEFAULT_CHARSET=utf8<br>-DWITH_DEBUG=0<br>-DENABLE_PROFILING=1        性能分析 </p>
-<p>如果想清理此前的编译所生成的文件，则需要使用如下命令:<br>make clean<br>rm CMakeCache.txt </p>
-<ol start="2">
-<li>编译安装 </li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#groupadd -r mysql </span></span><br><span class="line"><span class="comment">#useradd -g mysql -r -d /data/mydata mysql </span></span><br><span class="line"><span class="comment">#tar xf mysql-version.gz </span></span><br><span class="line"><span class="comment">#cd mysql-version </span></span><br><span class="line"><span class="comment">#cmake . -DCMAKE_INSTALL_PREFIX=/usr/local/mysql \ </span></span><br><span class="line">         -DMYSQL_DATADIR=/data/mydata \ </span><br><span class="line">         -DSYSCONFDIR=/etc \ </span><br><span class="line">         -DWITH_INNOBASE_STORAGE_ENGINE=1 \ </span><br><span class="line">         -DWITH_ARCHIVE_STORAGE_ENGINE=1 \ </span><br><span class="line">         -DWITH_BLACKHOLE_STORAGE_ENGINE=1 \ </span><br><span class="line">         -DWITH_READLINE=1 \ </span><br><span class="line">         -DWITH_SSL=system \ </span><br><span class="line">         -DWITH_ZLIB=system \ </span><br><span class="line">         -DWITH_LIBWRAP=0 \ </span><br><span class="line">         -DMYSQL_UNIX_ADDR=/tmp/mysql.sock \ </span><br><span class="line">         -DEFAULT_CHARSET=utf8 \ </span><br><span class="line">         -DEFAULT_COLLATION=utf8_general_ci </span><br><span class="line"><span class="comment">#make </span></span><br><span class="line"><span class="comment">#make install </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#chown -R :mysql /usr/local/mysql </span></span><br><span class="line"><span class="comment">#scripts/mysql_install_db --user=mysql --datadir=/data/mydata </span></span><br><span class="line"><span class="comment">#cp supports-files/my-large.cnf /etc/my.cnf </span></span><br><span class="line"><span class="comment">#cp supports-files/mysql.server /etc/init.d/mysqld </span></span><br><span class="line"><span class="comment">#chkconfig --add mysqld</span></span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>vim /etc/profile.d/mysql.sh<br>export PATH=$PATH:/usr/local/mysql/bin/  保存退出，重新登录即可 </p>
-</blockquote>
-<p>mysql客户端工具:<br>    mysql<br>    mysqldump<br>    mysqladmin<br>    mysqlcheck<br>    mysqlimport </p>
-<p>mysql非客户端工具:<br>    myisacheck<br>    myisampack </p>
-<p>-u USERNAME<br>-p PASSWORD<br>-h<br>–protocol<br>    socket<br>    tcp<br>    pipe<br>    memory(后两者是windows) </p>
-<p>MYISAM:<br>    每个表三个文件:<br>        .frm:表结构<br>        .MYD:表数据<br>        .MYI:表索引 </p>
-<p>InnoDB:<br>    所有表共享一个表空间文件<br>        .frm:表结构<br>        .ibd:表空间(表数据和表索引)<br>    建议:每表一个独立的表空间文件<br>    &gt;SHOW VARIABLES LIKE ‘%innodb’; </p>
-<pre><code>#vim /etc/my.cnf 
- innodb_file_per_table=1 
-说明，这个在centos6.5+上已经没有这个了； 
-</code></pre><p>可在自己家目录创建一个 .my.cnf </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#vim ~/.my.cnf </span></span><br><span class="line">[client] </span><br><span class="line">user=<span class="string">'root'</span> </span><br><span class="line">host=<span class="string">'localhost'</span> </span><br><span class="line">password=<span class="string">'redhat'</span> </span><br><span class="line"><span class="comment">#chmod 700 ~/.my.cnf</span></span><br></pre></td></tr></table></figure>
-<p><a href="http://www.tianfeiyu.com/?p=635" target="_blank" rel="noopener">http://www.tianfeiyu.com/?p=635</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/07/06/32-03MySQL系列之三MySQL数据库基础及编译安装/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/9/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><a class="page-number" href="/page/12/">12</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/11/">Next &raquo;</a>
@@ -1617,11 +1560,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1645,19 +1588,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">CI</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">git</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">go</a>
+                <a href="javascript:void(0)" class="js-tag color3">CI</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">grpc</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">go</a>
               </li>
              
               <li class="article-tag-list-item">

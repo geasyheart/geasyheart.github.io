@@ -71,7 +71,7 @@ ga('send', 'pageview');
 			
 				<li><a href="/">主页</a></li>
 	        
-				<li><a href="/tags/algo">算法</a></li>
+				<li><a href="/tags/算法">算法</a></li>
 	        
 				<li><a href="/tags/小桥流水人家/">小桥流水人家</a></li>
 	        
@@ -167,7 +167,7 @@ ga('send', 'pageview');
 				
 					<li style="width: 16.666666666666668%"><a href="/">主页</a></li>
 		        
-					<li style="width: 16.666666666666668%"><a href="/tags/algo">算法</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/算法">算法</a></li>
 		        
 					<li style="width: 16.666666666666668%"><a href="/tags/小桥流水人家/">小桥流水人家</a></li>
 		        
@@ -191,6 +191,231 @@ ga('send', 'pageview');
           </div>
           <div id="js-content" class="content-ll">
             
+  
+    <article id="post-43-03配置Nginx作为webserver" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/09/30/43-03配置Nginx作为webserver/">43_03配置Nginx作为webserver</a>
+    </h1>
+  
+
+        
+        <a href="/2015/09/30/43-03配置Nginx作为webserver/" class="archive-article-date">
+  	<time datetime="2015-09-30T14:24:05.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-30</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Keepalived+nginx:实现高可用 </p>
+<p>Tengine:这是阿里利用Nginx再次修改发布的产品； </p>
+<p>varnish,squid<br>    nginx:cache(disk)<br>    httpd:cache(disk,memory) </p>
+<p>nginx支持和memcached服务的缓存加速功能；　 </p>
+<p>HTTP referer:支持反盗链 </p>
+<p>传统上基于进程或线程模型架构的web服务通过每进程或每线程处理并发连接请求，这势必会在网络和I/O操作时产生阻塞，其另一个必然结果则是对内存或CPU的利用率低下，生成一个新的进程/线程需要事先备好其运行时环境，这保罗为其分配堆内存和栈内存，以及为其创建新的执行上下文等，这些操作都需要占用CPU,而且过多的进程/线程还会带来线程抖动或频繁的上下文切换，系统性能也会由此进一步下降； </p>
+<p>在设计的最初阶段，nginx的主要着眼点就是其高性能以及对物理计算资源的高密度利用，因此其采用了不同的架构模型。受启发于多种操作系统设计中基于“事件”的高级处理机制，nginx采用了模块化、事件驱动、异步、单线程及非阻塞的架构，并大量采用了多路复用及事件通知机制。在ngnix中，连接请求由为数不多的几个仅包含一个线程的进程worker以高效的回环(run-loop)机制进行处理，而每个worker可以并行处理数千个的并发连接及请求； </p>
+<p>如果负载以CPU密集型应用为主，如SSL或压缩应用，则worker数目应与CPU数相同，如果负载以IO密集型为主，如响应大量内容给客户端，则worker数应该为CPU个数的1.5倍或2倍； </p>
+<p>Ngnix会按需同时运行多个进程:一个主进程(master)和几个工作进程(worker)，配置了缓存时还会有缓存加载器进程(cache loader)和缓存管理器进程(cache manager)等，所有进程均是仅含有一个线程，并通过“共享内存”的机制实现进程间通信。主进程以root用户身份运行，而worker、cache loader和cache manager均应以非特权用户运行； </p>
+<p>主进程主要完成如下工作: </p>
+<ol>
+<li>读取并验证配置文件 </li>
+<li>创建、绑定及关闭套接字 </li>
+<li>启动、种植及维护worker进程的个数 </li>
+<li>无须终止服务而重新配置工作特性 </li>
+<li>控制非终端式程序升级，启用新的二进制程序并在需要时回滚至老版本 </li>
+<li>重新打开日志文件，实现日志滚动 </li>
+<li>编译嵌入式perl脚本 </li>
+</ol>
+<p>worker进程主要完成的任务包括: </p>
+<ol>
+<li>接收、传入并处理来自客户端的连接 </li>
+<li>提供反向代理及过滤功能 </li>
+<li>nginx任何能完成的其他任务 </li>
+</ol>
+<p>cache loader进程主要完成的任务包括: </p>
+<ol>
+<li>检查缓存存储中的缓存对象 </li>
+<li>使用缓存元数据建立内存数据库 </li>
+</ol>
+<p>cache manager进程的主要任务:<br>１、缓存的失效及过期检验 </p>
+<p>Nginx的配置有着几个不同的上下文:main、http、server、upstream和location(还有实现右键服务反向代理的mail)。配置语法的格式和定义方式遵循所谓的C风格，因此支持嵌套，还有着逻辑清晰并易于创建、阅读和维护等优势；　 </p>
+<p>Nginx的代码是由一个核心和一系列的模块组成，核心主要用于提供web server的基本功能，以及web和mail反向代理的功能，还用于启用网络协议，创建必要的运行时环境以及确保不同的模块之间平滑的进行交互。不过，大多数协议相关的功能和某应用特有的功能都是由nginx的模块实现的，这些功能模块大致可分为事件模块、阶段性处理器、输出过滤器、变量处理器、协议、upstream和负载均衡几个类别，这些共同组成了nginx的http功能，时间模块主要用于提供OS独立的(不同的操作系统的时间机制有所不同)时间通知机制如kqueue或epoll等。协议模块则负责实现nginx通过http、tls/ssl、smtp、pop3以及imap与对应的客户端建立会话。 </p>
+<p>在nginx内部，进程间的通信是通过模块的pipeline或chain实现的:换句话说，每一个功能或操作都由一个模块实现。例如:压缩、通过FastCGI或uwsgi协议与upstream服务器通信，以及与memcached建立会话等； </p>
+<p>sendfile:在内核直接完成文件封装发送给请求； </p>
+<h2 id="源码编译安装nginx"><a href="#源码编译安装nginx" class="headerlink" title="源码编译安装nginx"></a>源码编译安装nginx</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#yum groupinstall "Development Tools" "Server Platform Libraries" </span></span><br><span class="line"><span class="comment">#tar xf nginx-1.4.1.tar.gz </span></span><br><span class="line"><span class="comment">#groupadd -r -g 492 nginx </span></span><br><span class="line"><span class="comment">#useradd -r -g 492 -u 492 nginx </span></span><br><span class="line"> </span><br><span class="line">编译和安装 </span><br><span class="line">./configure \ </span><br><span class="line">--prefix=/usr \ </span><br><span class="line">--sbin-path=/usr/sbin/nginx \ </span><br><span class="line">--conf-path=/etc/nginx/nginx.conf \ </span><br><span class="line">--error-log-path=/var/<span class="built_in">log</span>/nginx/error.log \ </span><br><span class="line">--http-log-path=/var/<span class="built_in">log</span>/nginx/access.log \ </span><br><span class="line">--pid-path=/var/run/nginx/nginx.pid \ </span><br><span class="line">--lock-path=/var/lock/nginx.lock \ </span><br><span class="line">--user=nginx \ </span><br><span class="line">--group=nginx \ </span><br><span class="line">--with-http_ssl_module \ </span><br><span class="line">--with-http_flv_module \ </span><br><span class="line">--with-http_stub_status_module \ </span><br><span class="line">--with-http_gzip_static_module \ </span><br><span class="line">--http-client-body-temp-path=/var/tmp/nginx/client/ \ </span><br><span class="line">--http-proxy-temp-path=/var/tmp/nginx/proxy/ \ </span><br><span class="line">--http-fastcgi-temp-path=/var/tmp/nginx/fcgi/ \ </span><br><span class="line">--http-uwsgi-temp-path=/var/tmp/nginx/uwsgi \ </span><br><span class="line">--http-scgi-temp-path=/var/tmp/nginx/scgi \ </span><br><span class="line">--with-file-aio \ </span><br><span class="line">--with-http_image_filter_module \ </span><br><span class="line">--with-pcre\ </span><br><span class="line"> --with-http_mp4_module </span><br><span class="line"><span class="comment">#make &amp;&amp; make install </span></span><br><span class="line"> </span><br><span class="line">依赖包: </span><br><span class="line"><span class="comment">#yum install pcre-devel  openssl-devel gd-devel </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#chmod +x /etc/rc.d/init.d/nginx </span></span><br><span class="line"><span class="comment">#chkconfig --add nginx </span></span><br><span class="line"><span class="comment">#chkconfig nginx on </span></span><br><span class="line"><span class="comment">#service nginx start </span></span><br><span class="line"> </span><br><span class="line">如果出现: </span><br><span class="line">nginx: [emerg] mkdir() <span class="string">"/var/tmp/nginx/client/"</span> failed (2: No such file or directory) </span><br><span class="line"><span class="comment">#mkdir -pv /var/tmp/nginx/client </span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">测试页位置: </span><br><span class="line"><span class="built_in">cd</span> /usr/html/ </span><br><span class="line"> </span><br><span class="line">配置文件: </span><br><span class="line"><span class="built_in">cd</span> /etc/nginx/ </span><br><span class="line"> </span><br><span class="line">vim nginx.conf </span><br><span class="line"> </span><br><span class="line">worker_processes  2;   这个最前面有指定 </span><br><span class="line">events&#123; </span><br><span class="line">    worker_connections 1024;     最多支持2*1024个请求；这个要注意!!! </span><br><span class="line">&#125; </span><br><span class="line">http&#123; </span><br><span class="line">    .......... </span><br><span class="line">&#125; </span><br><span class="line">server&#123;                     定义虚拟主机 </span><br><span class="line">    location /URI/ &#123; </span><br><span class="line">        root html; </span><br><span class="line">        index index.html index.htm; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">location [ = | ~ | ~* | ^~ ]uri &#123;...&#125; </span><br><span class="line"> location URI&#123;&#125;: </span><br><span class="line">     对当前路径及子路径下的所有对象都生效； </span><br><span class="line"> </span><br><span class="line"> location = URI&#123;&#125;: </span><br><span class="line">     精确匹配指定的路径，不包括子路径，因此，只对当前资源生效； </span><br><span class="line"> </span><br><span class="line"> location ~URI&#123;&#125;: </span><br><span class="line"> location ~* URI&#123;&#125;: </span><br><span class="line">     模式匹配URI,此处的URI可使用正则表达式，~区分字符大小写，~*不区分字符大小写； </span><br><span class="line"> </span><br><span class="line"> location ^~ URI&#123;&#125;: </span><br><span class="line">     不使用正则表达式 </span><br><span class="line"> </span><br><span class="line"> 优先级: </span><br><span class="line">     = &gt; ^~ &gt; ~|~* </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">例如: </span><br><span class="line">location /&#123; </span><br><span class="line">    root /web/htdocs; </span><br><span class="line">    index index.html index.htm; </span><br><span class="line">&#125; </span><br><span class="line">location /bbs/ &#123; </span><br><span class="line">    root  /web; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">/web/bbs </span><br><span class="line"> </span><br><span class="line">定义访问控制: </span><br><span class="line">①基于IP </span><br><span class="line">    location / &#123; </span><br><span class="line">        deny all; </span><br><span class="line">        allow 192.168.1.2; </span><br><span class="line">    &#125; </span><br><span class="line"> </span><br><span class="line">    location /bbs/ &#123; </span><br><span class="line">        deny 192.168.1.12; </span><br><span class="line">    &#125; </span><br><span class="line">②基于用户 </span><br><span class="line">    location / &#123; </span><br><span class="line">        auth_basic <span class="string">"Restricted"</span>; </span><br><span class="line">        auth_basic_user_file /etc/nginx/.users; </span><br><span class="line">    &#125; </span><br><span class="line">提供用户:htpasswd -c  -m /etc/nginx/.users tom </span><br><span class="line">第二次时不能使用　-c 选项； </span><br><span class="line"> </span><br><span class="line">autoindex:列出所有网页，默认没打开，建议不打开； </span><br><span class="line"> </span><br><span class="line">可以查看服务器的状态信息: </span><br><span class="line">location /status &#123; </span><br><span class="line">    stub_status on;　　　实际使用应该定义用户访问，如上； </span><br><span class="line">&#125; </span><br><span class="line">已经接受连接的个数，已经处理的连接的个数，已经处理的请求的个数 </span><br><span class="line">reading --nginx 正在读取其首部请求的个数； </span><br><span class="line">writing -- nginx 正在读取其主体的请求的个数、正处理着其请求内容的请求的个数或者正在向其客户发送响应的个数 </span><br><span class="line">waiting -- 长连接模式的保持的连接个数； </span><br><span class="line"> </span><br><span class="line">支持SSL </span><br><span class="line">ssl_certificate /etc/nginx/ssl/nginx.crt; </span><br><span class="line">ssl_certificate_key   /etc/nginxssl/nginx.key; </span><br><span class="line"> </span><br><span class="line">location / &#123; </span><br><span class="line">    root /web/ssl; </span><br><span class="line">    index index.html index.htm; </span><br><span class="line">&#125; </span><br><span class="line">创建CA: </span><br><span class="line"><span class="built_in">cd</span> /etc/pki/CA </span><br><span class="line">(<span class="built_in">umask</span> 077;openssl genrsa 2048 &gt; private/cakey.pem) </span><br><span class="line">openssl req -new -x509 -key private/cakey.pem -out cacert.pem </span><br><span class="line">touch serial </span><br><span class="line"><span class="built_in">echo</span> 01 &gt; serial </span><br><span class="line">touch index.txt </span><br><span class="line"> </span><br><span class="line">mkdir /etc/nginx/ssl </span><br><span class="line"><span class="built_in">cd</span> /etc/nginx/ssl </span><br><span class="line">(<span class="built_in">umask</span> 077; openssl genrsa 1024 &gt; nginx.key) </span><br><span class="line">openssl req -new -key nginx.key -out nginx.csr </span><br><span class="line"> </span><br><span class="line">openssl ca -<span class="keyword">in</span> nginx.csr -days 3650 </span><br><span class="line"> </span><br><span class="line">这样就创建成功； </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">如何定义虚拟主机？ </span><br><span class="line"> </span><br><span class="line">server &#123; </span><br><span class="line">    listen 80; </span><br><span class="line">    server_name www.a.org; </span><br><span class="line">    location /&#123; </span><br><span class="line">        root /web/a.org </span><br><span class="line">        index index.html; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">如何实现LNMP: </span><br><span class="line">mysql要注意: </span><br><span class="line"><span class="comment">#vim /etc/ld.so.conf.d/mysql.conf </span></span><br><span class="line">/usr/<span class="built_in">local</span>/mysql/lib </span><br><span class="line"><span class="comment">#ldconfig -v </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#ln -sv /usr/local/mysql/include /usr/include/mysql</span></span><br></pre></td></tr></table></figure>
+<h2 id="编译PHP"><a href="#编译PHP" class="headerlink" title="编译PHP"></a>编译PHP</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><span class="line">./configure --prefix=/usr/<span class="built_in">local</span>/php\ </span><br><span class="line"> --with-openssl --with-mysql=/usr/<span class="built_in">local</span>/mysql  \ </span><br><span class="line">  --<span class="built_in">enable</span>-fpm --<span class="built_in">enable</span>-sockets \ </span><br><span class="line">  --<span class="built_in">enable</span>-sysvshm \ </span><br><span class="line">  --with-mysqli=/usr/<span class="built_in">local</span>/mysql/bin/mysql_config \ </span><br><span class="line">  --<span class="built_in">enable</span>-mbstring --with-freetype-dir\ </span><br><span class="line">   --with-jpeg-dir --with-png-dir --with-zlib \ </span><br><span class="line">   --with-libxml-dir \ </span><br><span class="line">   --<span class="built_in">enable</span>-xml --with-mhash\ </span><br><span class="line"> --with-mcrypt \ </span><br><span class="line">  --with-config-file-scan-dir=/etc/php.d \ </span><br><span class="line">  --with-bz2 --with-config-file-path=/etc --with-curl </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">yum install libxml2-devel bzip2-devel libcurl-devel libmcrypt-devel epel--release </span><br><span class="line">如果不想麻烦，可以使用epel源试试； </span><br><span class="line">mcrypt源码编译的，可参考前面的php源码安装； </span><br><span class="line"> </span><br><span class="line">为php提供给配置文件: </span><br><span class="line"><span class="comment">#cp php.ini-production /etc/php.ini </span></span><br><span class="line"> </span><br><span class="line">为php-fpm提供Sysv init脚本，并将其添加至服务列表: </span><br><span class="line"><span class="comment">#cp sapi/fpm/init.d.php-fpm /etc/rc.d/init.t/php-fpm </span></span><br><span class="line"><span class="comment">#chmod +x /etc/rc.d/init.d/php-fpm </span></span><br><span class="line"><span class="comment">#chkconfig --add php-fpm </span></span><br><span class="line"><span class="comment">#chkconfig php-fpm on </span></span><br><span class="line"> </span><br><span class="line">为php-fpm提供配置文件: </span><br><span class="line"><span class="comment">#cp /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf </span></span><br><span class="line"> </span><br><span class="line">编辑php-fpm的配置文件: </span><br><span class="line"><span class="comment">#vim /usr/local/php/etc/php-fpm.conf </span></span><br><span class="line">配置fpm的相关选项为你所需要的值，并启用pid文件 </span><br><span class="line">pm.max_children=50 </span><br><span class="line">pm.start_servers=5 </span><br><span class="line">pm.min_spare_servers=2 </span><br><span class="line">pm.max_spare_servers=8 </span><br><span class="line">pid=/usr/<span class="built_in">local</span>/php/var/run/php-fpm.pid </span><br><span class="line"> </span><br><span class="line">接下来启动php-fpm: </span><br><span class="line"><span class="comment">#service php-fpm start </span></span><br><span class="line"> </span><br><span class="line">接下来验证下: </span><br><span class="line"><span class="comment">#ps aux | grep php-fpm </span></span><br><span class="line"> </span><br><span class="line">整合nginx和php </span><br><span class="line">①编辑/etc/nginx/nginx.conf，启用如下选项: </span><br><span class="line">location ~ \.php$&#123; </span><br><span class="line">    root                html; </span><br><span class="line">    fastcgi_pass     127.0.0.1:9000; </span><br><span class="line">    fastcgi_index    index.php; </span><br><span class="line">    fastcgi_param  SCRIPT_FILENAME /scripts<span class="variable">$fastcgi_script_name</span>; </span><br><span class="line">    include              fastcgi_params;     </span><br><span class="line">&#125; </span><br><span class="line">②编辑/etc/nginx/fastcgi_params,将其内容改为如下内容: </span><br><span class="line">fastcgi_param      GATEWAY_INTERFACE   CGI/1.1; </span><br><span class="line">fastcgi_param      SERVER_SOFTWARE        nginx; </span><br><span class="line">fastcgi_param      QUERY_STRING               <span class="variable">$query_string</span>; </span><br><span class="line">fastcgi_param      REQUEST_METHOD         <span class="variable">$request_method</span>; </span><br><span class="line">fastcgi_param      CONTENT_TYPE               <span class="variable">$content_type</span>; </span><br><span class="line">fastcgi_param      CONTENT_LENGTH         <span class="variable">$content_length</span>; </span><br><span class="line">fastcgi_param      SCRIPT_FILENAME          <span class="variable">$document_root</span><span class="variable">$fastcgi_script_name</span>; </span><br><span class="line">fastcgi_param      SCRIPT_NAME                 <span class="variable">$fastcgi_script_name</span>; </span><br><span class="line">fastcgi_param      REQUEST_URI                  <span class="variable">$request_uri</span>; </span><br><span class="line">fastcgi_param      DOCUMENT_URI            <span class="variable">$document_uri</span>; </span><br><span class="line">fastcgi_param      DOCUMENT_ROOT        <span class="variable">$document_root</span>; </span><br><span class="line">fastcgi_param      SERVER_PROTOCOL       <span class="variable">$server_protocol</span>; </span><br><span class="line">fastcgi_param      REMOTE_ADDR               <span class="variable">$remote_addr</span>; </span><br><span class="line">fastcgi_param      REMOTE_PORT                <span class="variable">$remote_port</span>; </span><br><span class="line">fastcgi_param      SERVER_ADDR                 <span class="variable">$server_addr</span>; </span><br><span class="line">fastcgi_param      SERVER_PORT                  <span class="variable">$server_port</span>; </span><br><span class="line">fastcgi_param      SERVER_NAME                <span class="variable">$server_name</span>; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">并在所支持的主页面格式中添加php格式的主页，类似如下: </span><br><span class="line">location / &#123; </span><br><span class="line">        root html; </span><br><span class="line">        index index.php index.html index.htm; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">而后重新载入nginx的配置文件: </span><br><span class="line">service nginx reload </span><br><span class="line"> </span><br><span class="line">③在/usr/html新建index.php的测试页面，测试php是否正常； </span><br><span class="line">cat &gt; /usr/html/index.php&lt;&lt;EOF </span><br><span class="line">&lt;?php </span><br><span class="line">phpinfo(); </span><br><span class="line">?&gt; </span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<p>还有安装xcache;;;; </p>
+<p>安装xcache3.2.0,如果使用php-5.6.7会出现两者无法结合的现象，可以使用php-5.6.11版本，编译安装xcache后，一切不需要动，直接service php-fpm restart即可，<br>然后phpinfo测试下即可；；； </p>
+<p>nginx -t<br>service nginx testconfig   这两个可以检查配置文件是否正确；</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/09/30/43-03配置Nginx作为webserver/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-41-04Linux集群系列之二十二-Keepalived详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/09/30/41-04Linux集群系列之二十二-Keepalived详解/">41_04Linux集群系列之二十二--Keepalived详解</a>
+    </h1>
+  
+
+        
+        <a href="/2015/09/30/41-04Linux集群系列之二十二-Keepalived详解/" class="archive-article-date">
+  	<time datetime="2015-09-30T03:43:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-30</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>我认为Keepalived主要实现的功能有： </p>
+<ol>
+<li>VIP漂移； </li>
+<li>自定义脚本，另外不停的检测脚本； </li>
+<li>当资源切换到其他主机时，资源应该做哪些服务； </li>
+</ol>
+<p>我对于前两条的认知在于：比如运行了MySQL服务，那么不停的检测MySQL服务，如果MySQL服务停止，那么VIP漂移；<br>而对于Keepalived+LVS这种模型，只需要指明Real server以及sorry server web服务即可，并不需要做这些，而如果Nginx作为Director的话，就需要这么做了；；； </p>
+<p>如何利用keepalived实现ipvs的高可用?<br>VIP:<br>172.16.100.1<br>RS:<br>172.16.100.11<br>172.16.100.12 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">１．先搭建好DR模型的LVS集群 </span><br><span class="line">２．yum -y install ipvsadm keepalived </span><br><span class="line">cp /etc/keepalived/keepalived.conf /root </span><br><span class="line">vim /etc/keepalived/keepalived.conf </span><br><span class="line"> </span><br><span class="line">global_defs &#123; </span><br><span class="line">   notification_email &#123;   万一出故障，应该发给谁 </span><br><span class="line">     root@localhost </span><br><span class="line">   &#125; </span><br><span class="line"> notification_email_from keepalived@localhost    是谁发的，但是由于是本地发的，并不会验证这个用户是否存在 </span><br><span class="line">   smtp_server 127.0.0.1 </span><br><span class="line">   smtp_connect_timeout 30 </span><br><span class="line">   router_id LVS_DEVEL </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">vrrp_instance VI_1 &#123;  定义虚拟路由 </span><br><span class="line">    state MASTER      定义为主节点 </span><br><span class="line">    interface eth0 </span><br><span class="line">    virtual_router_id 51 </span><br><span class="line">    priority 101　 </span><br><span class="line">    优先级减去出现故障后降低的优先级大小要小于备节点的大小才行,备节点的优先级要稍微小于这个值 </span><br><span class="line">    advert_int 1 </span><br><span class="line">    authentication &#123; </span><br><span class="line">        auth_type PASS </span><br><span class="line">        auth_pass Your_passwd    认证 </span><br><span class="line">    &#125; </span><br><span class="line">    virtual_ipaddress &#123; </span><br><span class="line">        172.16.100.1/16 dev eth0 label eth0:0 </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line">virtual_server 172.16.100.1 80 &#123; </span><br><span class="line">    delay_loop 6 </span><br><span class="line">    lb_algo rr　　　调度算法 </span><br><span class="line">    lb_kind DR　　LVS模型 </span><br><span class="line">    net_mask 255.255.0.0 </span><br><span class="line">    persistence_timeout 50   持久连接 </span><br><span class="line">    protocol TCP </span><br><span class="line"> </span><br><span class="line">real_server 172.16.100.11 80 &#123; </span><br><span class="line">        weight 1  定义权重 </span><br><span class="line">        HTTP_GET &#123; </span><br><span class="line">            url &#123;　　　定义url,可以定义多个，看man </span><br><span class="line">              path / </span><br><span class="line">              status_code 200 </span><br><span class="line">            &#125; </span><br><span class="line">            connect_timeout 3    定义连接时常 </span><br><span class="line">            nb_get_retry 3　　　重试次数 </span><br><span class="line">            delay_before_retry 3　延迟时间 </span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">real_server 172.16.100.12 80 &#123; </span><br><span class="line">        weight 1  定义权重 </span><br><span class="line">        HTTP_GET &#123; </span><br><span class="line">            url &#123;　　　定义url,可以定义多个，看man </span><br><span class="line">              path / </span><br><span class="line">              status_code 200 </span><br><span class="line">            &#125; </span><br><span class="line">            connect_timeout 3    定义连接时常 </span><br><span class="line">            nb_get_retry 3　　　重试次数 </span><br><span class="line">            delay_before_retry 3　延迟时间 </span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#cp keepalived.conf node2:/etc/keepalived/ </span></span><br><span class="line">需要把 </span><br><span class="line">state MASTER 改为state BACKUP </span><br><span class="line">priority 100　　　　　　　这个值要小于主节点的优先级值，不过不要小太多，因为后面还有定义，可以是主:101,备:100 </span><br><span class="line"> </span><br><span class="line">＃<span class="keyword">for</span> I <span class="keyword">in</span> &#123;1..2&#125;;<span class="keyword">do</span> ssh root@node<span class="variable">$I</span> <span class="string">'serice keepalived start'</span>;<span class="keyword">done</span> </span><br><span class="line">＃tail /var/<span class="built_in">log</span>/message </span><br><span class="line"> </span><br><span class="line">测试，如果RS中的一台主机服务出现错误，例如模仿: </span><br><span class="line">[RS1]<span class="comment">#service httpd stop </span></span><br><span class="line">[VIP]<span class="comment">#ipvsadm -L -n </span></span><br><span class="line">可以看到RS1的条目被删除，并且会收到邮件 </span><br><span class="line">[RS1]<span class="comment">#service httpd start </span></span><br><span class="line">[VIP]<span class="comment">#ipvsadm -L -n </span></span><br><span class="line">可以看到RS1的条目重新加入; </span><br><span class="line"> </span><br><span class="line">１．如果所有的realserver都出现故障了怎么办? </span><br><span class="line"> </span><br><span class="line">DIP1:172.16.100.6 </span><br><span class="line">DIP2:172.16.100.7 </span><br><span class="line">yum -y install httpd 都做 </span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Under maintainence......"</span> &gt; /var/www/html/index.html </span><br><span class="line">service httpd start </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">vim /etc/keepalived/keepalived.conf </span><br><span class="line">在virtual_server下面添加sorry_server,例如: </span><br><span class="line">state MASTER </span><br><span class="line">priority 101 </span><br><span class="line">sorry_server 127.0.0.1 80 </span><br><span class="line"> </span><br><span class="line">dip2: </span><br><span class="line">scp dip1:/etc/keepalived/keepalived.conf /etc/keepalived/ </span><br><span class="line"> </span><br><span class="line">vim /etc/keepalived/keepalived.conf </span><br><span class="line">添加: </span><br><span class="line">state BACKUP </span><br><span class="line">priority 100 </span><br><span class="line">sorry_server 127.0.0.1 80 </span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> I <span class="keyword">in</span> &#123;1..2&#125;;<span class="keyword">do</span> ssh dip<span class="variable">$I</span> <span class="string">'service keepalived start '</span>;<span class="keyword">done</span> </span><br><span class="line">tail /var/<span class="built_in">log</span>/messages </span><br><span class="line"> </span><br><span class="line">测试:当两个realserver都down掉的时候? </span><br><span class="line"> </span><br><span class="line">rs1:service httpd stop </span><br><span class="line">rs2:service httpd stop </span><br><span class="line"> </span><br><span class="line">ipvsadm -L -n  可以看到两个节点都停止了； </span><br><span class="line">127.0.0.1上去了；</span><br></pre></td></tr></table></figure>
+<p>２．自写检测脚本，完成维护模式切换? </p>
+<p>DIP:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">在实例之外添加内容: </span><br><span class="line">vrrp_script chk_schedown &#123; </span><br><span class="line">    script <span class="string">"killall -0 haproxy"</span> </span><br><span class="line">    interval 2 </span><br><span class="line">        <span class="comment">#check every 2 seconds </span></span><br><span class="line">    weight -2  一旦检测失败，权重-2 </span><br><span class="line">        <span class="comment">#if failed,decrease 2 of the priority </span></span><br><span class="line">    fall 2    检测失败两次则失败 </span><br><span class="line">        <span class="comment">#require 2 failures for failures </span></span><br><span class="line">    rise 1 </span><br><span class="line">        <span class="comment">#require 1 successes for ok </span></span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">例: </span><br><span class="line"><span class="comment">#vim /etc/keepalived/keepalived.conf </span></span><br><span class="line">在实例之外添加内容(即另找一行添加): </span><br><span class="line">vrrp_script chk_schedown&#123; </span><br><span class="line">    script <span class="string">"[ -e /etc/keepalived/down ] &amp;&amp; exit 1 || exit 0"</span> </span><br><span class="line">     interval 2 </span><br><span class="line">     weight -2 </span><br><span class="line">     fall 2 </span><br><span class="line">     rise 1 </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">补充:这个脚本必须在vrrp_instance　VI_1的上面，配置文件可看总结(1)keepalived功能小测试 </span><br><span class="line"> </span><br><span class="line">上述脚本怎么执行，如何执行， </span><br><span class="line">在vrrp_instance VI_1 中定义，即: </span><br><span class="line">定义在实例之中,添加: </span><br><span class="line">track_script&#123; </span><br><span class="line">    chk_schedown </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="comment">#service keepalived restart </span></span><br><span class="line"> </span><br><span class="line">测试:100.6 </span><br><span class="line"><span class="comment">#touch  /etc/keepalived/down </span></span><br><span class="line"><span class="comment">#tail /var/log/messages </span></span><br><span class="line">会发现eth0:0不再有了，移到另外一个DIP主机上；</span><br></pre></td></tr></table></figure></p>
+<p>３．如何在vrrp事务发生时，发送警告邮件给指定的管理员? </p>
+<p>标题: vip added to HA1<br>正文:日期　时间，HA1 STATE from MASTER to BACKUP </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/keepalived/notify.sh </span></span><br><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line">contact=<span class="string">'root@localhost'</span> </span><br><span class="line"><span class="function"><span class="title">Usage</span></span>()&#123; </span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Usage:`basename <span class="variable">$0</span>` &#123;master|backup|fault&#125; VIP"</span> </span><br><span class="line">&#125; </span><br><span class="line"><span class="function"><span class="title">Notify</span></span>()&#123; </span><br><span class="line">    subject=<span class="string">"`hostname`'s state changed to <span class="variable">$1</span>"</span> </span><br><span class="line">    mailbody=<span class="string">"`date +%F`:`hostname`'s state change to <span class="variable">$1</span>,<span class="variable">$VIP</span> floating"</span> </span><br><span class="line">    <span class="built_in">echo</span> <span class="variable">$mailbody</span> | mail -s <span class="string">"<span class="variable">$subject</span>"</span> <span class="variable">$contact</span> </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">[ <span class="variable">$#</span> -lt 2 ]&amp;&amp; Usage &amp;&amp; <span class="built_in">exit</span> </span><br><span class="line">VIP=<span class="variable">$2</span> </span><br><span class="line"><span class="keyword">case</span> <span class="variable">$1</span> <span class="keyword">in</span> </span><br><span class="line">    master) </span><br><span class="line">    Notify master;; </span><br><span class="line">    backup) </span><br><span class="line">    Notify backup;; </span><br><span class="line">    fault) </span><br><span class="line">    Notify fault;; </span><br><span class="line">    *) </span><br><span class="line">    Usage </span><br><span class="line">    <span class="built_in">exit</span> 1;; </span><br><span class="line"><span class="keyword">esac</span> </span><br><span class="line"> </span><br><span class="line">在实例中添加如下信息: </span><br><span class="line"> </span><br><span class="line">notify_master <span class="string">"/etc/keepalived/notify.sh master 172.16.100.1"</span> 当变成主节点应该执行这个脚本 </span><br><span class="line">notify_backup <span class="string">"/etc/keepalived/notify.sh backup 172.16.100.1"</span> </span><br><span class="line">当变成备节点应该执行的脚本 </span><br><span class="line">notify_backup <span class="string">"/etc/keepalived/notify.sh fault 172.16.100.1"</span> </span><br><span class="line">当主节点变不了，备节点也变不了，应该执行的脚本 </span><br><span class="line"> </span><br><span class="line">service keepalived restart </span><br><span class="line"> </span><br><span class="line">测试: </span><br><span class="line">touch /etc/keepalived/down</span><br></pre></td></tr></table></figure>
+<p>视频最后有个更完善的脚本，我没有记． </p>
+<p>这个写的挺好:<br><a href="http://zhangxugg-163-com.iteye.com/blog/1665419" target="_blank" rel="noopener">http://zhangxugg-163-com.iteye.com/blog/1665419</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/09/30/41-04Linux集群系列之二十二-Keepalived详解/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
   
     <article id="post-41-03Linux集群系列之二十一-ISCSI、clvm和GFS2" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
@@ -1015,212 +1240,6 @@ automatic:自动登陆
 
 
   
-    <article id="post-24-04-3-实验L-A-M-P编译" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/09/20/24-04-3-实验L-A-M-P编译/">24_04_3_实验L-A-M-P编译</a>
-    </h1>
-  
-
-        
-        <a href="/2015/09/20/24-04-3-实验L-A-M-P编译/" class="archive-article-date">
-  	<time datetime="2015-09-20T02:16:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-20</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="基础"><a href="#基础" class="headerlink" title="基础"></a>基础</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">service iptables off </span><br><span class="line">setenforce 0 </span><br><span class="line">yum -y install epel-release</span><br></pre></td></tr></table></figure>
-<h2 id="httpd服务器：192-168-122-111"><a href="#httpd服务器：192-168-122-111" class="headerlink" title="httpd服务器：192.168.122.111"></a>httpd服务器：192.168.122.111</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">tar xvjf apr-1.5.1.tar.bz2                                     </span><br><span class="line">./configure --prefix=/usr/<span class="built_in">local</span>/apr </span><br><span class="line">make &amp;&amp; make install                                 </span><br><span class="line">tar xvjf apr-util-1.5.4.tar.bz2     </span><br><span class="line">./configure --prefix=/usr/<span class="built_in">local</span>/apr-util --with-apr=/usr/<span class="built_in">local</span>/apr         </span><br><span class="line">make &amp;&amp; make install                                                     </span><br><span class="line">                                                                                                 </span><br><span class="line">yum install pcre-devel openssl-devel zlib-devel </span><br><span class="line">tar xvjf httpd-2.4.10.tar.bz2     </span><br><span class="line">./configure --prefix=/usr/<span class="built_in">local</span>/apache \ </span><br><span class="line">     --sysconfdir=/etc/httpd \ </span><br><span class="line">     --<span class="built_in">enable</span>-so \ </span><br><span class="line">     --<span class="built_in">enable</span>-rewrite \ </span><br><span class="line">     --<span class="built_in">enable</span>-ssl \ </span><br><span class="line">     --<span class="built_in">enable</span>-cgi  \ </span><br><span class="line">     --<span class="built_in">enable</span>-cgid \ </span><br><span class="line">    --<span class="built_in">enable</span>-modules=most \ </span><br><span class="line">    --<span class="built_in">enable</span>-deflate \ </span><br><span class="line">    --<span class="built_in">enable</span>-mods-shared=most \ </span><br><span class="line">    --<span class="built_in">enable</span>-mpms-shared=all \ </span><br><span class="line">    --with-mpm=event \ </span><br><span class="line">    --with-apr=/usr/<span class="built_in">local</span>/apr \ </span><br><span class="line">    --with-apr-util=/usr/<span class="built_in">local</span>/apr-util </span><br><span class="line"> make &amp;&amp; make install</span><br></pre></td></tr></table></figure>
-<h2 id="php服务器：192-168-122-104"><a href="#php服务器：192-168-122-104" class="headerlink" title="php服务器：192.168.122.104"></a>php服务器：192.168.122.104</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">wget -c  http://cn2.php.net/distributions/php-5.6.12.tar.bz2 </span><br><span class="line"> </span><br><span class="line">./configure --prefix=/usr/<span class="built_in">local</span>/php --with-config-file-path=/etc --with-openssl --<span class="built_in">enable</span>-mbstring --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib  --with-libxml-dir  --<span class="built_in">enable</span>-xml --<span class="built_in">enable</span>-sockets --<span class="built_in">enable</span>-fpm --with-mcrypt  --with-config-file-scan-dir=/etc/php.d --with-bz2  --<span class="built_in">enable</span>-zip --with-mysql=mysqlnd --with-pdo-mysql=mysqlnd --with-mysqli=mysqlnd </span><br><span class="line"> </span><br><span class="line"> make &amp;&amp; make install </span><br><span class="line"> </span><br><span class="line">cp php.ini-production /etc/php.ini </span><br><span class="line"> cp sapi/fpm/init.d.php-fpm /etc/rc.d/init.d/php-fpm </span><br><span class="line">chmod +x /etc/rc.d/init.d/php-fpm </span><br><span class="line">chkconfig --add php-fpm </span><br><span class="line"> </span><br><span class="line">cp /usr/<span class="built_in">local</span>/php/etc/php-fpm.conf.default /usr/<span class="built_in">local</span>/php/etc/php-fpm.conf </span><br><span class="line">编辑php-fpm的配置文件： </span><br><span class="line">vi /usr/<span class="built_in">local</span>/php/etc/php-fpm.conf </span><br><span class="line">配置fpm的相关选项为你所需要的值，并启用pid文件： </span><br><span class="line">listen = 192.168.122.104:9000 </span><br><span class="line">pm.max_children = 50 </span><br><span class="line">pm.start_servers = 5 </span><br><span class="line">pm.min_space_servers = 2 </span><br><span class="line">pm.max_space_servers = 8 </span><br><span class="line">pid = /usr/<span class="built_in">local</span>/php/var/run/php-fpm.pid </span><br><span class="line"> </span><br><span class="line">接下来就可以启动php-fpm了： </span><br><span class="line">service php-fpm start </span><br><span class="line"> </span><br><span class="line">tar xf xcache-3.2.0.tar.gz </span><br><span class="line"> <span class="built_in">cd</span> xcache-3.2.0 </span><br><span class="line"> yum -y install autoconf </span><br><span class="line">/usr/<span class="built_in">local</span>/php/bin/phpize </span><br><span class="line">./configure --<span class="built_in">enable</span>-xcache --with-php-config=/usr/<span class="built_in">local</span>/php/bin/php-config </span><br><span class="line">make &amp;&amp; make install </span><br><span class="line"> </span><br><span class="line">cp xcache.ini /etc/php.d </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">3、启用httpd的相关模块 </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">vim /etc/httpd/httpd.conf </span><br><span class="line">LoadModule proxy_module modules/mod_proxy.so </span><br><span class="line">LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so </span><br><span class="line">在&lt;Directory <span class="string">"/usr/local/apache/htdocs"</span>&gt;外面写如下两行： </span><br><span class="line">ProxyRequests Off </span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ fcgi://192.168.122.104:9000/php/<span class="variable">$1</span> </span><br><span class="line"> </span><br><span class="line">php服务器： </span><br><span class="line">mkdir /php </span><br><span class="line">vim /php/phpinfo.php </span><br><span class="line">vim /php/mysql.php </span><br><span class="line">进行测试；； </span><br><span class="line"> </span><br><span class="line">安装phpadmin </span><br><span class="line">cp config.sample.inc.php config.inc.php </span><br><span class="line">编辑这个配置文件，修改这一项： </span><br><span class="line"><span class="variable">$cfg</span>[<span class="string">'Servers'</span>][<span class="variable">$i</span>][<span class="string">'host'</span>] = <span class="string">'192.168.236.104'</span>;</span><br></pre></td></tr></table></figure>
-<p>如果出现:<br>PEAR package PHP_Archive not installed: generated phar will require PHP’s phar extension be enabled. </p>
-<blockquote>
-<p>wget <a href="http://pear.php.net/go-pear.phar" target="_blank" rel="noopener">http://pear.php.net/go-pear.phar</a><br>/usr/local/php/bin/php go-pear.phar</p>
-</blockquote>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/09/20/24-04-3-实验L-A-M-P编译/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-39-01Linux集群系列之十一-高可用集群之heartbeat-v2-基于crm进行资源管理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/09/19/39-01Linux集群系列之十一-高可用集群之heartbeat-v2-基于crm进行资源管理/">39_01Linux集群系列之十一--高可用集群之heartbeat_v2_基于crm进行资源管理</a>
-    </h1>
-  
-
-        
-        <a href="/2015/09/19/39-01Linux集群系列之十一-高可用集群之heartbeat-v2-基于crm进行资源管理/" class="archive-article-date">
-  	<time datetime="2015-09-19T02:50:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-19</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>CIB: Cluster Information Base<br>    xml格式，为了能够简单使用CIB，提供了haresources2clib.py脚本 </p>
-<p>当在ha.cf中添加了crm  respawn选项的时候，默认的haresources配置信息就不会再被使用，但是可以执行<br>/usr/lib64/heartbeat/haresources2cib.py脚本使其保留在/var/lib/heartbeat/crm/目录下； </p>
-<p>但是haresources2cli.py的执行需要依赖同目录下的ha_propagate脚本，执行这个脚本会自动进行同步到其他节点上； </p>
-<p>当VIP挂了，备用节点抢过来VIP上线，但是在路由器中保存的是原来VIP的mac地址，那么备用节点需要进行arp欺骗：<br>/usr/lib64/heartbeat/send_arp实现mac地址伪装，进行arp欺骗； </p>
-<p>换另一种方式: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">yum install pacemaker corosync </span><br><span class="line"><span class="comment">#vim /etc/ha.d/ha.cf </span></span><br><span class="line">mcast eth0 225.0.100.19 694 1 0 </span><br><span class="line">crm respawn    此时没有任何资源 </span><br><span class="line">ln -s /usr/libexec/pacemaker/cib /usr/lib64/heartbeat/cib </span><br><span class="line">ln -s /usr/libexec/pacemaker/stonith /usr/lib64/heartbeat/stonithd </span><br><span class="line">ln -s /usr/libexec/pacemaker/attrd /usr/lib64/heartbeat/attrd </span><br><span class="line">ln -s /usr/libexec/pacemaker/crmd /usr/lib64/heartbeat/crmd </span><br><span class="line"> </span><br><span class="line"><span class="comment">#/usr/lib64/heartbeat/ha_propagate   会自动进行同步 </span></span><br><span class="line">＃service heartbeat start </span><br><span class="line"><span class="comment">#ssh node2 "service heartbeat start" </span></span><br><span class="line"><span class="comment">#tail /var/log/message </span></span><br><span class="line">    可以看到详细信息 </span><br><span class="line">     </span><br><span class="line"><span class="comment">#netstat -ntlp | grep mgmtd </span></span><br><span class="line">    监听在5560端口</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>cibadmin<br>cibclient<br>crmmon:可用于监测这些节点状态，每15秒刷新一次<br>crmadmin<br>crm_resource:用来做资源配置<br>crm_verify:校验/usr/lib64/heartbeat/cib.xml文件是否有语法错误的；<br>crm_standby:指定让哪个节点转为备节点<br>crm_sh:crm的命令行工具<br>使用方法:     </p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt; <span class="comment">#crm_sh </span></span><br><span class="line">&gt; crm<span class="comment"># help </span></span><br><span class="line">&gt; Usage:crm (nodes|config|resources) </span><br><span class="line">&gt; crm<span class="comment">#nodes </span></span><br><span class="line">&gt; crm nodes<span class="comment"># help </span></span><br><span class="line">&gt;  Usage: nodes(status|list) </span><br><span class="line">&gt;  crm nodes<span class="comment">#list</span></span><br></pre></td></tr></table></figure>
-<p>如何使用GUI方式进行管理<br>１、tail /etc/passwd<br>默认生成hacluster用户，没有密码 </p>
-<p>#passwd hacluster ,密码随便 </p>
-<p>#tail /var/log/message  查看谁是DC:假设是node2:192.168.1.103<br>    当然连接到hb_gui上也可以进行查看 </p>
-<p>#hb_gui &amp;<br>会出现:<br>Server(:port)  192.168.1.103<br>User Name: hacluster<br>Password: hacluster </p>
-<p>添加资源<br>Resources–&gt; + –&gt; native –&gt;Resource ID:webip–&gt;Type–&gt;IPaddr(2)–&gt; Parameters–&gt;ip 192.168.1.101–&gt;Add Parameters –&gt;nic eth0–&gt;cidr_netmask 24<br>最后Patameters类似:<br>Name        Value<br>ip         192.168.1.103<br>nic        eth0<br>cidr_netmask     16 </p>
-<p>点击webip–&gt;右键–&gt;start<br>如果出现错误，webip–&gt;右键–&gt;Migrate Resource–&gt;To node:node1.test.com<br>–&gt;Force:True<br>如果仍然错误，webip–&gt;右键–&gt;Clear Migrate Constraints即可； </p>
-<p>添加资源–&gt;httpd–&gt;这里使用LSB的httpd脚本–&gt;add即可； </p>
-<p>如果用到组:应该先添加组:<br> Resources– &gt;+–&gt;group–&gt;Resoure ID: webip–&gt;Type–&gt;IPaddr(2)–&gt; Parameters–&gt;ip 192.168.1.101–&gt;Add Parameters –&gt;nic eth0–&gt;cidr_netmask 24<br> 添加资源–&gt;group–&gt;httpd–&gt;这里使用LSB的httpd脚本–&gt;add即可； </p>
-<p>将node2.test.com running(dc)右键转为standby将会转移到node1.test.com,刷新网页，将会发生改变 </p>
-<p>添加nfs文件系统<br>先停下上面哪个组 </p>
-<p>#mount -t nfs 192.168.1.105:/web/htdocs /var/www/html<br>然后<br>add –&gt;native–&gt;Filesystem–&gt;Resource ID:webstore        device 192.168.1.105:/web/htdocs<br>                                      directory /var/www/html<br>                                      fstype nfs </p>
-<p>应该注意，最后的Resources的排列顺序应该是webip–&gt;webstore–&gt;httpd，这个顺序和resources那种方式定义的顺序是一样的； </p>
-<p>如果出现错误，更多是状态信息导致的，可以重新添加；； </p>
-<p>通过资源约束使三个独立运行的节点联系到一起<br>１、定义资源约束<br>Colocations–&gt;OK–&gt;ID httpd_with_filesystem–&gt;from httpd –&gt;to webstore–&gt;Score  INFINITY(正无穷，永远在一起)–&gt;OK </p>
-<p>Colocations–&gt;OK–&gt;ID webstore_with_webip–&gt;from webstore –&gt;to webip–&gt;Score  INFINITY(正无穷，永远在一起)–&gt;OK<br>２、定义启动顺序<br>Orders–&gt;ID webstore_before_httpd–&gt;from httpd –&gt; To webstore<br>    配置好后可看Description<br>Orders–&gt;ID webip_before–&gt;from httpd –&gt; To webip </p>
-<p>设置粘性Default Resource Stickiness，可使默认DC转移到设置的主机上，只要大于0即可； </p>
-<p>如果想让某个资源运行到另外一个节点上，那么可以设定位置约束<br>Locations-&gt;add new items  item type :localtion –&gt;ID webip_on_node1 Resource:webip–&gt;OK<br>点击webip_on_node1–&gt;右面–Score : INFIINTY(设定为永远)<br>Add Expression –&gt;uname eq node1.test.com –Apply<br>会发现所有资源运行在node1.test.com上； </p>
-<p>练习说明: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">yum install pacemaker heartbeat </span><br><span class="line"><span class="comment">#vim /etc/ha.d/ha.cf </span></span><br><span class="line">mcast eth0 225.0.100.19 694 1 0 </span><br><span class="line">crm respawn    || pacemaker respawn </span><br><span class="line"><span class="comment">#service heartbeat start </span></span><br><span class="line">会报错，tail /var/<span class="built_in">log</span>/messages出现/usr/lib64/heart目录下的一些文件没有执行: </span><br><span class="line">这个是bug,做下面即可； </span><br><span class="line">＃ln -s /usr/libexec/pacemaker/cib /usr/lib64/heartbeat/cib </span><br><span class="line">＃ln -s /usr/libexec/pacemaker/stonith /usr/lib64/heartbeat/stonithd </span><br><span class="line">＃ln -s /usr/libexec/pacemaker/attrd /usr/lib64/heartbeat/attrd </span><br><span class="line">＃ln -s /usr/libexec/pacemaker/crmd /usr/lib64/heartbeat/crmd </span><br><span class="line">启动起来了，但是执行crm_mon又失败，没搜出来解决办法。。 </span><br><span class="line">[root@node2 ha.d]<span class="comment"># crm_mon -1 </span></span><br><span class="line">Could not establish cib_ro connection: Connection refused (111) </span><br><span class="line"> </span><br><span class="line">Connection to cluster failed: Transport endpoint is not connected</span><br></pre></td></tr></table></figure>
-<p>貌似在centos6.5+这个有BUG的…,所以以后做的时候，建议使用heartbeat自带的haresources进行管理；<br>我在看pacemaker的文档时，都不再涉及heartbeat+pacemaker这种方式，而是使用了corosync+pacemaker这种，所以，建议使用后者；； </p>
-<p>更详细可直接参考这篇文章:<br><a href="http://www.linuxidc.com/Linux/2013-08/89167p3.htm" target="_blank" rel="noopener">http://www.linuxidc.com/Linux/2013-08/89167p3.htm</a><br><a href="http://www.cnblogs.com/chinacloud/archive/2010/11/18/1881056.html" target="_blank" rel="noopener">http://www.cnblogs.com/chinacloud/archive/2010/11/18/1881056.html</a><br><a href="http://wolfword.blog.51cto.com/4892126/1210647" target="_blank" rel="noopener">http://wolfword.blog.51cto.com/4892126/1210647</a><br><a href="http://wenku.baidu.com/link?url=71Xs0ZrJ6HehYNlPRfDziVImX4JvP0hM30ZTM9LxBzU0fJw7nnWrqbNE8gaFInnL50byi7-oOX3tR5qNpqJQlYO3nP-5EffJn87tAuPVUSa" target="_blank" rel="noopener">http://wenku.baidu.com/link?url=71Xs0ZrJ6HehYNlPRfDziVImX4JvP0hM30ZTM9LxBzU0fJw7nnWrqbNE8gaFInnL50byi7-oOX3tR5qNpqJQlYO3nP-5EffJn87tAuPVUSa</a><br><a href="http://blog.csdn.net/flcandclf/article/details/14520501" target="_blank" rel="noopener">http://blog.csdn.net/flcandclf/article/details/14520501</a><br><a href="http://www.tuicool.com/articles/jM7jiu" target="_blank" rel="noopener">http://www.tuicool.com/articles/jM7jiu</a><br><a href="http://www.21ops.com/linux/15178.html" target="_blank" rel="noopener">http://www.21ops.com/linux/15178.html</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/09/19/39-01Linux集群系列之十一-高可用集群之heartbeat-v2-基于crm进行资源管理/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/8/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/10/">Next &raquo;</a>
@@ -1326,11 +1345,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1354,19 +1373,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">CI</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">git</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">go</a>
+                <a href="javascript:void(0)" class="js-tag color3">CI</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">grpc</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">go</a>
               </li>
              
               <li class="article-tag-list-item">

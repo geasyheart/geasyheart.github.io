@@ -71,7 +71,7 @@ ga('send', 'pageview');
 			
 				<li><a href="/">主页</a></li>
 	        
-				<li><a href="/tags/algo">算法</a></li>
+				<li><a href="/tags/算法">算法</a></li>
 	        
 				<li><a href="/tags/小桥流水人家/">小桥流水人家</a></li>
 	        
@@ -167,7 +167,7 @@ ga('send', 'pageview');
 				
 					<li style="width: 16.666666666666668%"><a href="/">主页</a></li>
 		        
-					<li style="width: 16.666666666666668%"><a href="/tags/algo">算法</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/算法">算法</a></li>
 		        
 					<li style="width: 16.666666666666668%"><a href="/tags/小桥流水人家/">小桥流水人家</a></li>
 		        
@@ -191,6 +191,209 @@ ga('send', 'pageview');
           </div>
           <div id="js-content" class="content-ll">
             
+  
+    <article id="post-20-01-实验-DNS主从复制及区域传送" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/03/20-01-实验-DNS主从复制及区域传送/">20_01_实验_DNS主从复制及区域传送</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/03/20-01-实验-DNS主从复制及区域传送/" class="archive-article-date">
+  	<time datetime="2015-04-03T06:34:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-03</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>主DNS服务器: </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#mv /etc/named.conf /etc/named.conf.bak </span><br><span class="line">#vim /etc/named.conf</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">options &#123; </span><br><span class="line">    directory &quot;/var/named&quot;; </span><br><span class="line">    notify yes;    如果有从DNS，需要指明； </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone &quot;.&quot; IN &#123; </span><br><span class="line">    type hint; </span><br><span class="line">    file &quot;named.ca&quot; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone &quot;localhost&quot; IN &#123; </span><br><span class="line">    type master; </span><br><span class="line">    file &quot;named.localhost&quot;; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone &quot;unravel.com&quot; IN &#123; </span><br><span class="line">    type master; </span><br><span class="line">    allow-transfer &#123; 172.17.12.231; &#125;; </span><br><span class="line">    file &quot;unravel.com.zone&quot;; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone &quot;12.17.127.in-addr-arpa&quot; IN &#123; </span><br><span class="line">    type master; </span><br><span class="line">    file &quot;172.17.12.zone&quot;; </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h1 id="chmod-640-etc-named-conf-amp-amp-chown-root-named-etc-named-conf"><a href="#chmod-640-etc-named-conf-amp-amp-chown-root-named-etc-named-conf" class="headerlink" title="chmod 640 /etc/named.conf &amp;&amp; chown root.named /etc/named.conf"></a>chmod 640 /etc/named.conf &amp;&amp; chown root.named /etc/named.conf</h1><h1 id="vim-var-named-unravel-com-zone"><a href="#vim-var-named-unravel-com-zone" class="headerlink" title="vim /var/named/unravel.com.zone"></a>vim /var/named/unravel.com.zone</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">$TTL    68400; </span><br><span class="line">@    IN    SOA    ns1.unravel.com.    admin.unravel.com.( </span><br><span class="line">        20150101 </span><br><span class="line">        1H </span><br><span class="line">        2M </span><br><span class="line">        2D </span><br><span class="line">        6H) </span><br><span class="line">    IN    NS    ns1 </span><br><span class="line">    IN    NS    ns2 </span><br><span class="line">    IN    MX    10    mail     </span><br><span class="line">ns1    IN    A    172.17.12.69 </span><br><span class="line">ns2    IN    A    172.17.12.231 </span><br><span class="line">www    IN    A    172.17.12.69 </span><br><span class="line">ww    IN    CNAME    www</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#vim /var/named/172.17.12.zone</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$TTL 86400; </span><br><span class="line">@    IN    SOA    ns1.unravel.com.    admin.unravel.com. ( </span><br><span class="line">        20150101 </span><br><span class="line">        1H </span><br><span class="line">        2M </span><br><span class="line">        2D </span><br><span class="line">        6H) </span><br><span class="line">    IN    NS    ns1.unravel.com. </span><br><span class="line">    IN    NS    ns2.unravel.com. </span><br><span class="line">69    IN    PTR    ns1.unravel.com. </span><br><span class="line">231    IN    PTR    ns2.unravel.com. </span><br><span class="line">69    IN    PTR    www.unravel.com.</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#service named start</span><br></pre></td></tr></table></figure>
+<p>从DNS服务器: </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#yum install bind </span><br><span class="line">#mv /etc/named.conf /etc/named.conf.bak </span><br><span class="line">#vim /etc/named.conf</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">options &#123; </span><br><span class="line">    directory &quot;/var/named&quot;; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">zone &quot;unravel.com&quot; IN    &#123; </span><br><span class="line">    type slave; </span><br><span class="line">    file &quot;slaves/unravel.com.zone&quot;; </span><br><span class="line">    masters &#123; 172.17.12.69; &#125;; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone &quot;12.17.172.in-addr-arpa&quot; IN &#123; </span><br><span class="line">    type slave; </span><br><span class="line">    file &quot;slaves/172.17.12.zone&quot;; </span><br><span class="line">    masters &#123; 172.17.12.69; &#125;; </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#chown root.named /etc/named.cof </span><br><span class="line">#chmod 640 /etc/named.conf </span><br><span class="line">#service named start</span><br></pre></td></tr></table></figure>
+<p>就会完成主从DNS传送 （更多细节参考文档说明）</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/03/20-01-实验-DNS主从复制及区域传送/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-20-01DNS主从复制及区域传送" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/03/20-01DNS主从复制及区域传送/">20_01DNS主从复制及区域传送</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/03/20-01DNS主从复制及区域传送/" class="archive-article-date">
+  	<time datetime="2015-04-03T06:31:31.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-03</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>如何设置允许给其他主机提供一些定义 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#vi /etc/named.conf</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>options 中，<br>如果添加    recursion yes;表示给所有主机提供递归；<br>实际使用中，应该定义给谁递归：<br>allow-recursion {172.16.0.0/16};表示给这个网段的主机提供递归；<br>allow-transfer {none；}定义区域不提供传送；<br>notify yes; 如果主DNS服务器发生序列号改变，从DNS服务器将会受到通知；<br>allow-query :允许那些客户机可以访问DNS服务<br>allow-transfer ：如果有辅助DNS，是否允许它可以同步zone文件。 </p>
+</blockquote>
+<p>安装从服务器172.16.100.2：     </p>
+<blockquote>
+<p>需要在主DNS开启allow-transfer{ 172.16.100.2; };<br>    option 添加 notify yes;<br>    zone “unravel.com” IN {<br>        type slave;这个地方改动；<br>        file “slaves/unravel.com.zone”;<br>        masters { 172.16.100.1；};指明主DNS服务器是谁；<br>        allow-tranfer { none；};<br>    }；<br>    zone “100.16.172.in-addr.arpa” IN {<br>        type slave;<br>        file “slaves/172.16.100.zone”;<br>        masters { 172.16.100.1; };<br>        allow-transfer {none;};<br>named-checkconf        检查一下是否错误；<br>如果遇到权限问题，tail /var/log/messages<br>chgrp named /etc/named.conf(一般这个不会遇到)<br>不过我在实验时这个文件即使属于root.root也不会报错，也会把主DNS的区域文件更新至从DNS中； </p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service named start</span><br></pre></td></tr></table></figure>
+<p>就会进行（主从传送）； </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /var/named/salves/unravel,com.zone</span><br></pre></td></tr></table></figure>
+<p>可以看看信息；<br>现在进行区域传送：<br>在主DNS服务器上的/var/named.unravel.com.zone上添加：<br>imap    IN        A    172.168.100.5<br>然后把序列号往后加1；20141114（不要忘记）<br>tail /var/log/messages会看到进行增量备份<br>然后从DNS服务器就会收到；<br>注意:<br>    1/在主DNS服务器上options 添加 notify yes;<br>    2/要添加从DNS服务器NS记录 </p>
+<p>使用rndc控制本地DNS服务器 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#rndc-confgen &gt; /etc/rndc.conf </span><br><span class="line">#vi /etc/rndc.conf中提示Use with the folllowing in named.conf ,adjusting the allow list  as needed:</span><br></pre></td></tr></table></figure>
+<p>把这些copy到/etc/named.conf文件中： </p>
+<blockquote>
+<p>.,$-1w    &gt;&gt; /etc/named.conf  ，光标放在key “rndc.conf”上，追加保存到/etc/named.conf中；<br>然后编辑/etc/named.conf文件：<br>.,$/s^# //g 回车，即可去掉#号；<br>rndc -c /etc/rndc.conf status<br>如果提示the key is invaild.<br>rm /etc/rndc.key<br>如果还有错误，<br>service　named restart即可； </p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rndc -c /etc/rdnc.conf notify &quot;unravel.com&quot;对unravel.com这个域进行通知； </span><br><span class="line">rndc -c /etc/rdnc.conf flush 清除缓存； </span><br><span class="line">rndc -c /etc/rdnc.con stop 停止bind服务器；</span><br></pre></td></tr></table></figure>
+<p>使用rndc远程控制DNS服务器        但是注意一般不允许远程控制！！！！！！！！！！ </p>
+<p>如果允许其他主机进行控制，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/named.conf</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">controls &#123; </span><br><span class="line">        inet ip（自己的IP) </span><br><span class="line">        allow &#123; 允许控制主机IP；&#125; </span><br><span class="line">        service named restart即可； </span><br><span class="line">        scp /etc/rndc.conf 172.168.100.2(假设改动的是这个Ip):/root/把密钥拷贝过去；注意千万不要把自己服务器上的rndc的密钥文件给覆盖掉了； </span><br><span class="line">        vi ~/rndc.conf </span><br><span class="line">            把options 中的default-server改为你要控制的那个主机的ip； </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">     </span><br><span class="line">    dig  （domain information groper域名信息搜索） </span><br><span class="line">            他可以用来从域名服务器中收集信息，Dig有两种模式：简单交互模式用于简单的查询，而批处理模式 </span><br><span class="line">            则可以对包含多个查询条目的列表执行查询，所有查询选项都可以从命令行输入； </span><br><span class="line">        dig -t NS . </span><br><span class="line">        这个会显示根服务器的地址信息；    保存在/var/named/named.ca </span><br><span class="line">        dig -t RT NAME @IP </span><br><span class="line">        dig -t NS/SOA unravel.com </span><br><span class="line">        dig -x IP; </span><br><span class="line">        host -t A/NS/MX/SOA www.unravel.com </span><br><span class="line">        dig +recurse -t A www.baidu.com @192.168.0.101(表示以递归的方式进行查询) </span><br><span class="line">            如果定义了不给任何人递归，则不会反馈任何信息 </span><br><span class="line">        dig +trace A www.baidu.com @192.168.0.101（本机）查看怎样解析的； </span><br><span class="line">        dig -t axfr unravel.com </span><br><span class="line">            将得到对方完全区域传送的所有信息 </span><br><span class="line">         </span><br><span class="line">    SOCKET：套接字 </span><br><span class="line">        IP+PORT    主要目的就是让两个不同主机通信，C/S，作为访问入口的；</span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/03/20-01DNS主从复制及区域传送/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
   
     <article id="post-38-01Linux集群系列之七-高可用集群原理详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
@@ -1175,289 +1378,6 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-17-01RHEL系统安装及kickstart" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/24/17-01RHEL系统安装及kickstart/">17_01RHEL系统安装及kickstart</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/24/17-01RHEL系统安装及kickstart/" class="archive-article-date">
-  	<time datetime="2015-03-24T14:40:18.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-24</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><blockquote>
-<p>Anaconda:stage2.img   <a href="http://zh.wikipedia.org/zh-cn/Anaconda" target="_blank" rel="noopener">http://zh.wikipedia.org/zh-cn/Anaconda</a><br>Anaconda是Red Hat Linux和Fedora的安装管理程序。它以Python及C语言写成，以图形的PyGTK和文字的python-newt接口写成。它可以用来自动安装配置，使用户能够以最小的监督运行。<br>Anaconda安装管理程序应用在RHEL，Fedora和其他一些项目，Anaconda提供纯文字模式和GUI模式，用户可以安装在各种各样的系统。<br>Anacondas是一种吃蜥蜴的蟒蛇，而正因Caldera的安装管理程序名为蜥蜴（lizard），因而得名。 </p>
-</blockquote>
-<p>kickstart :完成自动化安装 </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#yum install system-config-kickstart </span><br><span class="line">#ksvalidator(帮助查看配置文件是否配置有错) </span><br><span class="line">#ksvalidator /root/anaconda.cfg </span><br><span class="line">#system-config-kickstart</span><br></pre></td></tr></table></figure>
-<p>会打开一个配置文件，这样会非常省事 </p>
-<blockquote>
-<p>/root/anaconda.cfg<br>（一旦安装完，会生成这个文件，所以可以参考这个为样本） </p>
-</blockquote>
-<h2 id="kickstart-三部份"><a href="#kickstart-三部份" class="headerlink" title="kickstart:三部份"></a>kickstart:三部份</h2><ul>
-<li>命令段 </li>
-</ul>
-<ul>
-<li>必备命令 <blockquote>
-<p>keyboard/lang/timezone/rootpw/auth(or authconfig)/bootloader </p>
-<pre><code>keyboard us 
-lang  en_US (zh_CN)    local -a可查看所有支持的语言 
-rootpw --iscrypted 
-timezone [--utc]&lt;timezone&gt;    timeconfig 可查看所有时区，如果乱码，export LANG=C 
-bootloader --location=mbr(default) --append=&quot;hdd=ide-scsi ide=nodma&quot; 
-</code></pre></blockquote>
-</li>
-<li><p>可选命令 </p>
-<blockquote>
-<p>autopart/ignoredisk/clearpart<br>autopart：自动分区<br>ingnoredisk: </p>
-<pre><code>ingoredisk --drives=drive1,drive2,... 
-ingoredisk --only-use=sda(示例) 
-</code></pre><p>clearpart:清除分区(如果这个指错，会有致命伤害) </p>
-<pre><code>clearpart --drivers=hda,hdb --all 
-clearpart --linux (清除所有Linux分区) 
-clearpart --none(default) 不移除任何分区，使用空闲空间 
-clearpart --initlabel(如果没有分区表，就初始化一个) 
-</code></pre><p>driverdisk(必须使用这个命令告诉安装程序到哪寻找硬盘驱动) </p>
-<pre><code>driverdisk --source=ftp://path/to/dd.img 
-driverdisk --source=http://path/to/dd.img 
-driverdisk --source=nfs:host:/path/to/img 
-</code></pre><p>firewall </p>
-<pre><code>firewall --enabled 
-firewall --disabled 
-firewall --trust 
-        --ssh 
-        --telnet 
-        --smtp 
-        --http 
-        --ftp 
-</code></pre><p>firstboot:安装重启后还是要配置，如果不配置，直接–disabled </p>
-<pre><code>--disabled 
---enabled 
-</code></pre><p>halt:系统安装完后关机<br>graphical(default):图形化安装<br>text:纯文本方式安装<br>install/upgrade（安装还是升级） </p>
-<pre><code>url --url http://&lt;server&gt;/&lt;dir&gt; 
-url --url ftp://&lt;username&gt;:&lt;password&gt;@&lt;server&gt;/&lt;dir&gt; 
-</code></pre><p> interactive(交互模式安装，由于为了就是自动化安装，所以这个没啥用)<br>part  磁盘分区<br>network </p>
-<pre><code>--bootproto= one of dhcp/bootp/static 
-network --bootproto=dhcp 
-network (--device(指定哪个网卡)) --bootproto=static --ip=10.0.2.15 --netmask=255.255.255.0 --gateway=10.0.2.254 --nameserver=10.0.2.1 
-</code></pre><p>selinux –permissive<br>skipx(跳过图形化配置) </p>
-</blockquote>
-</li>
-<li><p>软件包选择段，$packages </p>
-</li>
-</ul>
-<ol>
-<li><p>脚本段 </p>
-<blockquote>
-<p>%pre（预安装脚本）：这个由于系统正在安装中，可提供的东西有限，所以一般在安装<br>$post(后安装脚本)    后写脚本，即$post段 </p>
-</blockquote>
-</li>
-<li><p>应该把kickstart文件放哪? </p>
-<blockquote>
-<p>ks=  告诉安装服务到哪去找<br>ks=http://<br>ks=cdrom:/ </p>
-</blockquote>
-</li>
-<li><p>安装过程中，boot提示符中可以使用的命令: </p>
-<blockquote>
-<p>askmethod<br>dd= </p>
-<p>ip=<br>netmask=<br>gatway=<br>dns=dns1,dns2 </p>
-<p>ks= nfs:<server>:/<path><br>ks=http://<server>:/<path><br>ks=floppy:/<path><br>ks=hd:<device>:/<file><br>ks=file:/<file><br>ks=cdrom:/<path> </path></file></file></device></path></path></server></path></server></p>
-<p>ksdevice=<br>nonet(不启用网络功能)<br>noprobe(不探测硬件信息)防止特殊的硬件在安装驱动过程中失败导致系统安装失败<br>rescue:进入救援模式 </p>
-</blockquote>
-</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkisofs -R -b isolinux/isolinux.bin -no-emul-boot -boot-load-size 4 -boot-info-table -o boot.iso iso/</span><br></pre></td></tr></table></figure>
-<p>（说明，我在使用这个自动化安装Redhat6.5的时候失败，提示无法找到cdrom的驱动，所以写了PXE方式安装）</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/24/17-01RHEL系统安装及kickstart/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-19-02DNS服务相关概念详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/22/19-02DNS服务相关概念详解/">19_02DNS服务相关概念详解</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/22/19-02DNS服务相关概念详解/" class="archive-article-date">
-  	<time datetime="2015-03-22T14:51:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>DNS服务器类型：<br>    主DNS服务器：数据修改<br>    辅助DNS服务器：请求数据同步<br>    $TTL    86400;缓存时间<br>        serial number        ；版本号<br>        refresh            ；定义辅助DNS多久刷新一次主DNS版本号<br>        retry            ；如果没响应，就重试，应该小于刷新时间<br>        expire            ；过期时间<br>        nagative answer TTL ；(缓存时间，如果没有设定$TTL值，这个值就可当作$TTL)<br>    缓存DNS服务器<br>        不提供权威答案，只提供缓存，节约带宽<br>    转发器<br>        不缓存，只提供转发功能，使用转发器可绕过从根服务器开始按照正常流程检索的正常过程。 </p>
-<p>如果主DNS服务器挂了，辅助DNS服务器就会在一定时间内进行多次查证主DNS服务器是否在线，如果没有收到任何回应，辅助DNS服务器就会自杀，而不是替代主DNS服务器！ </p>
-<p>数据库中，每一个条目称作一个资源记录(resource record ，RR)<br>资源记录格式RRT(Resource Record Type) </p>
-<p>资源记录类型：<br>SOA(Start of Authority):定义一个DNS区； </p>
-<pre><code>ZONE NAME    TTL        IN        SOA        FQDN        ADMINSTRATOR_MAILBOX( 
-                serial number        ；版本号 
-                refresh            ；定义辅助DNS多久刷新一次主DNS版本号 
-                retry            ；如果没响应，就重试，应该小于刷新时间     
-                expire            ；过期时间 
-                na  ttl) 
-</code></pre><p>注意:<br>    时间单位M（分钟）、H（小时）、D（天）、W（周），默认是秒；<br>    邮件格式：<a href="mailto:admin@unravel.co" target="_blank" rel="noopener">admin@unravel.co</a>m—&gt;应该写成admin.unravel.com </p>
-<p>举例1: </p>
-<pre><code>unravel.com.        600        IN        SOA        ns1.unravel.com.        admin.unravel.com.( 
-                20141112    ;(&lt;=10) 
-                1H 
-                5M 
-                1W    ;重试1周后依然不在线，则就挂了 
-                1D    );否定TTL值 
-</code></pre><p>NS(name server):Domain NAME —&gt;FQDN（用来指定一个区的服务器，并将子域授权给其他机构）<br>    unravel.com.        600        IN        NS        ns.unravel.com.<br>    ns.unravel.com.        600        IN        A        1.1.1.2 </p>
-<p>MX(mail exchanger):ZONE NAME –&gt;FQDN（用来记录邮件交换记录）<br>    ZONE NAME    TTL        IN        MX    pri        VALUE<br>                    优先级：0~99，数字越小级别越高 </p>
-<p>举例2:<br>    unravel.com.    600        IN        MX     10        mail.unravel.com.<br>    mail.unravel.com.    600    IN        A            1.1.1.3 </p>
-<p>A(address):FQDN –&gt;IPv4 （提供域名到IPV4地址的映射）<br>AAAA:FQDN –&gt;IPv6     (提供域名到IPV6地址的映射)<br>PTR(pointer):ip –&gt;FQDN  (提供从IP地址到域名的反向映射)<br>CNAME(Canonical NAME正式名称)：FQDN—&gt;FQDN    （记录为一个域名分配别名）<br>    www2.unravel.com.        IN        CNAME        <a href="http://www.unravel.com" target="_blank" rel="noopener">www.unravel.com</a> </p>
-<p>对于DNS，应该知道的概念:    域(Domain)  区域(Zone) </p>
-<p>建立两个区域文件： </p>
-<p>正向区域文件：<br>    unravel.com.        IN         SOA    ns1.unravel.com.<br>    <a href="http://www.unravel.com" target="_blank" rel="noopener">www.unravel.com</a>.    IN        A       192.168.0.1<br>简写为：<br>    www            IN        A       192.168.0.1 </p>
-<p>反向区域文件：<br>0.168.192.in-addr.arpa.        IN         SOA </p>
-<p>1.0.168.192.in-addr.arpa.    IN        PTR        <a href="http://www.unravel.com" target="_blank" rel="noopener">www.unravel.com</a>.<br>简写为：<br>1                IN        PTR        <a href="http://www.unravel.com" target="_blank" rel="noopener">www.unravel.com</a>. </p>
-<p>第一条必须为SOA；<br>MX记录只能定义在正向记录文件当中；<br>NS记录正向反向都可以记录；<br>A只能记录在正向；<br>PTR只能记录在反向； </p>
-<p>区域传送的类型：<br>    完全区域传送：axfr<br>    增量区域传送：ixfr </p>
-<p>区域类型：<br>    主区域：master<br>    从区域：slave<br>    提示区域：hint(定义根的位置)<br>    转发区域：forward </p>
-<p>网络地址<br>any     T_ANY<br>所有/任何与指定域相关的信息<br>mx      T_MX<br>该域的邮件网关<br>ns      T_NS<br>域名服务器<br>soa     T_SOA<br>区域的授权记录<br>hinfo   T_HINFO<br>主机信息<br>axfr    T_AXFR<br>区域传输记录(必须是询问一台授权的服务器)<br>txt     T_TXT<br>任意的字符串信息<br>(参看RFC 1035以获得完整的列表.) </p>
-<p>query-class<br>是指在查询中请求的网络等级.如果省略,默认为 “in”(C_IN = Internet . ) 以下的等级是可识别的:<br>in      C_IN<br>Internet等级的域<br>any     C_ANY<br>所有/任何等级的信息</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/22/19-02DNS服务相关概念详解/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/13/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><span class="page-number current">14</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/15/">Next &raquo;</a>
@@ -1563,11 +1483,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1591,19 +1511,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">CI</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">git</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">go</a>
+                <a href="javascript:void(0)" class="js-tag color3">CI</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">grpc</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">go</a>
               </li>
              
               <li class="article-tag-list-item">

@@ -71,7 +71,7 @@ ga('send', 'pageview');
 			
 				<li><a href="/">主页</a></li>
 	        
-				<li><a href="/tags/algo">算法</a></li>
+				<li><a href="/tags/算法">算法</a></li>
 	        
 				<li><a href="/tags/小桥流水人家/">小桥流水人家</a></li>
 	        
@@ -167,7 +167,7 @@ ga('send', 'pageview');
 				
 					<li style="width: 16.666666666666668%"><a href="/">主页</a></li>
 		        
-					<li style="width: 16.666666666666668%"><a href="/tags/algo">算法</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/算法">算法</a></li>
 		        
 					<li style="width: 16.666666666666668%"><a href="/tags/小桥流水人家/">小桥流水人家</a></li>
 		        
@@ -191,6 +191,219 @@ ga('send', 'pageview');
           </div>
           <div id="js-content" class="content-ll">
             
+  
+    <article id="post-SQLAlchemy初始化和创建连接" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/19/SQLAlchemy初始化和创建连接/">SQLAlchemy初始化和创建连接</a>
+    </h1>
+  
+
+        
+        <a href="/2018/03/19/SQLAlchemy初始化和创建连接/" class="archive-article-date">
+  	<time datetime="2018-03-19T09:31:05.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-19</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="SQLAlchemy初始化"><a href="#SQLAlchemy初始化" class="headerlink" title="SQLAlchemy初始化"></a>SQLAlchemy初始化</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> create_engine</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> sessionmaker</span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> Column</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.types <span class="keyword">import</span> String, Integer</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.ext.declarative <span class="keyword">import</span> declarative_base</span><br><span class="line"></span><br><span class="line">engine = create_engine(<span class="string">'postgresql://test@localhost:5432/test'</span>)</span><br><span class="line">DBSession = sessionmaker(engine)</span><br><span class="line">session = DBSession()</span><br><span class="line"></span><br><span class="line">BaseModel = declarative_base()</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span><span class="params">(BaseModel)</span>:</span></span><br><span class="line">    __tablename__ = <span class="string">'user'</span></span><br><span class="line"></span><br><span class="line">    id = Column(String, primary_key=<span class="literal">True</span>)</span><br><span class="line">    username = Column(String, index=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Session</span><span class="params">(BaseModel)</span>:</span></span><br><span class="line">    __tablename__ = <span class="string">'session'</span></span><br><span class="line"></span><br><span class="line">    id = Column(String, primary_key=<span class="literal">True</span>)</span><br><span class="line">    user = Column(String, index=<span class="literal">True</span>)</span><br><span class="line">    ip = Column(String)</span><br><span class="line"></span><br><span class="line">query = session.query(Session, User.username).join(User, User.id == Session.user)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> query:</span><br><span class="line">    <span class="keyword">print</span> dir(i)</span><br></pre></td></tr></table></figure>
+<h2 id="SQLAlchemy创建连接"><a href="#SQLAlchemy创建连接" class="headerlink" title="SQLAlchemy创建连接"></a>SQLAlchemy创建连接</h2><h3 id="Engine"><a href="#Engine" class="headerlink" title="Engine"></a>Engine</h3><p>engine 的定义包含了三部分的内容:</p>
+<ol>
+<li>具体数据库类型的实现</li>
+<li>连接池</li>
+<li>策略(即engine自己的实现)</li>
+</ol>
+<p>所谓的数据库类型即是<code>MYSQL</code> , <code>Postgresql</code> , <code>SQLite</code> 这些不同的数据库.<br>一般创建 engine 是使用<code>create_engine</code>方法:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">engine = create_engine(<span class="string">'postgresql+psycopg2://scott:tiger@localhost/mydatabase'</span>)</span><br></pre></td></tr></table></figure>
+<p>对于这个字符串, SQLAlchemy 提供了工具可用于处理它:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> create_engine</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.engine.url <span class="keyword">import</span> make_url</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.engine.url <span class="keyword">import</span> URL</span><br><span class="line"></span><br><span class="line">s = <span class="string">'postgresql://test@localhost:5432/bbcustom'</span></span><br><span class="line">url = make_url(s)</span><br><span class="line">s = URL(drivername=<span class="string">'postgresql'</span>, username=<span class="string">'test'</span>, password=<span class="string">""</span>,host=<span class="string">"localhost"</span>, port=<span class="number">5432</span>, database=<span class="string">"bbcustom"</span>)</span><br><span class="line"></span><br><span class="line">engine = create_engine(url)</span><br><span class="line">engine = create_engine(s)</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> engine.execute(<span class="string">'select id from "user"'</span>).fetchall()</span><br></pre></td></tr></table></figure>
+<p><code>create_engine</code> 函数有很多的控制参数, 这个后面再详细说.</p>
+<h3 id="Engine的策略"><a href="#Engine的策略" class="headerlink" title="Engine的策略"></a>Engine的策略</h3><p><code>create_engine</code>的调用, 实际上会变成<code>strategy.create</code>的调用. 而<code>strategy</code>就是<code>engine</code>的实现细节. <code>strategy</code>可以在<code>create_engine</code>调用时通过<code>strategy</code>参数指定, 目前官方的支持有三种:</p>
+<ol>
+<li>plain, 默认的</li>
+<li>threadlocal, 连接是线程局部的</li>
+<li>mock, 所有的 SQL 语句的执行会使用指定的函数</li>
+</ol>
+<p><code>mock</code> 这个实现, 会把所有的 <code>SQL</code> 语句的执行交给指定的函数来做, 这个函数是由<code>create_engine</code>的 <code>executor</code> 参数指定:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">f</span><span class="params">(sql, *args, **kargs)</span>:</span></span><br><span class="line">    <span class="keyword">print</span> sql, args, kargs</span><br><span class="line"></span><br><span class="line">s = <span class="string">'postgresql://test@localhost:5432/bbcustom'</span></span><br><span class="line">engine = create_engine(s, strategy=<span class="string">'mock'</span>, executor=f)</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> engine.execute(<span class="string">'select id from "user"'</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="各数据库实现"><a href="#各数据库实现" class="headerlink" title="各数据库实现"></a>各数据库实现</h3><p>各数据库的实现在 SQLAlchemy 中分成了两个部分, 一是数据库的类型, 二是具体数据库中适配的客户端实现. 比如对于 Postgresql 的访问, 可以使用<code>psycopg2</code>, 也可以使用<code>pg8000</code>:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">s = <span class="string">'postgresql+psycopg2://test@localhost:5432/bbcustom'</span></span><br><span class="line">s = <span class="string">'postgresql+pg8000://test@localhost:5432/bbcustom'</span></span><br><span class="line">engine = create_engine(s)</span><br></pre></td></tr></table></figure>
+<p>具体的适配工作, 是需要在代码中实现一个 Dialect 类来完成的. 官方的实现在 dialects 目录下.</p>
+<p>获取具体的 Dialect 的行为, 则是前面提到的<code>URL</code>对象的<code>get_dialect</code>方法.<code>create_engine</code>时你单传一个字符串,<code>SQLAlchemy</code>自己也会使用<code>make_url</code>得到一个<code>URL</code>的实例).</p>
+<h3 id="连接池"><a href="#连接池" class="headerlink" title="连接池"></a>连接池</h3><p>SQLAlchemy 支持连接池, 在<code>create_engine</code>时添加相关参数即可使用.</p>
+<ol>
+<li>pool_size:连接数</li>
+<li>max_overflow:最多多几个连接</li>
+<li>pool_recycle:连接重置周期</li>
+<li>pool_timeout:连接超时时间</li>
+</ol>
+<p>连接池效果:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> create_engine</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.engine.url <span class="keyword">import</span> make_url</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.engine.url <span class="keyword">import</span> URL</span><br><span class="line"></span><br><span class="line">s = <span class="string">'postgresql://test@localhost:5432/bbcustom'</span></span><br><span class="line">engine = create_engine(s, pool_size=<span class="number">2</span>, max_overflow=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> threading <span class="keyword">import</span> Thread</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">f</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">print</span> engine.execute(<span class="string">'select pg_sleep(5)'</span>).fetchall()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p = []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">3</span>):</span><br><span class="line">    p.append(Thread(target=f))</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> t <span class="keyword">in</span> p:</span><br><span class="line">    t.start()</span><br></pre></td></tr></table></figure>
+<p>连接池的实现, 在<code>create_engine</code>调用时也可以指定:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy.pool <span class="keyword">import</span> QueuePool</span><br><span class="line">engine = create_engine(<span class="string">'sqlite:///file.db'</span>, poolclass=QueuePool)</span><br></pre></td></tr></table></figure>
+<p>还有:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy.pool <span class="keyword">import</span> NullPool</span><br><span class="line">engine = create_engine(</span><br><span class="line">         <span class="string">'postgresql+psycopg2://scott:tiger@localhost/test'</span>,</span><br><span class="line">          poolclass=NullPool)</span><br></pre></td></tr></table></figure>
+<p>或者仅仅是获取连接的方法:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sqlalchemy.pool <span class="keyword">as</span> pool</span><br><span class="line"><span class="keyword">import</span> psycopg2</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">getconn</span><span class="params">()</span>:</span></span><br><span class="line">    c = psycopg2.connect(username=<span class="string">'ed'</span>, host=<span class="string">'127.0.0.1'</span>, dbname=<span class="string">'test'</span>)</span><br><span class="line">    <span class="comment"># do things with 'c' to set up</span></span><br><span class="line">    <span class="keyword">return</span> c</span><br><span class="line"></span><br><span class="line">engine = create_engine(<span class="string">'postgresql+psycopg2://'</span>, creator=getconn)</span><br></pre></td></tr></table></figure>
+<p>连接池可以被单独使用:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sqlalchemy.pool <span class="keyword">as</span> pool</span><br><span class="line"><span class="keyword">import</span> psycopg2</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">getconn</span><span class="params">()</span>:</span></span><br><span class="line">    c = psycopg2.connect(username=<span class="string">'ed'</span>, host=<span class="string">'127.0.0.1'</span>, dbname=<span class="string">'test'</span>)</span><br><span class="line">    <span class="keyword">return</span> c</span><br><span class="line"></span><br><span class="line">mypool = pool.QueuePool(getconn, max_overflow=<span class="number">10</span>, pool_size=<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line">conn = mypool.connect()</span><br><span class="line">cursor = conn.cursor()</span><br><span class="line">cursor.execute(<span class="string">"select foo"</span>)</span><br></pre></td></tr></table></figure>
+<p>连接池可以被多个 engine 共享使用:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">e = create_engine(<span class="string">'postgresql://'</span>, pool=mypool)</span><br></pre></td></tr></table></figure>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">SQLAlchemy</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/SQLAlchemy//" class="article-tag-list-link color1">SQLAlchemy</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/03/19/SQLAlchemy初始化和创建连接/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-mongoengine重建索引无效" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/02/27/mongoengine重建索引无效/">mongoengine重建索引无效</a>
+    </h1>
+  
+
+        
+        <a href="/2018/02/27/mongoengine重建索引无效/" class="archive-article-date">
+  	<time datetime="2018-02-27T10:25:06.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-02-27</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>mongoengine重建索引无效，老索引仍正常存在。<br>此处解决方式通过写脚本的方式进行解决。</p>
+<p><a href="https://stackoverflow.com/questions/35437458/when-mongoengine-rebuild-indexes" target="_blank" rel="noopener">链接</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/02/27/mongoengine重建索引无效/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
   
     <article id="post-django-migrate运行python函数" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
@@ -899,194 +1112,6 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-rabbitmq-server简单配置" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/28/rabbitmq-server简单配置/">rabbitmq-server简单配置</a>
-    </h1>
-  
-
-        
-        <a href="/2017/07/28/rabbitmq-server简单配置/" class="archive-article-date">
-  	<time datetime="2017-07-28T07:44:13.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-07-28</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">guest用户只能本地访问，所以：</span><br><span class="line"><span class="comment"># rabbitmqctl add_user zy 123456</span></span><br><span class="line"><span class="comment"># rabbitmqctl set_user_tags zy administrator</span></span><br><span class="line"><span class="comment"># rabbitmqctl set_permissions -p / zy ".*" ".*" ".*"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">可以启动rabbitmq-server的监控，可以ip:15672访问</span><br><span class="line"><span class="comment"># rabbitmq-plugins enable rabbitmq_management</span></span><br><span class="line"><span class="comment"># systemctl restart rabbitmq-server</span></span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/07/28/rabbitmq-server简单配置/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-gitlab-ci安装配置" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/28/gitlab-ci安装配置/">gitlab-ci安装配置</a>
-    </h1>
-  
-
-        
-        <a href="/2017/07/28/gitlab-ci安装配置/" class="archive-article-date">
-  	<time datetime="2017-07-28T07:29:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-07-28</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>GitLab CI中文文档<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://doc.gitlab.cc/ce/ci/README.html</span><br></pre></td></tr></table></figure></p>
-<h2 id="Install-GitLab-Runner"><a href="#Install-GitLab-Runner" class="headerlink" title="Install GitLab Runner"></a>Install GitLab Runner</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://docs.gitlab.com/runner/install/</span><br></pre></td></tr></table></figure>
-<h3 id="下面这个地方只是为了防止无法打开上面的网页，如果可以直接打开，下面步骤可以略过"><a href="#下面这个地方只是为了防止无法打开上面的网页，如果可以直接打开，下面步骤可以略过" class="headerlink" title="下面这个地方只是为了防止无法打开上面的网页，如果可以直接打开，下面步骤可以略过"></a>下面这个地方只是为了防止无法打开上面的网页，如果可以直接打开，下面步骤可以略过</h3><p>For Debian/Ubuntu</p>
-<ol>
-<li>如果想要使用Docker runner,首先要进行安装Docker，由于之前使用了阿里的Docker加速器，所以Docker安装可以略过，更多可以直接看阿里Docker</li>
-<li>安装Gitlab源</li>
-</ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> For Debian/Ubuntu</span></span><br><span class="line">curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-ci-multi-runner/script.deb.sh | sudo bash</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> For CentOS</span></span><br><span class="line">curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-ci-multi-runner/script.rpm.sh | sudo bash</span><br></pre></td></tr></table></figure>
-<ol start="3">
-<li>Install gitlab-ci-multi-runner</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># For Debian/Ubuntu</span><br><span class="line">sudo apt-get install gitlab-ci-multi-runner</span><br><span class="line"></span><br><span class="line"># For CentOS</span><br><span class="line">sudo yum install gitlab-ci-multi-runner</span><br></pre></td></tr></table></figure>
-<ol start="4">
-<li>Register the runner:</li>
-</ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">sudo gitlab-ci-multi-runner register</span><br><span class="line"></span><br><span class="line">Please enter the gitlab-ci coordinator URL (e.g. https://gitlab.com )</span><br><span class="line">https://gitlab.com</span><br><span class="line">Please enter the gitlab-ci token for this runner</span><br><span class="line">xxx</span><br><span class="line">Please enter the gitlab-ci description for this runner</span><br><span class="line">my-runner</span><br><span class="line">INFO[0034] fcf5c619 Registering runner... succeeded</span><br><span class="line">Please enter the executor: shell, docker, docker-ssh, ssh?</span><br><span class="line">docker</span><br><span class="line">Please enter the Docker image (eg. ruby:2.1):</span><br><span class="line">ruby:2.1</span><br><span class="line">INFO[0037] Runner registered successfully. Feel free to start it, but if it's</span><br><span class="line">running already the config should be automatically reloaded!</span><br></pre></td></tr></table></figure>
-<ol start="5">
-<li>update</li>
-</ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> For Debian/Ubuntu</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install gitlab-ci-multi-runner</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> For CentOS</span></span><br><span class="line">sudo yum update</span><br><span class="line">sudo yum install gitlab-ci-multi-runner</span><br></pre></td></tr></table></figure>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">CI</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/CI//" class="article-tag-list-link color3">CI</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/07/28/gitlab-ci安装配置/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/4/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/6/">Next &raquo;</a>
@@ -1192,11 +1217,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1220,19 +1245,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">CI</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">git</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">go</a>
+                <a href="javascript:void(0)" class="js-tag color3">CI</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">grpc</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">go</a>
               </li>
              
               <li class="article-tag-list-item">

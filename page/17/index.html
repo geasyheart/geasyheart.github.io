@@ -71,7 +71,7 @@ ga('send', 'pageview');
 			
 				<li><a href="/">主页</a></li>
 	        
-				<li><a href="/tags/algo">算法</a></li>
+				<li><a href="/tags/算法">算法</a></li>
 	        
 				<li><a href="/tags/小桥流水人家/">小桥流水人家</a></li>
 	        
@@ -167,7 +167,7 @@ ga('send', 'pageview');
 				
 					<li style="width: 16.666666666666668%"><a href="/">主页</a></li>
 		        
-					<li style="width: 16.666666666666668%"><a href="/tags/algo">算法</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/算法">算法</a></li>
 		        
 					<li style="width: 16.666666666666668%"><a href="/tags/小桥流水人家/">小桥流水人家</a></li>
 		        
@@ -191,6 +191,187 @@ ga('send', 'pageview');
           </div>
           <div id="js-content" class="content-ll">
             
+  
+    <article id="post-11-01linux网络配置之一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/22/11-01linux网络配置之一/">11_01linux网络配置之一</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/22/11-01linux网络配置之一/" class="archive-article-date">
+  	<time datetime="2015-02-22T15:12:02.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>协议:protocol </p>
+<p>网桥: </p>
+<p>网关:<br>实现不同网段的数据转发。 </p>
+<p>网路交换器:<br> <a href="http://zh.wikipedia.org/wiki/%E7%B6%B2%E8%B7%AF%E4%BA%A4%E6%8F%9B%E5%99%A8" target="_blank" rel="noopener">http://zh.wikipedia.org/wiki/%E7%B6%B2%E8%B7%AF%E4%BA%A4%E6%8F%9B%E5%99%A8</a><br>工作原理:<br> 交换机工作于OSI参考模型的第二层，即数据链路层。<br> 交换机内部的CPU会在每个端口成功连接时，通过将MAC地址和端口对应，形成一张MAC表。<br> 在今后的通讯中，发往该MAC地址的数据包将仅送往其对应的端口，而不是所有的端口。<br> 因此，交换机可用于划分数据链路层广播，即冲突域；但它不能划分网络层广播，即广播域。<br>分类:<br> 二层交换机:<br> 交换机被广泛应用于二层网络交换。中档的网管型交换机还具有VLAN划分、端口自动协商、MAC访问控制列表等功能，<br> 并提供命令行界面或图形界面控制台，供网络管理员调整参数<br> 通过MAC地址表示数据包。<br> 三层交换机:<br> 用于连接不同网段，并具有路由功能<br> 通过ip地址进行数据传送。<br> 四层交换机<br> 七层交换机 </p>
+<p>与HUB(集线器)的区别:<br>交换器与集线器不同之处是，集线器会将网络内某一用户发送之数据包传至所有已连接到集线器的电脑。<br>而交换器则只会将数据包发送到指定目的地的电脑（通过MAC表），相对上能减少数据碰撞及数据被窃听的机会。<br>交换器更能将同时传到的数据包分别处理，而集线器则不能。 </p>
+<p>最大的不同之处在于:集线器的每一个接口都处于相同的冲突域，而交换机的每个接口处于一个冲突域。<br>在性能方面尤为突出:例如在100Mb/s的以太网络中有100个用户，使用集线器，每个用户只有1Mb/s（100Mb/s/100），<br>因为Hub是共享式的网络；而使用交换机，每个接口有100Mb/s，如果有100个接口，<br>总带宽为100*100Mb/s（最终的带宽大小取决于输入接口的带宽；即如果输入端口只有1000M，则达到上限前，每个用户都能使用100M带宽，<br>但一旦所有用户的总需求超过1000M，用户将在相同优先级的原则下进行带宽分配），因为交换机是独立式的网络<br>物理地址(MAC地址) </p>
+<p>逻辑地址(IP地址) </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/22/11-01linux网络配置之一/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-10-04LVM快照" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/22/10-04LVM快照/">10_04LVM快照</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/22/10-04LVM快照/" class="archive-article-date">
+  	<time datetime="2015-02-22T02:22:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>快照卷:<br> 快照的作用主要是能够进行在线数据备份与恢复。 </p>
+<ol>
+<li>生命周期为整个数据时长，在这段时长内，数据的增长量不能超过快照卷大小。 </li>
+<li>快照卷应该是只读的。 </li>
+<li>跟原卷在同一个卷组内。 </li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">为testlv创建快照卷大小50M,(这个时候的快照，是当前testlv下的快照) </span><br><span class="line"><span class="comment"># lvcreate -L 50M -n testlv-snap -s -p r(只读) /dev/myvg/testlv </span></span><br><span class="line"><span class="comment"># mount /dev/myvg/testlv-snap /mnt </span></span><br><span class="line">当其没意义了，可进行删除此逻辑卷 </span><br><span class="line"><span class="comment"># lvremove /dev/myvg/testlv-snap</span></span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/22/10-04LVM快照/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
   
     <article id="post-10-03LVM实作流程" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
@@ -1041,196 +1222,6 @@ ga('send', 'pageview');
 
 
   
-    <article id="post-08-02bash脚本编程之七-case语句及脚本选项进阶" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/13/08-02bash脚本编程之七-case语句及脚本选项进阶/">08_02bash脚本编程之七-case语句及脚本选项进阶</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/13/08-02bash脚本编程之七-case语句及脚本选项进阶/" class="archive-article-date">
-  	<time datetime="2015-02-13T10:42:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-13</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>面向过程： </p>
-<blockquote>
-<p>控制结构<br>顺序结构<br>选择结构<br>循环结构 </p>
-</blockquote>
-<h2 id="1"><a href="#1" class="headerlink" title="1)"></a>1)</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">case: </span><br><span class="line"> case SWITCH in </span><br><span class="line"> value1) </span><br><span class="line"> statement </span><br><span class="line"> ... </span><br><span class="line"> ;; </span><br><span class="line"> value2) </span><br><span class="line"> statement </span><br><span class="line"> ... </span><br><span class="line"> ;; </span><br><span class="line"> *) </span><br><span class="line"> statement </span><br><span class="line"> ... </span><br><span class="line"> ;; </span><br><span class="line"> esac </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">case $1 in  </span><br><span class="line">[0-9]) </span><br><span class="line"> echo &quot;a digit.&quot; </span><br><span class="line"> ;; </span><br><span class="line">[a-z]) </span><br><span class="line"> echo &quot;lowercase letters&quot; </span><br><span class="line"> ;; </span><br><span class="line">[A-Z]) </span><br><span class="line"> echo &quot;capital letters&quot; </span><br><span class="line"> ;; </span><br><span class="line">*) </span><br><span class="line"> echo &quot;Special character&quot; </span><br><span class="line"> ;; </span><br><span class="line">esac</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">case $1 in </span><br><span class="line">&apos;start&apos;) </span><br><span class="line"> echo &quot;start server...&quot; </span><br><span class="line"> ;; </span><br><span class="line">&apos;stop&apos;) </span><br><span class="line"> echo &quot;stop server...&quot; </span><br><span class="line"> ;; </span><br><span class="line">&apos;restart&apos;) </span><br><span class="line"> echo &quot;restart server...&quot; </span><br><span class="line"> ;; </span><br><span class="line">&apos;status&apos;)  </span><br><span class="line"> echo &quot;Runing...&quot; </span><br><span class="line"> ;; </span><br><span class="line">*) </span><br><span class="line"> echo &quot;`basename $0` &#123;start|stop|restart|status&#125;&quot; </span><br><span class="line">esac</span><br></pre></td></tr></table></figure>
-<h2 id="练习"><a href="#练习" class="headerlink" title="练习"></a>练习</h2><p>写一个脚本，可以接受选项及参数，而后能够获取每一个选项，及选项的参数，并能根据选项及参数做出特定的操作，比如： </p>
-<blockquote>
-<p>adminusers.sh –add tom,jerry –del tom,blair -v|–verbose -h|help </p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">DEBUG=0 </span><br><span class="line">ADD=0 </span><br><span class="line">DEL=0 </span><br><span class="line">for I in `seq 0 $#`;do </span><br><span class="line">if [ $# -gt 0 ];then </span><br><span class="line">case $1 in </span><br><span class="line">-v|--verbose) </span><br><span class="line">  DEBUG=1 </span><br><span class="line">  shift </span><br><span class="line">  ;; </span><br><span class="line">  -h|help) </span><br><span class="line"> echo &quot;Usage:`basename $0` --add USER_LIST --del USER_LIST -v|--verbose -h|help&quot; </span><br><span class="line"> exit 0 </span><br><span class="line"> ;; </span><br><span class="line">--add) </span><br><span class="line"> ADD=1 </span><br><span class="line"> ADDUSERS=$2 </span><br><span class="line"> shift 2 </span><br><span class="line"> ;; </span><br><span class="line">--del) </span><br><span class="line"> DEL=1 </span><br><span class="line"> DELUSERS=$2 </span><br><span class="line"> shift 2 </span><br><span class="line"> ;; </span><br><span class="line">*) </span><br><span class="line"> echo &quot;Usage:`basename $0` --add USER_LIST --del USER_LIST -v|--verbose -h|help&quot; </span><br><span class="line"> exit 7 </span><br><span class="line">esac </span><br><span class="line">fi </span><br><span class="line">done </span><br><span class="line">if [ $ADD -eq 1 ];then </span><br><span class="line"> for USER in `echo $ADDUSERS | sed &apos;s/,/ /g&apos;`;do </span><br><span class="line"> if id $USER &amp;&gt;/dev/null ;then </span><br><span class="line">  [ $DEBUG -eq 1 ] &amp;&amp; echo &quot;$USER exited&quot; </span><br><span class="line"> else </span><br><span class="line"> useradd -m $USER &amp;&amp; echo $USER |passwd --stdin $USER &amp;&gt;/dev/null </span><br><span class="line"> [$DEBUG -eq 1 ] &amp;&amp; echo &quot;Add user $USER finished&quot; </span><br><span class="line"> fi </span><br><span class="line"> done </span><br><span class="line">fi  </span><br><span class="line">if [ $DEL -eq 1 ];then </span><br><span class="line"> for USER in `echo $DELUSERS | sed &apos;s/,/ /g&apos;`;do </span><br><span class="line">  if id $USER &amp;&gt;/dev/null;then </span><br><span class="line">    userdel -r $USER </span><br><span class="line"> [ $DEBUG -eq 1 ] &amp;&amp; echo &quot;Delete $USER finished&quot; </span><br><span class="line">  else </span><br><span class="line"> [ $USER -eq 1 ] &amp;&amp; echo &quot;$USER not exist&quot; </span><br><span class="line">  fi </span><br><span class="line"> done </span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/13/08-02bash脚本编程之七-case语句及脚本选项进阶/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-08-01facl及用户及Linux终端" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/13/08-01facl及用户及Linux终端/">08_01facl及用户及Linux终端</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/13/08-01facl及用户及Linux终端/" class="archive-article-date">
-  	<time datetime="2015-02-13T10:41:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-13</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>文件系统访问列表：<br>比如:<br> tom创建了一个文件，但是他想共享给jerry，具有可读写的权限，<br> 但是，这个意味着他要把other那加上w权限，这样就不是他所期望的<br> 那样了，所以这个地方引入facl </p>
-<p>FACL：Filesystem Access Control List<br>利用文件扩展属性保存额外的访问控制权限<br>目的：<br> jerry：rw- </p>
-<p>setfacl:<br> -m：设定额外的访问控制权限<br> u：UID：perm<br> setfacl -m u:jerry:rw test.txt<br> 可以使用 getfacl test.txt进行查看<br> g:GID:perm<br> setfacl -m g:group:rw test.txt(多了一个组可读写)<br> 对于目录，<br> setfacl -m d:u：UID：perm:rw DIR<br> 这个意味着对这个目录下的所有文件进行共享<br> -x:取消额外的访问控制权限<br> setfacl -x u:jerry test.txt<br> setfacl -x g:group test.txt<br>getfacl:查看<br> getfacl test.txt </p>
-<p>who:<br> username TTY log_time<br> -r:显示运行级别<br> -H：显示哪登陆的<br>w： log_time 空闲时间 使用cpu时间  运行当前进程使用的时间 正在干什么 </p>
-<p> 这两个命令没法查看su 过去的用户；<br>终端类型：<br> console:控制台<br> pty：物理终端<br> tty#:虚拟终端(附加在pty上)<br> ttys#:串行终端(无VGA时的名称)<br> pts#:伪终端(远程或者图形化界面) </p>
-<p> #：1，2，3… </p>
-<p>last:显示登录历史<br> 所查看的是 /var/log/wtmp文件，显示用户的登录历史及系统重启历史<br> -n:最近n次登陆<br>lastb:显示用户错误的登录尝试,即没成功的<br> /var/log/btmp文件<br> -n:最近n次登陆<br>lastlog:显示每一个用户的最近一次的成功登陆信息<br> -u：查看哪一个用户<br>basename:用于显示路径的文件名<br> 如:basename /etc/skel<br> skel </p>
-<p>mail:对应家目录mbox  (我centos的是在/var/spool/mail/下)<br>mail -s 发送<br> mail -s “Hello” root &lt; /etc/skel<br> 即主题是hello，内容是/etc/skel </p>
-<p>hostname:只是暂时的<br>永久的在 /etc/sysconfig/network </p>
-<p>练习:<br> 如果当前主机名不是<a href="http://www.geasyheart.com。就将其修改如此" target="_blank" rel="noopener">www.geasyheart.com。就将其修改如此</a><br> [ <code>hostname</code> != ‘<a href="http://www.geasyheart&#39;]" target="_blank" rel="noopener">www.geasyheart&#39;]</a> &amp;&amp;hostname <a href="http://www.geasyheart.com" target="_blank" rel="noopener">www.geasyheart.com</a><br> 如果当前主机名是localhost,就将其修改为<a href="http://www.geasyheart.com。就将其修改如此" target="_blank" rel="noopener">www.geasyheart.com。就将其修改如此</a><br> [ <code>hostname</code>  ==’localhost’ ] &amp;&amp; hostname <a href="http://www.geasyheart.com" target="_blank" rel="noopener">www.geasyheart.com</a><br> 如果当前主机的主机名为空，或none,或localhost，就将其修改为<a href="http://www.geasyheart.com" target="_blank" rel="noopener">www.geasyheart.com</a><br> [ -z <code>hostname</code> ] || [  <code>hostname</code> == ‘none’ -o <code>hostname</code> == ‘localhost’ ] &amp;&amp; hostname  <a href="http://www.geasyheart.com" target="_blank" rel="noopener">www.geasyheart.com</a><br> (这个地方要注意，选项和布尔运算不能放一起)<br>生成随机数：<br>RANDOM：0~32768<br> echo $RANDOM </p>
-<p>随机数生成器：熵池<br>/dev/random<br>/dev/urandom<br> 到熵池取随机数，如果取得多，熵池可能会被取空，这个时候，<br> 如果是random的话，会让你等半天，然后再把熵池填满，再让你取；<br> 而urandom是如果取完了，会采用软件乘胜方式，进行生成；<br> 所以，在安全方面，random更高，然而在速度方面，urandom更快； </p>
-<p>写一个脚本，利用RANDOM生成１０个随机数，并找出最大数；  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">declare -i MAX=0 </span><br><span class="line">declare -i MIN=0 </span><br><span class="line">for I in `seq 1 10`;do </span><br><span class="line"> MYRAND=$RANDOM </span><br><span class="line"> [ $I -eq 1 ] &amp;&amp; MIN=$MYRAND </span><br><span class="line"> if [ $I -le 9 ];then </span><br><span class="line">echo -n &quot;MYRAND,&quot; </span><br><span class="line"> else </span><br><span class="line">echo &quot;$MYRAND&quot; </span><br><span class="line"> fi </span><br><span class="line">[ $MYRAND -gt $MAX ] &amp;&amp; MAX=$MYRAND </span><br><span class="line">[ $MYRAND -lt $MIN ] &amp;&amp; MIN=$MYRAND </span><br><span class="line">done </span><br><span class="line">echo &quot;$MAX&quot; </span><br><span class="line">echo &quot;$MIN</span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/13/08-01facl及用户及Linux终端/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/16/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="page-number current">17</span><a class="page-number" href="/page/18/">18</a><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/18/">Next &raquo;</a>
@@ -1336,11 +1327,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
+                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">小桥流水人家</a>
+                <a href="javascript:void(0)" class="js-tag color1">MySQL</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1364,19 +1355,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">CI</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">git</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">go</a>
+                <a href="javascript:void(0)" class="js-tag color3">CI</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">grpc</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">go</a>
               </li>
              
               <li class="article-tag-list-item">
