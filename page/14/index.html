@@ -192,6 +192,128 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-38-03Linux集群系列之九-高可用集群原理详解之多节点集群" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/03/38-03Linux集群系列之九-高可用集群原理详解之多节点集群/">38_03Linux集群系列之九--高可用集群原理详解之多节点集群</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/03/38-03Linux集群系列之九-高可用集群原理详解之多节点集群/" class="archive-article-date">
+  	<time datetime="2015-04-03T10:19:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-03</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>quorum:法定票数<br>默认都为１票 </p>
+<p>failover domain(故障转移域) </p>
+<p>Messaging Layer:<br>HeartBeat v1<br>HeartBeat v2<br>HeartBeat v3<br>        UDP:694<br>HeartBeat v3<br>    heartbeat,pacemaker,cluster-glue </p>
+<p>corosync+pacemaker<br>cman<br>keepalived:由于使用的是VRRP(虚拟路由冗余协议)，所以更适合于做双主模型；<br>ultramonky </p>
+<p>CRM:<br>在heartbeat v1.x版本中，默认的是haresource，在heartbeat v2.x版本中，增加了crm资源管理器，crm管理方式有两个，一种是基于命令行的crmsh,另一个是基于图形界面的hb_gui;<br>pacemaker(heartbeat v3或corosync)<br>rgmanager(cman) </p>
+<p>Resource type:<br>    Primitive<br>    clone<br>    group<br>    master/slave:drbd </p>
+<p>RA Type:<br>    Legacy heartbeat v1 RA<br>    Linux Standard Base<br>    OCF(Open Cluster Framework)<br>        pacemaker<br>        linbit(drbd)<br>    STONITH </p>
+<p>STONITH设备:<br>1、Power Distribution Units(PDU)带网线的 </p>
+<p>2、Uninterruptible Power Supplies(UPS) </p>
+<p>3、Blade Power Control Devices(刀片服务器电源控制器) </p>
+<p>4、Lights-out Devices </p>
+<p>5、Testing Devices<br>    meatware:手动STONITH设备 </p>
+<p>STONITH的实现:<br>stonithd </p>
+<p>STONITH plug-ins </p>
+<p>Pacemaker 提供了多种用户管理接口，分别如下：<br>(1).基于命令的管理方式<br>crmsh<br>pcs<br>(2).基于图形界面的管理方式<br>pygui<br>hawk<br>LCMC<br>pcs </p>
+<p><a href="http://www.linuxidc.com/Linux/2013-08/88521.htm" target="_blank" rel="noopener">http://www.linuxidc.com/Linux/2013-08/88521.htm</a><br><a href="http://blog.csdn.net/sdd00001/article/details/21464713" target="_blank" rel="noopener">http://blog.csdn.net/sdd00001/article/details/21464713</a><br>HA集群之CoroSync+Pacemaker浅析和实现<br><a href="http://www.it165.net/admin/html/201405/3066.html" target="_blank" rel="noopener">http://www.it165.net/admin/html/201405/3066.html</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/03/38-03Linux集群系列之九-高可用集群原理详解之多节点集群/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+
+  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script type="text/javascript">
+
+if(true){
+	var gitalk = new Gitalk({
+  	clientID: 'b214cde67415ed5b1224',
+  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
+  	repo: 'geasyheart.github.io',
+  	owner: 'geasyheart',
+  	admin: ['geasyheart'],
+  	id: '',
+  	distractionFreeMode: 'true'
+})
+gitalk.render('gitalk-container') 
+}
+</script>
+  
+  
     <article id="post-20-02DNS子域授权" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1394,166 +1516,6 @@ gitalk.render('gitalk-container')
 </script>
   
   
-    <article id="post-17-03sudo详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/25/17-03sudo详解/">17_03sudo详解</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/25/17-03sudo详解/" class="archive-article-date">
-  	<time datetime="2015-03-25T01:24:24.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-25</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="参考文档："><a href="#参考文档：" class="headerlink" title="参考文档："></a>参考文档：</h2><blockquote>
-<p><a href="https://wiki.archlinux.org/index.php/Sudo_%28%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87%29（有比较详细的使用介绍）" target="_blank" rel="noopener">https://wiki.archlinux.org/index.php/Sudo_%28%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87%29（有比较详细的使用介绍）</a></p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/etc/sudoers</span><br><span class="line">visudo</span><br></pre></td></tr></table></figure>
-<p>当调用sudo，会在接下来5分钟内可以不再输入密码，这样却带来一个问题，就是别人<br>在这个时间点内用你的帐号修改信息，所以可以加入-k选项。即：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$sudo -k</span><br></pre></td></tr></table></figure>
-<p>再调用sudo,不管调用多少次，都需要输入密码</p>
-<p>sudo命令:</p>
-<blockquote>
-<p>   -l:列出当前用户可以使用的所有sudo类命令<br>   -k:如上所示，调用sudo不保存密码，即让认证信息失败<br>   -u:后跟username，以制定用户的身份执行命令(root除外)</p>
-</blockquote>
-<p>一个sudo条目:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">who    which_hosts(runas)    Tag:command</span><br><span class="line"></span><br><span class="line">root    ALL=(ALL)    ALL</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>表示root用户可以在任何主机上运行所有命令</p>
-</blockquote>
-<blockquote>
-<p>如果只想允许以某个主机名登录用户执行命令：<br>用户名   主机名=(ALL) ALL</p>
-<p>允许wheel用户组成员无密码使用sudo：<br>%wheel      ALL=(ALL) NOPASSWD: ALL</p>
-<p>who:User_Alias<br>which_hosts:Host_Alias<br>runas:Runas_Alias<br>Tag:NOPASSWD,用户不再需要输入密码 PASSWD：需要输入密码(针对单个命令定义)<br>commmand:Command_Alias</p>
-<p>别名：类似定义组</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#man sudoers</span><br></pre></td></tr></table></figure>
-<p>别名必须全部而且只能使用大写英文字母的组合</p>
-<p>用户别名:<br>User_Alias USERADMIN=</p>
-<blockquote>
-<p>   系统用户的用户名<br>   组名:使用%引导<br>   还可以包含其他已经用户别名</p>
-</blockquote>
-<p>Host_Alias:</p>
-<blockquote>
-<p>   主机名<br>   IP<br>   网络地址<br>   其他主机别名</p>
-</blockquote>
-<p>Runas_Alias:</p>
-<blockquote>
-<p>   用户名<br>   %组名<br>   其他的Runas别名</p>
-</blockquote>
-<p>Cmnd_Alias:</p>
-<blockquote>
-<p>   命令绝对路径<br>   目录(此目录所有命令)<br>   其他事先定义过的命令别名</p>
-</blockquote>
-<h2 id="练习"><a href="#练习" class="headerlink" title="练习"></a>练习</h2><blockquote>
-<p> hadoop,root,useradd,usermod</p>
-</blockquote>
-<p>#visudo</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hadoop ALL=(root) /usr/sbin/useradd /usr/sbin/usermod</span><br><span class="line">$sudo useradd xiaosan</span><br></pre></td></tr></table></figure>
-<p>即可成功</p>
-<p>定义一个用户别名（hadoop,hadoop组，useradmin组），命令别名：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">User_Alias USERADMIN = hadoop,%hadoop,%useradmin</span><br><span class="line">Cmnd_Alias USERADMINCMND  = /usr/sbin/useradd,/usr/sbin/userdel,/usr/bin/passwd [A-Za-z]*， !/usr/bin/passwd root </span><br><span class="line"></span><br><span class="line">USERADMIN    ALL=(root)    NOPASSWD:USERADMINCMND</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Cmnd_Alias WHEELER = /usr/sbin/lsof, /bin/nice, /bin/ps, /usr/bin/top, /usr/local/bin/nano, /usr/sbin/ss, /usr/bin/locate, /usr/bin/find, /usr/bin/rsync</span><br><span class="line">Cmnd_Alias PROCESSES = /bin/nice, /bin/kill, /usr/bin/nice, /usr/bin/ionice, /usr/bin/top, /usr/bin/kill, /usr/bin/killall, /usr/bin/ps, /usr/bin/pkill</span><br><span class="line">Cmnd_Alias EDITS = /usr/bin/vim, /usr/bin/nano, /usr/bin/cat, /usr/bin/vi</span><br><span class="line">Cmnd_Alias ARCHLINUX = /usr/sbin/gparted, /usr/bin/pacman</span><br><span class="line"></span><br><span class="line">root ALL = (ALL) ALL</span><br><span class="line">yourusename ALL = (ALL) ALL, NOPASSWD: WHEELER, NOPASSWD: PROCESSES, NOPASSWD: ARCHLINUX, NOPASSWD: EDITS</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>/var/log/secure 记录了详细信息</p>
-</blockquote>
-<blockquote>
-<p>注意日志的安全性</p>
-</blockquote>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/25/17-03sudo详解/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-
-  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script type="text/javascript">
-
-if(true){
-	var gitalk = new Gitalk({
-  	clientID: 'b214cde67415ed5b1224',
-  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
-  	repo: 'geasyheart.github.io',
-  	owner: 'geasyheart',
-  	admin: ['geasyheart'],
-  	id: '',
-  	distractionFreeMode: 'true'
-})
-gitalk.render('gitalk-container') 
-}
-</script>
-  
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/13/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><span class="page-number current">14</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/15/">Next &raquo;</a>
@@ -1667,10 +1629,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">machine learning</a>
               </li>
              
@@ -1680,10 +1638,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">python</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1704,6 +1658,14 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">机器学习</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
             
             <div class="clearfix"></div>

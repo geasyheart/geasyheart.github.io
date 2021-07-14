@@ -192,6 +192,150 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-bloomfilter" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/16/bloomfilter/">bloomfilter</a>
+    </h1>
+  
+
+        
+        <a href="/2018/04/16/bloomfilter/" class="archive-article-date">
+  	<time datetime="2018-04-16T07:11:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-16</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p>创建一个m位的位数组(bitmap),先将所有的位数组初始化为0。然后选择k个不同的哈希函数。第i个哈希函数对应的字符串str哈希的结果记为h(i, str),且h(i, str)的范围要在0至m-1。如下图所示。</p>
+<img src="/2018/04/16/bloomfilter/map1.png" title="原理">
+<blockquote>
+<p>如何判断字符串是否存在呢？<br>字符串也经过h(i, str),h(2, str),h(3, str)…哈希映射，检查每一个映射到m位的位数组上是否为1，如果不全为1，则表示一定不存在，否则，不能说明完全存在，有误差率在里面，为什么不能说一定存在呢，没看懂，可看：<a href="http://pages.cs.wisc.edu/~cao/papers/summary-cache/node8.html" target="_blank" rel="noopener">BloomFilters</a></p>
+</blockquote>
+<h3 id="关于容错率"><a href="#关于容错率" class="headerlink" title="关于容错率"></a>关于容错率</h3><p>既然不能完全表示存在，那么如何计算这个误差率呢？一共有三个参数:k,m,n。</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>表示</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>k</td>
+<td>哈希个数</td>
+</tr>
+<tr>
+<td>m</td>
+<td>位数组大小</td>
+</tr>
+<tr>
+<td>n</td>
+<td>字符串个数</td>
+</tr>
+</tbody>
+</table>
+<p>下图表示m/n的结果与k个哈希函数的选择出现的错误率表格。</p>
+<img src="/2018/04/16/bloomfilter/bloomfilter1.png" title="容错率">
+<p>如上，举例简单说明，如果声明一个为数组大小为2，只传入一个字符串，那么m/n为2，如果选择k个哈希，导致的容错率分别是1.39,0.393,0.400。ok，如果要存1亿个字符串，那么大概为多少呢？</p>
+<p>简单计算：如果容错率要求为5.73e-06,那么m/n=32,如果n为1亿的话，那么m为32亿，32亿 / 8/ 1024/1024=381.4697265625MB内存。<br>还是相当可以的。关于更多的容错率，可以看<a href="http://pages.cs.wisc.edu/~cao/papers/summary-cache/node8.html" target="_blank" rel="noopener">BloomFilters</a>。</p>
+<p><a href="https://hur.st/bloomfilter/?n=100000000&amp;p=0.0000001&amp;m=&amp;k=" target="_blank" rel="noopener">此处有个在线计算器</a></p>
+<h3 id="相关的包"><a href="#相关的包" class="headerlink" title="相关的包"></a>相关的包</h3><p>Python实现:<a href="https://github.com/jaybaird/python-bloomfilter" target="_blank" rel="noopener">python-bloomfilter</a><br>C实现:<a href="https://github.com/axiak/pybloomfiltermmap/" target="_blank" rel="noopener">pybloomfiltermmap</a></p>
+<h3 id="后续"><a href="#后续" class="headerlink" title="后续"></a>后续</h3><ol>
+<li>选择使用的包</li>
+<li>最终效果</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/04/16/bloomfilter/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+
+  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script type="text/javascript">
+
+if(true){
+	var gitalk = new Gitalk({
+  	clientID: 'b214cde67415ed5b1224',
+  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
+  	repo: 'geasyheart.github.io',
+  	owner: 'geasyheart',
+  	admin: ['geasyheart'],
+  	id: '',
+  	distractionFreeMode: 'true'
+})
+gitalk.render('gitalk-container') 
+}
+</script>
+  
+  
     <article id="post-SQLAlchemy混合属性机制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1462,113 +1606,6 @@ gitalk.render('gitalk-container')
 </script>
   
   
-    <article id="post-freezegun-一个可以伪造时间的库" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/22/freezegun-一个可以伪造时间的库/">freezegun-一个可以伪造时间的库</a>
-    </h1>
-  
-
-        
-        <a href="/2018/03/22/freezegun-一个可以伪造时间的库/" class="archive-article-date">
-  	<time datetime="2018-03-22T09:58:24.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>在写单元测试的时候，有时候需要伪造时间，例如一个token的有效期30天，但是我的单元测试不可能等30天或其他什么的，所以，，，可以使用freezegun这个库去伪造时间，更多不介绍了，<a href="https://github.com/spulec/freezegun" target="_blank" rel="noopener">官网</a>,很详细的使用说明.</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/03/22/freezegun-一个可以伪造时间的库/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-
-  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script type="text/javascript">
-
-if(true){
-	var gitalk = new Gitalk({
-  	clientID: 'b214cde67415ed5b1224',
-  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
-  	repo: 'geasyheart.github.io',
-  	owner: 'geasyheart',
-  	admin: ['geasyheart'],
-  	id: '',
-  	distractionFreeMode: 'true'
-})
-gitalk.render('gitalk-container') 
-}
-</script>
-  
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/5/">Next &raquo;</a>
@@ -1682,10 +1719,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">machine learning</a>
               </li>
              
@@ -1695,10 +1728,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">python</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1719,6 +1748,14 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">机器学习</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
             
             <div class="clearfix"></div>

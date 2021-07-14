@@ -192,6 +192,166 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-17-03sudo详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/03/25/17-03sudo详解/">17_03sudo详解</a>
+    </h1>
+  
+
+        
+        <a href="/2015/03/25/17-03sudo详解/" class="archive-article-date">
+  	<time datetime="2015-03-25T01:24:24.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-25</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="参考文档："><a href="#参考文档：" class="headerlink" title="参考文档："></a>参考文档：</h2><blockquote>
+<p><a href="https://wiki.archlinux.org/index.php/Sudo_%28%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87%29（有比较详细的使用介绍）" target="_blank" rel="noopener">https://wiki.archlinux.org/index.php/Sudo_%28%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87%29（有比较详细的使用介绍）</a></p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/etc/sudoers</span><br><span class="line">visudo</span><br></pre></td></tr></table></figure>
+<p>当调用sudo，会在接下来5分钟内可以不再输入密码，这样却带来一个问题，就是别人<br>在这个时间点内用你的帐号修改信息，所以可以加入-k选项。即：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$sudo -k</span><br></pre></td></tr></table></figure>
+<p>再调用sudo,不管调用多少次，都需要输入密码</p>
+<p>sudo命令:</p>
+<blockquote>
+<p>   -l:列出当前用户可以使用的所有sudo类命令<br>   -k:如上所示，调用sudo不保存密码，即让认证信息失败<br>   -u:后跟username，以制定用户的身份执行命令(root除外)</p>
+</blockquote>
+<p>一个sudo条目:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">who    which_hosts(runas)    Tag:command</span><br><span class="line"></span><br><span class="line">root    ALL=(ALL)    ALL</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>表示root用户可以在任何主机上运行所有命令</p>
+</blockquote>
+<blockquote>
+<p>如果只想允许以某个主机名登录用户执行命令：<br>用户名   主机名=(ALL) ALL</p>
+<p>允许wheel用户组成员无密码使用sudo：<br>%wheel      ALL=(ALL) NOPASSWD: ALL</p>
+<p>who:User_Alias<br>which_hosts:Host_Alias<br>runas:Runas_Alias<br>Tag:NOPASSWD,用户不再需要输入密码 PASSWD：需要输入密码(针对单个命令定义)<br>commmand:Command_Alias</p>
+<p>别名：类似定义组</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#man sudoers</span><br></pre></td></tr></table></figure>
+<p>别名必须全部而且只能使用大写英文字母的组合</p>
+<p>用户别名:<br>User_Alias USERADMIN=</p>
+<blockquote>
+<p>   系统用户的用户名<br>   组名:使用%引导<br>   还可以包含其他已经用户别名</p>
+</blockquote>
+<p>Host_Alias:</p>
+<blockquote>
+<p>   主机名<br>   IP<br>   网络地址<br>   其他主机别名</p>
+</blockquote>
+<p>Runas_Alias:</p>
+<blockquote>
+<p>   用户名<br>   %组名<br>   其他的Runas别名</p>
+</blockquote>
+<p>Cmnd_Alias:</p>
+<blockquote>
+<p>   命令绝对路径<br>   目录(此目录所有命令)<br>   其他事先定义过的命令别名</p>
+</blockquote>
+<h2 id="练习"><a href="#练习" class="headerlink" title="练习"></a>练习</h2><blockquote>
+<p> hadoop,root,useradd,usermod</p>
+</blockquote>
+<p>#visudo</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hadoop ALL=(root) /usr/sbin/useradd /usr/sbin/usermod</span><br><span class="line">$sudo useradd xiaosan</span><br></pre></td></tr></table></figure>
+<p>即可成功</p>
+<p>定义一个用户别名（hadoop,hadoop组，useradmin组），命令别名：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">User_Alias USERADMIN = hadoop,%hadoop,%useradmin</span><br><span class="line">Cmnd_Alias USERADMINCMND  = /usr/sbin/useradd,/usr/sbin/userdel,/usr/bin/passwd [A-Za-z]*， !/usr/bin/passwd root </span><br><span class="line"></span><br><span class="line">USERADMIN    ALL=(root)    NOPASSWD:USERADMINCMND</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Cmnd_Alias WHEELER = /usr/sbin/lsof, /bin/nice, /bin/ps, /usr/bin/top, /usr/local/bin/nano, /usr/sbin/ss, /usr/bin/locate, /usr/bin/find, /usr/bin/rsync</span><br><span class="line">Cmnd_Alias PROCESSES = /bin/nice, /bin/kill, /usr/bin/nice, /usr/bin/ionice, /usr/bin/top, /usr/bin/kill, /usr/bin/killall, /usr/bin/ps, /usr/bin/pkill</span><br><span class="line">Cmnd_Alias EDITS = /usr/bin/vim, /usr/bin/nano, /usr/bin/cat, /usr/bin/vi</span><br><span class="line">Cmnd_Alias ARCHLINUX = /usr/sbin/gparted, /usr/bin/pacman</span><br><span class="line"></span><br><span class="line">root ALL = (ALL) ALL</span><br><span class="line">yourusename ALL = (ALL) ALL, NOPASSWD: WHEELER, NOPASSWD: PROCESSES, NOPASSWD: ARCHLINUX, NOPASSWD: EDITS</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>/var/log/secure 记录了详细信息</p>
+</blockquote>
+<blockquote>
+<p>注意日志的安全性</p>
+</blockquote>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/03/25/17-03sudo详解/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+
+  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script type="text/javascript">
+
+if(true){
+	var gitalk = new Gitalk({
+  	clientID: 'b214cde67415ed5b1224',
+  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
+  	repo: 'geasyheart.github.io',
+  	owner: 'geasyheart',
+  	admin: ['geasyheart'],
+  	id: '',
+  	distractionFreeMode: 'true'
+})
+gitalk.render('gitalk-container') 
+}
+</script>
+  
+  
     <article id="post-17-02Linux系统故障排除方法" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1479,274 +1639,6 @@ gitalk.render('gitalk-container')
 </script>
   
   
-    <article id="post-16-03Linux日志系统syslog以及syslog-ng" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/19/16-03Linux日志系统syslog以及syslog-ng/">16_03Linux日志系统syslog以及syslog-ng</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/19/16-03Linux日志系统syslog以及syslog-ng/" class="archive-article-date">
-  	<time datetime="2015-03-19T02:54:28.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-19</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>   一台服务器的日志对系统工程师来说是至关重要的,一旦服务器出现故障或被入侵,我们需要查看日志来定位问题的关键所在,所以说对于线上跑的服务器而言日志应该合理的处理及管理.下面来介绍下linux系统的syslog日志服务器.<br>  几乎所有的网络设备都可以通过syslog协议，将日志信息以用户数据报协议(UDP)方式传送到远端服务器，远端接收日志服务器必须通过syslogd监听UDP端口514，并根据 syslog.conf配置文件中的配置处理本机，接收访问系统的日志信息，把指定的事件写入特定文件中，供后台数据库管理和响应之用。 </p>
-<ul>
-<li>syslog详解 </li>
-</ul>
-<ol>
-<li>syslog简介<br>syslog 系统日志,记录linux系统启动及运行的过程中产生的信息,rhel5.x系统上默认自带了syslog 其配置文件是/etc/syslog.conf<br>syslog 默认有两个守护进程,klogd,syslogd,<br>klogd 进程是记录系统运行的过程中内核生成的日志,而在系统启动的过程中内核初始化过程中 生成的信息记录到控制台(/dev/console）当系统启动完成之后会把此信息存放到/var/log/dmesg文件中,我可以通过cat /var/log/dmesg查看这个文件,也可以通过dmesg命令来查看<br>syslogd 进程是记录非内核以外的信息<br>而为什么需要两个守护进程呢?是因为内核跟其他信息需要记录的详细程度及格式的不同<br>我们使用ps命令可以看到syslog的两个守护进程 </li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">    ps -ef | grep klogd | grep -v grep  </span><br><span class="line">    root      3308     1  0 Nov26 ?        00:00:00 klogd -x  </span><br><span class="line">      </span><br><span class="line">    ps -ef | grep syslogd | grep -v grep   </span><br><span class="line">    root      3288     1  0 Nov26 ?        00:00:00 syslogd -m 0</span><br></pre></td></tr></table></figure>
-<p>修改日志服务器/etc/sysconfig/syslog文件： </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># vi /etc/sysconfig/syslog    (打开接受外来日志消息的功能)</span><br></pre></td></tr></table></figure>
-<p> 修改SYSLOGD_OPTIONS=”-r -x -m 0”               </p>
-<blockquote>
-<p>   -r ： 开接受外来日志消息的功能，其监控514 UDP端口；<br>   -x ： 关闭自动解析对方日志服务器的FQDN信息，这能避免DNS不完整所带来的麻烦；<br>   -m ： 修改syslog的内部mark消息写入间隔时间（0为关闭），例如240为每隔240分钟写入一次“–MARK–”信息；<br>   -h ： 默认情况下，syslog不会发送从远端接受过来的消息到其他主机，而使用该选项，则把该开关打开，所有接受到的信息都可根据syslog.conf中定义的@主机转发过去 </p>
-</blockquote>
-<p>上面通过ps命令可以看到syslog的两个守护进程,而这两个守护进程是共用一个配置文件/etc/syslog.conf,下面介绍下其配置文件 </p>
-<ol start="2">
-<li>syslog配置文件详解 </li>
-</ol>
-<blockquote>
-<p>   配置文件定义格式为 facility.priority   action<br>    facility,可以理解为日志的来源或设备目前常用的facility(设备)有以下及中<br>       1,auth      # 认证相关的<br>       2,authpriv  # 权限,授权相关的<br>       3,cron      # 任务计划相关的<br>       4,daemon    # 守护进程相关的<br>       5,kern      # 内核相关的<br>       6,lpr       # 打印相关的<br>       7,mail      # 邮件相关的<br>       8,mark      # 标记相关的<br>       9,news      # 新闻相关的<br>       10,security # 安全相关的,与auth 类似<br>       11,syslog   # syslog自己的<br>       12,user     # 用户相关的<br>       13,uucp     # unix to unix cp 相关的<br>       14,local0 到 local7 # 用户自定义使用<br>       15,<em>        # </em>表示所有的facility<br>       等…..  </p>
-</blockquote>
-<blockquote>
-<pre><code>priority(log level)日志的级别,一般有以下几种级别(从低到高)  
-   debug           # 程序或系统的调试信息  
-   info            # 一般信息,  
-   notice          # 不影响正常功能,需要注意的消息  
-   warning/warn    # 可能影响系统功能,需要提醒用户的重要事件  
-   err/error       # 错误信息  
-   crit            # 比较严重的 蓝色警报 
-   alert           # 必须马上处理的 橙色警报 
-   emerg/panic     # 会导致系统不可用的 红色警报 
-   *               # 表示所有的日志级别  
-   none            # 跟* 相反,表示啥也没有  
-</code></pre></blockquote>
-<blockquote>
-<pre><code>action(动作)日志记录的位置  
-  系统上的绝对路径    # 普通文件 如： /var/log/xxx  
-  |                   # 管道  通过管道送给其他的命令处理  
-  终端              # 终端   如：/dev/console  
-  @HOST               # 远程主机 如： @10.0.0.1       
-  用户              # 系统用户 如： root  
-  *                   # 登录到系统上的所有用户，一般emerg级别的日志是这样定义的  
-</code></pre></blockquote>
-<blockquote>
-<p>   定义格式例子：<br>    mail.info   /var/log/mail.log # 表示将mail相关的,级别为info及  </p>
-<pre><code>                              # info以上级别的信息记录到/var/log/mail.log文件中  
-auth.=info  @10.0.0.1         # 表示将auth相关的,基本为info的信息记录到10.0.0.1主机上去  
-                              # 前提是10.0.0.1要能接收其他主机发来的日志信息  
-user.!=error                  # 表示记录user相关的,不包括error级别的信息  
-user.!error                   # 与user.error相反  
-*.info                        # 表示记录所有的日志信息的info级别  
-mail.*                        # 表示记录mail相关的所有级别的信息  
-*.*                           # 你懂的.  
-cron.info;mail.info           # 多个日志来源可以用&quot;;&quot; 隔开  
-cron,mail.info                # 与cron.info;mail.info 是一个意思  
-mail.*;mail.!=info            # 表示记录mail相关的所有级别的信息,但是不包括info级别的  
-</code></pre></blockquote>
-<blockquote>
-<p>   接下来去翻译下rhel5.x系统上自带的syslog的配置文件/etc/syslog.conf  </p>
-<h1 id="表示将所有facility的info级别-但不包括mail-authpriv-cron相关的信息-记录到-var-log-messages文件"><a href="#表示将所有facility的info级别-但不包括mail-authpriv-cron相关的信息-记录到-var-log-messages文件" class="headerlink" title="表示将所有facility的info级别,但不包括mail,authpriv,cron相关的信息,记录到 /var/log/messages文件"></a>表示将所有facility的info级别,但不包括mail,authpriv,cron相关的信息,记录到 /var/log/messages文件</h1><p>   *.info;mail.none;authpriv.none;cron.none                /var/log/messages  </p>
-<h1 id="表示将权限-授权相关的所有基本的信息-记录到-var-log-secure文件中-这个文件的权限是600"><a href="#表示将权限-授权相关的所有基本的信息-记录到-var-log-secure文件中-这个文件的权限是600" class="headerlink" title="表示将权限,授权相关的所有基本的信息,记录到/var/log/secure文件中.这个文件的权限是600"></a>表示将权限,授权相关的所有基本的信息,记录到/var/log/secure文件中.这个文件的权限是600</h1><p>   authpriv.*                                              /var/log/secure  </p>
-</blockquote>
-<blockquote>
-<h1 id="表示将mail相关的所有基本的信息记录到-var-log-maillog文件中-可以看到路径前面有一个”-“"><a href="#表示将mail相关的所有基本的信息记录到-var-log-maillog文件中-可以看到路径前面有一个”-“" class="headerlink" title="表示将mail相关的所有基本的信息记录到/var/log/maillog文件中,可以看到路径前面有一个”-“"></a>表示将mail相关的所有基本的信息记录到/var/log/maillog文件中,可以看到路径前面有一个”-“</h1><h1 id="“-“-表示异步写入磁盘"><a href="#“-“-表示异步写入磁盘" class="headerlink" title="“-“ 表示异步写入磁盘,"></a>“-“ 表示异步写入磁盘,</h1><p>   mail.*                                                  -/var/log/maillog  </p>
-</blockquote>
-<blockquote>
-<h1 id="表示将任务计划相关的所有级别的信息记录到-var-log-cron文件中"><a href="#表示将任务计划相关的所有级别的信息记录到-var-log-cron文件中" class="headerlink" title="表示将任务计划相关的所有级别的信息记录到/var/log/cron文件中"></a>表示将任务计划相关的所有级别的信息记录到/var/log/cron文件中</h1><p>   cron.*                                                  /var/log/cron  </p>
-</blockquote>
-<blockquote>
-<h1 id="表示将所有facility的emerg级别的信息-发送给登录到系统上的所有用户"><a href="#表示将所有facility的emerg级别的信息-发送给登录到系统上的所有用户" class="headerlink" title="表示将所有facility的emerg级别的信息,发送给登录到系统上的所有用户"></a>表示将所有facility的emerg级别的信息,发送给登录到系统上的所有用户</h1><p>   <em>.emerg                                                 </em>  </p>
-</blockquote>
-<blockquote>
-<h1 id="表示将uucp及news的crit级别的信息记录到-var-log-spooler文件中"><a href="#表示将uucp及news的crit级别的信息记录到-var-log-spooler文件中" class="headerlink" title="表示将uucp及news的crit级别的信息记录到/var/log/spooler文件中"></a>表示将uucp及news的crit级别的信息记录到/var/log/spooler文件中</h1><p>   uucp,news.crit                                          /var/log/spooler  </p>
-</blockquote>
-<pre><code># 表示将local7的所有级别的信息记录到/var/log/boot.log文件中,  
-# 上面说过local0 到local7这8个是用户自定义使用的,这里的local7记录的是系统启动相关的信息  
-</code></pre><blockquote>
-<p>   local7.*                                                /var/log/boot.log  </p>
-</blockquote>
-<p>syslog默认记录的日志格式有四个字段,时间标签 主机 子系统名称 消息<br>可以使用tail  /var/log/messages 看下 </p>
-<p>syslog的介绍到这里基本上已经完成了,下面来瞧瞧syslog的升级版,syslog-ng俗称syslog下一代日志服务器,到底有啥好的呢….. </p>
-<ul>
-<li>syslog-ng详解 </li>
-</ul>
-<ol>
-<li><p>syslog-ng简介<br>syslog-ng (syslog-Next generation) 是syslog的升级版,syslog-ng有两个版本,一个是收费的,一个是开源的，那么作为syslog的下一代产品,功能是可想而知,肯定比syslog的功能强大的多,如 </p>
-<blockquote>
-<p>高性能<br>可靠的传输<br>支持多平台<br>高可靠性<br>众多的用户群体<br>强大的日志过滤及排序<br>事件标签和关联性<br>支持最新的IETF标准<br>等….<br>开源版本的主页 <a href="http://www.balabit.com/network-security/syslog-ng/opensource-logging-system/overview" target="_blank" rel="noopener">http://www.balabit.com/network-security/syslog-ng/opensource-logging-system/overview</a> </p>
-</blockquote>
-</li>
-<li><p>syslog-ng的安装 </p>
-</li>
-</ol>
-<blockquote>
-<p>rhel5.x的系统上默认没有使用syslog-ng来记录日志的,需要使用的话,需要自己编译安装,安装方法如下 </p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">    yum install gcc*   </span><br><span class="line">    cd /usr/src  </span><br><span class="line">    wget http://www.balabit.com/downloads/files/syslog-ng/sources/3.2.4/source/eventlog_0.2.12.tar.gz  </span><br><span class="line">    wget http://www.balabit.com/downloads/files/syslog-ng/open-source-edition/3.3.5/source/syslog-ng_3.3.5.tar.gz  </span><br><span class="line">    tar xvf eventlog_0.2.12.tar.gz  </span><br><span class="line">    cd eventlog-0.2.12  </span><br><span class="line">    ./configure --prefix=/usr/local/eventlog  </span><br><span class="line">    make  </span><br><span class="line">    make install  </span><br><span class="line">      </span><br><span class="line">    cd /usr/src  </span><br><span class="line">    tar xvf syslog-ng_3.3.5.tar.gz  </span><br><span class="line">    cd syslog-ng-3.3.5  </span><br><span class="line">    export PKG_CONFIG_PATH=/usr/local/eventlog/lib/pkgconfig  </span><br><span class="line">    ./configure --prefix=/usr/local/syslog-ng  </span><br><span class="line">    make  </span><br><span class="line">    make install  </span><br><span class="line">      </span><br><span class="line">```  </span><br><span class="line"></span><br><span class="line">&gt; 将syslog-ng添加为系统服务,  </span><br><span class="line">    vim /etc/init.d/syslog-ng  #内容如下</span><br></pre></td></tr></table></figure>
-<pre><code>#!/bin/bash  
-#   
-# chkconfig: -  60 27  
-# description: syslog-ng SysV script.   
-. /etc/rc.d/init.d/functions  
-
-syslog_ng=/usr/local/syslog-ng/sbin/syslog-ng  
-prog=syslog-ng  
-pidfile=/usr/local/syslog-ng/var/syslog-ng.pid  
-lockfile=/usr/local/syslog-ng/var/syslog-ng.lock  
-RETVAL=0  
-STOP_TIMEOUT=${STOP_TIMEOUT-10}  
-
-start() {  
-        echo -n $&quot;Starting $prog: &quot;  
-        daemon --pidfile=$pidfile $syslog_ng $OPTIONS  
-        RETVAL=$?  
-        echo  
-        [ $RETVAL = 0 ] &amp;&amp; touch ${lockfile}  
-        return $RETVAL  
-}  
-
-stop() {  
-    echo -n $&quot;Stopping $prog: &quot;  
-    killproc -p $pidfile -d $STOP_TIMEOUT $syslog_ng  
-    RETVAL=$?  
-    echo  
-    [ $RETVAL = 0 ] &amp;&amp; rm -f $lockfile $pidfile  
-}  
-
-case &quot;$1&quot; in  
-  start)  
-    start  
-    ;;  
-  stop)  
-    stop  
-    ;;  
-  status)  
-        status -p $pidfile $syslog_ng  
-    RETVAL=$?  
-    ;;  
-  restart)  
-    stop  
-    start  
-    ;;  
-  *)  
-    echo $&quot;Usage: $prog {start|stop|restart|status}&quot;  
-    RETVAL=2  
-esac  
-exit $RETVAL  
-------------------------------------------------------------  
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<pre><code>chmod a+x /etc/init.d/syslog-ng  
-killall syslogd  
-chkconfig --add syslog-ng  
-chkconfig syslog-ng on  
-service syslog-ng start  
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">3. syslog-ng配置文件详解 </span><br><span class="line">此时syslog-ng服务已经启动起来了,配置文件的位置在安装目录下的etc/syslog-ng.conf </span><br><span class="line"> </span><br><span class="line">``` </span><br><span class="line">   syslog-ng.conf文件里的内容有以下几个部分组成,  </span><br><span class="line">    # 全局选项,多个选项时用分好&quot;;&quot;隔开  </span><br><span class="line">    options &#123; .... &#125;;  </span><br><span class="line">    # 定义日志源,  </span><br><span class="line">    source s_name &#123; ... &#125;;  </span><br><span class="line">    # 定义过滤规则，规则可以使用正则表达式来定义,这里是可选的,不定义也没关系  </span><br><span class="line">    filter f_name &#123; ... &#125;;  </span><br><span class="line">    # 定义目标  </span><br><span class="line">    destination d_name &#123; ... &#125;;  </span><br><span class="line">    # 定义消息链可以将多个源,多个过滤规则及多个目标定义为一条链  </span><br><span class="line">    log &#123; ... &#125;;  </span><br><span class="line">    详解如下  </span><br><span class="line">    ----------------------------------------------------------------  </span><br><span class="line">    options &#123; long_hostnames(off); sync(0); perm(0640); stats(3600); &#125;;  </span><br><span class="line">        更多选项如下  </span><br><span class="line">        chain_hostnames(yes|no)     # 是否打开主机名链功能，打开后可在多网络段转发日志时有效  </span><br><span class="line">        long_hostnames(yes|no)      # 是chain_hostnames的别名，已不建议使用  </span><br><span class="line">        keep_hostname(yes|no)       # 是否保留日志消息中保存的主机名称  </span><br><span class="line">        use_dns(yes|no)             # 是否打开DNS查询功能，  </span><br><span class="line">        use_fqdn(yes|no)            # 是否使用完整的域名  </span><br><span class="line">        check_hostname(yes|no)      # 是否检查主机名有没有包含不合法的字符  </span><br><span class="line">        bad_hostname(regexp)        # 可通过正规表达式指定某主机的信息不被接受  </span><br><span class="line">        dns_cache(yes|no)           # 是否打开DNS缓存功能  </span><br><span class="line">        dns_cache_expire(n)         # DNS缓存功能打开时，一个成功缓存的过期时间  </span><br><span class="line">        dns_cache_expire_failed(n)  # DNS缓存功能打开时，一个失败缓存的过期时间  </span><br><span class="line">        dns_cache_size(n)           # DNS缓存保留的主机名数量  </span><br><span class="line">        create_dirs(yes|no)         # 当指定的目标目录不存在时，是否创建该目录  </span><br><span class="line">        dir_owner(uid)              # 目录的UID  </span><br><span class="line">        dir_group(gid)              # 目录的GID  </span><br><span class="line">        dir_perm(perm)              # 目录的权限，使用八进制方式标注，例如0644  </span><br><span class="line">        owner(uid)                  # 文件的UID  </span><br><span class="line">        group(gid)                  # 文件的GID  </span><br><span class="line">        perm(perm)                  # 文件的权限，同样，使用八进制方式标注  </span><br><span class="line">        gc_busy_threshold(n)        # 当syslog-ng忙时，其进入垃圾信息收集状态的时间一旦分派的对象达到这个数字，syslog-ng就启动垃圾信息收集状态。默认值是：3000。  </span><br><span class="line">        gc_idle_threshold(n)        # 当syslog-ng空闲时，其进入垃圾信息收集状态的时间一旦被分派的对象到达这个数字，syslog-ng就会启动垃圾信息收集状态，默认值是：100  </span><br><span class="line">        log_fifo_size(n)            # 输出队列的行数  </span><br><span class="line">        log_msg_size(n)             # 消息日志的最大值（bytes）  </span><br><span class="line">        mark(n)                     # 多少时间（秒）写入两行MARK信息供参考，目前没有实现  </span><br><span class="line">        stats(n)                    # 多少时间（秒）写入两行STATUS信息,默认值是：600  </span><br><span class="line">        sync(n)                     # 缓存多少行的信息再写入文件中，0为不缓存，局部参数可以覆盖该值。  </span><br><span class="line">        time_reap(n)                # 在没有消息前，到达多少秒，即关闭该文件的连接  </span><br><span class="line">        time_reopen(n)              # 对于死连接，到达多少秒，会重新连接  </span><br><span class="line">        use_time_recvd(yes|no)      # 宏产生的时间是使用接受到的时间，还是日志中记录的时间；建议使用R_的宏代替接收时间，S_的宏代替日志记录的时间，而不要依靠该值定义。  </span><br><span class="line">      </span><br><span class="line">    source s_name &#123; internal(); unix-dgram(&quot;/dev/log&quot;); udp(ip(&quot;0.0.0.0&quot;) port(514)); &#125;;  </span><br><span class="line">      </span><br><span class="line">        file (filename)                 # 从指定的文件读取日志信息  </span><br><span class="line">        unix-dgram  (filename)          # 打开指定的SOCK_DGRAM模式的unix套接字，接收日志消息  </span><br><span class="line">        unix-stream (filename)          # 打开指定的SOCK_STREAM模式的unix套接字，接收日志消息  </span><br><span class="line">        udp ( (ip),(port) )             # 在指定的UDP端口接收日志消息  </span><br><span class="line">        tcp ( (ip),(port) )             # 在指定的TCP端口接收日志消息  </span><br><span class="line">        sun-streams (filename)          # 在solaris系统中，打开一个（多个）指定的STREAM设备，从其中读取日志消息  </span><br><span class="line">        internal()                      # syslog-ng内部产生的消息  </span><br><span class="line">        pipe(filename),fifo(filename)   # 从指定的管道或者FIFO设备，读取日志信息  </span><br><span class="line">      </span><br><span class="line">    filter f_name   &#123; not facility(news, mail) and not filter(f_iptables); &#125;;  </span><br><span class="line">        更多规则函数如下  </span><br><span class="line">        facility(..)    # 根据facility（设备）选择日志消息，使用逗号分割多个facility  </span><br><span class="line">        level(..)       # 根据level（优先级）选择日志消息，使用逗号分割多个level，或使用“..”表示一个范围  </span><br><span class="line">        program(表达式)    # 日志消息的程序名是否匹配一个正则表达式  </span><br><span class="line">        host(表达式)   # 日志消息的主机名是否和一个正则表达式匹配  </span><br><span class="line">        match(表达式)  # 对日志消息的内容进行正则匹配  </span><br><span class="line">        filter()        # 调用另一条过滤规则并判断它的值  </span><br><span class="line">        定义规则的时候也可以使用逻辑运算符and or not  </span><br><span class="line">      </span><br><span class="line">    destination d_name &#123; file(&quot;/var/log/messages&quot;); &#125;;  </span><br><span class="line">        更多动作如下  </span><br><span class="line">        file (filename)                 # 把日志消息写入指定的文件  </span><br><span class="line">        unix-dgram  (filename)          # 把日志消息写入指定的SOCK_DGRAM模式的unix套接字  </span><br><span class="line">        unix-stream (filename)          # 把日志消息写入指定的SOCK_STREAM模式的unix套接字  </span><br><span class="line">        udp (ip),(port)                 # 把日志消息发送到指定的UDP端口  </span><br><span class="line">        tcp (ip),(port)                 # 把日志消息发送到指定的TCP端口  </span><br><span class="line">        usertty(username)               # 把日志消息发送到已经登陆的指定用户终端窗口  </span><br><span class="line">        pipe(filename),fifo(filename)   # 把日志消息发送到指定的管道或者FIFO设备  </span><br><span class="line">        program(parm)                   # 启动指定的程序，并把日志消息发送到该进程的标准输入  </span><br><span class="line">      </span><br><span class="line">    log &#123; source(s_name); filter(f_name); destination(d_name) &#125;;</span><br></pre></td></tr></table></figure>
-<p>一条日志的处理流程大概是这样的,如下<br>首先是 “日志的来源 source s_name { … };”<br>然后是 “过滤规则 filter f_name { … };”<br>再然后是 “消息链 log { source(s_name); filter(f_name); destination(d_name) };”<br>最后是 “目标动作 destination d_name { … };”<br>这样以来一条日志就根据你的意思来处理了,需要注意的是一条日志消息过了之后,会匹配定义的所有配置,并不是匹配到以后就不再往下匹配了. </p>
-<ol start="4">
-<li><p>syslog-ng配置文件例子 </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br></pre></td><td class="code"><pre><span class="line">    $syslog-ng_path/etc/syslog-ng.conf 内容如下  </span><br><span class="line">      </span><br><span class="line">    options &#123; long_hostnames(off); sync(0); perm(0640); stats(3600); &#125;;  </span><br><span class="line">      </span><br><span class="line">    source src &#123;   </span><br><span class="line">                internal();   </span><br><span class="line">                unix-dgram(&quot;/dev/log&quot;);   </span><br><span class="line">                # 表示日志来源为本机udp的514端口,  </span><br><span class="line">                udp(ip(&quot;0.0.0.0&quot;) port(514));   </span><br><span class="line">    &#125;;  </span><br><span class="line">      </span><br><span class="line">    filter f_iptables   &#123; facility(kern) and match(&quot;IN=&quot;) and match(&quot;OUT=&quot;); &#125;;  </span><br><span class="line">      </span><br><span class="line">    filter f_console    &#123; level(warn) and facility(kern) and not filter(f_iptables)  </span><br><span class="line">                          or level(err) and not facility(authpriv); &#125;;  </span><br><span class="line">      </span><br><span class="line">    filter f_newsnotice &#123; level(notice) and facility(news); &#125;;  </span><br><span class="line">    filter f_newscrit   &#123; level(crit)   and facility(news); &#125;;  </span><br><span class="line">    filter f_newserr    &#123; level(err)    and facility(news); &#125;;  </span><br><span class="line">    filter f_news       &#123; facility(news); &#125;;  </span><br><span class="line">      </span><br><span class="line">    filter f_mailinfo   &#123; level(info)      and facility(mail); &#125;;  </span><br><span class="line">    filter f_mailwarn   &#123; level(warn)      and facility(mail); &#125;;  </span><br><span class="line">    filter f_mailerr    &#123; level(err, crit) and facility(mail); &#125;;  </span><br><span class="line">    filter f_mail       &#123; facility(mail); &#125;;  </span><br><span class="line">      </span><br><span class="line">    filter f_cron       &#123; facility(cron); &#125;;  </span><br><span class="line">      </span><br><span class="line">    filter f_local      &#123; facility(local0, local1, local2, local3,  </span><br><span class="line">                                   local4,  local6, local7); &#125;;  </span><br><span class="line">      </span><br><span class="line">    filter f_acpid_full &#123; match(&apos;^acpid:&apos;); &#125;;  </span><br><span class="line">    filter f_acpid      &#123; level(emerg..notice) and match(&apos;^acpid:&apos;); &#125;;  </span><br><span class="line">      </span><br><span class="line">    filter f_acpid_old  &#123; match(&apos;^\[acpid\]:&apos;); &#125;;  </span><br><span class="line">      </span><br><span class="line">    filter f_netmgm     &#123; match(&apos;^NetworkManager:&apos;); &#125;;  </span><br><span class="line">      </span><br><span class="line">    filter f_messages   &#123; not facility(news, mail) and not filter(f_iptables); &#125;;  </span><br><span class="line">    filter f_warn       &#123; level(warn, err, crit) and not filter(f_iptables); &#125;;  </span><br><span class="line">    filter f_alert      &#123; level(alert); &#125;;  </span><br><span class="line">      </span><br><span class="line">    destination console  &#123; pipe(&quot;/dev/tty10&quot;    owner(-1) group(-1) perm(-1)); &#125;;  </span><br><span class="line">    log &#123; source(src); filter(f_console); destination(console); &#125;;  </span><br><span class="line">      </span><br><span class="line">    destination xconsole &#123; pipe(&quot;/dev/xconsole&quot; owner(-1) group(-1) perm(-1)); &#125;;  </span><br><span class="line">    log &#123; source(src); filter(f_console); destination(xconsole); &#125;;  </span><br><span class="line">      </span><br><span class="line">    destination newscrit   &#123; file(&quot;/var/log/news/news.crit&quot;  </span><br><span class="line">                                  owner(news) group(news)); &#125;;  </span><br><span class="line">    log &#123; source(src); filter(f_newscrit); destination(newscrit); &#125;;  </span><br><span class="line">      </span><br><span class="line">    destination newserr    &#123; file(&quot;/var/log/news/news.err&quot;  </span><br><span class="line">                                  owner(news) group(news)); &#125;;  </span><br><span class="line">    log &#123; source(src); filter(f_newserr); destination(newserr); &#125;;  </span><br><span class="line">      </span><br><span class="line">    destination newsnotice &#123; file(&quot;/var/log/news/news.notice&quot;  </span><br><span class="line">                                  owner(news) group(news)); &#125;;  </span><br><span class="line">    log &#123; source(src); filter(f_newsnotice); destination(newsnotice); &#125;;  </span><br><span class="line">      </span><br><span class="line">    destination mailinfo &#123; file(&quot;/var/log/mail.info&quot;); &#125;;  </span><br><span class="line">    log &#123; source(src); filter(f_mailinfo); destination(mailinfo); &#125;;  </span><br><span class="line">      </span><br><span class="line">    destination mailwarn &#123; file(&quot;/var/log/mail.warn&quot;); &#125;;  </span><br><span class="line">    log &#123; source(src); filter(f_mailwarn); destination(mailwarn); &#125;;  </span><br><span class="line">      </span><br><span class="line">    destination mailerr  &#123; file(&quot;/var/log/mail.err&quot; fsync(yes)); &#125;;  </span><br><span class="line">    log &#123; source(src); filter(f_mailerr);  destination(mailerr); &#125;;  </span><br><span class="line">      </span><br><span class="line">    destination mail &#123; file(&quot;/var/log/mail&quot;); &#125;;  </span><br><span class="line">    log &#123; source(src); filter(f_mail); destination(mail); &#125;;  </span><br><span class="line">      </span><br><span class="line">    destination acpid &#123; file(&quot;/var/log/acpid&quot;); &#125;;  </span><br><span class="line">    destination null &#123; &#125;;  </span><br><span class="line">    log &#123; source(src); filter(f_acpid); destination(acpid); flags(final); &#125;;  </span><br><span class="line">      </span><br><span class="line">    log &#123; source(src); filter(f_acpid_full); destination(null); flags(final); &#125;;  </span><br><span class="line">      </span><br><span class="line">    log &#123; source(src); filter(f_acpid_old); destination(acpid); flags(final); &#125;;  </span><br><span class="line">      </span><br><span class="line">    destination netmgm &#123; file(&quot;/var/log/NetworkManager&quot;); &#125;;  </span><br><span class="line">    log &#123; source(src); filter(f_netmgm); destination(netmgm); flags(final); &#125;;  </span><br><span class="line">      </span><br><span class="line">    destination localmessages &#123; file(&quot;/var/log/localmessages&quot;); &#125;;  </span><br><span class="line">    log &#123; source(src); filter(f_local); destination(localmessages); &#125;;  </span><br><span class="line">      </span><br><span class="line">    destination messages &#123; file(&quot;/var/log/messages&quot;); &#125;;  </span><br><span class="line">    log &#123; source(src); filter(f_messages); destination(messages); &#125;;  </span><br><span class="line">      </span><br><span class="line">    destination firewall &#123; file(&quot;/var/log/firewall&quot;); &#125;;  </span><br><span class="line">    log &#123; source(src); filter(f_iptables); destination(firewall); &#125;;  </span><br><span class="line">      </span><br><span class="line">    destination warn &#123; file(&quot;/var/log/warn&quot; fsync(yes)); &#125;;  </span><br><span class="line">    log &#123; source(src); filter(f_warn); destination(warn); &#125;;  </span><br><span class="line">      </span><br><span class="line">    filter f_ha         &#123; facility(local5); &#125;;  </span><br><span class="line">    destination hamessages &#123; file(/var/log/ha); &#125;;  </span><br><span class="line">    log &#123; source(src); filter(f_ha); destination(hamessages); &#125;;</span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<p> 参考:<a href="http://ant595.blog.51cto.com/5074217/1080922" target="_blank" rel="noopener">http://ant595.blog.51cto.com/5074217/1080922</a><br>     <a href="http://iminmin.blog.51cto.com/689308/437168" target="_blank" rel="noopener">http://iminmin.blog.51cto.com/689308/437168</a><br>     <a href="http://wenku.baidu.com/link?url=uZwXNVwxcAFCb26Ql3VP2Myr3t2oScepMJTEugvz0Cn6UB_5fdbJtQ-9_Rw71TdBw2tdZnkgRguCXk1TH_XWLdqr8wUIPeY_muf4f9aj8va" target="_blank" rel="noopener">http://wenku.baidu.com/link?url=uZwXNVwxcAFCb26Ql3VP2Myr3t2oScepMJTEugvz0Cn6UB_5fdbJtQ-9_Rw71TdBw2tdZnkgRguCXk1TH_XWLdqr8wUIPeY_muf4f9aj8va</a><br> （如果侵害了原作者权益，请及时告知，会立即删除） </p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/19/16-03Linux日志系统syslog以及syslog-ng/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-
-  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script type="text/javascript">
-
-if(true){
-	var gitalk = new Gitalk({
-  	clientID: 'b214cde67415ed5b1224',
-  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
-  	repo: 'geasyheart.github.io',
-  	owner: 'geasyheart',
-  	admin: ['geasyheart'],
-  	id: '',
-  	distractionFreeMode: 'true'
-})
-gitalk.render('gitalk-container') 
-}
-</script>
-  
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/14/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="page-number current">15</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/16/">Next &raquo;</a>
@@ -1860,10 +1752,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">machine learning</a>
               </li>
              
@@ -1873,10 +1761,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">python</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1897,6 +1781,14 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">机器学习</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
             
             <div class="clearfix"></div>

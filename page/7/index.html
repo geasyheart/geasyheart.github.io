@@ -192,6 +192,157 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-tengine-tomcat-postgresql-redis安装" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/08/24/tengine-tomcat-postgresql-redis安装/">tengine+tomcat+postgresql+redis安装</a>
+    </h1>
+  
+
+        
+        <a href="/2016/08/24/tengine-tomcat-postgresql-redis安装/" class="archive-article-date">
+  	<time datetime="2016-08-24T03:50:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-08-24</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="Tengine安装"><a href="#Tengine安装" class="headerlink" title="Tengine安装"></a>Tengine安装</h2><blockquote>
+<p>[root@localhost tengine-2.1.2]# tar xf tengine-2.1.2.tar.gz<br>[root@localhost tengine-2.1.2]# useradd -s /bin/false -r tengine </p>
+</blockquote>
+<p>关于tengine，是阿里根据Nginx再次修改的，关于源码编译的核心之处在于按需编译，之前文档也有写到，所以这里只指定安装路径等基础信息，其他将不指定; </p>
+<blockquote>
+<p>[root@localhost tengine-2.1.2]# yum -y install openssl-devel pcre-devel<br>[root@localhost tengine-2.1.2]# ./configure –prefix=/usr/local/tengine –user=tengine –group=tengine<br>[root@localhost tengine-2.1.2]# make &amp;&amp; make install </p>
+</blockquote>
+<p>设置成开机自启: </p>
+<blockquote>
+<p>[root@localhost sbin]# vim /usr/lib/systemd/system/tengined.service </p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[Unit] </span><br><span class="line">Description=The Tengine Http Server </span><br><span class="line">After=syslog.target network.target remote-fs.target nss-lookup.target </span><br><span class="line"> </span><br><span class="line">[Service] </span><br><span class="line">Type=forking </span><br><span class="line">PIDFile=/usr/local/tengine/logs/nginx.pid </span><br><span class="line">ExecStartPre=/usr/bin/rm -f /usr/local/tengine/logs/nginx.pid </span><br><span class="line">ExecStartPre=/usr/local/tengine/sbin/nginx -t </span><br><span class="line">ExecStart=/usr/local/tengine/sbin/nginx </span><br><span class="line">ExecReload=/bin/kill -s HUP $MAINPID </span><br><span class="line">ExecStop=/bin/kill -s QUIT $MAINPID </span><br><span class="line">KillMode=process </span><br><span class="line">KillSignal=SIGQUIT </span><br><span class="line">TimeoutStopSec=5 </span><br><span class="line">PrivateTmp=true </span><br><span class="line"> </span><br><span class="line">[Install] </span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>[root@localhost sbin]# systemctl enable tengined.service </p>
+</blockquote>
+<blockquote>
+<p>关于tomcat不做叙述，以前文章中有…<br><a href="http://geasyheart.blog.163.com/blog/static/242548036201593094744315" target="_blank" rel="noopener">http://geasyheart.blog.163.com/blog/static/242548036201593094744315</a> </p>
+</blockquote>
+<h2 id="redis安装"><a href="#redis安装" class="headerlink" title="redis安装"></a>redis安装</h2><blockquote>
+<p>[root@localhost ~]# wget -c <a href="http://download.redis.io/releases/redis-3.2.0.tar.gz" target="_blank" rel="noopener">http://download.redis.io/releases/redis-3.2.0.tar.gz</a><br>[root@localhost ~]# tar xf redis-3.2.0.tar.gz -C /usr/local<br>[root@localhost redis-3.2.0]# yum -y install tcl<br>[root@localhost redis-3.2.0]# make &amp;&amp; make test &amp;&amp; make install </p>
+</blockquote>
+<p>启动脚本: </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[Unit] </span><br><span class="line">Description=Redis persistent key-value database </span><br><span class="line">After=network.target </span><br><span class="line"> </span><br><span class="line">[Service] </span><br><span class="line">ExecStart=redis-server /data/apps/redis-3.2.0/redis.conf --daemonize no </span><br><span class="line">ExecStop=redis-cli -h 192.168.0.3 -p 9999  -a pwd shutdown </span><br><span class="line">User=root </span><br><span class="line">Group=redis </span><br><span class="line"> </span><br><span class="line">[Install] </span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+<h2 id="安装postgresql"><a href="#安装postgresql" class="headerlink" title="安装postgresql"></a>安装postgresql</h2><blockquote>
+<p>[root@localhost ~]# wget -c <a href="https://download.postgresql.org/pub/repos/yum/9.5/redhat/rhel-7-x86_64/pgdg-centos95-9.5-2.noarch.rpm" target="_blank" rel="noopener">https://download.postgresql.org/pub/repos/yum/9.5/redhat/rhel-7-x86_64/pgdg-centos95-9.5-2.noarch.rpm</a><br>[root@localhost ~]# rpm -ivh pgdg-centos95-9.5-2.noarch.rpm<br>[root@localhost ~]# yum -y install postgresql95-server  postgresql95-contrib<br>[root@localhost ~]# systemctl enable postgresql-9.5.service </p>
+<ol>
+<li>初始化数据库<br>[root@localhost ~]# /usr/pgsql-9.5/bin/postgresql95-setup initdb<br>[root@localhost ~]# systemctl start postgresql-9.5.service </li>
+<li>配置文件位置<br>[root@localhost ~]# vim /var/lib/pgsql/9.5/data/pg_hba.conf </li>
+</ol>
+</blockquote>
+<ol start="3">
+<li>配置密码 <blockquote>
+<p>[root@localhost ~]# su postgres<br>[root@localhost ~]# psql -U postgres<br>postgres=# alter user postgres with password ‘your_password’; </p>
+</blockquote>
+</li>
+</ol>
+<h2 id="防火墙"><a href="#防火墙" class="headerlink" title="防火墙"></a>防火墙</h2><blockquote>
+<p>[root@localhost ~]# vim /usr/lib/firewalld/services/postgres95.xml </p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt; </span><br><span class="line">&lt;service&gt; </span><br><span class="line">        &lt;short&gt;Postgres 9.5 Database service&lt;/short&gt; </span><br><span class="line">        &lt;description&gt;Postgres&lt;/description&gt; </span><br><span class="line">        &lt;portprotocol=&quot;tcp&quot;port=&quot;5432&quot;/&gt; </span><br><span class="line">&lt;/service&gt;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>[root@localhost ~]# firewall-cmd –permanent –add-service=postgres95<br>如果不成功:<br>[root@localhost ~]# firewall-cmd –permanent –add-port=5432/tcp<br>[root@localhost ~]# firewall-cmd –permanent –reload </p>
+</blockquote>
+<p>当然，也可以关闭防火墙。 </p>
+<p>[错误]<br> PID file /your_path/nginx.pid not readable (yet?) after start.<br>这个就是你启动脚本和配置文件的pid不一致导致的</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2016/08/24/tengine-tomcat-postgresql-redis安装/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+
+  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script type="text/javascript">
+
+if(true){
+	var gitalk = new Gitalk({
+  	clientID: 'b214cde67415ed5b1224',
+  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
+  	repo: 'geasyheart.github.io',
+  	owner: 'geasyheart',
+  	admin: ['geasyheart'],
+  	id: '',
+  	distractionFreeMode: 'true'
+})
+gitalk.render('gitalk-container') 
+}
+</script>
+  
+  
     <article id="post-33-01-2-MySQL数据类型" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1363,128 +1514,6 @@ gitalk.render('gitalk-container')
 </script>
   
   
-    <article id="post-46-03-实验-tomcat-httpd" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/10/30/46-03-实验-tomcat-httpd/">46_03-实验-tomcat-httpd</a>
-    </h1>
-  
-
-        
-        <a href="/2015/10/30/46-03-实验-tomcat-httpd/" class="archive-article-date">
-  	<time datetime="2015-10-30T04:24:05.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-30</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>环境:<br>tomcat server:192.168.122.115<br>httpd server:192.168.122.47 </p>
-<p>tomcat server: </p>
-<p>安装jdk和tomcat: </p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@nginx tomcat]<span class="comment"># catalina.sh version </span></span><br><span class="line">Using CATALINA_BASE:   /usr/<span class="built_in">local</span>/tomcat </span><br><span class="line">Using CATALINA_HOME:   /usr/<span class="built_in">local</span>/tomcat </span><br><span class="line">Using CATALINA_TMPDIR: /usr/<span class="built_in">local</span>/tomcat/temp </span><br><span class="line">Using JRE_HOME:        /usr </span><br><span class="line">Using CLASSPATH:       /usr/<span class="built_in">local</span>/tomcat/bin/bootstrap.jar:/usr/<span class="built_in">local</span>/tomcat/bin/tomcat-juli.jar </span><br><span class="line">Server version: Apache Tomcat/8.0.30 </span><br><span class="line">Server built:   Dec 1 2015 22:30:46 UTC </span><br><span class="line">Server number:  8.0.30.0 </span><br><span class="line">OS Name:        Linux </span><br><span class="line">OS Version:     2.6.32-573.el6.x86_64 </span><br><span class="line">Architecture:   amd64 </span><br><span class="line">JVM Version:    1.7.0_79-b15 </span><br><span class="line">JVM Vendor:     Oracle Corporation</span><br></pre></td></tr></table></figure>
-<p>需要注意的几点： </p>
-<p>(1) 这个地方必须指定你的默认host，否则会解析到localhost上；；； </p>
-<engine name="Catalina" defaulthost="www.test.com">   
-
-<p>(2)在tomcat8上发现docBase不能指定为当前目录，这个不知为何，低版本的我试过，是可以的; </p>
-<host name="www.test.com" appbase="/web" unpackwars="true" autodeploy="true"><br>    <context path docbase="html"><br></context></host> 
-
-<h1 id="vim-web-html-index-jsp"><a href="#vim-web-html-index-jsp" class="headerlink" title="vim /web/html/index.jsp"></a>vim /web/html/index.jsp</h1><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span><span class="tag">&lt;<span class="name">body</span>&gt;</span><span class="tag">&lt;<span class="name">center</span>&gt;</span> </span><br><span class="line">tomcat1 now time is: <span class="tag">&lt;<span class="name">%=new</span> <span class="attr">java.util.Date</span>()%&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">center</span>&gt;</span><span class="tag">&lt;/<span class="name">body</span>&gt;</span><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>httpd server: </p>
-<p>这里省事了，没有重新编译安装httpd<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@bogon ~]<span class="comment">#yum -y install httpd </span></span><br><span class="line">[root@bogon ~]<span class="comment"># vim /etc/httpd/conf/httpd.conf </span></span><br><span class="line"> </span><br><span class="line">ProxyRequests Off </span><br><span class="line">ProxyPassMatch ^/(.*\.jsp)$  http://192.168.122.115:8080/<span class="variable">$1</span> </span><br><span class="line">在这个的上面添加如上内容&lt;Directory <span class="string">"/var/www/html"</span>&gt;</span><br></pre></td></tr></table></figure></p>
-<p>重新启动httpd服务器即可；；； </p>
-<p>如果tomcat在本地的话，那么在httpd进行反向代理的时候，仍要指定defaultHost=’<a href="http://www.test.com&#39;；" target="_blank" rel="noopener">www.test.com&#39;；</a></p>
-</engine>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/10/30/46-03-实验-tomcat-httpd/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-
-  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script type="text/javascript">
-
-if(true){
-	var gitalk = new Gitalk({
-  	clientID: 'b214cde67415ed5b1224',
-  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
-  	repo: 'geasyheart.github.io',
-  	owner: 'geasyheart',
-  	admin: ['geasyheart'],
-  	id: '',
-  	distractionFreeMode: 'true'
-})
-gitalk.render('gitalk-container') 
-}
-</script>
-  
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/6/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/8/">Next &raquo;</a>
@@ -1598,10 +1627,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">machine learning</a>
               </li>
              
@@ -1611,10 +1636,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">python</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1635,6 +1656,14 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">机器学习</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
             
             <div class="clearfix"></div>
