@@ -192,6 +192,146 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-SQLAlchemy模型使用" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/22/SQLAlchemy模型使用/">SQLAlchemy模型使用</a>
+    </h1>
+  
+
+        
+        <a href="/2018/03/22/SQLAlchemy模型使用/" class="archive-article-date">
+  	<time datetime="2018-03-22T11:52:09.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="SQLAlchemy-模型使用"><a href="#SQLAlchemy-模型使用" class="headerlink" title="SQLAlchemy 模型使用"></a>SQLAlchemy 模型使用</h2><h3 id="模型定义"><a href="#模型定义" class="headerlink" title="模型定义"></a>模型定义</h3><p>对于 Table 的定义, 本来是直接的实例化调用, 通过 <code>declarative</code> 的包装, 可以像”定义类”这样的更直观的方式来完成.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">user = Table(<span class="string">'user'</span>, metadata,</span><br><span class="line">    Column(<span class="string">'user_id'</span>, Integer, primary_key = <span class="literal">True</span>),</span><br><span class="line">    Column(<span class="string">'user_name'</span>, String(<span class="number">16</span>), nullable = <span class="literal">False</span>),</span><br><span class="line">    Column(<span class="string">'email_address'</span>, String(<span class="number">60</span>)),</span><br><span class="line">    Column(<span class="string">'password'</span>, String(<span class="number">20</span>), nullable = <span class="literal">False</span>)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> create_engine</span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> Column</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.types <span class="keyword">import</span> String, Integer, CHAR, BIGINT</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.ext.declarative <span class="keyword">import</span> declarative_base</span><br><span class="line">BaseModel = declarative_base()</span><br><span class="line">Engine = create_engine(<span class="string">'postgresql://test@localhost:5432/test'</span>, echo=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Blog</span><span class="params">(BaseModel)</span>:</span></span><br><span class="line">    __tablename__ = <span class="string">'blog'</span></span><br><span class="line"></span><br><span class="line">    id = Column(CHAR(<span class="number">32</span>), primary_key=<span class="literal">True</span>)</span><br><span class="line">    title = Column(String(<span class="number">64</span>), server_default=<span class="string">''</span>, nullable=<span class="literal">False</span>)</span><br><span class="line">    text = Column(String, server_default=<span class="string">''</span>, nullable=<span class="literal">False</span>)</span><br><span class="line">    user = Column(CHAR(<span class="number">32</span>), index=<span class="literal">True</span>, server_default=<span class="string">''</span>, nullable=<span class="literal">False</span>)</span><br><span class="line">    create = Column(BIGINT, index=<span class="literal">True</span>, server_default=<span class="string">'0'</span>, nullable=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span><span class="params">(BaseModel)</span>:</span></span><br><span class="line">    __tablename__ = <span class="string">'user'</span></span><br><span class="line"></span><br><span class="line">    id = Column(CHAR(<span class="number">32</span>), primary_key=<span class="literal">True</span>)</span><br><span class="line">    name = Column(String(<span class="number">32</span>), server_default=<span class="string">''</span>, nullable=<span class="literal">False</span>)</span><br><span class="line">    username = Column(String(<span class="number">32</span>), index=<span class="literal">True</span>, server_default=<span class="string">''</span>, nullable=<span class="literal">False</span>)</span><br><span class="line">    password = Column(String(<span class="number">64</span>), server_default=<span class="string">''</span>, nullable=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">init_db</span><span class="params">()</span>:</span></span><br><span class="line">    BaseModel.metadata.create_all(Engine)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">drop_db</span><span class="params">()</span>:</span></span><br><span class="line">    BaseModel.metadata.drop_all(Engine)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="comment">#init_db()</span></span><br><span class="line">    drop_db()</span><br><span class="line">    <span class="comment">#BaseModel.metadata.tables['user'].create(Engine, checkfirst=True)</span></span><br><span class="line">    <span class="comment">#BaseModel.metadata.tables['user'].drop(Engine, checkfirst=False)</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+<h3 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">session = Session()</span><br><span class="line">session.add(User(id=uuid.uuid4().hex))</span><br><span class="line">session.add(Blog(id=uuid.uuid4().hex))</span><br><span class="line">session.add_all([</span><br><span class="line">    User(id=uuid.uuid4().hex),</span><br><span class="line">    Blog(id=uuid.uuid4().hex)</span><br><span class="line">])</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
+<p>执行的顺序并不一定会和代码顺序一致, SQLAlchemy 自己会整合逻辑再执行.</p>
+<h3 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h3><p>SQLAlchemy 实现的查询非常强大, 写起来有一种随心所欲的感觉.<br>查询的结果, 有几种不同的类型, 这个需要注意, 像是:</p>
+<ol>
+<li>instance</li>
+<li>instance of list</li>
+<li>keyed tuple of list</li>
+<li>value of list</li>
+</ol>
+<h4 id="基本查询"><a href="#基本查询" class="headerlink" title="基本查询"></a>基本查询</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">session.query(User).filter_by(username=<span class="string">'abc'</span>).all()</span><br><span class="line">session.query(User).filter(User.username==<span class="string">'abc'</span>).all()</span><br><span class="line">session.query(Blog).filter(Blog.create &gt;= <span class="number">0</span>).all()</span><br><span class="line">session.query(Blog).filter(Blog.create &gt;= <span class="number">0</span>).first()</span><br><span class="line">session.query(Blog).filter(Blog.create &gt;= <span class="number">0</span> | Blog.title == <span class="string">'A'</span>).first()</span><br><span class="line">session.query(Blog).filter(Blog.create &gt;= <span class="number">0</span> &amp; Blog.title == <span class="string">'A'</span>).first()</span><br><span class="line">session.query(Blog).filter(Blog.create &gt;= <span class="number">0</span>).offset(<span class="number">1</span>).limit(<span class="number">1</span>).scalar()</span><br><span class="line">session.query(User).filter(User.username ==  <span class="string">'abc'</span>).scalar()</span><br><span class="line">session.query(User.id).filter(User.username ==  <span class="string">'abc'</span>).scalar()</span><br><span class="line">session.query(Blog.id).filter(Blog.create &gt;= <span class="number">0</span>).all()</span><br><span class="line">session.query(Blog.id).filter(Blog.create &gt;= <span class="number">0</span>).all()[<span class="number">0</span>].id</span><br><span class="line">dict(session.query(Blog.id, Blog.title).filter(Blog.create &gt;= <span class="number">0</span>).all())</span><br><span class="line">session.query(Blog.id, Blog.title).filter(Blog.create &gt;= <span class="number">0</span>).first().title</span><br><span class="line">session.query(User.id).order_by(<span class="string">'id desc'</span>).all()</span><br><span class="line">session.query(User.id).order_by(<span class="string">'id'</span>).first()</span><br><span class="line">session.query(User.id).order_by(User.id).first()</span><br><span class="line">session.query(User.id).order_by(-User.id).first()</span><br><span class="line">session.query(<span class="string">'id'</span>, <span class="string">'username'</span>).select_from(User).all()</span><br><span class="line">session.query(User).get(<span class="string">'16e19a64d5874c308421e1a835b01c69'</span>)</span><br></pre></td></tr></table></figure>
+<h4 id="多表查询"><a href="#多表查询" class="headerlink" title="多表查询"></a>多表查询</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">session.query(Blog, User).filter(Blog.user == User.id).first().User.username</span><br><span class="line">session.query(Blog, User.id, User.username).filter(Blog.user == User.id).first().id</span><br><span class="line">session.query(Blog.id,</span><br><span class="line">              User.id,</span><br><span class="line">              User.username).filter(Blog.user == User.id).first().keys()</span><br></pre></td></tr></table></figure>
+<h4 id="条件查询"><a href="#条件查询" class="headerlink" title="条件查询"></a>条件查询</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> or_, not_</span><br><span class="line"></span><br><span class="line">session.query(User).filter(or_(User.id == <span class="string">''</span>,</span><br><span class="line">                               User.id == <span class="string">'16e19a64d5874c308421e1a835b01c69'</span>)).all()</span><br><span class="line">session.query(User).filter(not_(User.id == <span class="string">'16e19a64d5874c308421e1a835b01c69'</span>)).all()</span><br><span class="line">session.query(User).filter(User.id.in_([<span class="string">'16e19a64d5874c308421e1a835b01c69'</span>])).all()</span><br><span class="line">session.query(User).filter(User.id.like(<span class="string">'16e19a%'</span>)).all()</span><br><span class="line">session.query(User).filter(User.id.startswith(<span class="string">'16e19a'</span>)).all()</span><br><span class="line">dir(User.id)</span><br></pre></td></tr></table></figure>
+<h4 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> func</span><br><span class="line">session.query(func.count(<span class="string">'1'</span>)).select_from(User).scalar()</span><br><span class="line">session.query(func.count(<span class="string">'1'</span>), func.max(User.username)).select_from(User).first()</span><br><span class="line">session.query(func.count(<span class="string">'1'</span>)).select_from(User).scalar()</span><br><span class="line">session.query(func.md5(User.username)).select_from(User).all()</span><br><span class="line">session.query(func.current_timestamp()).scalar()</span><br><span class="line">session.query(User).count()</span><br></pre></td></tr></table></figure>
+<h3 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h3><p>还是通常的两种方式:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">session.query(User).filter(User.username == <span class="string">'abc'</span>).update(&#123;<span class="string">'name'</span>: <span class="string">'123'</span>&#125;)</span><br><span class="line">session.commit()</span><br><span class="line"></span><br><span class="line">user = session.query(User).filter_by(username=<span class="string">'abc'</span>).scalar()</span><br><span class="line">user.name = <span class="string">'223'</span></span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
+<p>如果涉及对属性原值的引用, 则要考虑<code>synchronize_session</code>这个参数.</p>
+<ol>
+<li><code>evaluate</code> 默认值, 会同时修改当前 session 中的对象属性.</li>
+<li><code>fetch</code> 修改前, 会先通过 select 查询条目的值.</li>
+<li><code>False</code>不修改当前 session 中的对象属性.</li>
+</ol>
+<p>在默认情况下, 因为会有修改当前会话中的对象属性, 所以如果语句中有 SQL 函数, 或者”原值引用”, 那是无法完成的操作, 自然也会报错, 比如:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> func</span><br><span class="line">session.query(User).update(&#123;User.name: func.trim(<span class="string">'123 '</span>)&#125;)</span><br><span class="line">session.query(User).update(&#123;User.name: User.name + <span class="string">'x'</span>&#125;)</span><br></pre></td></tr></table></figure>
+<p>这种情况下, 就不能要求 SQLAlchemy 修改当前 session 的对象属性了, 而是直接进行数据库的交互, 不管当前会话值:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">session.query(User).update(&#123;User.name: User.name + <span class="string">'x'</span>&#125;, synchronize_session=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+<p>是否修改当前会话的对象属性, 涉及到当前会话的状态. 如果当前会话过期, 那么在获取相关对象的属性值时, SQLAlchemy 会自动作一次数据库查询, 以便获取正确的值:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">user = session.query(User).filter_by(username=<span class="string">'abc'</span>).scalar()</span><br><span class="line"><span class="keyword">print</span> user.name</span><br><span class="line">session.query(User).update(&#123;User.name: <span class="string">'new'</span>&#125;, synchronize_session=<span class="literal">False</span>)</span><br><span class="line"><span class="keyword">print</span> user.name</span><br><span class="line">session.commit()</span><br><span class="line"><span class="keyword">print</span> user.name</span><br></pre></td></tr></table></figure>
+<p>执行了<code>update</code>之后, 虽然相关对象的实际的属性值已变更, 但是当前会话中的对象属性值并没有改变. 直到<code>session.commit()</code>之后, 当前会话变成”过期”状态, 再次获取<code>user.name</code>时, SQLAlchemy 通过<code>user</code>的 <code>id</code> 属性, 重新去数据库查询了新值. (如果 user 的 id 变了呢? 那就会出事了啊.)<br><code>synchronize_session</code> 设置成 <code>fetch</code> 不会有这样的问题, 因为在做 update 时已经修改了当前会话中的对象了.<br>不管 <code>synchronize_session</code> 的行为如何, <code>commit</code> 之后 <code>session</code> 都会过期, 再次获取相关对象值时, 都会重新作一次查询.</p>
+<h3 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">session.query(User).filter_by(username=<span class="string">'abc'</span>).delete()</span><br><span class="line"></span><br><span class="line">user = session.query(User).filter_by(username=<span class="string">'abc'</span>).first()</span><br><span class="line">session.delete(user)</span><br></pre></td></tr></table></figure>
+<p>删除同样有像修改一样的 synchronize_session 参数的问题, 影响当前会话的状态.</p>
+<h3 id="JOIN"><a href="#JOIN" class="headerlink" title="JOIN"></a>JOIN</h3><p>SQLAlchemy 可以很直观地作 join 的支持:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">r = session.query(Blog, User).join(User, Blog.user == User.id).all()</span><br><span class="line"><span class="keyword">for</span> blog, user <span class="keyword">in</span> r:</span><br><span class="line">    <span class="keyword">print</span> blog.id, blog.user, user.id</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">r = session.query(Blog, User.name, User.username).join(User, Blog.user == User.id).all()</span><br><span class="line"><span class="keyword">print</span> r</span><br></pre></td></tr></table></figure></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">SQLAlchemy</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/SQLAlchemy//" class="article-tag-list-link color1">SQLAlchemy</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/03/22/SQLAlchemy模型使用/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+
+  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script type="text/javascript">
+
+if(true){
+	var gitalk = new Gitalk({
+  	clientID: 'b214cde67415ed5b1224',
+  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
+  	repo: 'geasyheart.github.io',
+  	owner: 'geasyheart',
+  	admin: ['geasyheart'],
+  	id: '',
+  	distractionFreeMode: 'true'
+})
+gitalk.render('gitalk-container') 
+}
+</script>
+  
+  
     <article id="post-freezegun-一个可以伪造时间的库" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1302,116 +1442,6 @@ gitalk.render('gitalk-container')
 </script>
   
   
-    <article id="post-grpc生成server-and-client代码导入路径问题" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/10/01/grpc生成server-and-client代码导入路径问题/">grpc生成server-and-client代码导入路径问题</a>
-    </h1>
-  
-
-        
-        <a href="/2017/10/01/grpc生成server-and-client代码导入路径问题/" class="archive-article-date">
-  	<time datetime="2017-10-01T01:28:42.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-10-01</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>invoke \<br> –&gt; proto<br>    –&gt; protos<br>        –&gt; hello.proto</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -m grpc_tools.protoc -I proto --python_out=. --grpc_python_out=. proto/protos/hello.proto</span><br></pre></td></tr></table></figure>
-<p>最后的目录结构:</p>
-<p>invoke \<br>    –&gt; proto<br>        –&gt; protos<br>            –&gt; hello.proto<br>    –&gt; protos<br>        –&gt; hello_pb2.py<br>        –&gt; hello_pb2_grpc.py</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">grpc</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/grpc//" class="article-tag-list-link color5">grpc</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/10/01/grpc生成server-and-client代码导入路径问题/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-
-  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script type="text/javascript">
-
-if(true){
-	var gitalk = new Gitalk({
-  	clientID: 'b214cde67415ed5b1224',
-  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
-  	repo: 'geasyheart.github.io',
-  	owner: 'geasyheart',
-  	admin: ['geasyheart'],
-  	id: '',
-  	distractionFreeMode: 'true'
-})
-gitalk.render('gitalk-container') 
-}
-</script>
-  
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/4/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/6/">Next &raquo;</a>
@@ -1525,6 +1555,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">machine learning</a>
               </li>
              
@@ -1537,11 +1571,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">CI</a>
+                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">git</a>
+                <a href="javascript:void(0)" class="js-tag color3">CI</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1553,15 +1587,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">git</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">机器学习</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
             
             <div class="clearfix"></div>

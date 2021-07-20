@@ -192,6 +192,170 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-24-01LAMP编译安装之httpd" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/22/24-01LAMP编译安装之httpd/">24_01LAMP编译安装之httpd</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/22/24-01LAMP编译安装之httpd/" class="archive-article-date">
+  	<time datetime="2015-04-22T02:42:44.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="编译安装LAMP之httpd以及调优"><a href="#编译安装LAMP之httpd以及调优" class="headerlink" title="编译安装LAMP之httpd以及调优"></a>编译安装LAMP之httpd以及调优</h2><p>安装顺序： </p>
+<blockquote>
+<p>httpd —&gt;MYSQL—–&gt;php—–&gt;Xcache </p>
+</blockquote>
+<p>httpd:<br>    apr: Apache Portable Runtime<br>    apr是一个可移植运行库，通俗的说是一个虚拟机，只要安装上对应不同操作系统的apr，就能够使用httpd；<br>    在linux系统中，默认安装了apr，但是有可能会遇到apr版本过低，以至于不能够使用最新版本的httpd；<br>    所以可以下载手动编译安装apr，以支持最新的httpd； </p>
+<p>httpd编译几大部分    最详细：：<a href="http://httpd.apache.org/docs/2.4/programs/configure.html" target="_blank" rel="noopener">http://httpd.apache.org/docs/2.4/programs/configure.html</a> </p>
+<p>#optionalfeatures     </p>
+<ol>
+<li>Multi-Processing Modules                                 <h1 id><a href="#" class="headerlink" title=" "></a> </h1>—-&gt;DSO <h1 id="通俗的讲就是提供了模块化的方式以便使用什么模块；"><a href="#通俗的讲就是提供了模块化的方式以便使用什么模块；" class="headerlink" title="通俗的讲就是提供了模块化的方式以便使用什么模块；"></a>通俗的讲就是提供了模块化的方式以便使用什么模块；</h1>#（at this point, you can specify which features you want included in Apache by enabling and disabling modules.<br>#Apache comes with a wide range of modules included by default.<br>#They will be compiled as shared objects (DSOs) which can be loaded or unloaded at runtime.         </li>
+</ol>
+<p><a href="http://httpd.apache.org/docs/2.4/install.html" target="_blank" rel="noopener">http://httpd.apache.org/docs/2.4/install.html</a><br><a href="http://shineforever.blog.51cto.com/1429204/301247" target="_blank" rel="noopener">http://shineforever.blog.51cto.com/1429204/301247</a>     </p>
+<p>if MPMs are built as DSO modules:<br>例：<br>–enable-mpms-shared=all 这个使用所有<br>–enable-mpms-shared=’prefork worker’<br>–with-mpm=event<br>这个会默认使用event模块；编译好后 httpd -l 查看； </p>
+<p>static:<br>就是直接静态编译进系统，不能增减；<br>–enable-modules  一般这个是–enable-modules=most 表明启动很多常用模块，下如同；<br>–enable-mods-shared 这个是以DSO编译启用 ; –enable-mods-shared=most<br>–enable-mods-static这个是以static编译加入; </p>
+<ol start="2">
+<li>Third-party modules<br>–with-module=module-type:module-file[, module-type:module-file </li>
+</ol>
+<p>Note<br>If you want to build a DSO module instead of a statically linked use (apxs).configure searches automatically for an installed zlib library ,if your source configuration requires one (e.g., when mod_deflate is enabled).<br>You can set the directory path to the compression library instead.             </p>
+<ol start="3">
+<li>specific packages                                 <blockquote>
+<p>–with-apr=DIR|FILE<br>–with-apr-util=DIR|FILE<br>–with-ssl=DIR<br>–with-z=DIR </p>
+</blockquote>
+</li>
+</ol>
+<p>为了确保开发环境已经装好 </p>
+<pre><code>yum grouplist ;            列出当前系统已经安装的软件包组、可安装的软件包组;    (说明：yum list是可安装的软件包)         
+</code></pre><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#yum groupinstall "Development tools"    确保开发工具包安装；             </span></span><br><span class="line">                                                                                              </span><br><span class="line"><span class="comment">#yum groupinstall "Development Libraries"    开发库的安装；这个我在试验时也可以不安装；</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>apr–&gt;apr-util–&gt;httpd<br>(在这说句，如果你是直接拷贝这些源码包，如果时间来自未来，所以用hwclock -s 更新到现在时间)<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">    ./configure --<span class="built_in">help</span> | less 查看帮助信息 </span><br><span class="line">  </span><br><span class="line">    <span class="comment">#tar xvjf apr-1.5.1.tar.bz2                                     </span></span><br><span class="line">    <span class="comment">#./configure --prefix=/usr/local/apr </span></span><br><span class="line">    <span class="comment">#make &amp;&amp; make install                                   </span></span><br><span class="line">                                                                                                  </span><br><span class="line">                                                                                                          </span><br><span class="line">    <span class="comment">#tar xvjf apr-util-1.5.4.tar.bz2     </span></span><br><span class="line">    <span class="comment">#./configure --prefix=/usr/local/apr-util --with-apr=/usr/local/apr         </span></span><br><span class="line">    <span class="comment">#make &amp;&amp; make install                                                     </span></span><br><span class="line">                                                                                                  </span><br><span class="line">    <span class="comment">#yum install pcre-devel </span></span><br><span class="line">    <span class="comment">#tar xvjf httpd-2.4.10.tar.bz2     </span></span><br><span class="line">    <span class="comment">#./configure --prefix=/usr/local/apache --sysconfdir=/etc/httpd         </span></span><br><span class="line">     --<span class="built_in">enable</span>-so --<span class="built_in">enable</span>-rewrite --<span class="built_in">enable</span>-ssl --<span class="built_in">enable</span>-cgi --<span class="built_in">enable</span>-cgid </span><br><span class="line">    --<span class="built_in">enable</span>-modules=most     --<span class="built_in">enable</span>-deflate </span><br><span class="line">    --<span class="built_in">enable</span>-mods-shared=most --<span class="built_in">enable</span>-mpms-shared=all --with-mpm=event(默认) </span><br><span class="line">    --with-apr=/usr/<span class="built_in">local</span>/apr --with-apr-util=/usr/<span class="built_in">local</span>/apr-util </span><br><span class="line">      </span><br><span class="line">configure: error: mod_ssl has been requested but can not be built due to prerequisite failures </span><br><span class="line">     <span class="comment">#yum install openssl-devel </span></span><br><span class="line">  </span><br><span class="line">configure:error:mod_deflate has been requested but can not be build due to prerequisite failures </span><br><span class="line">    <span class="comment">#yum install zlib-devel </span></span><br><span class="line">  </span><br><span class="line">   <span class="comment"># make &amp;&amp; make install </span></span><br><span class="line">cp /etc/httpd/httpd.conf /etc/httpd/httpd.conf.bak</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<h1 id="vi-etc-httpd-httpd-conf"><a href="#vi-etc-httpd-httpd-conf" class="headerlink" title="vi /etc/httpd/httpd.conf"></a>vi /etc/httpd/httpd.conf</h1><p> 添加PidFile = “/var/run/httpd.pid”<br>    （說明，我在实验时可以不添加这一行） </p>
+<p>#########################################################################<br>添加虚拟主机可以在/etc/httpd/extra/下创建；<br>然后在/etc/httpd/httpd.conf中把VirtualHost给启用； </p>
+<ol>
+<li>找到DocumentRoot禁止掉; </li>
+<li>重新编写一个要么把Include /etc/httpd/extra/httpd-vhosts.conf启用(说明，默认情况下没有启动extra/目录) </li>
+<li><virtualhost 172.17.14.58:80><br> ServerName <a href="http://www.test.com" target="_blank" rel="noopener">www.test.com</a><br> DocumentRoot “/www/test.com”<br> ErrorLog “logs/test.com-error_log”<br> CustomLog “logs/test.com-access_log” commom<br> <directory " www test.com"> <pre><code>Require all granted 
+</code></pre> </directory><br></virtualhost><br>这是最基本的写法，一定要注意。<br>着重声明:2.2版本和2.4版本在定义访问控制的时候不一样了:<br>原来:<br> Order allow,deny<br>现在:<br> Require all granted </li>
+</ol>
+<p>vim /etc/profile.d/httpd.sh<br>export PATH=$PATH:/usr/local/apache/bin<br>重新登录即可。 </p>
+<p>如果想把event改为prefork.<br>注释掉: </p>
+<p>#LoadModule mpm_event_module modules/mod_mpm_event.so<br>添加:<br>LoadModule mpm_prefork_module modules/mod_mpm_prefork.so<br>重启:<br>应该用下面命令来查看当前系统使用的模块。。<br>httpd -M </p>
+<p>httpd 2.4新特性: </p>
+<ol>
+<li>MPM可于运行时装载:<br> –enable-mpms-shared=all –with-mpm=event </li>
+<li>支持event MPM </li>
+<li>异步读写 </li>
+<li>在每个模块及每个目录上指定日志级别 </li>
+<li>每请求配置:<if><elseif><else>; </else></elseif></if></li>
+<li>增强表达式分析器 </li>
+<li>毫秒级的Keepalive Timeout </li>
+<li>基于域名的虚拟主机不再需要NameVirtualHost指令；！！！！！！！ </li>
+<li>降低了内存占用 </li>
+<li>支持在配置文件中使用自定义变量 </li>
+</ol>
+<h2 id="各选项介绍"><a href="#各选项介绍" class="headerlink" title="各选项介绍"></a>各选项介绍</h2><blockquote>
+<p>–prefix=/usr/local/apache 安装路径<br>–sysconfdir=/etc/httpd24 配置文件路径<br>–enable-so 允许运行时加载DSO模块<br>–enable-ssl 如果不加载将无法使用使用https<br>–enable-cgi 允许使用cgi脚本<br>–enable-cgid允许线程执行cgi脚本<br>–enable-rewrite 支持URL重写机制<br>–with-zlib 支持网络通用压缩库<br>–with-pcre 支持pcre   用pcre来解决C语言中使用正则表达式的问题<br>–with-apr=/usr/local/apr 指定apr的安装路径<br>–with-apr-util=/usr/local/apr-util/ 指定apr-util的安装路径<br>–enable-modules=most 启用大多数常用的模块<br>–enable-mpms-shared=all 启用MPM所有支持的模式<br>–with-mpm=event 默认使用enevt模式                                                     </p>
+</blockquote>
+<p>##优化</p>
+<p><a href="http://www.jincon.com/archives/243/" target="_blank" rel="noopener">http://www.jincon.com/archives/243/</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/22/24-01LAMP编译安装之httpd/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+
+  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script type="text/javascript">
+
+if(true){
+	var gitalk = new Gitalk({
+  	clientID: 'b214cde67415ed5b1224',
+  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
+  	repo: 'geasyheart.github.io',
+  	owner: 'geasyheart',
+  	admin: ['geasyheart'],
+  	id: '',
+  	distractionFreeMode: 'true'
+})
+gitalk.render('gitalk-container') 
+}
+</script>
+  
+  
     <article id="post-23-04建立LAMP平台" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1664,120 +1828,6 @@ gitalk.render('gitalk-container')
 </script>
   
   
-    <article id="post-38-04-2-实验利用haresources进行资源管理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/04/38-04-2-实验利用haresources进行资源管理/">38_04_2_实验利用haresources进行资源管理</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/04/38-04-2-实验利用haresources进行资源管理/" class="archive-article-date">
-  	<time datetime="2015-04-04T10:19:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-04</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>cat &gt;&gt;实验说明:&lt;&lt;EOF<br>web服务器:<br>192.168.122.162    node1.test.com<br>192.168.122.244    node2.test.com<br>nfs服务器:<br>192.168.122.27        nfs.test.com<br>EOF </p>
-<p>#①提供主机名<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">hostname <span class="string">"node1.test.com"</span> </span><br><span class="line">vim /etc/sysconfig/network </span><br><span class="line">HOSTNAME=node1.test.com </span><br><span class="line"> </span><br><span class="line">hostname <span class="string">"node2.test.com"</span> </span><br><span class="line">vim /etc/sysconfig/network </span><br><span class="line">HOSTNAME=node2.test.com </span><br><span class="line"> </span><br><span class="line">hostname <span class="string">"nfs.test.com"</span> </span><br><span class="line">vim /etc/sysconfig/network </span><br><span class="line">HOSTNAME=nfs.test.com</span><br></pre></td></tr></table></figure></p>
-<p>#②web服务器能够基于公钥登陆<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa  -f ~/.ssh/id_rsa -P <span class="string">''</span> </span><br><span class="line">ssh-copy-id -i ~/.ssh/id_rsa.pub root@192.168.122.244 </span><br><span class="line"> </span><br><span class="line">ssh-keygen -t rsa  -f ~/.ssh/id_rsa -P <span class="string">''</span> </span><br><span class="line">ssh-copy-id -i ~/.ssh/id_rsa.pub root@192.168.122.162</span><br></pre></td></tr></table></figure></p>
-<p>#③提供hosts文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cat &gt;&gt;/etc/hosts&lt;&lt;EOF </span><br><span class="line">192.168.122.162    node1.test.com </span><br><span class="line">192.168.122.244    node2.test.com </span><br><span class="line">EOF </span><br><span class="line">scp /etc/hosts node2:/etc/</span><br></pre></td></tr></table></figure></p>
-<p>#④时间同步<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ntpdate ntp.api.bz </span><br><span class="line"><span class="built_in">echo</span> <span class="string">"*/5     *       *       *       *       ntpdate ntp.api.bz &amp;&gt;/dev/null"</span> &gt;&gt; /etc/crontab </span><br><span class="line">``` </span><br><span class="line"><span class="comment">#⑤利用epel源，安装heartbeat </span></span><br><span class="line">```bash</span><br><span class="line">yum -y install epel-release </span><br><span class="line">yum -y install heartbeat &amp;&amp; chkconfig heartbeat on </span><br><span class="line">yum -y install httpd &amp;&amp; chkconfig httpd off</span><br></pre></td></tr></table></figure></p>
-<p>#⑥提供配置文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">cp -p /usr/share/doc/heartbeat-3.0.4/&#123;authkeys,ha.cf,haresources&#125; /etc/ha.d </span><br><span class="line"><span class="built_in">cd</span> /etc/ha.d/ </span><br><span class="line">chmod 600 authkeys </span><br><span class="line">dd <span class="keyword">if</span>=/dev/random count=1 bs=512 | md5sum </span><br><span class="line"> </span><br><span class="line">cat &gt;&gt;authkeys&lt;&lt;EOF </span><br><span class="line">auth1 </span><br><span class="line">1 md5 05d7ca80f950d1a7b41322bd39220d2a </span><br><span class="line">EOF </span><br><span class="line"> </span><br><span class="line">cat &gt;&gt;ha.cf&lt;&lt;EOF </span><br><span class="line">logfacility    local0 </span><br><span class="line">keepalive 2 </span><br><span class="line">deadtime 30 </span><br><span class="line">warntime 10 </span><br><span class="line">initdead 120 </span><br><span class="line">udpport    694 </span><br><span class="line">mcast eth1 225.0.0.1 694 1 0 </span><br><span class="line">auto_failback on </span><br><span class="line">node    node1.test.com </span><br><span class="line">node    node2.test.com </span><br><span class="line">ping 192.168.122.1 </span><br><span class="line">deadping 30 </span><br><span class="line">compression    bz2 </span><br><span class="line">compression_threshold 2 </span><br><span class="line">EOF </span><br><span class="line"> </span><br><span class="line">cat &gt;&gt;haresources&lt;&lt;EOF </span><br><span class="line">node1.test.com IPaddr::192.168.122.100/24/eth1 httpd </span><br><span class="line">EOF </span><br><span class="line"> </span><br><span class="line">scp  /etc/ha.d/&#123;ha.cf,authkeys,haresources&#125; node2:/etc/ha.d/ </span><br><span class="line"> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">"node1.test.com"</span> &gt; /var/www/html/index.html </span><br><span class="line"><span class="built_in">echo</span> <span class="string">"node2.test.com"</span> &gt; /var/www/html/index.html </span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> &#123;1..2&#125;;<span class="keyword">do</span> ssh node<span class="variable">$x</span> <span class="string">'service heartbeat start'</span> start;<span class="keyword">done</span> </span><br><span class="line"> </span><br><span class="line"><span class="comment">#进行访问测试，然后转到/usr/share/heartbeat-3.0.4 &amp;&amp; ./hb_standby 将自己转移为备节点，那么另外一个将成为主节点； </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#提供nfs服务器文件共享: </span></span><br><span class="line">yum -y install nfs-utils rpcbind </span><br><span class="line"><span class="built_in">echo</span> <span class="string">"&lt;h1&gt;success&lt;/h1&gt;"</span> &gt; /web/htdocs/index.html </span><br><span class="line">service nfs start </span><br><span class="line">service rpcbind start </span><br><span class="line">showmount -e 192.168.122.27 </span><br><span class="line"> </span><br><span class="line">mount -t nfs 192.168.122.27:/web/htdocs /mnt </span><br><span class="line">umount /mnt      <span class="comment">#heartbeat会进行自动挂载，但是要注意:nfs服务不能关掉，否则资源不会被访问到； </span></span><br><span class="line"> </span><br><span class="line">cat &gt;&gt;haresources&lt;&lt;EOF </span><br><span class="line">node1.test.com IPaddr::192.168.122.100/24/eth1 Filesystem::172.16.100.27:/web/htdocs::/var/www/html::nfs httpd </span><br><span class="line">EOF </span><br><span class="line"> </span><br><span class="line">scp haresources node2:/etc/ha.d/ </span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> &#123;1..2&#125;;<span class="keyword">do</span> ssh node<span class="variable">$x</span> <span class="string">'service heartbeat start'</span> start;<span class="keyword">done</span></span><br></pre></td></tr></table></figure></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#启动heartbeat会出现，稍微等一会，就会发现资源能够正常工作了，如果不行，那么service heartbeat restart即可；下面是首次启动时的输出样例； </span><br><span class="line">#Starting High-Availability services: INFO:  Resource is stoppedDone. </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">#如果开启了iptables服务器： </span><br><span class="line">#iptables -A INPUT -p udp -dport 694 -j ACCEPT </span><br><span class="line">#iptables -A OUTPUT -p udp --sport 694 -j ACCEPT</span><br></pre></td></tr></table></figure>
-<p>因为我的网卡是eth1,所以全文的网络接口指向的是eth1;;;</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/04/38-04-2-实验利用haresources进行资源管理/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-
-  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script type="text/javascript">
-
-if(true){
-	var gitalk = new Gitalk({
-  	clientID: 'b214cde67415ed5b1224',
-  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
-  	repo: 'geasyheart.github.io',
-  	owner: 'geasyheart',
-  	admin: ['geasyheart'],
-  	id: '',
-  	distractionFreeMode: 'true'
-})
-gitalk.render('gitalk-container') 
-}
-</script>
-  
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/12/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="page-number" href="/page/12/">12</a><span class="page-number current">13</span><a class="page-number" href="/page/14/">14</a><a class="page-number" href="/page/15/">15</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/14/">Next &raquo;</a>
@@ -1891,6 +1941,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">machine learning</a>
               </li>
              
@@ -1903,11 +1957,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">CI</a>
+                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">git</a>
+                <a href="javascript:void(0)" class="js-tag color3">CI</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1919,15 +1973,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">git</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">机器学习</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
             
             <div class="clearfix"></div>

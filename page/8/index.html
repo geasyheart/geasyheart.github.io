@@ -192,6 +192,145 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-47-01Tomcat系列之apache使用mod-proxy或mod-jk反向代理tomcat" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/10/30/47-01Tomcat系列之apache使用mod-proxy或mod-jk反向代理tomcat/">47_01Tomcat系列之apache使用mod_proxy或mod_jk反向代理tomcat</a>
+    </h1>
+  
+
+        
+        <a href="/2015/10/30/47-01Tomcat系列之apache使用mod-proxy或mod-jk反向代理tomcat/" class="archive-article-date">
+  	<time datetime="2015-10-30T08:26:09.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-30</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>mod_proxy：提供代理的功能，而mod_jk是作为一个独立的连接器存在，所以性能上要比较高； </p>
+<ul>
+<li>mod_jk：mod_jk实质上是Apache与Tomcat的连接器，并藉此附带提供集群和负载均衡的功能。 </li>
+<li>mod_jk2：mod_jk的升级版，但官方已不再支持； </li>
+</ul>
+<p>mod_proxy_http：mod_proxy提供http反向代理； </p>
+<ul>
+<li>mod_proxy_ajp  :这个使用二进制方式传输，与通过http协议代理到后端相比，效率更高，而且在进行访问tomcat时不允许不经过反向代理过来； </li>
+<li>mod_proxy_banlancer：负载均衡时用到； </li>
+</ul>
+<p>如果使用tomcat做集群，建议使用httpd做反向代理； </p>
+<p>环境配置:<br>tomcat主机: </p>
+<ul>
+<li>192.168.10.8 </li>
+<li>192.168.10.9 </li>
+</ul>
+<ol>
+<li>安装jdk和tomcat.　参考：46_03(实验) </li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">#vim /usr/local/tomcat/conf/server.xml </span></span><br><span class="line"> </span><br><span class="line">修改成&lt;Engine name=<span class="string">"Cataina"</span>&gt; defaultHost=<span class="string">"www.test.com"</span> jvmRoute=<span class="string">"Tomcat1"</span>&gt; </span><br><span class="line"> </span><br><span class="line"> 添加 </span><br><span class="line"> &lt;Host name=<span class="string">"www.test.com"</span> appBase=<span class="string">"/web"</span> </span><br><span class="line">     unpackWARs=<span class="string">"true"</span>  autoDeploy=<span class="string">"true"</span>&gt; </span><br><span class="line">    &lt;Context  path=<span class="string">""</span> docBase=<span class="string">"webapps"</span> reLoadable=<span class="string">"true"</span> /&gt; </span><br><span class="line">&lt;/Host&gt; </span><br><span class="line"> </span><br><span class="line"><span class="comment"># catalina.sh configtest </span></span><br><span class="line"><span class="comment"># mkdir -pv /web/webapps　　#把jsp放到这个目录下就行； </span></span><br><span class="line"><span class="comment"># cd /web/webapps </span></span><br><span class="line"><span class="comment"># vim index.jsp </span></span><br><span class="line">&lt;html&gt;&lt;body&gt;&lt;center&gt; </span><br><span class="line">now time is: &lt;%=new java.util.Date()%&gt; </span><br><span class="line">&lt;/center&gt;&lt;/body&gt;&lt;/html&gt; </span><br><span class="line"> </span><br><span class="line"><span class="comment">#catalina.sh start</span></span><br></pre></td></tr></table></figure>
+<p>192.168.10.106安装httpd，对后端的Tomcat做反向代理：<br> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">安装httpd的配置选项: </span><br><span class="line">    <span class="comment">#./configure --prefix=/usr/local/apache \ </span></span><br><span class="line">     --sysconfdir=/etc/httpd \ </span><br><span class="line">     --<span class="built_in">enable</span>-so \ </span><br><span class="line">     --<span class="built_in">enable</span>-rewrite \ </span><br><span class="line">     --<span class="built_in">enable</span>-ssl \ </span><br><span class="line">     --with-zlib \ </span><br><span class="line">     --with-pcre \ </span><br><span class="line">     --<span class="built_in">enable</span>-cgi  \ </span><br><span class="line">     --<span class="built_in">enable</span>-cgid \ </span><br><span class="line">              --<span class="built_in">enable</span>-modules=most \ </span><br><span class="line">              --<span class="built_in">enable</span>-deflate \ </span><br><span class="line">    --<span class="built_in">enable</span>-mods-shared=most \ </span><br><span class="line">    --<span class="built_in">enable</span>-mpms-shared=all \ </span><br><span class="line">    --with-mpm=event \ </span><br><span class="line">    --<span class="built_in">enable</span>-proxy \ </span><br><span class="line">    --<span class="built_in">enable</span>-proxy-http \ </span><br><span class="line">    --<span class="built_in">enable</span>-proxy-ajp \ </span><br><span class="line">    --<span class="built_in">enable</span>-proxy-balancer \ </span><br><span class="line">    --<span class="built_in">enable</span>-lbmethod-heartbeat \ </span><br><span class="line">    --<span class="built_in">enable</span>-heartbeat \ </span><br><span class="line">    --<span class="built_in">enable</span>-slotmem-shm \ </span><br><span class="line">    --<span class="built_in">enable</span>-slotmem-plain \ </span><br><span class="line">    --<span class="built_in">enable</span>-watchdog \ </span><br><span class="line">    --with-apr=/usr/<span class="built_in">local</span>/apr \ </span><br><span class="line">    --with-apr-util=/usr/<span class="built_in">local</span>/apr-util</span><br></pre></td></tr></table></figure></p>
+<p>配置apache通过mod_proxy模块与tomcat连接<br>需要使用mod_proxy与tomcat实例连接，需要apache已经装载mod_proxy、mod_proxy_http、mod_proxy_ajp和proxy_balancer_module(实现tomcat集群时用到)等模块； </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#/usr/local/apache/bin/httpd -D DUMP_MODULES | grep proxy　　　＃默认没有，可以在配置文件中查找proxy然后启动这些； </span></span><br><span class="line">proxy_module(shared) </span><br><span class="line">proxy_connect_module(shared) </span><br><span class="line">proxy_ftp_module(shared) </span><br><span class="line">proxy_http_module(shared) </span><br><span class="line">proxy_fcgi_module(shared) </span><br><span class="line">proxy_scgi_module(shared) </span><br><span class="line">proxy_ajp_module(shared) </span><br><span class="line">proxy_balancer_module(shared) </span><br><span class="line">proxy_express_module(shared)</span><br></pre></td></tr></table></figure>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#vim /etc/httpd/httpd.conf</span></span><br></pre></td></tr></table></figure>
+<p>注释中心主机,添加 </p>
+<blockquote>
+<p>Include /etc/httpd/extra/httpd-proxy.conf </p>
+</blockquote>
+<p>让apache跟tomcat的http连接器进行整合:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#vim /etc/httpd/extra/httpd-proxy.conf </span></span><br><span class="line">&lt;VirtualHost *:80&gt; </span><br><span class="line">  ProxyVia On </span><br><span class="line">  ProxyRequests Off      关闭正向代理; </span><br><span class="line">  ProxyPass / http://192.168.10.8:8080/ </span><br><span class="line">  ProxyPassReverse / http://192.168.10.8:8080/ </span><br><span class="line">    &lt;Proxy *&gt; </span><br><span class="line">        Require all granted </span><br><span class="line">    &lt;/Proxy&gt; </span><br><span class="line">&lt;Location /&gt; </span><br><span class="line">             Require all granted </span><br><span class="line">        &lt;/Location&gt; </span><br><span class="line">&lt;/VirtualHost&gt; </span><br><span class="line"> </span><br><span class="line">LoadModule slotmem_shm_module modules/mod_slotmem_shm.so </span><br><span class="line">LoadModule slotmem_plain_module modules/mod_slotmem_plain.so  <span class="comment">#这个我没有找到，结果没问题；</span></span><br></pre></td></tr></table></figure></p>
+<p>重启httpd即可实现反向代理。<br>这个地方我没有添加httpd启动脚本，自己看前面的；；<br><a href="http://172.16.100.106/index.jsp" target="_blank" rel="noopener">http://172.16.100.106/index.jsp</a><br>需要着重明白这句话，所有的请求都会交给后端的Tomcat处理，httpd并不会处理任何请求，所以网页要放在tomcat指定的目录下； </p>
+<p>【方式二】 配置apache跟tomcat的mod_jk连接器进行整合: </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#tar xf tomcat-connectors-1.2.37-src.tar.gz </span></span><br><span class="line"><span class="comment">#cd tomcat-connectors-1.2.37-src/native/ </span></span><br><span class="line"><span class="comment">#./configure --with-apxs=/usr/local/apache/bin/apxs </span></span><br><span class="line"><span class="comment">#make &amp;&amp; make install </span></span><br><span class="line"> </span><br><span class="line">注释掉: </span><br><span class="line"><span class="comment">#Include /etc/httpd/extra/httpd-proxy.conf </span></span><br><span class="line">添加: </span><br><span class="line">Include /etc/httpd/extra/httpd-jk.conf </span><br><span class="line"> </span><br><span class="line">apache要使用mod_jk连接器，需要在启动时加载此连接器模块。为了便于管理与mod_jk模块相关的配置，这里使用一个专门的配置文件/etc/httpd/extra/httpd-jk.conf来保存相关指令及其配置，其内容如下: </span><br><span class="line"><span class="comment">#vim /etc/httpd/extra/httpd-jk.conf </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#Load the mod_jk </span></span><br><span class="line">LoadModule jk_module modules/mod_jk.so </span><br><span class="line">JkWorkersFile /etc/httpd/extra/workers.properties </span><br><span class="line">JkLogFile logs/mod_jk.log </span><br><span class="line">JkLogLevel debug </span><br><span class="line">JkMount /* Tomcat1                  送到哪一个tomcat上去，这个和上面的jvmRoute要一致； </span><br><span class="line">JkMount /status/    stat1 </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment"># vim /etc/httpd/extra/workers.properties </span></span><br><span class="line">worker.list=Tomcat1,stat1 </span><br><span class="line">worker.Tomcat1.port=8009 </span><br><span class="line">worker.Tomcat1.host=192.168.10.8 </span><br><span class="line">worker.Tomcat1.type=ajp13 </span><br><span class="line">worker.Tomcat1.lbfactor=1 </span><br><span class="line">worker.stat1.type=status</span><br></pre></td></tr></table></figure>
+<p>至此，一个基于mod_jk模块与后端名为Tomcat1的worker通信的配置已经完成，重新httpd服务即可生效；</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/10/30/47-01Tomcat系列之apache使用mod-proxy或mod-jk反向代理tomcat/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+
+  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script type="text/javascript">
+
+if(true){
+	var gitalk = new Gitalk({
+  	clientID: 'b214cde67415ed5b1224',
+  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
+  	repo: 'geasyheart.github.io',
+  	owner: 'geasyheart',
+  	admin: ['geasyheart'],
+  	id: '',
+  	distractionFreeMode: 'true'
+})
+gitalk.render('gitalk-container') 
+}
+</script>
+  
+  
     <article id="post-46-03-实验-tomcat-httpd" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1709,114 +1848,6 @@ gitalk.render('gitalk-container')
 </script>
   
   
-    <article id="post-42-03-2-实验-MySQL基于GTID的多线程复制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/10/02/42-03-2-实验-MySQL基于GTID的多线程复制/">42_03_2_实验:MySQL基于GTID的多线程复制</a>
-    </h1>
-  
-
-        
-        <a href="/2015/10/02/42-03-2-实验-MySQL基于GTID的多线程复制/" class="archive-article-date">
-  	<time datetime="2015-10-02T08:44:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-02</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="主MySQL的配置文件"><a href="#主MySQL的配置文件" class="headerlink" title="主MySQL的配置文件"></a>主MySQL的配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">[root@node1 ~]<span class="comment"># egrep -v '^$|#' /etc/my.cnf </span></span><br><span class="line">[mysqld] </span><br><span class="line">datadir = /mydata/data </span><br><span class="line">binlog_format=ROW </span><br><span class="line">port = 3306 </span><br><span class="line">server_id = 10 </span><br><span class="line">socket = /tmp/mysql.sock </span><br><span class="line">innodb_file_per_table = ON </span><br><span class="line">character_set_server = utf8 </span><br><span class="line">rpl_semi_sync_master_enabled = ON </span><br><span class="line">log_bin = master_bin </span><br><span class="line">log_bin_index = master_bin.index </span><br><span class="line">ssl-ca=/usr/<span class="built_in">local</span>/mysql/ssl/cacert.pem </span><br><span class="line">ssl-cert=/usr/<span class="built_in">local</span>/mysql/ssl/master.crt </span><br><span class="line">ssl-key=/usr/<span class="built_in">local</span>/mysql/ssl/master.key </span><br><span class="line"><span class="built_in">log</span>-slave-updates=<span class="literal">true</span> </span><br><span class="line">gtid-mode=on </span><br><span class="line">enforce-gtid-consistency=<span class="literal">true</span> </span><br><span class="line">master-info-repository=TABLE    </span><br><span class="line">sync-master-info=1 </span><br><span class="line">slave-parallel-workers=2 </span><br><span class="line">binlog-checksum=CRC32 </span><br><span class="line">master-verify-checksum=1 </span><br><span class="line">slave-sql-verify-checksum=1 </span><br><span class="line">binlog-rows-query-log-events=1 </span><br><span class="line">report-port=3306 </span><br><span class="line">report-host=192.168.122.220 </span><br><span class="line">sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES</span><br></pre></td></tr></table></figure>
-<h2 id="从MySQL的配置文件"><a href="#从MySQL的配置文件" class="headerlink" title="从MySQL的配置文件"></a>从MySQL的配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">[root@node2 ~]<span class="comment"># egrep -v '^$|#' /etc/my.cnf </span></span><br><span class="line">[mysqld] </span><br><span class="line">datadir = /mydata/data </span><br><span class="line">port = 3306 </span><br><span class="line">server_id = 11 </span><br><span class="line">socket = /tmp/mysql.sock </span><br><span class="line">innodb_file_per_table = ON </span><br><span class="line">character_set_server = utf8 </span><br><span class="line">relay_log = relay_log </span><br><span class="line">relay_log_index = relay_log.index </span><br><span class="line">rpl_semi_sync_slave_enabled = ON </span><br><span class="line">ssl_ca = /usr/<span class="built_in">local</span>/mysql/ssl/cacert.pem </span><br><span class="line">ssl_cert = /usr/<span class="built_in">local</span>/mysql/ssl/slave.crt </span><br><span class="line">ssl_key = /usr/<span class="built_in">local</span>/mysql/ssl/slave.key </span><br><span class="line">binlog-format=ROW </span><br><span class="line"><span class="built_in">log</span>-slave-updates=<span class="literal">true</span> </span><br><span class="line">gtid-mode=on </span><br><span class="line">enforce-gtid-consistency=<span class="literal">true</span> </span><br><span class="line">master-info-repository=TABLE </span><br><span class="line">relay-log-info-repository=TABLE </span><br><span class="line">sync-master-info=1 </span><br><span class="line">slave-parallel-workers=2 </span><br><span class="line">binlog-checksum=CRC32 </span><br><span class="line">master-verify-checksum=1 </span><br><span class="line">slave-sql-verify-checksum=1 </span><br><span class="line">binlog-rows-query-log-events=1 </span><br><span class="line">report-port=3306 </span><br><span class="line"><span class="built_in">log</span>-bin=mysql-bin.log </span><br><span class="line">report-host=192.168.122.14 </span><br><span class="line">sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES</span><br></pre></td></tr></table></figure>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt;GRANT REPLICATION SLAVE ON *.* TO 'repluser'@'192.168.122.%' IDENTIFIED BY 'replpass'; </span><br><span class="line">mysql&gt;FLUSH PRIVILEGES; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">mysql&gt; change master to master_host='192.168.122.120', </span><br><span class="line">    -&gt; master_user='repluser', </span><br><span class="line">    -&gt; master_password='replpass', </span><br><span class="line">    -&gt; master_auto_position=1; </span><br><span class="line">Query OK, 0 rows affected, 2 warnings (0.30 sec) </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">mysql&gt;start slave; </span><br><span class="line">``` </span><br><span class="line"> </span><br><span class="line">如果遇到mysql -urepluser -h 192.168.122.220 -p </span><br><span class="line"> </span><br><span class="line">出现失败 repluser@node1.test.com    说明出现了域名解析，那么， </span><br><span class="line">skip_name_reslove=ON即可；；； </span><br><span class="line"> </span><br><span class="line">2. 设置半同步</span><br><span class="line"> </span><br><span class="line">```sql</span><br><span class="line"><span class="comment">#On Master </span></span><br><span class="line">mysql&gt;INSTALL PLUGIN rpl_semi_sync_master SONAME 'semisync_master.so'; </span><br><span class="line">mysql&gt;SHOW GLOBAL VARIABLES LIKE '%rpl%'; </span><br><span class="line">mysql&gt;SET GLOBAL rpl_semi_sync_master_enabled = 1; </span><br><span class="line">mysql&gt;SET GLOBAL rpl_semi_sync_master_timeout = 1000;   1000ms </span><br><span class="line"> </span><br><span class="line"><span class="comment">#On Slave </span></span><br><span class="line">mysql&gt;INSTALL PLUGIN rpl_semi_sync_slave SONAME 'semisync_slave.so'; </span><br><span class="line">mysql&gt;SET GLOBAL rpl_semi_sync_slave_enabled = 1;　 </span><br><span class="line">mysql&gt;STOP SLAVE IO_THREAD; START SLAVE IO_THREAD; </span><br><span class="line"> </span><br><span class="line">在Master和Slave的my.cnf中编辑: </span><br><span class="line"> </span><br><span class="line"><span class="comment">#On Master </span></span><br><span class="line">[mysqld] </span><br><span class="line">rpl_semi_sync_master_enabled=1 </span><br><span class="line">rpl_semi_sync_master_timeout=1000     <span class="comment">#1 second </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#On Slave </span></span><br><span class="line">[mysqld] </span><br><span class="line">rpl_semi_sync_slave_enabled =1</span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/10/02/42-03-2-实验-MySQL基于GTID的多线程复制/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-
-  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script type="text/javascript">
-
-if(true){
-	var gitalk = new Gitalk({
-  	clientID: 'b214cde67415ed5b1224',
-  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
-  	repo: 'geasyheart.github.io',
-  	owner: 'geasyheart',
-  	admin: ['geasyheart'],
-  	id: '',
-  	distractionFreeMode: 'true'
-})
-gitalk.render('gitalk-container') 
-}
-</script>
-  
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/7/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/9/">Next &raquo;</a>
@@ -1930,6 +1961,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">machine learning</a>
               </li>
              
@@ -1942,11 +1977,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">CI</a>
+                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">git</a>
+                <a href="javascript:void(0)" class="js-tag color3">CI</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1958,15 +1993,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">git</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">机器学习</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
             
             <div class="clearfix"></div>

@@ -192,6 +192,114 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-42-03-2-实验-MySQL基于GTID的多线程复制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/10/02/42-03-2-实验-MySQL基于GTID的多线程复制/">42_03_2_实验:MySQL基于GTID的多线程复制</a>
+    </h1>
+  
+
+        
+        <a href="/2015/10/02/42-03-2-实验-MySQL基于GTID的多线程复制/" class="archive-article-date">
+  	<time datetime="2015-10-02T08:44:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-02</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="主MySQL的配置文件"><a href="#主MySQL的配置文件" class="headerlink" title="主MySQL的配置文件"></a>主MySQL的配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">[root@node1 ~]<span class="comment"># egrep -v '^$|#' /etc/my.cnf </span></span><br><span class="line">[mysqld] </span><br><span class="line">datadir = /mydata/data </span><br><span class="line">binlog_format=ROW </span><br><span class="line">port = 3306 </span><br><span class="line">server_id = 10 </span><br><span class="line">socket = /tmp/mysql.sock </span><br><span class="line">innodb_file_per_table = ON </span><br><span class="line">character_set_server = utf8 </span><br><span class="line">rpl_semi_sync_master_enabled = ON </span><br><span class="line">log_bin = master_bin </span><br><span class="line">log_bin_index = master_bin.index </span><br><span class="line">ssl-ca=/usr/<span class="built_in">local</span>/mysql/ssl/cacert.pem </span><br><span class="line">ssl-cert=/usr/<span class="built_in">local</span>/mysql/ssl/master.crt </span><br><span class="line">ssl-key=/usr/<span class="built_in">local</span>/mysql/ssl/master.key </span><br><span class="line"><span class="built_in">log</span>-slave-updates=<span class="literal">true</span> </span><br><span class="line">gtid-mode=on </span><br><span class="line">enforce-gtid-consistency=<span class="literal">true</span> </span><br><span class="line">master-info-repository=TABLE    </span><br><span class="line">sync-master-info=1 </span><br><span class="line">slave-parallel-workers=2 </span><br><span class="line">binlog-checksum=CRC32 </span><br><span class="line">master-verify-checksum=1 </span><br><span class="line">slave-sql-verify-checksum=1 </span><br><span class="line">binlog-rows-query-log-events=1 </span><br><span class="line">report-port=3306 </span><br><span class="line">report-host=192.168.122.220 </span><br><span class="line">sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES</span><br></pre></td></tr></table></figure>
+<h2 id="从MySQL的配置文件"><a href="#从MySQL的配置文件" class="headerlink" title="从MySQL的配置文件"></a>从MySQL的配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">[root@node2 ~]<span class="comment"># egrep -v '^$|#' /etc/my.cnf </span></span><br><span class="line">[mysqld] </span><br><span class="line">datadir = /mydata/data </span><br><span class="line">port = 3306 </span><br><span class="line">server_id = 11 </span><br><span class="line">socket = /tmp/mysql.sock </span><br><span class="line">innodb_file_per_table = ON </span><br><span class="line">character_set_server = utf8 </span><br><span class="line">relay_log = relay_log </span><br><span class="line">relay_log_index = relay_log.index </span><br><span class="line">rpl_semi_sync_slave_enabled = ON </span><br><span class="line">ssl_ca = /usr/<span class="built_in">local</span>/mysql/ssl/cacert.pem </span><br><span class="line">ssl_cert = /usr/<span class="built_in">local</span>/mysql/ssl/slave.crt </span><br><span class="line">ssl_key = /usr/<span class="built_in">local</span>/mysql/ssl/slave.key </span><br><span class="line">binlog-format=ROW </span><br><span class="line"><span class="built_in">log</span>-slave-updates=<span class="literal">true</span> </span><br><span class="line">gtid-mode=on </span><br><span class="line">enforce-gtid-consistency=<span class="literal">true</span> </span><br><span class="line">master-info-repository=TABLE </span><br><span class="line">relay-log-info-repository=TABLE </span><br><span class="line">sync-master-info=1 </span><br><span class="line">slave-parallel-workers=2 </span><br><span class="line">binlog-checksum=CRC32 </span><br><span class="line">master-verify-checksum=1 </span><br><span class="line">slave-sql-verify-checksum=1 </span><br><span class="line">binlog-rows-query-log-events=1 </span><br><span class="line">report-port=3306 </span><br><span class="line"><span class="built_in">log</span>-bin=mysql-bin.log </span><br><span class="line">report-host=192.168.122.14 </span><br><span class="line">sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES</span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt;GRANT REPLICATION SLAVE ON *.* TO 'repluser'@'192.168.122.%' IDENTIFIED BY 'replpass'; </span><br><span class="line">mysql&gt;FLUSH PRIVILEGES; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">mysql&gt; change master to master_host='192.168.122.120', </span><br><span class="line">    -&gt; master_user='repluser', </span><br><span class="line">    -&gt; master_password='replpass', </span><br><span class="line">    -&gt; master_auto_position=1; </span><br><span class="line">Query OK, 0 rows affected, 2 warnings (0.30 sec) </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">mysql&gt;start slave; </span><br><span class="line">``` </span><br><span class="line"> </span><br><span class="line">如果遇到mysql -urepluser -h 192.168.122.220 -p </span><br><span class="line"> </span><br><span class="line">出现失败 repluser@node1.test.com    说明出现了域名解析，那么， </span><br><span class="line">skip_name_reslove=ON即可；；； </span><br><span class="line"> </span><br><span class="line">2. 设置半同步</span><br><span class="line"> </span><br><span class="line">```sql</span><br><span class="line"><span class="comment">#On Master </span></span><br><span class="line">mysql&gt;INSTALL PLUGIN rpl_semi_sync_master SONAME 'semisync_master.so'; </span><br><span class="line">mysql&gt;SHOW GLOBAL VARIABLES LIKE '%rpl%'; </span><br><span class="line">mysql&gt;SET GLOBAL rpl_semi_sync_master_enabled = 1; </span><br><span class="line">mysql&gt;SET GLOBAL rpl_semi_sync_master_timeout = 1000;   1000ms </span><br><span class="line"> </span><br><span class="line"><span class="comment">#On Slave </span></span><br><span class="line">mysql&gt;INSTALL PLUGIN rpl_semi_sync_slave SONAME 'semisync_slave.so'; </span><br><span class="line">mysql&gt;SET GLOBAL rpl_semi_sync_slave_enabled = 1;　 </span><br><span class="line">mysql&gt;STOP SLAVE IO_THREAD; START SLAVE IO_THREAD; </span><br><span class="line"> </span><br><span class="line">在Master和Slave的my.cnf中编辑: </span><br><span class="line"> </span><br><span class="line"><span class="comment">#On Master </span></span><br><span class="line">[mysqld] </span><br><span class="line">rpl_semi_sync_master_enabled=1 </span><br><span class="line">rpl_semi_sync_master_timeout=1000     <span class="comment">#1 second </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#On Slave </span></span><br><span class="line">[mysqld] </span><br><span class="line">rpl_semi_sync_slave_enabled =1</span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/10/02/42-03-2-实验-MySQL基于GTID的多线程复制/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+
+  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script type="text/javascript">
+
+if(true){
+	var gitalk = new Gitalk({
+  	clientID: 'b214cde67415ed5b1224',
+  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
+  	repo: 'geasyheart.github.io',
+  	owner: 'geasyheart',
+  	admin: ['geasyheart'],
+  	id: '',
+  	distractionFreeMode: 'true'
+})
+gitalk.render('gitalk-container') 
+}
+</script>
+  
+  
     <article id="post-42-03MySQL主从复制-MySQL5" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1378,130 +1486,6 @@ gitalk.render('gitalk-container')
 </script>
   
   
-    <article id="post-40-03Linux集群系列之十七-RHCS架构解析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/09/26/40-03Linux集群系列之十七-RHCS架构解析/">40_03Linux集群系列之十七--RHCS架构解析</a>
-    </h1>
-  
-
-        
-        <a href="/2015/09/26/40-03Linux集群系列之十七-RHCS架构解析/" class="archive-article-date">
-  	<time datetime="2015-09-26T06:52:39.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-26</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>RHCS(Red Hat Cluster Suite): </p>
-<blockquote>
-<p>   LVS<br>   HA<br>   GFS2　(Global File System,早期RH4/5有GFS)<br>   cLVM   (Cluster Logical Volume Manager)<br>RHCS提供了完整的集群资源套件，例如上面的负载均衡，高可用，集群文件系统，集群逻辑卷管理器； </p>
-</blockquote>
-<p>在RH4,5两个版本中，信息层和管理层和资源代理的实现组件如下:<br>RHCS: </p>
-<blockquote>
-<p>   ML:cman (cluster manager)<br>   CRM: rgmanager (resource group manager)<br>   RA:<br>        １、internal<br>        ２、script: LSB </p>
-</blockquote>
-<p>在RH4上Messaging Layer是cman,但是由于cman在整个信息层的功能没有openais的强大，所以在RH5上cman作为openais的一个插件工作，而这个插件的主要作用在于提供了quorum(因为当时并没有很好的关于投票系统的解决方案)但是配置文件并不依赖于openais,而是由cman自己提供，在/etc/cluster/cluster.conf,所以说在RH5上openais提供了信息层的监控，但是仍由cman进行管理。 </p>
-<p>在RH6上提供了完整的corosync信息层管理工具，可以不再使用cman这个插件，如果使用cman，它的配置文件仍是/etc/cluster/cluster.conf；<br>然而在资源管理层虽然使用了pacemaker,但是仍由rgmanager管理，这个和信息层一样，即虽然使用了corosync和pacemaker,但是仍由cman和rgmanager控制； </p>
-<p>在corosync2.3.0版本后，提供了一个更加优秀的投票系统，这个叫做votequorum，所以在这个版本中的cman将会退出这个江湖； </p>
-<p>gfs2:Global File System(集群文件系统):最好16个节点<br>ocfs2:Oracle Cluster File System(没有gfs2好)<br>DLM:Distributed Lock Manager(分布式锁管理器)<br>gfs:Google file system(分布式文件系统)<br>所以在搜索gfs的时候要注意；<br>为了能够扩展容量，所以提供了类似LVM的集群逻辑卷；<br>cLVM:借助于HA的功能，将某个节点对LVM操作通知给其他节点；<br>CCS(Cluster Configuration System):各个节点配置资源的通知，更新；<br>Failover domain:服务故障转移域:表示节点出问题了应该往哪节点转移以及是否应该重启服务；<br>    如果一个服务停止了，是转移到另外一个节点上，还是应该重启服务，所以可以定义优先级； </p>
-<p>LVM–&gt;cLVM: </p>
-<p>#vim /etc/lvm/lvm.conf<br>locking_type =1 基于文件的锁<br>把其改为3就可改为集群的了；<br>然后启动cLVM服务即可； </p>
-<p>LVS:piranha(GUI工具) </p>
-<p>软件、系统安装:<br>cobbler(类似于PXE的自动安装)<br>puppet(配置文件管理、软件分发)<br>luci/ricci(集群管理)<br>fabric(命令分发工具，比for ;do ssh ; done这个方式高的多) </p>
-<p>RHCS配置:<br>system-config-cluster </p>
-<p>详细部分可以查看:<br><a href="http://blog.chinaunix.net/uid-26931379-id-3558604.html" target="_blank" rel="noopener">http://blog.chinaunix.net/uid-26931379-id-3558604.html</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/09/26/40-03Linux集群系列之十七-RHCS架构解析/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-
-  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script type="text/javascript">
-
-if(true){
-	var gitalk = new Gitalk({
-  	clientID: 'b214cde67415ed5b1224',
-  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
-  	repo: 'geasyheart.github.io',
-  	owner: 'geasyheart',
-  	admin: ['geasyheart'],
-  	id: '',
-  	distractionFreeMode: 'true'
-})
-gitalk.render('gitalk-container') 
-}
-</script>
-  
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/8/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/10/">Next &raquo;</a>
@@ -1615,6 +1599,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">machine learning</a>
               </li>
              
@@ -1627,11 +1615,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">CI</a>
+                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">git</a>
+                <a href="javascript:void(0)" class="js-tag color3">CI</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1643,15 +1631,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">git</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">机器学习</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
             
             <div class="clearfix"></div>
