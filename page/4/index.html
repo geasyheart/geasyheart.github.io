@@ -192,6 +192,154 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-SQLAlchemy示例-AdjacencyList-单向链接列表" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/20/SQLAlchemy示例-AdjacencyList-单向链接列表/">SQLAlchemy示例:AdjacencyList,单向链接列表</a>
+    </h1>
+  
+
+        
+        <a href="/2018/04/20/SQLAlchemy示例-AdjacencyList-单向链接列表/" class="archive-article-date">
+  	<time datetime="2018-04-20T02:41:04.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-20</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这里说的 AdjacencyList , 就是最常用来在关系数据库中表示树结构的,<code>parent</code>方式:</p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>name</th>
+<th>parent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>一</td>
+<td>null</td>
+</tr>
+<tr>
+<td>2</td>
+<td>二</td>
+<td>1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>三</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>上面的数据, 表示的结构就是:<br>一<br>  |- 二<br>    |- 三<br>模型定义很好做:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> create_engine</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.ext.declarative <span class="keyword">import</span> declarative_base</span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> Column, ForeignKey</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.types <span class="keyword">import</span> Integer, Unicode</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> relationship, sessionmaker, joinedload</span><br><span class="line"></span><br><span class="line">BaseModel = declarative_base()</span><br><span class="line">Engine = create_engine(<span class="string">'sqlite://'</span>, echo=<span class="literal">True</span>)</span><br><span class="line">Session = sessionmaker(Engine)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Node</span><span class="params">(BaseModel)</span>:</span></span><br><span class="line">    __tablename__ = <span class="string">'node'</span></span><br><span class="line"></span><br><span class="line">    id = Column(Integer, autoincrement=<span class="literal">True</span>, primary_key=<span class="literal">True</span>)</span><br><span class="line">    name = Column(Unicode(<span class="number">32</span>), nullable=<span class="literal">False</span>, server_default=<span class="string">''</span>)</span><br><span class="line">    parent = Column(Integer, ForeignKey(<span class="string">'node.id'</span>), index=<span class="literal">True</span>,</span><br><span class="line">                    nullable=<span class="literal">False</span>, server_default=<span class="string">'0'</span>)</span><br></pre></td></tr></table></figure>
+<p>这里不让<code>parent</code>字段有<code>null</code>, 而使用<code>0</code>代替.<br>这个例子在关系上, 有一个纠结的地方, 因为 <code>node</code> 这个表, 它是自关联的, 所以如果想要<code>children</code> 和 <code>parent_obj</code> 这两个关系时:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">children = relationship(<span class="string">'Node'</span>)</span><br><span class="line">parent_obj = relationship(<span class="string">'Node'</span>)</span><br></pre></td></tr></table></figure></p>
+<p>呃, 尴尬了.<br>如果是两个表, 那么 SQLAlchemy 可以通过外键在哪张表这个信息, 来确定关系的方向:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Blog</span><span class="params">(BaseModel)</span>:</span></span><br><span class="line">    ...</span><br><span class="line">    user = Column(Integer, ForeignKey(<span class="string">'user.id'</span>))</span><br><span class="line">    user_obj = relationship(<span class="string">'User'</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">User</span><span class="params">(BaseModel)</span>:</span></span><br><span class="line">    ...</span><br><span class="line">    blog_list = relationship(<span class="string">'Blog'</span>)</span><br></pre></td></tr></table></figure>
+<p>因为外键在 <code>Blog</code> 中, 所以 <code>Blog -&gt; User</code> 的 <code>user_obj</code> 是一个 <code>N -&gt; 1</code>关系.<br>反之, <code>User -&gt; Blog</code> 的 <code>blog_list</code> 则是一个 <code>1 -&gt; N</code> 的关系.<br>而自相关的 <code>Node</code> 无法直接判断方向, 所以 <code>SQLAlchemy</code> 会按 <code>1 -&gt; N</code> 处理, 那么:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">children = relationship(<span class="string">'Node'</span>)</span><br><span class="line">parent_obj = relationship(<span class="string">'Node'</span>)</span><br></pre></td></tr></table></figure></p>
+<p>这两条之中, <code>children</code> 是正确的, 是我们想要的. 要定义 <code>parent_obj</code> 则需要在 <code>relationship</code> 中通过参数明确表示方向:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">parent_obj = relationship(<span class="string">'Node'</span>, remote_side=[id])</span><br></pre></td></tr></table></figure></p>
+<p>这种方式就定义了一个, “到 id” 的 <code>N -&gt; 1</code> 关系.<br>现在完整的模型定义是:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Node</span><span class="params">(BaseModel)</span>:</span></span><br><span class="line">    __tablename__ = <span class="string">'node'</span></span><br><span class="line"></span><br><span class="line">    id = Column(Integer, autoincrement=<span class="literal">True</span>, primary_key=<span class="literal">True</span>)</span><br><span class="line">    name = Column(Unicode(<span class="number">32</span>), nullable=<span class="literal">False</span>, server_default=<span class="string">''</span>)</span><br><span class="line">    parent = Column(Integer, ForeignKey(<span class="string">'node.id'</span>), index=<span class="literal">True</span>,</span><br><span class="line">                    nullable=<span class="literal">False</span>, server_default=<span class="string">'0'</span>)</span><br><span class="line"></span><br><span class="line">    children = relationship(<span class="string">'Node'</span>) <span class="comment"># 1 -&gt; N</span></span><br><span class="line">    parent_obj = relationship(<span class="string">'Node'</span>, remote_side=[id])</span><br></pre></td></tr></table></figure>
+<p>查询方面没什么特殊的了, 不过我发现在自相关的模型关系, <code>lazy</code> 选项不起作用:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">children = relationship(<span class="string">'Node'</span>, lazy=<span class="string">"joined"</span>)</span><br><span class="line">parent_obj = relationship(<span class="string">'Node'</span>, remote_side=[id], lazy=<span class="string">"joined"</span>)</span><br></pre></td></tr></table></figure></p>
+<p>都是无效的, 只有在查询时, 手动使用 <code>options()</code> 定义:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">n = session.query(Node).filter(Node.name==<span class="string">u'一'</span>)\</span><br><span class="line">           .options(joinedload(<span class="string">'parent_obj'</span>)).first()</span><br></pre></td></tr></table></figure></p>
+<p>如果要一次查出多级的子节点:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">n = session.query(Node).filter(Node.name==<span class="string">u'一'</span>)\</span><br><span class="line">           .options(joinedload(<span class="string">'children'</span>).joinedload(<span class="string">'children'</span>)).first()</span><br><span class="line"><span class="keyword">print</span> n.name, n.children, n.children[<span class="number">0</span>].children</span><br></pre></td></tr></table></figure></p>
+<p>多个 <code>joinedload()</code> 串连的话, 可以使用 <code>joinedload_all()</code> 来整合:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> joinedload_all</span><br><span class="line"></span><br><span class="line">n = session.query(Node).filter(Node.name==<span class="string">u'一'</span>)\</span><br><span class="line">           .options(joinedload_all(<span class="string">'children'</span>, <span class="string">'children'</span>)).first()</span><br></pre></td></tr></table></figure></p>
+<p>在修改方面, 删除的话, 配置了 <code>cascade</code> , 删除父节点, 则子节点也会自动删除:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">children = relationship(<span class="string">'Node'</span>, lazy=<span class="string">'joined'</span>, cascade=<span class="string">'all'</span>) <span class="comment"># 1 -&gt; N</span></span><br><span class="line">node = session.query(Node).filter(Node.name == <span class="string">u'一'</span>).first()</span><br><span class="line">session.delete(node)</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure></p>
+<p>如果只删除子节点, 那么 <code>delete-orphan</code> 选项就很好用了:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">children = relationship(<span class="string">'Node'</span>, lazy=<span class="string">'joined'</span>, cascade=<span class="string">'all, delete-orphan'</span>) <span class="comment"># 1 -&gt; N</span></span><br><span class="line">node = session.query(Node).filter(Node.name == <span class="string">u'一'</span>).first()</span><br><span class="line">node.children = []</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">SQLAlchemy</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/SQLAlchemy//" class="article-tag-list-link color1">SQLAlchemy</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/04/20/SQLAlchemy示例-AdjacencyList-单向链接列表/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+
+  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script type="text/javascript">
+
+if(true){
+	var gitalk = new Gitalk({
+  	clientID: 'b214cde67415ed5b1224',
+  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
+  	repo: 'geasyheart.github.io',
+  	owner: 'geasyheart',
+  	admin: ['geasyheart'],
+  	id: '',
+  	distractionFreeMode: 'true'
+})
+gitalk.render('gitalk-container') 
+}
+</script>
+  
+  
     <article id="post-关于Python的mock" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1491,118 +1639,6 @@ gitalk.render('gitalk-container')
 </script>
   
   
-    <article id="post-迁移博客喽" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/25/迁移博客喽/">迁移博客喽</a>
-    </h1>
-  
-
-        
-        <a href="/2018/03/25/迁移博客喽/" class="archive-article-date">
-  	<time datetime="2018-03-25T10:39:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-25</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="为什么要迁移"><a href="#为什么要迁移" class="headerlink" title="为什么要迁移"></a>为什么要迁移</h2><ol>
-<li>这两天有点时间，另外也是为了对自己的以前做一下总结，从上大学期间对linux非常喜爱的自己到工作期间的一点感悟，不忘初心。</li>
-<li>也是发现现在好像没什么可以分享的，敲代码需要一整套的知识体系，不如直接放项目出来～</li>
-</ol>
-<h2 id="如何迁移"><a href="#如何迁移" class="headerlink" title="如何迁移"></a>如何迁移</h2><p>主要应用了Python的<a href="https://scrapy.org/" target="_blank" rel="noopener">Scrapy</a>框架,更多内容请看<a href="https://github.com/geasyheart/lofter-spider/" target="_blank" rel="noopener">lofter-spider</a></p>
-<h2 id="感想"><a href="#感想" class="headerlink" title="感想"></a>感想</h2><p>爱Linux，爱Python<br>看看曾经疯狂的自己，珍惜现在的自己<br>技术需要不断探索，也需要不断总结<br>年轻时需要任性，以后需要稳重，责任</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/03/25/迁移博客喽/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-
-  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script type="text/javascript">
-
-if(true){
-	var gitalk = new Gitalk({
-  	clientID: 'b214cde67415ed5b1224',
-  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
-  	repo: 'geasyheart.github.io',
-  	owner: 'geasyheart',
-  	admin: ['geasyheart'],
-  	id: '',
-  	distractionFreeMode: 'true'
-})
-gitalk.render('gitalk-container') 
-}
-</script>
-  
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/5/">Next &raquo;</a>
@@ -1716,10 +1752,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">machine learning</a>
               </li>
              
@@ -1728,15 +1760,19 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">python</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">算法</a>
+                <a href="javascript:void(0)" class="js-tag color3">CI</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">CI</a>
+                <a href="javascript:void(0)" class="js-tag color4">git</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1748,7 +1784,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">git</a>
+                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
              
               <li class="article-tag-list-item">
