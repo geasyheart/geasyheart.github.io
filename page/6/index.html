@@ -192,6 +192,113 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-jenkins使用" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/11/29/jenkins使用/">jenkins使用</a>
+    </h1>
+  
+
+        
+        <a href="/2017/11/29/jenkins使用/" class="archive-article-date">
+  	<time datetime="2017-11-29T09:58:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-11-29</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>嗯嗯，为什么会有这篇文章？？<br>知道当你写代码的时候前端让你拉代码的痛苦么～～，没有运维我来上，手动多了就更😡了，所以，你懂的。。 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">## 搭建 </span><br><span class="line">  </span><br><span class="line">使用的docker进行部署，但是注意不要部署在8080端口，公司电信有时不能正常访问 </span><br><span class="line">   </span><br><span class="line">## 环境 </span><br><span class="line">  </span><br><span class="line">1. jenkins </span><br><span class="line">2. gitlab </span><br><span class="line">  </span><br><span class="line">## 使用 </span><br><span class="line">  </span><br><span class="line">关于jenkins,目前熟悉的流程： </span><br><span class="line">  </span><br><span class="line">1. gitlab推送消息 </span><br><span class="line">2. jenkins获取消息，拉取代码，todo其他 </span><br><span class="line">   </span><br><span class="line">目前使用步骤为： </span><br><span class="line">  </span><br><span class="line">+ 安装gitlab webhook等插件，重启jenkins，构建触发器会多出一个可以使用gitlab的.. </span><br><span class="line">+ 关于gitlab推送，使用secret token </span><br><span class="line">+ 关于代码部署,使用publish over ssh </span><br><span class="line">-  配置此jenkins能够访问生产环境的私钥 </span><br><span class="line">-  send files or execute command over ssh那配置参数，此处详情如下。 </span><br><span class="line">-  构建后操作 配置 email通知，如果失败，会发送邮件 </span><br><span class="line">   </span><br><span class="line">构建: </span><br><span class="line">+ transfters: </span><br><span class="line">- source files:   **/*  (建议直接填写这个,这个表示这个项目的所有文件) </span><br><span class="line">- remove prefix: 没用到 </span><br><span class="line">- remote directory: 此对应配置ssh服务器的时候有个remote directory的相对路径 </span><br><span class="line">1. 如果remote directory为/srv,填写project_name, 则最后项目文件存放位置为： /srv/project_name </span><br><span class="line">2. 注意： 所有文件是拷贝过去的，不是git仓库 </span><br><span class="line">3. 当然，我使用了下面方式： 先手动部署一遍，然后只指定下面的exec command参数 </span><br><span class="line">- exec command: 此处对应生产环境的路径 </span><br><span class="line">  </span><br><span class="line">其他的网上都能找到现成的，此处记录以纪念学习历程。。。</span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">CI</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/CI//" class="article-tag-list-link color3">CI</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/11/29/jenkins使用/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+
+  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script type="text/javascript">
+
+if(true){
+	var gitalk = new Gitalk({
+  	clientID: 'b214cde67415ed5b1224',
+  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
+  	repo: 'geasyheart.github.io',
+  	owner: 'geasyheart',
+  	admin: ['geasyheart'],
+  	id: '',
+  	distractionFreeMode: 'true'
+})
+gitalk.render('gitalk-container') 
+}
+</script>
+  
+  
     <article id="post-grpc-timeout" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1187,173 +1294,6 @@ gitalk.render('gitalk-container')
 </script>
   
   
-    <article id="post-视频直播" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/05/10/视频直播/">视频直播</a>
-    </h1>
-  
-
-        
-        <a href="/2017/05/10/视频直播/" class="archive-article-date">
-  	<time datetime="2017-05-10T07:38:01.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-05-10</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Collection-设计"><a href="#Collection-设计" class="headerlink" title="Collection 设计"></a>Collection 设计</h1><h2 id="约定"><a href="#约定" class="headerlink" title="约定"></a>约定</h2><ol>
-<li>在没有特殊声明的情况下，字段<code>_id</code>默认使用<code>ObjectId</code>类型</li>
-</ol>
-<h2 id="课程相关Collections"><a href="#课程相关Collections" class="headerlink" title="课程相关Collections"></a>课程相关Collections</h2><h3 id="LiveCourse"><a href="#LiveCourse" class="headerlink" title="LiveCourse"></a>LiveCourse</h3><p>直播课的元信息</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"_id"</span>: <span class="string">"ObjectId"</span>, <span class="comment">// 课程 ID</span></span><br><span class="line">  	<span class="attr">"meta"</span>: &#123;</span><br><span class="line">      <span class="attr">"buy"</span>: <span class="string">"integer"</span>, <span class="comment">// 购买数量</span></span><br><span class="line">      <span class="attr">"category"</span>: [<span class="string">"string"</span>],</span><br><span class="line">      <span class="attr">"description"</span>: <span class="string">"string"</span>, <span class="comment">// 描述 HTML</span></span><br><span class="line">      <span class="attr">"name"</span>: <span class="string">"string"</span>, <span class="comment">// 课程名称</span></span><br><span class="line">      <span class="attr">"opening"</span>: <span class="string">"string"</span>, <span class="comment">// 开班时间</span></span><br><span class="line">      <span class="attr">"policy"</span>: [<span class="string">"integer"</span>], <span class="comment">// 课程服务策略清单，见下表</span></span><br><span class="line">      <span class="attr">"price"</span>: <span class="string">"integer"</span>, <span class="comment">// 价格，小数点后两位。例如：1909 -&gt; ¥19.09</span></span><br><span class="line">      <span class="attr">"rate_ratio"</span>: <span class="string">"integer"</span>, <span class="comment">// 好评度，eg. 80%</span></span><br><span class="line">      <span class="attr">"rate"</span>: <span class="string">"integer"</span> <span class="comment">// 评分星级 [1,2,3,4,5]</span></span><br><span class="line">  	&#125;,</span><br><span class="line">    <span class="attr">"plans"</span>: &#123;</span><br><span class="line">      <span class="attr">"sections"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">"name"</span>: <span class="string">"string"</span>,</span><br><span class="line">          <span class="attr">"start"</span>: <span class="string">"Date"</span>,</span><br><span class="line">          <span class="attr">"length"</span>: <span class="string">"integer"</span>, <span class="comment">//时长 分钟</span></span><br><span class="line">          <span class="attr">"finished"</span>: <span class="string">"boolean"</span></span><br><span class="line">        &#125;</span><br><span class="line">      ],</span><br><span class="line">      <span class="attr">"chapters"</span>:[</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">"chapter"</span>: <span class="string">"string"</span>,</span><br><span class="line">          <span class="attr">"length"</span>: <span class="string">"integer"</span> <span class="comment">// 此章节有多少小节</span></span><br><span class="line">        &#125;</span><br><span class="line">      ],</span><br><span class="line">      <span class="attr">"current"</span>: <span class="string">"integer"</span>  <span class="comment">//当前正在上哪一小节。-1为当前无课程</span></span><br><span class="line">    &#125;,</span><br><span class="line">  	<span class="attr">"group"</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">"name"</span>: <span class="string">"string"</span>, <span class="comment">// 群名</span></span><br><span class="line">        <span class="attr">"no"</span>: <span class="string">"string"</span>, <span class="comment">// 群号</span></span><br><span class="line">      &#125;</span><br><span class="line">  	],</span><br><span class="line">  	<span class="attr">"teachers"</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">"uni"</span>: <span class="string">"ObjectId"</span>,</span><br><span class="line">        <span class="attr">"name"</span>: <span class="string">"string"</span>,</span><br><span class="line">        <span class="attr">"title"</span>: <span class="string">"string"</span>, <span class="comment">//老师短介绍</span></span><br><span class="line">        <span class="attr">"img"</span>: <span class="string">"string"</span>,  <span class="comment">// URL</span></span><br><span class="line">        <span class="attr">"templ"</span>: <span class="string">"string"</span>, <span class="comment">// 老师简历ID</span></span><br><span class="line">      &#125;</span><br><span class="line">  	]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>课程服务承诺策略 Policies：</p>
-<p>（十位相同的选项只能选一个）</p>
-<table>
-<thead>
-<tr>
-<th>策略</th>
-<th>含义</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>00</td>
-<td>支付保障（默认勾选）</td>
-</tr>
-<tr>
-<td>10</td>
-<td>随时退款</td>
-</tr>
-<tr>
-<td>11</td>
-<td>前三节课前退款</td>
-</tr>
-<tr>
-<td>12</td>
-<td>课前随时退款</td>
-</tr>
-<tr>
-<td>13</td>
-<td>不支持退款</td>
-</tr>
-<tr>
-<td>20</td>
-<td>课后有回放</td>
-</tr>
-<tr>
-<td>30</td>
-<td>承诺包过</td>
-</tr>
-</tbody>
-</table>
-<h3 id="LiveCourseComments"><a href="#LiveCourseComments" class="headerlink" title="LiveCourseComments"></a>LiveCourseComments</h3><p>直播课的评论</p>
-<p>追加评论的时候可以选择修改Rate评分的数值</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"_id"</span>: <span class="string">"ObjectId"</span>,</span><br><span class="line">  <span class="attr">"hidden"</span>: <span class="string">"boolean"</span>, <span class="comment">// 是否显示该评论</span></span><br><span class="line">  <span class="attr">"course"</span>: <span class="string">"ObjectId"</span>,</span><br><span class="line">  <span class="attr">"user"</span>: <span class="string">"integer"</span>, <span class="comment">// 评论者的用户ID</span></span><br><span class="line">  <span class="attr">"rate"</span>: <span class="string">"integer"</span>, <span class="comment">// 评分星级 [1,2,3,4,5]</span></span><br><span class="line">  <span class="attr">"content"</span>: <span class="string">"string"</span>,</span><br><span class="line">  <span class="attr">"progress"</span>: <span class="string">"integer"</span>, <span class="comment">// 评论时课程完成度 0 - 100</span></span><br><span class="line">  <span class="attr">"append"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"content"</span>: <span class="string">"string"</span>,</span><br><span class="line">      <span class="attr">"progress"</span>: <span class="string">"integer"</span>,</span><br><span class="line">      <span class="attr">"date"</span>: <span class="string">"date"</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="LiveCourseBuyers"><a href="#LiveCourseBuyers" class="headerlink" title="LiveCourseBuyers"></a>LiveCourseBuyers</h3><p>直播课的购买记录</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"_id"</span>: <span class="string">"ObjectId"</span>,</span><br><span class="line">  <span class="attr">"course"</span>: <span class="string">"ObjectId"</span>,</span><br><span class="line">  <span class="attr">"user"</span>: <span class="string">"integer"</span>, <span class="comment">// UID of buyer</span></span><br><span class="line">  <span class="attr">"origin_p"</span>: <span class="string">"integer"</span>,</span><br><span class="line">  <span class="attr">"price"</span>: <span class="string">"integer"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="LiveCoursePrivilege"><a href="#LiveCoursePrivilege" class="headerlink" title="LiveCoursePrivilege"></a>LiveCoursePrivilege</h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"_id"</span>: <span class="string">"ObjectId"</span>,</span><br><span class="line">  <span class="attr">"course"</span>: <span class="string">"ObjectId"</span>,</span><br><span class="line">  <span class="attr">"user"</span>: <span class="string">"integer"</span>, <span class="comment">// UID of User</span></span><br><span class="line">  <span class="attr">"role"</span>: <span class="string">"integer"</span>, <span class="comment">// 用户的角色 &#123;0: admin, 1: student, 2: admin(Teacher), 3: assistant&#125;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="LiveCourseTeachers"><a href="#LiveCourseTeachers" class="headerlink" title="LiveCourseTeachers"></a>LiveCourseTeachers</h3><p>直播课程老师元信息</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"_id"</span>: <span class="string">"ObjectId"</span>,</span><br><span class="line">  <span class="attr">"name"</span>: <span class="string">"string"</span>,</span><br><span class="line">  <span class="comment">// TODO</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="直播相关Collections"><a href="#直播相关Collections" class="headerlink" title="直播相关Collections"></a>直播相关Collections</h2><h3 id="NeteaseLiveChannel"><a href="#NeteaseLiveChannel" class="headerlink" title="NeteaseLiveChannel"></a>NeteaseLiveChannel</h3><p>网易云视频直播频道信息</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"_id"</span>: <span class="string">"ObjectId"</span>,</span><br><span class="line">  <span class="attr">"course"</span>: <span class="string">"ObjectId"</span>,</span><br><span class="line">  <span class="attr">"update"</span>: <span class="string">"date"</span>,</span><br><span class="line">  <span class="attr">"push"</span>: <span class="string">"string"</span>, <span class="comment">// 推流URL</span></span><br><span class="line">  <span class="attr">"pull"</span>: &#123;</span><br><span class="line">    <span class="attr">"rtmp"</span>: <span class="string">"string"</span>,</span><br><span class="line">    <span class="attr">"flv"</span>: <span class="string">"string"</span>,</span><br><span class="line">    <span class="attr">"hls"</span>: <span class="string">"string"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="LiveRoomAdmins"><a href="#LiveRoomAdmins" class="headerlink" title="LiveRoomAdmins"></a>LiveRoomAdmins</h3><p>直播间管理</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"_id"</span>: <span class="string">"ObjectId"</span>,</span><br><span class="line">  <span class="attr">"course"</span>: <span class="string">"ObjectId"</span>,</span><br><span class="line">  <span class="attr">"text_limit"</span>: <span class="string">"integer"</span>,  <span class="comment">// 全局发言频率限制(秒)</span></span><br><span class="line">  <span class="attr">"rich_text"</span>: <span class="string">"boolean"</span>,  <span class="comment">// 是否启用特殊消息（献花、鼓掌）</span></span><br><span class="line">  <span class="attr">"ban_list"</span>: [</span><br><span class="line">    <span class="string">"integer"</span>  <span class="comment">// 被禁言的学生ID</span></span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="统计相关Collections"><a href="#统计相关Collections" class="headerlink" title="统计相关Collections"></a>统计相关Collections</h2><h3 id="LiveCourseAttendance"><a href="#LiveCourseAttendance" class="headerlink" title="LiveCourseAttendance"></a>LiveCourseAttendance</h3><p>学生课程签到信息</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"_id"</span>: <span class="string">"ObjectId"</span>,</span><br><span class="line">  <span class="attr">"course"</span>: <span class="string">"ObjectId"</span>,</span><br><span class="line">  <span class="attr">"user"</span>: <span class="string">"integer"</span>, <span class="comment">// 用户ID</span></span><br><span class="line">  <span class="attr">"sections"</span>: [</span><br><span class="line">    <span class="string">"boolean"</span></span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="LiveCourseCompletion"><a href="#LiveCourseCompletion" class="headerlink" title="LiveCourseCompletion"></a>LiveCourseCompletion</h3><p>学生课时完成度信息</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"id"</span>: <span class="string">"ObjectId"</span>,</span><br><span class="line">  <span class="attr">"course"</span>: <span class="string">"ObjectId"</span>,</span><br><span class="line">  <span class="attr">"user"</span>: <span class="string">"integer"</span>,</span><br><span class="line">  <span class="attr">"progress"</span>: &#123;</span><br><span class="line">    <span class="attr">"total"</span>: <span class="string">"integer"</span>,  <span class="comment">// 总完成度</span></span><br><span class="line">    <span class="attr">"sections"</span>: [</span><br><span class="line">      <span class="string">"integer"</span>   <span class="comment">// 小节完成度</span></span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">"chapters"</span>: [</span><br><span class="line">      <span class="string">"integer"</span>  <span class="comment">// 章节完成度</span></span><br><span class="line">    ]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/05/10/视频直播/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-
-  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script type="text/javascript">
-
-if(true){
-	var gitalk = new Gitalk({
-  	clientID: 'b214cde67415ed5b1224',
-  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
-  	repo: 'geasyheart.github.io',
-  	owner: 'geasyheart',
-  	admin: ['geasyheart'],
-  	id: '',
-  	distractionFreeMode: 'true'
-})
-gitalk.render('gitalk-container') 
-}
-</script>
-  
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/5/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/7/">Next &raquo;</a>
@@ -1495,11 +1435,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">grpc</a>
+                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">算法</a>
+                <a href="javascript:void(0)" class="js-tag color5">grpc</a>
               </li>
              
               <li class="article-tag-list-item">

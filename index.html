@@ -192,6 +192,129 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-ubuntu16-04多GPU风扇转速调整" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/07/22/ubuntu16-04多GPU风扇转速调整/">ubuntu16.04多GPU风扇转速调整</a>
+    </h1>
+  
+
+        
+        <a href="/2021/07/22/ubuntu16-04多GPU风扇转速调整/" class="archive-article-date">
+  	<time datetime="2021-07-22T04:22:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近闲置出来两块1080ti GPU，内心那叫一个激动哇，虽然有些老，另外训练时转速提不上去，此次就解决这个问题。</p>
+<h2 id="方法一（个人只在单GPU上实验成功）"><a href="#方法一（个人只在单GPU上实验成功）" class="headerlink" title="方法一（个人只在单GPU上实验成功）"></a>方法一（个人只在单GPU上实验成功）</h2><h3 id="1-生成xorg-conf"><a href="#1-生成xorg-conf" class="headerlink" title="1. 生成xorg.conf"></a>1. 生成xorg.conf</h3><p>如果:</p>
+<blockquote>
+<p>cannot stat /etc/x11/xorg.conf no such file or directory</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 生成这个文件</span></span><br><span class="line"></span><br><span class="line">$ sudo nvidia-xconfig --<span class="built_in">enable</span>-all-gpus --cool-bits=4</span><br></pre></td></tr></table></figure>
+<h3 id="2-vim-etc-x11-xorg-conf"><a href="#2-vim-etc-x11-xorg-conf" class="headerlink" title="2. vim /etc/x11/xorg.conf"></a>2. vim /etc/x11/xorg.conf</h3><p>添加<code>Option &quot;Coolbits&quot; &quot;4&quot;</code>到device nvidia 里面.如果有多个就每个都add。</p>
+<h3 id="3-reboot"><a href="#3-reboot" class="headerlink" title="3. reboot"></a>3. reboot</h3><h3 id="4-nvidia-settings"><a href="#4-nvidia-settings" class="headerlink" title="4.nvidia-settings"></a>4.nvidia-settings</h3><p>打开nvidia-settings软件，然后调风扇转速即可。</p>
+<h2 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h2><blockquote>
+<p>使用<a href="https://github.com/andyljones/coolgpus" target="_blank" rel="noopener">coolgpus</a></p>
+</blockquote>
+<h3 id="1-关闭图形化界面"><a href="#1-关闭图形化界面" class="headerlink" title="1. 关闭图形化界面"></a>1. 关闭图形化界面</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop lightgdm  &amp;&amp; systemctl lightgdm <span class="built_in">disable</span> lightgdm</span><br></pre></td></tr></table></figure>
+<h3 id="2-使用coolgpus"><a href="#2-使用coolgpus" class="headerlink" title="2. 使用coolgpus"></a>2. 使用coolgpus</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=Headless GPU Fan Control</span><br><span class="line">After=syslog.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">ExecStart=/home/ajones/conda/bin/coolgpus --<span class="built_in">kill</span> </span><br><span class="line">Restart=on-failure</span><br><span class="line">RestartSec=5s</span><br><span class="line">ExecStop=/bin/<span class="built_in">kill</span> -2 <span class="variable">$MAINPID</span></span><br><span class="line">KillMode=none </span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl <span class="built_in">enable</span> coolgpus</span><br><span class="line">sudo systemctl start coolgpus</span><br></pre></td></tr></table></figure>
+<h3 id="个人建议"><a href="#个人建议" class="headerlink" title="个人建议"></a>个人建议</h3><p>如果使用coolgpus的时候先确保可以正常使用，然后再添加到systemctl里面去。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop lightgdm</span><br><span class="line">sudo $(<span class="built_in">which</span> coolgpus) --speed 99 99</span><br></pre></td></tr></table></figure>
+<p>如果可以了再后续操作。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/07/22/ubuntu16-04多GPU风扇转速调整/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+
+  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script type="text/javascript">
+
+if(true){
+	var gitalk = new Gitalk({
+  	clientID: 'b214cde67415ed5b1224',
+  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
+  	repo: 'geasyheart.github.io',
+  	owner: 'geasyheart',
+  	admin: ['geasyheart'],
+  	id: '',
+  	distractionFreeMode: 'true'
+})
+gitalk.render('gitalk-container') 
+}
+</script>
+  
+  
     <article id="post-python-bdist-wheel" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1196,123 +1319,6 @@ gitalk.render('gitalk-container')
 </script>
   
   
-    <article id="post-2020感想" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/01/19/2020感想/">2020感想</a>
-    </h1>
-  
-
-        
-        <a href="/2020/01/19/2020感想/" class="archive-article-date">
-  	<time datetime="2020-01-19T13:08:01.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-01-19</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>年终总结了，想了好久，一直想着应该总结些什么，但是总要开一个头。</p>
-<p>相比南京，上海这里更多元（N维特征向量~），人来人往的人群，挤成狗而每天吵不完架的地铁，好吃的南京东路，标志性的打卡地方，惨淡的生活气息，努力的小伙伴，发挥着自己的才智和社交，这是我认识的北上广的生活。</p>
-<p>这一年最重要的是遇到了自己喜欢的人，就像是突然抬起了头看了下天空，看，这更像是人生。</p>
-<p>很遥远，但，就在那。</p>
-<p>许巍的《故乡》中唱到，“你在我的心里永远是故乡”。</p>
-<p>人生中还有比这更值得炫耀与努力的事情吗，貌似只有一个亿的小目标了~</p>
-<p>如果不踏出这一步，人生一大遗憾。</p>
-<p>踏出了，不知道。</p>
-<p>但是不后悔。</p>
-<p>我还年轻。</p>
-<p>才28，算什么。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">小桥流水人家</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/小桥流水人家//" class="article-tag-list-link color2">小桥流水人家</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/01/19/2020感想/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-
-  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script type="text/javascript">
-
-if(true){
-	var gitalk = new Gitalk({
-  	clientID: 'b214cde67415ed5b1224',
-  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
-  	repo: 'geasyheart.github.io',
-  	owner: 'geasyheart',
-  	admin: ['geasyheart'],
-  	id: '',
-  	distractionFreeMode: 'true'
-})
-gitalk.render('gitalk-container') 
-}
-</script>
-  
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -1454,11 +1460,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">grpc</a>
+                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">算法</a>
+                <a href="javascript:void(0)" class="js-tag color5">grpc</a>
               </li>
              
               <li class="article-tag-list-item">

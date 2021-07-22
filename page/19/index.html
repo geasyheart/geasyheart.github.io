@@ -192,6 +192,133 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-07-01Vim编辑器详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/11/07-01Vim编辑器详解/">07_01Vim编辑器详解</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/11/07-01Vim编辑器详解/" class="archive-article-date">
+  	<time datetime="2015-02-11T13:55:47.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-11</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>末行模式下：<br> .:表示当前行<br> $:最后一行<br> +#:向下的#行<br> 1，$ y 复制1至最后一行<br>c:修改:<br> cc + 新内容 这种方式是会直接把行内容删除，然后再插入模式下添加新内容<br>r:替换：<br> r + 内容   这个一般用于单字符的修改<br> 6r + a: 就会把当前字符的后6个替换成a<br>R:替换：<br> 在文本中直接替换，这个用的多！！！！！！！！！！<br>u：撤销<br> 最多撤销50次；；；<br>ctrl + r:还原撤销<br>. :重复前一次编辑操作 </p>
+<p>/PATTERN：查找<br>?PATTERN：向前查找<br>敲n指向下一个 </p>
+<p>可视化模式<br> v：按单个字符进行选取<br> V：按整行进行选取 </p>
+<p>查找并替换：<br> 和sed命令一样<br> 1，5s/PATTERN1/PARRERN2/gi(i是忽略大小写)<br> s/#//<br> s/#//g<br> %：表示全文 </p>
+<p>vim file1 file2<br>:next 切换下一个<br>:prev 切换上一个<br>:last 最后一个<br>:first 第一个<br>:qa 全部退出 </p>
+<p>分屏显示：<br> 即windows下words的分屏操作<br> ctrl + w,s :水平分割，先按ctrl+w，松开，再按s<br> ctrl +w ,v:垂直分割(Vertical)<br> 实现窗口的切换 ctrl + w+ 方向键  </p>
+<p>分窗口显示多个文件：<br>vim -o 水平分割<br> -O 垂直分割<br> 实现窗口的切换 ctrl + w+ 方向键  </p>
+<p>将另外一个文件的内容填充到当前文件中<br> :r file </p>
+<p> :set ic （忽略大小写）<br> :set noic（取消忽略大小写）<br> :set autoindent or set ai （设置自动缩进）<br> :set noai（取消自动缩进） </p>
+<p> 查找到的为虐你高亮显示或取消<br> set hlsearch<br> set nohlsearch<br> 语法高亮<br> syntax on<br> syntax off </p>
+<p> 练习： </p>
+<ol>
+<li>将 /etc/yum.repo.d/server.repo文件中<a href="ftp://instructor.example.com/pub替换为http://172.16.0.1/yum" target="_blank" rel="noopener">ftp://instructor.example.com/pub替换为http://172.16.0.1/yum</a> <blockquote>
+<p>%s/ftp:\/\/instructor.example.com\/pub/http:\/\/172.16.0.1\/yum/g </p>
+</blockquote>
+</li>
+<li>将 /etc/fstab中的5-9行保存至新文件~/fstab <blockquote>
+<p>vim /etc/fstab ,然后 :5,9 w ~/fstab </p>
+</blockquote>
+</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/11/07-01Vim编辑器详解/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+
+  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script type="text/javascript">
+
+if(true){
+	var gitalk = new Gitalk({
+  	clientID: 'b214cde67415ed5b1224',
+  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
+  	repo: 'geasyheart.github.io',
+  	owner: 'geasyheart',
+  	admin: ['geasyheart'],
+  	id: '',
+  	distractionFreeMode: 'true'
+})
+gitalk.render('gitalk-container') 
+}
+</script>
+  
+  
     <article id="post-06-03bash编程之五-字符串测试及for语句" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1342,11 +1469,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">grpc</a>
+                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">算法</a>
+                <a href="javascript:void(0)" class="js-tag color5">grpc</a>
               </li>
              
               <li class="article-tag-list-item">
