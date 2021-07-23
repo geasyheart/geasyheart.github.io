@@ -192,6 +192,153 @@ ga('send', 'pageview');
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-21-03Httpd属性配置" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/21/21-03Httpd属性配置/">21_03Httpd属性配置</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/21/21-03Httpd属性配置/" class="archive-article-date">
+  	<time datetime="2015-04-21T02:26:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-21</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>###Section 2:’Main’ server configuration </p>
+<p>DocumentRoot “/var/www/html”   URL路径跟本地文件系统路径不是一码事，可自行定义，不过和下面这些属性要相连接 </p>
+<p><directory><br>    Options FollowSymLinks<br>    AllowOverride None<br></directory><br>Options Indexes FollowSymLinks </p>
+<p>Options:<br>    indexes(索引):允许索引目录,即:每一个文件都显示给你看，作为一个web网站，一定不允许这项，如果作为下载站的时候，要启用这一项。<br>    FollowSymLinks:允许跟随符号链接<br>        例如#ln -s /etc/fstab /var/www/html/fstab.html,即可直接通过web查看，不过这项有较高的系统开销<br>    Includes:允许执行服务端包含<br>    ExecCGI:允许执行CGI脚本(这项应该允许)<br>    MultiViews:除非是国际化的站点，否则没必要<br>    All:启用所有选项<br>    None:什么都不启用 </p>
+<p>AllowOverride None:定义服务器的访问控制列表 </p>
+<pre><code>Order allow,deny 
+Allow from 192.168.0.0/24 仅允许这个网段的主机访问 
+            HOSTNAME:www.baidu.com 
+            DOMAINNAME:unravel.com 
+            Partial IP:172.16, 192.168.100.7 
+
+Order deny,allow 
+Deny from 192.168.0.0/24 仅拒绝这个网段的主机访问 
+</code></pre><p>AllowOverride AuthConfig  认证访问<br>        AuthType Basic<br>        AuthName “Restricted Files”<br>        AuthUserFile “/etc/httpd/conf/htpasswd”<br>        Require user username(指定这一个用户，可多个) | valid-user(允许htpasswd中所有用户) </p>
+<pre><code>#htpasswd -c -m /etc/httpd/conf/htpasswd hadoop 
+    -c:只能用于第一次创建这个文件 
+    -m:使用md5进行加密 
+    -D:删除一个用户 
+</code></pre><p>Group File Syntax<br>    GroupName: rbowen dpitts sunge rshersey </p>
+<pre><code>AuthType Basic 
+AuthName &quot;By Invitation Only&quot; 
+AuthUserFile &quot;/etc/httpd/conf/htpasswd&quot; 
+AuthGroupfile &quot;/etc/httpd/conf/htgroup&quot; 
+Require group GroupName 
+</code></pre><p>编辑htgroup<br>    GroupName:username1 username2…<br>    注意:这些用户事先应该有用户密码(使用htpasswd创建) </p>
+<p>出现错误，可自行查看错误日志 </p>
+<p>Order allow,deny 定义顺序的，先检查allow，后deny。<br>    Allow from all    定义所有都可访问 </p>
+<p><ifmodule mod_userdir.c><br>    UserDir disabled </ifmodule></p>
+<pre><code>#UserDir public_html 
+</code></pre><p><br>    这项的意思指创建用户个人的页面，启用UserDir那行，意味着用户家目录自行创建public_html目录后，在里面添加网页，便可访问，但是，用户的家目录的权限是700，即不允许其他任何人访问，所以应该改动家目录具有x权限 </p>
+<pre><code>#useradd hadoop 
+$mkdir public_html 
+$vim index.html 
+    Hadoop site. 
+#chmod o+x /home/hadoop 
+#service httpd restart 
+http://IP/~hadoop 即可访问 
+</code></pre><p>其实下面有更为详细的选项，不过这个一般不用。。 </p>
+<p>AccessFileName .htaccess<br>       定义目录的访问控制，只要在希望的目录下建立这个文件，以及上面的访问控制法则，便可<br>    实现访问控制。但是，因该注意:在一个真正的生产环境下，不会启用此选项，因为资源浪费极高。 </p>
+<p><files ~ "^\.ht"><br>    Order allow,deny<br>    Deny fron all<br>    Satisfy All<br></files><br>作模式匹配，以.ht开头，所有这样的文件不允许访问，比如需要http认证的密码文件，不是作为<br>网页为别人看的，那么这种文件就不应该被别人访问到，所以这里就是作模式匹配，匹配到的统统不允许访问。 </p>
+<p>HostnameLookups Off                /var/log/httpd/access_log记录了所有访问过的信息，默认记录的是IP，如果启用这一项，意味着web服务器将会作IP地址反解，得出主机名，<br>                                这个是极其浪费服务器资源的，线上环境一定不要开启 </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/21/21-03Httpd属性配置/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+
+
+  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+<script type="text/javascript">
+
+if(true){
+	var gitalk = new Gitalk({
+  	clientID: 'b214cde67415ed5b1224',
+  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
+  	repo: 'geasyheart.github.io',
+  	owner: 'geasyheart',
+  	admin: ['geasyheart'],
+  	id: '',
+  	distractionFreeMode: 'true'
+})
+gitalk.render('gitalk-container') 
+}
+</script>
+  
+  
     <article id="post-20-01-实验-DNS简单配置主从" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1292,131 +1439,6 @@ gitalk.render('gitalk-container')
 </script>
   
   
-    <article id="post-18-01加密类型及其相关算法" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/27/18-01加密类型及其相关算法/">18_01加密类型及其相关算法</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/27/18-01加密类型及其相关算法/" class="archive-article-date">
-  	<time datetime="2015-03-27T14:51:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-27</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>TCP/IP：安全<br> A–&gt;B<br> 机密性：明文传输(ftp/http/smtp/telent)<br> 完整性:<br> 身份验证: </p>
-<p>机密性:<br>      plaintext–&gt;转换规则–&gt;ciphertext<br>      ciphertext–&gt;转换规则–&gt;plaintext </p>
-<pre><code>转换算法:密钥 
-对称加密:算法（加密和解密密钥是同一个） 
-</code></pre><p> 优点：加密解密快<br> 缺点：无法对密钥有效管理 </p>
-<p>完整性:<br>      单向加密算法:提取数据特征码<br>      输入一样:输出必然一样<br>      雪崩效应:输入的微小改变，将会引起结果的巨大改变<br>      定长输出:无论原始数据是多长，结果大小都是相同的<br>      不可逆:无法根据特征码还原原来的数据<br>      A:plaintext:footprint –&gt;B<br>      因为以明文进行传输，中间人获取内容后修改数据然后重新进行生成特征码传给B，B并不能知道数据被篡改过。<br>      中间人攻击:plaintext2:footprint2–&gt;B<br>      将特征码进行加密，就能完成数据的完整性。 </p>
-<p>  协商生成密码:互联网密钥交换 ( Internet Key Exchange)<br>    Diffie-Hellman协议:<br> A:<br>  p,g(大素数，生成数)<br> A:x<br> B:y </p>
-<p> A:g^x%p –&gt;B<br> B:g^y%p –&gt;A </p>
-<p> g,p,g^x%p,g^y%p </p>
-<p> A:(g^y%p)^x=g^yx%p<br> B:(g^x%p)^y=g^xy%p </p>
-<p>   密钥交换算法<br> g=2<br> p=7<br> x=2<br> y=3 </p>
-<p>   公钥加密算法:非对称加密算法<br> 密钥对:<br>   公钥:p<br>   私钥:s<br> 发送方用自己的私钥加密数据，可以实现身份验证<br> 发送方用对方的公钥加密数据，可以保证数据机密性 </p>
-<p> 公钥加密算法很少用来加密数据:速度太慢(至少3个数量级) </p>
-<p>身份验证:<br>   第三方机构(当然不止一个):<br> 对公钥进行公正，发证机关先去计算特征码，并用自己的私钥加密特征码。<br> 收费的，人家给你认证，需要收费的。。而且不便宜<br> 很多只要单方面对身份验证即可；<br> 例如，在淘宝上买东西，只要验证淘宝是淘宝即可，淘宝不需要验证你的身份，(当然也难或者没必要)，<br>  既然不能验证你的身份，就无法保证交易是可靠的，所以出现了支付宝，你把钱存我这，然后我发货给你。<br> 自己的钱怎么转到支付宝上，那怎么保证是你把钱转到支付宝，银行保证，银行通过U盾等工具验证是你<br>        进行的交易。 </p>
-<p>a和b进行通信，先拿到对方的公钥，通过ike协议来实现，a发送b一段数据，生成校验码，然后通过对称加密对数据和校验码进行加密，然后a生成一个随机密码，然后a利用b的公钥来加密a的随机密码；<br>b收到时，利用b自身的私钥来解密a的随机密码，然后通过对称加密来解密数据；<br>但是这样能保证数据的保密性和完整性，但是无法保证身份验证；<br>所以引入证书，来确保你是你；<br>但是这里又有一个问题，证书的颁发机构就要确保证书是有效的； </p>
-<p>如果证书丢了，意味着私钥丢了，私钥要机密存放。<br>密钥管理工具。 </p>
-<p>PKI（Public Key Infrastructure）<br><a href="http://baike.baidu.com/link?url=1gQ7_WjM25DCN2V0o5D6zo7GySukl2QpGbJYjIXbRh9GSQXm1DvFr_Y3i3-oEnF9yysmVClCFxJZQQrIGrTlda" target="_blank" rel="noopener">http://baike.baidu.com/link?url=1gQ7_WjM25DCN2V0o5D6zo7GySukl2QpGbJYjIXbRh9GSQXm1DvFr_Y3i3-oEnF9yysmVClCFxJZQQrIGrTlda</a><br>为解决这些Internet 的安全问题，世界各国对其进行了多年的研究，初步形成了一套完整的Internet 安全解决方案，即时下被广泛采用的PKI 技术(Public Key Infrastructure-公钥基础设施)，PKI（公钥基础设施）技术采用证书管理公钥，通过第三方的可信任机构–认证中心CA(Certificate Authority)，把用户的公钥和用户的其他标识信息(如名称、e-mail、身份 证号等）捆绑在一起，在Internet 网上验证用户的身份。眼下，通用的办法是采用基于PKI 结构结合数字证书，通过把要传输的数字信息进行加密，保证信息传输的保密性、完整性，签名保证身份的真实性和抗抵赖。 </p>
-<p>IKE(Internet Key Exchange): </p>
-<p>Internet密钥交换协议(IKE)是用于交换和管理在VPN中使用的加密密钥的.到目前为止,它依然存在安全缺陷.基于该协议的重要的现实意义,简单地介绍了它的工作机制,并对它进行了安全性分析;对于抵御中间人攻击和DoS攻击,给出了相应的修正方法;还对主模式下预共享密钥验证方法提出了新的建议;最后给出了它的两个发展趋势:JFK和IKEv2.<br><a href="http://baike.baidu.com/link?url=8aRGYrrnt0-rlxlCmJJumAMAouhOYE4ml369SRLANQwdzmcptVBN95VBPgsR9C8dEGCCE6ViaHMKf6yfzs4QHa" target="_blank" rel="noopener">http://baike.baidu.com/link?url=8aRGYrrnt0-rlxlCmJJumAMAouhOYE4ml369SRLANQwdzmcptVBN95VBPgsR9C8dEGCCE6ViaHMKf6yfzs4QHa</a><br><a href="http://zh.wikipedia.org/wiki/%E7%B6%B2%E9%9A%9B%E7%B6%B2%E8%B7%AF%E9%87%91%E9%91%B0%E4%BA%A4%E6%8F%9B" target="_blank" rel="noopener">http://zh.wikipedia.org/wiki/%E7%B6%B2%E9%9A%9B%E7%B6%B2%E8%B7%AF%E9%87%91%E9%91%B0%E4%BA%A4%E6%8F%9B</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/27/18-01加密类型及其相关算法/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-
-
-  <div id="gitalk-container" style="padding: 0px 30px 0px 30px;"></div> 
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-<script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-<script type="text/javascript">
-
-if(true){
-	var gitalk = new Gitalk({
-  	clientID: 'b214cde67415ed5b1224',
-  	clientSecret: '191eb81ebacc2bf85e2f870808962b9fdc46d527',
-  	repo: 'geasyheart.github.io',
-  	owner: 'geasyheart',
-  	admin: ['geasyheart'],
-  	id: '',
-  	distractionFreeMode: 'true'
-})
-gitalk.render('gitalk-container') 
-}
-</script>
-  
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/13/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><span class="page-number current">14</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/15/">Next &raquo;</a>
@@ -1530,15 +1552,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">machine learning</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">SQLAlchemy</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
+                <a href="javascript:void(0)" class="js-tag color2">machine learning</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1558,11 +1576,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">算法</a>
+                <a href="javascript:void(0)" class="js-tag color5">grpc</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">grpc</a>
+                <a href="javascript:void(0)" class="js-tag color3">flutter</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">算法</a>
               </li>
              
               <li class="article-tag-list-item">
