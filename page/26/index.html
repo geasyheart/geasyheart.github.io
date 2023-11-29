@@ -212,6 +212,105 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-07-02bash脚本编程之六-使用脚本选项及组合条件测试" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/11/07-02bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%85%AD-%E4%BD%BF%E7%94%A8%E8%84%9A%E6%9C%AC%E9%80%89%E9%A1%B9%E5%8F%8A%E7%BB%84%E5%90%88%E6%9D%A1%E4%BB%B6%E6%B5%8B%E8%AF%95/">07_02bash脚本编程之六-使用脚本选项及组合条件测试</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/11/07-02bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%85%AD-%E4%BD%BF%E7%94%A8%E8%84%9A%E6%9C%AC%E9%80%89%E9%A1%B9%E5%8F%8A%E7%BB%84%E5%90%88%E6%9D%A1%E4%BB%B6%E6%B5%8B%E8%AF%95/" class="archive-article-date">
+  	<time datetime="2015-02-11T13:57:26.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-11</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="添加10个用户"><a href="#添加10个用户" class="headerlink" title="添加10个用户"></a>添加10个用户</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">if [ $# -ne 1 ];then </span><br><span class="line">  echo &quot;Usager:./uad.sh --add or --del.&quot; </span><br><span class="line">  exit 5 </span><br><span class="line">fi </span><br><span class="line"> </span><br><span class="line">if [ $1 == &#x27;--add&#x27; ];then </span><br><span class="line">    for x in `seq 10`;do </span><br><span class="line">      if id user$x &amp;&gt;/dev/null ;then </span><br><span class="line"> echo &quot;user$x exited&quot; </span><br><span class="line">      else  </span><br><span class="line"> useradd -m user$x &amp;&amp; echo &quot;user$x&quot; | passwd --stdin user$x &amp;&gt;/dev/null &amp;&amp; echo &quot;user$x founded&quot; </span><br><span class="line">      fi </span><br><span class="line">    done </span><br><span class="line">elif [ $1 == &#x27;--del&#x27; ];then </span><br><span class="line">    for x in `seq 10`;do </span><br><span class="line"> if id user$x &amp;&gt;/dev/null ;then </span><br><span class="line"> userdel -r user$x &amp;&amp; echo &quot;user$x deleted&quot; </span><br><span class="line"> else  </span><br><span class="line"> echo &quot;user$x not found&quot; </span><br><span class="line"> fi </span><br><span class="line">    done </span><br><span class="line">else </span><br><span class="line"> echo &quot;Unknown wrong&quot; </span><br><span class="line"> exit 6 </span><br><span class="line">fi </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="添加用户debian-gentoo-ubuntu"><a href="#添加用户debian-gentoo-ubuntu" class="headerlink" title="添加用户debian,gentoo,ubuntu"></a>添加用户debian,gentoo,ubuntu</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">if [ $1 == add ];then </span><br><span class="line">    for x in `echo $2 | sed &#x27;s/,/ /g&#x27;`;do </span><br><span class="line"> if id $x &amp;&gt;/dev/null;then </span><br><span class="line"> echo &quot;$x had exited&quot; </span><br><span class="line"> else  </span><br><span class="line"> useradd -m $x &amp;&amp; echo &quot;$x&quot; | passwd --stdin $x  &amp;&gt;/dev/null&amp;&amp; echo &quot;$x founded successful&quot; </span><br><span class="line"> fi </span><br><span class="line">    done </span><br><span class="line">elif [ $1 == del ];then </span><br><span class="line">    for x in `echo $2 | sed &#x27;s/,/ /g&#x27;`;do </span><br><span class="line"> if id $x &amp;&gt;/dev/null;then </span><br><span class="line"> userdel -r $x &amp;&amp; echo &quot; $x deleted successful&quot; </span><br><span class="line"> else </span><br><span class="line"> echo &quot;No such user&quot; </span><br><span class="line"> </span><br><span class="line">  fi </span><br><span class="line">    done </span><br><span class="line">else </span><br><span class="line"> echo &quot;Usage:./uad3.sh add or del user1,user2,user3...&quot; </span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<h2 id="如何设置多个条件"><a href="#如何设置多个条件" class="headerlink" title="如何设置多个条件"></a>如何设置多个条件</h2><blockquote>
+<p>if [ $# -gt 1 -a $# -le 3 ] <br>if [　$# -gt 1] &amp;&amp; [ $# -le 3 ] </p>
+</blockquote>
+<p>当用户输入q或Q或quit或Quit:退出 </p>
+<pre><code>
+ if [ $1 == &#39;q&#39; -o &#39;Q&#39; -o &#39;quit&#39; -o &#39;Quit&#39; ];then 
+ echo &quot;Quiting&quot; 
+ exit 0 
+else 
+ echo &quot;Unknown Error&quot; 
+</code></pre>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/11/07-02bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%85%AD-%E4%BD%BF%E7%94%A8%E8%84%9A%E6%9C%AC%E9%80%89%E9%A1%B9%E5%8F%8A%E7%BB%84%E5%90%88%E6%9D%A1%E4%BB%B6%E6%B5%8B%E8%AF%95/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-07-01Vim编辑器详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     

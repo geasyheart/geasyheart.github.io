@@ -212,6 +212,111 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-31-02bash脚本编程之在bash脚本中使用选项" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/05/14/31-02bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%9C%A8bash%E8%84%9A%E6%9C%AC%E4%B8%AD%E4%BD%BF%E7%94%A8%E9%80%89%E9%A1%B9/">31_02bash脚本编程之在bash脚本中使用选项</a>
+    </h1>
+  
+
+        
+        <a href="/2015/05/14/31-02bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%9C%A8bash%E8%84%9A%E6%9C%AC%E4%B8%AD%E4%BD%BF%E7%94%A8%E9%80%89%E9%A1%B9/" class="archive-article-date">
+  	<time datetime="2015-05-14T09:56:04.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-05-14</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>例如我想创建一个脚本，可以让别人引用，例如: </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"><span class="comment">#Name:mkscript </span></span><br><span class="line"><span class="comment">#Description:Create script </span></span><br><span class="line"><span class="comment">#Author:unravel </span></span><br><span class="line"><span class="comment">#Version:0.0.1 </span></span><br><span class="line"><span class="comment">#Datatime:05112015 </span></span><br><span class="line"><span class="comment">#Usage: mkscript FILENAME </span></span><br><span class="line"><span class="built_in">cat</span> &gt;<span class="variable">$1</span>&lt;&lt; <span class="string">EOF </span></span><br><span class="line"><span class="string">#!/bin/bash </span></span><br><span class="line"><span class="string">#Name:`basename $1` </span></span><br><span class="line"><span class="string">#Description: </span></span><br><span class="line"><span class="string">#Author:unravel </span></span><br><span class="line"><span class="string">#Version:0.0.1 </span></span><br><span class="line"><span class="string">#Datatime:`date +%F-%H-%M-%S` </span></span><br><span class="line"><span class="string">#Usage: </span></span><br><span class="line"><span class="string"> </span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim +8 $1 </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#chmod +x mkscript &amp;&amp; ./mkscript test.sh </span></span><br><span class="line">这样有个缺点，就是如果这个文件事先存在，则会抹除所有事先存在的内容，那么: </span><br><span class="line"><span class="comment">#!/bin/bash </span></span><br><span class="line"><span class="comment">#Name:mkscript </span></span><br><span class="line"><span class="comment">#Description:Create script </span></span><br><span class="line"><span class="comment">#Author:unravel </span></span><br><span class="line"><span class="comment">#Version:0.0.1 </span></span><br><span class="line"><span class="comment">#Datatime:05112015 </span></span><br><span class="line"><span class="comment">#Usage: mkscript FILENAME </span></span><br><span class="line"><span class="keyword">if</span> ! grep <span class="string">&quot;[^[:space:]]&quot;</span> <span class="variable">$1</span> &amp;&gt;/dev/null;<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">cat</span> &gt;<span class="variable">$1</span>&lt;&lt; <span class="string">EOF </span></span><br><span class="line"><span class="string">#!/bin/bash </span></span><br><span class="line"><span class="string">#Name:`basename $1` </span></span><br><span class="line"><span class="string">#Description: </span></span><br><span class="line"><span class="string">#Author:unravel </span></span><br><span class="line"><span class="string">#Version:0.0.1 </span></span><br><span class="line"><span class="string">#Datatime:`date +%F-%H-%M-%S` </span></span><br><span class="line"><span class="string">#Usage: </span></span><br><span class="line"><span class="string"> </span></span><br><span class="line"><span class="string">EOF</span> </span><br><span class="line"><span class="keyword">fi</span> </span><br></pre></td></tr></table></figure>
+
+<p>vim + $1 </p>
+<p>#cp &#x2F;etc&#x2F;fstab . &amp;&amp; .&#x2F;mkscript fstab<br> <br>如果我在编辑的时候有语法错误，没检测出来，当我保存退出的时候，希望可以帮我检测出来并提示:<br>#!&#x2F;bin&#x2F;bash<br>#Name:mkscript<br>#Description:Create script<br>#Author:unravel<br>#Version:0.0.1<br>#Datatime:05112015<br>#Usage: mkscript FILENAME<br>if ! grep “[^[:space:]]” $1 &amp;&gt;&#x2F;dev&#x2F;null;then<br>cat &gt;$1&lt;&lt; EOF<br>#!&#x2F;bin&#x2F;bash<br>#Name:<code>basename $1</code><br>#Description:<br>#Author:unravel<br>#Version:0.0.1<br>#Datatime:<code>date +%F-%H-%M-%S</code><br>#Usage: </p>
+<p>EOF<br>fi<br>vim + $1 </p>
+<p>until bash -n $1 &amp;&gt;&#x2F;dev&#x2F;null;do<br>    read -p “syntax error,q|Q quiting,others for editing:” OPT<br>    case $OPT in<br>        q|Q)<br>            echo “quit”<br>            exit 8<br>            ;;<br>        *)<br>            vim + $1<br>            ;;<br>    esac<br>done    <br>chmod +x $1 </p>
+<p>#.&#x2F;mkscript test.sh<br>可以专门把这个放到&#x2F;bin目录下，当作命令来用:<br>#cp &#x2F;tmp&#x2F;mkscript &#x2F;bin </p>
+<p>getopts:这个命令可以获取脚本的选项 </p>
+<p>getopts : getopts   optstring    name </p>
+<p>例如:<br>#vim opt.sh<br>getopts “abcd” OPT<br>echo $OPT    可以实现选项<br>#chmod +x opt.sh<br>#.&#x2F;opt.sh -a<br>a<br>#.&#x2F;opt.sh -b<br>b<br>但:<br>#.&#x2F;opt.sh -a -b<br>a </p>
+<p>#vim opt.sh<br>getopts “bd:” OPT<br>echo $OPT<br>echo $OPTARG   (这个默认就有这个变量)<br>#.&#x2F;opt.sh -d “haha”<br>d<br>haha   (所以这个:表示可以后接参数)<br>但是:<br>#.&#x2F;opt.sh -b “haha”<br>只会输出b,只接受最后一个参数。 </p>
+<p>所以，任何一个参数想带上参数，就在哪个参数后面加: , 例如:<br>getopts “b:d:” OPT<br>echo $OPT<br>echo $OPTARG<br>#.&#x2F;opt.sh -b “bb”<br>b<br>bb </p>
+<p>如果输入.&#x2F;opt.sh -e 就会报错，非法字符，就会感觉不友好:<br>getopts “:b:d:” OPT (在最前面添加:即可)<br>echo $OPT<br>echo $OPTARG </p>
+<p>接受多个参数:<br>USAGE() {<br>    echo “Usage:opt.sh [-b argu] [-b argu]”<br>        }<br>while getopts “:b:d:” SWITCH;do<br>    case $SWITCH in<br>        b)echo “The option is b”<br>          echo $OPTARG<br>          ;;<br>        d)echo “The option is d”<br>          echo $OPTARG<br>          ;;<br>        *)USAGE;;<br>       <br>    esac<br>done         </p>
+<p>#.&#x2F;opt.sh -b haha -d dada<br>The option is b<br>haha<br>The option is d<br>dada </p>
+<p>最终脚本: </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"><span class="comment">#Name:mkscript </span></span><br><span class="line"><span class="comment">#Description:Create script </span></span><br><span class="line"><span class="comment">#Author:unravel </span></span><br><span class="line"><span class="comment">#Version:0.0.1 </span></span><br><span class="line"><span class="comment">#Datatime:05112015 </span></span><br><span class="line"><span class="comment">#Usage: mkscript FILENAME </span></span><br><span class="line"><span class="keyword">while</span> <span class="built_in">getopts</span> <span class="string">&quot;:d:&quot;</span> SWITCH;<span class="keyword">do</span> </span><br><span class="line">    <span class="keyword">case</span> <span class="variable">$SWITCH</span> <span class="keyword">in</span> </span><br><span class="line">        d) </span><br><span class="line">            DESC=<span class="variable">$OPTARG</span> </span><br><span class="line">            ;; </span><br><span class="line">        *) </span><br><span class="line">            <span class="built_in">echo</span> <span class="string">&quot;Usage:&quot;</span>mkscript [-d Description]<span class="string">&quot;&quot;</span> </span><br><span class="line">            ;; </span><br><span class="line">    <span class="keyword">esac</span> </span><br><span class="line"><span class="keyword">done</span> </span><br><span class="line"><span class="built_in">shift</span> $[<span class="variable">$OPTIND</span> -1]    (OPTIND也是内置的，指向最后一个，所以到文件名那要-1) </span><br><span class="line"><span class="keyword">if</span> ! grep <span class="string">&quot;[^[:space:]]&quot;</span> <span class="variable">$1</span> &amp;&gt;/dev/null;<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">cat</span> &gt;<span class="variable">$1</span>&lt;&lt; <span class="string">EOF </span></span><br><span class="line"><span class="string">#!/bin/bash </span></span><br><span class="line"><span class="string">#Name:`basename $1` </span></span><br><span class="line"><span class="string">#Description: $DESC </span></span><br><span class="line"><span class="string">#Author:unravel </span></span><br><span class="line"><span class="string">#Version:0.0.1 </span></span><br><span class="line"><span class="string">#Datatime:`date +%F-%H-%M-%S` </span></span><br><span class="line"><span class="string">#Usage: </span></span><br><span class="line"><span class="string"> </span></span><br><span class="line"><span class="string">EOF</span> </span><br><span class="line"><span class="keyword">fi</span> </span><br><span class="line">vim + <span class="variable">$1</span> </span><br><span class="line"> </span><br><span class="line"><span class="keyword">until</span> bash -n <span class="variable">$1</span> &amp;&gt;/dev/null;<span class="keyword">do</span> </span><br><span class="line">    <span class="built_in">read</span> -p <span class="string">&quot;syntax error,q|Q quiting,others for editing:&quot;</span> OPT </span><br><span class="line">    <span class="keyword">case</span> <span class="variable">$OPT</span> <span class="keyword">in</span> </span><br><span class="line">        q|Q) </span><br><span class="line">            <span class="built_in">echo</span> <span class="string">&quot;quit&quot;</span> </span><br><span class="line">            <span class="built_in">exit</span> 8 </span><br><span class="line">            ;; </span><br><span class="line">        *) </span><br><span class="line">            vim + <span class="variable">$1</span> </span><br><span class="line">            ;; </span><br><span class="line">    <span class="keyword">esac</span> </span><br><span class="line"><span class="keyword">done</span>     </span><br></pre></td></tr></table></figure>
+<p>大概更新到这个地方 </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/05/14/31-02bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%9C%A8bash%E8%84%9A%E6%9C%AC%E4%B8%AD%E4%BD%BF%E7%94%A8%E9%80%89%E9%A1%B9/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-30-04nss" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1073,92 +1178,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/04/22/24-04%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85LAMP%E4%B9%8B%E9%85%8D%E7%BD%AEhttpd%E4%BB%A5FastCGI%E6%96%B9%E5%BC%8F%E4%B8%8EPHP%E6%95%B4%E5%90%88/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-24-03-2-实验-完成LAMP模块化搭建" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/22/24-03-2-%E5%AE%9E%E9%AA%8C-%E5%AE%8C%E6%88%90LAMP%E6%A8%A1%E5%9D%97%E5%8C%96%E6%90%AD%E5%BB%BA/">24_03_2_实验:完成LAMP模块化搭建</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/22/24-03-2-%E5%AE%9E%E9%AA%8C-%E5%AE%8C%E6%88%90LAMP%E6%A8%A1%E5%9D%97%E5%8C%96%E6%90%AD%E5%BB%BA/" class="archive-article-date">
-  	<time datetime="2015-04-22T03:14:47.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">PATH=/Download </span><br><span class="line">apr=apr-1.5.1 </span><br><span class="line">apr-util=apr-util-1.5.4 </span><br><span class="line">mysql=mysql-version </span><br><span class="line">http=http-version </span><br><span class="line">mcrypt=libmycrypt-version </span><br><span class="line">yum groupinstall -y <span class="string">&quot;Development Tools&quot;</span>  &amp;&gt;/dev/null </span><br><span class="line">tar xf <span class="variable">$PATH</span>/<span class="variable">$apr</span> &amp;&amp; <span class="built_in">cd</span> <span class="variable">$PATH</span>/<span class="variable">$apr</span>                         </span><br><span class="line">./configure --prefix=/usr/local/apr </span><br><span class="line">make  &amp;&amp; make install                                                                                                      </span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$PATH</span> &amp;&amp; tar xf <span class="variable">$&#123;apr-util&#125;</span> &amp;&amp; <span class="built_in">cd</span> <span class="variable">$&#123;apr-util&#125;</span> </span><br><span class="line">./configure --prefix=/usr/local/apr-util --with-apr=/usr/local/apr         </span><br><span class="line">make &amp;&amp; make install                                                                                          </span><br><span class="line">yum install pcre-devel openssl-devel </span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$PATH</span> &amp;&amp; tar xf <span class="variable">$http</span> &amp;&amp; <span class="built_in">cd</span> <span class="variable">$http</span> </span><br><span class="line">./configure --prefix=/usr/local/apache --sysconfdir=/etc/httpd --enable-so --enable-rewrite --enable-ssl --enable-cgi --enable-cgid </span><br><span class="line">  --enable-modules=most --enable-deflate --enable-mods-shared=most --enable-mpms-shared=all --with-mpm=event(默认) </span><br><span class="line">  --with-apr=/usr/local/apr --with-apr-util=/usr/local/apr-util </span><br><span class="line">     </span><br><span class="line">make &amp;&amp; make install </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;export PATH=<span class="variable">$PATH</span>:/usr/local/apache/bin/&quot;</span> &gt; /etc/profile.d/httpd.sh </span><br><span class="line"> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;/usr/local/apache/bin/apachectl start &amp;&gt; /dev/null&quot;</span> &gt;&gt; /etc/rc.d/rc.local </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$PATH</span> &amp;&amp; tar xf <span class="variable">$mysql</span> -C /usr/local </span><br><span class="line"><span class="built_in">cd</span> /usr/local </span><br><span class="line"><span class="built_in">ln</span> -sv <span class="variable">$mysql</span> mysql &amp;&amp; <span class="built_in">cd</span> mysql </span><br><span class="line">groupadd -r -g 306 mysql </span><br><span class="line">useradd -r  -g 306 -u 306 mysql </span><br><span class="line"> </span><br><span class="line"><span class="built_in">mkdir</span> -p /mydata/data </span><br><span class="line"><span class="built_in">chown</span> -R　mysql.mysql /mydata/data </span><br><span class="line"><span class="built_in">chmod</span> 750 /mydata/data </span><br><span class="line"> </span><br><span class="line">scripts/mysql_install_db --user=mysql --datadir=/mydata/data </span><br><span class="line"><span class="built_in">chown</span> -R root.mysql /usr/local/mysql/* </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cp</span> support-files/mysql.server /etc/init.d/mysqld </span><br><span class="line">chkconfig --add mysqld </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cp</span> support-files/my-default.cnf /etc/my.cnf </span><br><span class="line"> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;datadir = /mydata/data&quot;</span> &gt;&gt; /etc/my.cnf             </span><br><span class="line"> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;export PATH=<span class="variable">$PATH</span>:/usr/local/mysql/bin/&quot;</span> &gt;/etc/profile.d/mysql.sh </span><br><span class="line"> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;MANPATH /usr/local/mysql/man&quot;</span> &gt;&gt; /etc/man.config </span><br><span class="line"> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;/usr/local/mysql/lib&quot;</span> &gt; /etc/ld.so.conf.d/mysql.conf </span><br><span class="line">ldconfig -v &amp;&gt; /dev/null </span><br><span class="line"> </span><br><span class="line"><span class="built_in">ln</span> -s/usr/local/mysql/include /usr/include/mysql &amp;&gt;/dev/null </span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$PATH</span> &amp;&amp; tar xf <span class="variable">$mcrypt</span> </span><br><span class="line">./configure --prefix=/usr/local/mcrypt </span><br><span class="line">make &amp;&amp; make install </span><br><span class="line"> </span><br><span class="line">yum install bzip2-devel libxml2-devel zlib-devel </span><br><span class="line">./configure --prefix=/usr/local/php --with-config-file-path=/etc  --with-openssl --with-mysql=/usr/local/mysql   --with-mysqli=/usr/local/mysql/bin/mysql_config </span><br><span class="line">--enable-mbstring --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir --enable-xml --enable-sockets </span><br><span class="line">--with-apxs2=/usr/local/apache/bin/apxs --with-mcrypt=/usr/local/mycrypt  --with-config-file-scan-dir=/etc/php.d --with-bz2 --enable-maintainer-zts </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cp</span> php.ini-production /etc/php.ini </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;AddType application/x-httpd-php .php </span></span><br><span class="line"><span class="string">Addtype application/x-httpd-php-source .phps&quot;</span> &gt;&gt; /etc/httpd/httpd.conf </span><br><span class="line"> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot; </span></span><br><span class="line"><span class="string">phpinfo(); </span></span><br><span class="line"><span class="string">?&gt; </span></span><br><span class="line"><span class="string">&quot;</span> &gt; /usr/local/apache/htdocs/phpinfo.php </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot; </span></span><br><span class="line"><span class="string">&lt;?php </span></span><br><span class="line"><span class="string">    <span class="variable">$conn</span>=mysql_connect(&#x27;localhost&#x27;,&#x27;root&#x27;,&#x27;password&#x27;); </span></span><br><span class="line"><span class="string">    if (<span class="variable">$conn</span>)\n </span></span><br><span class="line"><span class="string">        echo &quot;</span>Success<span class="string">&quot;; </span></span><br><span class="line"><span class="string">    else\n </span></span><br><span class="line"><span class="string">        echo &quot;</span>Failure<span class="string">&quot;; </span></span><br><span class="line"><span class="string">?&gt;&quot;</span> &gt; /usr/local/apache/htdocs/php-mysql.php </span><br><span class="line">     </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> <span class="comment"># tar xvjf xcache </span></span><br><span class="line"> /usr/local/php/bin/phpize </span><br><span class="line"> ./configure --enable-xcache --with-php-config=/usr/local/php/bin/php-config </span><br><span class="line">make &amp;&amp; make install </span><br><span class="line">    安装结束后，会出现类似如下行: </span><br><span class="line">    Installing shared extensions:    /usr/local/php/lib/php/extensions/no-debug-zts-20131226 </span><br><span class="line"> </span><br><span class="line">2/编辑php.ini，整合php和xcache </span><br><span class="line"> </span><br><span class="line">    首先将xcache提供的样例配置导入php.ini </span><br><span class="line">    <span class="built_in">mkdir</span> /etc/php.d </span><br><span class="line">     <span class="built_in">cp</span> xcache.ini /etc/php.d </span><br><span class="line"> </span><br><span class="line">说明:xcache.ini文件在xcache的源码目录中。 </span><br><span class="line"> </span><br><span class="line">接下来编辑/etc/php.d/xcache.ini，找到zend_extension开头的行，修改为如下行: </span><br><span class="line">zend_extension = /usr/local/php/lib/php/extensions/no-debug-zts-20131226/xcache.so </span><br></pre></td></tr></table></figure>
-<p>重启http,如果在phpinfo中显示有xcache,则显示成功安装。。 </p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/22/24-03-2-%E5%AE%9E%E9%AA%8C-%E5%AE%8C%E6%88%90LAMP%E6%A8%A1%E5%9D%97%E5%8C%96%E6%90%AD%E5%BB%BA/">展开全文 >></a>
         </p>
       
 

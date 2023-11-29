@@ -212,6 +212,114 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-推送" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/12/05/%E6%8E%A8%E9%80%81/">推送</a>
+    </h1>
+  
+
+        
+        <a href="/2017/12/05/%E6%8E%A8%E9%80%81/" class="archive-article-date">
+  	<time datetime="2017-12-05T06:33:58.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-12-05</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="如何定位到某一台设备"><a href="#如何定位到某一台设备" class="headerlink" title="如何定位到某一台设备"></a>如何定位到某一台设备</h3><p>根据不同的tag进行定位，例如： </p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;where&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;and&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">            <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;and&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">                    <span class="punctuation">&#123;</span></span><br><span class="line">                        <span class="attr">&quot;tag&quot;</span><span class="punctuation">:</span> <span class="string">&quot;guocheng67&quot;</span></span><br><span class="line">                    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">                    <span class="punctuation">&#123;</span></span><br><span class="line">                        <span class="attr">&quot;tag&quot;</span><span class="punctuation">:</span> <span class="string">&quot;njy12&quot;</span></span><br><span class="line">                    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">                    <span class="punctuation">&#123;</span></span><br><span class="line">                        <span class="attr">&quot;tag&quot;</span><span class="punctuation">:</span> <span class="string">&quot;test&quot;</span></span><br><span class="line">                    <span class="punctuation">&#125;</span></span><br><span class="line">                <span class="punctuation">]</span></span><br><span class="line">            <span class="punctuation">&#125;</span></span><br><span class="line">        <span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>上面表示: 发送消息给农技员ID为12、过程为67、环境为test。又由于多台设备可以指定相同的tag，从而单条推送可以推送给多台设备。所以此处的组播意思可能就变了，根据不同的tag组合定位到不同的设备个、群体，实现组播发送，此处tag为app端设置。</p>
+<h3 id="关于解决友盟推送每分钟限制"><a href="#关于解决友盟推送每分钟限制" class="headerlink" title="关于解决友盟推送每分钟限制"></a>关于解决友盟推送每分钟限制</h3><p>官方文档限制每分钟只能发送5条消息，所以后端维持一个<code>队列A</code>以及<code>计时器</code>，进行分批发送，保证消息发送出去。</p>
+<p>此队列实现思想：</p>
+<ol>
+<li>推送请求过来，将此推送消息体保存至redis hash表中，key为uuid,value为消息体</li>
+<li>将此 uuid lpush至队列A，等待任务被执行</li>
+</ol>
+<p>此计时器实现思想：</p>
+<ol>
+<li>每隔一段间隔(例如3s)进行轮询存储在队列A中的任务,如果有内容，则定位到当前时间至分钟，例如<code>201712100304</code>,利用redis incr进行操作此key，如果大于5，则表示此分钟已经发送满，则继续轮训至下分钟进行发送</li>
+<li>如果执行成功，则将此uuid rpop至另外一个<code>队列B</code>,实现原子性操作，此处只能表示此任务已经被执行了，但是不能代表执行成功，此处可参考<code>错误</code></li>
+</ol>
+<h3 id="错误"><a href="#错误" class="headerlink" title="错误"></a>错误</h3><ol>
+<li>任务没有被正常执行，或者消息丢失，涉及原因可能多样</li>
+<li>友盟推送返回错误，此处错误可以参考<a target="_blank" rel="noopener" href="http://dev.umeng.com/push/android/api-doc#4_8">错误</a></li>
+</ol>
+<p>对于错误1，理论应再次推入<code>队列A</code>，但此处不考虑。<br>对于错误2，除了应用次数限制错误，其余错误可以避免。</p>
+<h3 id="任务以及结果存储期限"><a href="#任务以及结果存储期限" class="headerlink" title="任务以及结果存储期限"></a>任务以及结果存储期限</h3><p>此处队列与存储均使用redis进行实现，所以理论上只要redis服务不停止，服务状态与结果均可以持久化存储，又由于推送非持久化过程，所以此处暂时满足。</p>
+<h3 id="定时发送消息"><a href="#定时发送消息" class="headerlink" title="定时发送消息"></a>定时发送消息</h3><p>后端维持一个定时任务，到达时间后，会将消息推送给队列A，等待发送。<br>此处可以动态增、删任务。</p>
+<h3 id="立即发送"><a href="#立即发送" class="headerlink" title="立即发送"></a>立即发送</h3><p>将此消息推到队首／尾，等待发送。</p>
+<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h3><p>转战友盟，此片结束。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/12/05/%E6%8E%A8%E9%80%81/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-jenkins使用" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -986,97 +1094,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2017/05/26/flask%E8%B7%A8%E5%9F%9F/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-click使用" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/05/21/click%E4%BD%BF%E7%94%A8/">click使用</a>
-    </h1>
-  
-
-        
-        <a href="/2017/05/21/click%E4%BD%BF%E7%94%A8/" class="archive-article-date">
-  	<time datetime="2017-05-21T07:31:13.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-05-21</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> click</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@click.command()</span></span><br><span class="line"><span class="meta">@click.option(<span class="params"><span class="string">&#x27;-n&#x27;</span>, <span class="string">&#x27;--name&#x27;</span>, default=<span class="string">&#x27;zy&#x27;</span>, <span class="built_in">help</span>=<span class="string">&#x27;名字&#x27;</span></span>)</span></span><br><span class="line"><span class="meta">@click.option(<span class="params"><span class="string">&#x27;-a&#x27;</span>, <span class="string">&#x27;--age&#x27;</span>, default=<span class="number">22</span>, <span class="built_in">help</span>=<span class="string">&#x27;年龄&#x27;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">sayhi</span>(<span class="params">name, age</span>):</span><br><span class="line">    <span class="built_in">print</span>(name, age)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    sayhi()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    main()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<p>运行方式:</p>
-<blockquote>
-<p>python filename.py -n zzzz - a 22</p>
-</blockquote>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">import</span> zipfile</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> click</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> kguo <span class="keyword">import</span> create_app</span><br><span class="line"><span class="keyword">from</span> kguo.core.db <span class="keyword">import</span> redis_db</span><br><span class="line"></span><br><span class="line">app = create_app()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> app.config.get(<span class="string">&quot;LOGGER_ENABLED&quot;</span>):</span><br><span class="line">    logging.basicConfig(</span><br><span class="line">        level=<span class="built_in">getattr</span>(logging, app.config.get(<span class="string">&quot;LOGGER_LEVEL&quot;</span>, <span class="string">&quot;DEBUG&quot;</span>)),</span><br><span class="line">        <span class="built_in">format</span>=app.config.get(</span><br><span class="line">            <span class="string">&quot;LOGGER_FORMAT&quot;</span>,</span><br><span class="line">            <span class="string">&#x27;%(asctime)s %(name)-12s %(levelname)-8s %(message)s&#x27;</span>),</span><br><span class="line">        datefmt=app.config.get(<span class="string">&quot;LOGGER_DATE_FORMAT&quot;</span>, <span class="string">&#x27;%d.%m %H:%M:%S&#x27;</span>)</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@click.group()</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">core_cmd</span>():</span><br><span class="line">    <span class="string">&quot;&quot;&quot; Core Commands &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@core_cmd.command()</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">check</span>():</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Prints app status&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">from</span> pprint <span class="keyword">import</span> pprint</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Extensions.&quot;</span>)</span><br><span class="line">    pprint(app.extensions)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Modules.&quot;</span>)</span><br><span class="line">    pprint(app.blueprints)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;App.&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> app</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@core_cmd.command()</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">showconfig</span>():</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Print all config variables&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">from</span> pprint <span class="keyword">import</span> pprint</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Config.&quot;</span>)</span><br><span class="line">    pprint(<span class="built_in">dict</span>(app.config.store()))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@core_cmd.command()</span></span><br><span class="line"><span class="meta">@click.option(<span class="params"><span class="string">&#x27;--reloader/--no-reloader&#x27;</span>, default=<span class="literal">True</span></span>)</span></span><br><span class="line"><span class="meta">@click.option(<span class="params"><span class="string">&#x27;--debug/--no-debug&#x27;</span>, default=<span class="literal">True</span></span>)</span></span><br><span class="line"><span class="meta">@click.option(<span class="params"><span class="string">&#x27;--host&#x27;</span>, default=<span class="string">&#x27;127.0.0.1&#x27;</span></span>)</span></span><br><span class="line"><span class="meta">@click.option(<span class="params"><span class="string">&#x27;--port&#x27;</span>, default=<span class="number">5000</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">runserver</span>(<span class="params">reloader, debug, host, port</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Run the Flask development server i.e. app.run()&quot;&quot;&quot;</span></span><br><span class="line">    app.run(use_reloader=reloader, debug=debug, host=host, port=port)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@core_cmd.command()</span></span><br><span class="line"><span class="meta">@click.option(<span class="params"><span class="string">&#x27;--path&#x27;</span>, default=<span class="string">&#x27;captchas.zip&#x27;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">loadcap</span>(<span class="params">path</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Load captcha from zip file</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    ZIP文件应该在根目录包含全部文件，并不含后缀</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    f = zipfile.ZipFile(path, <span class="string">&#x27;r&#x27;</span>)</span><br><span class="line">    redis_db.delete(<span class="string">&#x27;captcha&#x27;</span>)</span><br><span class="line">    <span class="keyword">for</span> idx, name <span class="keyword">in</span> <span class="built_in">enumerate</span>(f.namelist()):</span><br><span class="line">        <span class="keyword">with</span> f.<span class="built_in">open</span>(name, <span class="string">&#x27;r&#x27;</span>) <span class="keyword">as</span> img:</span><br><span class="line">            redis_db.hset(<span class="string">&#x27;captcha&#x27;</span>, <span class="string">&#x27;p%d&#x27;</span> % idx, img.read())</span><br><span class="line">            redis_db.hset(<span class="string">&#x27;captcha&#x27;</span>, <span class="string">&#x27;w%d&#x27;</span> % idx, name)</span><br><span class="line">    redis_db.hset(<span class="string">&#x27;captcha&#x27;</span>, <span class="string">&#x27;count&#x27;</span>, idx + <span class="number">1</span>)</span><br><span class="line">    f.close()</span><br><span class="line"></span><br><span class="line">help_text = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Kguo App Manager</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">manager = click.CommandCollection(<span class="built_in">help</span>=help_text)</span><br><span class="line">manager.add_source(core_cmd)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    <span class="keyword">with</span> app.app_context():</span><br><span class="line">        manager()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/05/21/click%E4%BD%BF%E7%94%A8/">展开全文 >></a>
         </p>
       
 

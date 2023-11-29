@@ -212,6 +212,89 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-基于树形条件随机场的高阶句法分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/11/02/%E5%9F%BA%E4%BA%8E%E6%A0%91%E5%BD%A2%E6%9D%A1%E4%BB%B6%E9%9A%8F%E6%9C%BA%E5%9C%BA%E7%9A%84%E9%AB%98%E9%98%B6%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/">基于树形条件随机场的高阶句法分析</a>
+    </h1>
+  
+
+        
+        <a href="/2021/11/02/%E5%9F%BA%E4%BA%8E%E6%A0%91%E5%BD%A2%E6%9D%A1%E4%BB%B6%E9%9A%8F%E6%9C%BA%E5%9C%BA%E7%9A%84%E9%AB%98%E9%98%B6%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2021-11-02T06:22:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-11-02</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>此篇文章貌似没有重点，日常笔记吧。</p>
+<p><a target="_blank" rel="noopener" href="http://hlt.suda.edu.cn/~yzhang/master-thesis/treecrf-ho-syn-parsing.pdf">基于树形条件随机场的高阶句法分析</a>作者硕士毕业论文，关于句法分析的历史与实现基本讲了一遍，包括作者使用TreeCRF高阶建模等工作。<br><a target="_blank" rel="noopener" href="https://github.com/yzhangcs/parser">代码</a>，这个项目包含了句法分析任务的实现。包括dependency parser，semantic dependency parser，constituency parser等。</p>
+<p>对于句法分析工作，百度ddparser相比下来可能是工业上更好的选择，不过目前个人更倾向于语义句法工作，相比下来更接近直观感受（还是看任务啦～）。</p>
+<p>不管是semantic role labeling(语义角色标注)或者semantic dependency parser(语义依存分析)，看<a target="_blank" rel="noopener" href="http://ltp.ai/demo.html">ltp</a>的演示效果。</p>
+<img src="/2021/11/02/%E5%9F%BA%E4%BA%8E%E6%A0%91%E5%BD%A2%E6%9D%A1%E4%BB%B6%E9%9A%8F%E6%9C%BA%E5%9C%BA%E7%9A%84%E9%AB%98%E9%98%B6%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/123321.png" class="" title="效果">
+
+
+<p>但是不能光看这种效果，从目前公开的论文水平来看，准确率并没有很高，另外高质量，高数量的标注数据集也相对少。</p>
+<p>大家都是一样的模型，比的就是数据集喽，这点不得不夸HanLP，至少人家代码里面都有数据集，方便学习。</p>
+<p><img src="https://catalog.ldc.upenn.edu/desc/addenda/LDC2013T19.cmn.jpg" alt="手动狗头"></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/11/02/%E5%9F%BA%E4%BA%8E%E6%A0%91%E5%BD%A2%E6%9D%A1%E4%BB%B6%E9%9A%8F%E6%9C%BA%E5%9C%BA%E7%9A%84%E9%AB%98%E9%98%B6%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-属性抽取调研-工业界" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -2605,68 +2688,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2021/09/27/%E4%B8%80%E4%BA%9Bmask%E7%9A%84%E6%93%8D%E4%BD%9C%E7%90%86%E8%A7%A3/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-attention一些点" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/09/02/attention%E4%B8%80%E4%BA%9B%E7%82%B9/">attention一些点</a>
-    </h1>
-  
-
-        
-        <a href="/2021/09/02/attention%E4%B8%80%E4%BA%9B%E7%82%B9/" class="archive-article-date">
-  	<time datetime="2021-09-02T02:19:25.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-09-02</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/09/02/attention%E4%B8%80%E4%BA%9B%E7%82%B9/">展开全文 >></a>
         </p>
       
 

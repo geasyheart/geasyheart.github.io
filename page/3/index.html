@@ -212,6 +212,253 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-UIE-事件提取" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/">UIE-事件提取</a>
+    </h1>
+  
+
+        
+        <a href="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/" class="archive-article-date">
+  	<time datetime="2022-08-17T02:08:17.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-17</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>此篇文章分析paddlenlp中universal information extraction(UIE)对于事件提取的实现方式。</p>
+<p>** 后续在没有特殊声明的情况下，UIE均代表paddlenlp的实现方式。**</p>
+<p>在这篇文章<a target="_blank" rel="noopener" href="https://www.paddlepaddle.org.cn/support/news?action=detail&id=2935">产业级信息抽取技术开源，为什么Prompt更有效？
+</a>中，作者突出UIE的优势：</p>
+<ol>
+<li>多任务统一建模</li>
+<li>零样本抽取和少样本快速迁移能力（基于Prompt的信息抽取）</li>
+</ol>
+<p>而上述两点，基本也突出了目前深度学习算法的几个问题：</p>
+<p>** 一、多任务统一建模 **</p>
+<ol>
+<li>每个模型的建模方式都不同，希望在decoder（bert外的layers）更有效简单的解决问题。encoder（bert）端更多利用具备更深层次语义表达能力。</li>
+<li>目前国内外也在研究这种多任务统一建模，在一个模型中输入不同的schema来得到相应的问题解。</li>
+</ol>
+<p>** 二、零样本或者小样本 **<br>监督学习的特点，就是希望拥有更多的标注样本，数据是算法的上限，搞算法的希望越多越好。那这里又可以分为几部分来看：</p>
+<ol>
+<li>目前的预训练模型，还过于单调。比如bert只能做纯文本，即使目前有多模态融合，但做的还远远不够，模型需要知识库!（这个暂时改变不了～）</li>
+<li>零样本或者小样本微调，这种更符合实际情况，那这种更多考验预训练模型的能力。</li>
+</ol>
+<p>扯了这么多，下面进入正文。</p>
+<h3 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Copyright (c) 2022 PaddlePaddle Authors. All Rights Reserved.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span></span><br><span class="line"><span class="comment"># you may not use this file except in compliance with the License.</span></span><br><span class="line"><span class="comment"># You may obtain a copy of the License at</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#     http://www.apache.org/licenses/LICENSE-2.0</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Unless required by applicable law or agreed to in writing, software</span></span><br><span class="line"><span class="comment"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span></span><br><span class="line"><span class="comment"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span></span><br><span class="line"><span class="comment"># See the License for the specific language governing permissions and</span></span><br><span class="line"><span class="comment"># limitations under the License.</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> paddle</span><br><span class="line"><span class="keyword">import</span> paddle.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">from</span> paddlenlp.transformers <span class="keyword">import</span> ErniePretrainedModel</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">UIE</span>(<span class="title class_ inherited__">ErniePretrainedModel</span>):</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, encoding_model</span>):</span><br><span class="line">        <span class="built_in">super</span>(UIE, self).__init__()</span><br><span class="line">        self.encoder = encoding_model</span><br><span class="line">        hidden_size = self.encoder.config[<span class="string">&quot;hidden_size&quot;</span>]</span><br><span class="line">        self.linear_start = paddle.nn.Linear(hidden_size, <span class="number">1</span>)</span><br><span class="line">        self.linear_end = paddle.nn.Linear(hidden_size, <span class="number">1</span>)</span><br><span class="line">        self.sigmoid = nn.Sigmoid()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, input_ids, token_type_ids, pos_ids, att_mask</span>):</span><br><span class="line">        sequence_output, pooled_output = self.encoder(</span><br><span class="line">            input_ids=input_ids,</span><br><span class="line">            token_type_ids=token_type_ids,</span><br><span class="line">            position_ids=pos_ids,</span><br><span class="line">            attention_mask=att_mask)</span><br><span class="line">        start_logits = self.linear_start(sequence_output)</span><br><span class="line">        start_logits = paddle.squeeze(start_logits, -<span class="number">1</span>)</span><br><span class="line">        start_prob = self.sigmoid(start_logits)</span><br><span class="line">        end_logits = self.linear_end(sequence_output)</span><br><span class="line">        end_logits = paddle.squeeze(end_logits, -<span class="number">1</span>)</span><br><span class="line">        end_prob = self.sigmoid(end_logits)</span><br><span class="line">        <span class="keyword">return</span> start_prob, end_prob</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>是不是非常简单！！！</p>
+<p>不过对于ERNIE3的模型结构，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">UIE(</span><br><span class="line">  (encoder): ErnieModel(</span><br><span class="line">    (embeddings): ErnieEmbeddings(</span><br><span class="line">      (word_embeddings): Embedding(40000, 312, padding_idx=0, sparse=False)</span><br><span class="line">      (position_embeddings): Embedding(2048, 312, sparse=False)</span><br><span class="line">      (token_type_embeddings): Embedding(4, 312, sparse=False)</span><br><span class="line">      (task_type_embeddings): Embedding(16, 312, sparse=False)</span><br><span class="line">      (layer_norm): LayerNorm(normalized_shape=[312], epsilon=1e-12)</span><br><span class="line">      (dropout): Dropout(p=0.1, axis=None, mode=upscale_in_train)</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>其中token_type_embeddings为4,另外引入了task_type_embeddings。</p>
+</blockquote>
+<p>这地方我在网上也木有看到很多相关介绍，此处以后再补充。</p>
+<h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>事件提取，是将事件的核心触发词和相关论元进行提取出来，构成结构化的数据。比如：</p>
+<blockquote>
+<p>泰安今早发生2.9级地震！</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>触发词</td>
+<td>地震</td>
+</tr>
+<tr>
+<td>等级</td>
+<td>2.9级</td>
+</tr>
+<tr>
+<td>时间</td>
+<td>今早</td>
+</tr>
+<tr>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody></table>
+<p>有了概念后，接下来我们介绍UIE的实现方式。</p>
+<h3 id="数据标注"><a href="#数据标注" class="headerlink" title="数据标注"></a>数据标注</h3><p>UIE使用了doccano来进行数据标注，相关的使用示例请看<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/develop/model_zoo/uie/doccano.md">开发使用</a>，注意哦，作者这里doccano使用的版本是<code>1.6.2</code>，我一开始使用最新的，很多和文章对应不到一起。</p>
+<p>导出后的样例：</p>
+<table>
+<thead>
+<tr>
+<th><img src="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/a1.png" class="" title="a1"></th>
+<th><img src="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/a2.png" class="" title="a2"></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>{“id”: 5, “data”: “泰安今早发生2.9级地震！”, “label”: {“relations”: [{“id”: 12, “from_id”: 41, “to_id”: 39, “type”: “时间”}, {“id”: 13, “from_id”: 41, “to_id”: 40, “type”: “震级”}], “entities”: [{“id”: 39, “start_offset”: 2, “end_offset”: 4, “label”: “时间”}, {“id”: 40, “start_offset”: 6, “end_offset”: 10, “label”: “等级”}, {“id”: 41, “start_offset”: 10, “end_offset”: 12, “label”: “地震触发词”}]}}</td>
+<td>{“id”: 6, “data”: “日本昨日发生10级地震！”, “label”: {“relations”: [{“id”: 14, “from_id”: 44, “to_id”: 42, “type”: “时间”}, {“id”: 15, “from_id”: 44, “to_id”: 43, “type”: “震级”}], “entities”: [{“id”: 42, “start_offset”: 2, “end_offset”: 4, “label”: “时间”}, {“id”: 43, “start_offset”: 6, “end_offset”: 9, “label”: “等级”}, {“id”: 44, “start_offset”: 9, “end_offset”: 11, “label”: “地震触发词”}]}}</td>
+</tr>
+</tbody></table>
+<p>接着走<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/develop/model_zoo/uie/doccano.md#71-%E6%8A%BD%E5%8F%96%E5%BC%8F%E4%BB%BB%E5%8A%A1%E6%95%B0%E6%8D%AE%E8%BD%AC%E6%8D%A2">数据转换</a>,形成的train.txt和test.txt如下所示。</p>
+<blockquote>
+<p>train.txt</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;content&quot;: &quot;泰安今早发生2.9级地震！&quot;, &quot;result_list&quot;: [&#123;&quot;text&quot;: &quot;地震&quot;, &quot;start&quot;: 10, &quot;end&quot;: 12&#125;], &quot;prompt&quot;: &quot;地震触发词&quot;&#125;</span><br><span class="line">&#123;&quot;content&quot;: &quot;泰安今早发生2.9级地震！&quot;, &quot;result_list&quot;: [], &quot;prompt&quot;: &quot;2.9级的震级&quot;&#125;</span><br><span class="line">&#123;&quot;content&quot;: &quot;泰安今早发生2.9级地震！&quot;, &quot;result_list&quot;: [], &quot;prompt&quot;: &quot;2.9级的时间&quot;&#125;</span><br><span class="line">&#123;&quot;content&quot;: &quot;泰安今早发生2.9级地震！&quot;, &quot;result_list&quot;: [&#123;&quot;text&quot;: &quot;2.9级&quot;, &quot;start&quot;: 6, &quot;end&quot;: 10&#125;], &quot;prompt&quot;: &quot;等级&quot;&#125;</span><br><span class="line">&#123;&quot;content&quot;: &quot;泰安今早发生2.9级地震！&quot;, &quot;result_list&quot;: [&#123;&quot;text&quot;: &quot;2.9级&quot;, &quot;start&quot;: 6, &quot;end&quot;: 10&#125;], &quot;prompt&quot;: &quot;地震的震级&quot;&#125;</span><br><span class="line">&#123;&quot;content&quot;: &quot;泰安今早发生2.9级地震！&quot;, &quot;result_list&quot;: [&#123;&quot;text&quot;: &quot;今早&quot;, &quot;start&quot;: 2, &quot;end&quot;: 4&#125;], &quot;prompt&quot;: &quot;地震的时间&quot;&#125;</span><br><span class="line">&#123;&quot;content&quot;: &quot;泰安今早发生2.9级地震！&quot;, &quot;result_list&quot;: [&#123;&quot;text&quot;: &quot;今早&quot;, &quot;start&quot;: 2, &quot;end&quot;: 4&#125;], &quot;prompt&quot;: &quot;时间&quot;&#125;</span><br><span class="line">&#123;&quot;content&quot;: &quot;泰安今早发生2.9级地震！&quot;, &quot;result_list&quot;: [], &quot;prompt&quot;: &quot;今早的震级&quot;&#125;</span><br><span class="line">&#123;&quot;content&quot;: &quot;泰安今早发生2.9级地震！&quot;, &quot;result_list&quot;: [], &quot;prompt&quot;: &quot;今早的时间&quot;&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>test.txt(此处对应的prompt都是有result_list的哦)</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;content&quot;: &quot;日本昨日发生10级地震！&quot;, &quot;result_list&quot;: [&#123;&quot;text&quot;: &quot;昨日&quot;, &quot;start&quot;: 2, &quot;end&quot;: 4&#125;], &quot;prompt&quot;: &quot;时间&quot;&#125;</span><br><span class="line">&#123;&quot;content&quot;: &quot;日本昨日发生10级地震！&quot;, &quot;result_list&quot;: [&#123;&quot;text&quot;: &quot;10级&quot;, &quot;start&quot;: 6, &quot;end&quot;: 9&#125;], &quot;prompt&quot;: &quot;等级&quot;&#125;</span><br><span class="line">&#123;&quot;content&quot;: &quot;日本昨日发生10级地震！&quot;, &quot;result_list&quot;: [&#123;&quot;text&quot;: &quot;地震&quot;, &quot;start&quot;: 9, &quot;end&quot;: 11&#125;], &quot;prompt&quot;: &quot;地震触发词&quot;&#125;</span><br><span class="line">&#123;&quot;content&quot;: &quot;日本昨日发生10级地震！&quot;, &quot;result_list&quot;: [&#123;&quot;text&quot;: &quot;昨日&quot;, &quot;start&quot;: 2, &quot;end&quot;: 4&#125;], &quot;prompt&quot;: &quot;地震的时间&quot;&#125;</span><br><span class="line">&#123;&quot;content&quot;: &quot;日本昨日发生10级地震！&quot;, &quot;result_list&quot;: [&#123;&quot;text&quot;: &quot;10级&quot;, &quot;start&quot;: 6, &quot;end&quot;: 9&#125;], &quot;prompt&quot;: &quot;地震的震级&quot;&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>可以看到，转换后的prompt由两部分组成：</p>
+<ol>
+<li>实体词。比如<code>时间</code>，<code>等级</code>，<code>地震触发词</code>。</li>
+<li>由relation形成的prompt。即<code>实体词+的+relation</code>。比如<code>地震的时间</code>，<code>地震的震级</code>，<code>今早的时间</code>，<code>今早的震级</code>，<code>2.9级的震级</code>，<code>2.9级的时间</code>。</li>
+</ol>
+<h3 id="训练"><a href="#训练" class="headerlink" title="训练"></a>训练</h3><p>官方微调<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/tree/develop/model_zoo/uie#43-%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83">介绍</a>。</p>
+<p>这部分就一个点需要注意，就是数据构造方式，看下面：</p>
+<!-- ![图](https://user-images.githubusercontent.com/40840292/167236006-66ed845d-21b8-4647-908b-e1c6e7613eb1.png) -->
+
+<img src="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/167236006-66ed845d-21b8-4647-908b-e1c6e7613eb1.png" class="" title="prompt">
+
+
+<blockquote>
+<p><code>[CLS]</code> prompt <code>[SEP]</code> Content <code>[SEP]</code></p>
+</blockquote>
+<p>Content对应原句。相关代码可看<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/b10aa7a84b5604f6c688a3c9a83d9df325c3c082/model_zoo/uie/utils.py#L186">check</a>和<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/b10aa7a84b5604f6c688a3c9a83d9df325c3c082/model_zoo/uie/utils.py#L130">convert example</a>。</p>
+<p>到这里整体训练流程就明白了，那有一个问题，就是如何使用呢？？？</p>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>从上面标注图片可以看到，所有的出发点都是来自<code>地震触发词</code>，那么就应该先预测<code>触发词</code>，然后根据这个触发词来找到与之相关的<code>所有的论元</code>，比如<code>地震</code>的<code>震级</code>, <code>地震</code>的<code>时间</code>。中间通过一个<code>的</code>字来进行连接形成prompt。</p>
+<p>那如何找<code>与之相关的所有的论元</code>呢？？？通过relation，那如何定义relation呢？通过<code>schema</code>！！！</p>
+<p>下面看官方示例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="keyword">from</span> paddlenlp <span class="keyword">import</span> Taskflow</span><br><span class="line"></span><br><span class="line">schema = &#123;<span class="string">&#x27;地震触发词&#x27;</span>: [<span class="string">&#x27;地震强度&#x27;</span>, <span class="string">&#x27;时间&#x27;</span>, <span class="string">&#x27;震中位置&#x27;</span>, <span class="string">&#x27;震源深度&#x27;</span>]&#125;</span><br><span class="line">ie = Taskflow(<span class="string">&#x27;information_extraction&#x27;</span>, schema=schema)</span><br><span class="line">ie.set_schema(schema)</span><br><span class="line">output = ie(<span class="string">&#x27;中国地震台网正式测定：5月16日06时08分在云南临沧市凤庆县(北纬24.34度，东经99.98度)发生3.5级地震，震源深度10千米。&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(output)</span><br></pre></td></tr></table></figure>
+
+<p>set_schema干了什么事呢？看官方代码<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/b10aa7a84b5604f6c688a3c9a83d9df325c3c082/paddlenlp/taskflow/information_extraction.py#L702">SchemaTree</a>，这里对schema形成了一个tree，构造完的示例如下：</p>
+<img src="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/c1.png" class="" title="c1">
+
+
+<p>也就是说，通过遍历SchemaTree，预测顺序为：地震触发词，地震强度，时间，震中位置，震源深度。</p>
+<p>对应的输入为：</p>
+<blockquote>
+<ol>
+<li>[CLS]地震触发词[SEP]中国地震台网正式测定：5月16日06时08分在云南临沧市凤庆县(北纬24.34度，东经99.98度)发生3.5级地震，震源深度10千米。[SEP]</li>
+</ol>
+</blockquote>
+<p>输出为:</p>
+<blockquote>
+<p>地震</p>
+</blockquote>
+<p>接着以<code>地震</code>作为触发词，构造接下来的prompt，核心哦！！</p>
+<blockquote>
+<ol>
+<li>[CLS]地震的地震强度[SEP]中国地震台网正式测定：5月16日06时08分在云南临沧市凤庆县(北纬24.34度，东经99.98度)发生3.5级地震，震源深度10千米。[SEP]</li>
+<li>[CLS]地震的时间[SEP]中国地震台网正式测定：5月16日06时08分在云南临沧市凤庆县(北纬24.34度，东经99.98度)发生3.5级地震，震源深度10千米。[SEP]</li>
+<li>[CLS]地震的震中位置[SEP]中国地震台网正式测定：5月16日06时08分在云南临沧市凤庆县(北纬24.34度，东经99.98度)发生3.5级地震，震源深度10千米。[SEP]</li>
+<li>[CLS]地震的震源深度[SEP]中国地震台网正式测定：5月16日06时08分在云南临沧市凤庆县(北纬24.34度，东经99.98度)发生3.5级地震，震源深度10千米。[SEP]</li>
+</ol>
+</blockquote>
+<p>整理流程至此就已经非常明白了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>事件提取作者这里使用关系抽取的标注方式来标注的，包括实体和对应关系，但是做了层转换，转换成prompt训练样本。具体做的事情分成两步：</p>
+<h3 id="1-通过的字将触发词和关系做拼接。比如地震的时间"><a href="#1-通过的字将触发词和关系做拼接。比如地震的时间" class="headerlink" title="1. 通过的字将触发词和关系做拼接。比如地震的时间"></a>1. 通过<code>的</code>字将触发词和关系做拼接。比如<code>地震的时间</code></h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;泰安今早发生2.9级地震！&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;result_list&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;今早&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;start&quot;</span><span class="punctuation">:</span> <span class="number">2</span><span class="punctuation">,</span> <span class="attr">&quot;end&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="attr">&quot;prompt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;地震的时间&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-实体本身比如时间"><a href="#2-实体本身比如时间" class="headerlink" title="2. 实体本身比如时间"></a>2. 实体本身比如<code>时间</code></h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;泰安今早发生2.9级地震！&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;result_list&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;今早&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;start&quot;</span><span class="punctuation">:</span> <span class="number">2</span><span class="punctuation">,</span> <span class="attr">&quot;end&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="attr">&quot;prompt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;时间&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>预测的时候也是先找<code>核心触发词</code>，然后再构成prompt。</p>
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>语义角色标注任务能否通过这种方式来进行改进或者说能够通过语义角色标注的方式来减少UIE标注的标签数量？</p>
+<p>比如：</p>
+<blockquote>
+<p>泰安今早发生2.9级地震！</p>
+</blockquote>
+<p>主体： 泰安<br>谓语： 发生<br>客体： 地震</p>
+<p>时间： 今早<br>等级： 2.9级<br>…</p>
+<p>核心论元就三个，主体、客体、触发词。然后围绕这三个，比如时间，地点等构成这个事件。</p>
+<p>如果这样的话，流程就变成了如下方式：</p>
+<ol>
+<li>提取出来一句话中所有的触发词。</li>
+<li>围绕这个触发词，找到所有相关的论元。</li>
+<li>根据需要搜索指定的触发词，从而返回与之相关的论元。</li>
+</ol>
+<p>问题来了，那如何构造呢？<br>比如<code>发生</code>，发生什么？如果按照UIE的方式来讲，是<code>地震触发词</code>，简洁明了，不会有任何歧义，以地震作为事件主体来找触发词以及相应的论元。</p>
+<p>如果换成发生的话，关系就变成了比如：</p>
+<ol>
+<li>发生的主体</li>
+<li>发生的客体</li>
+<li>发生的时间</li>
+<li>发生的等级</li>
+</ol>
+<p>构造上没有任何问题～～～，只是觉得<code>发生</code>不够直接表达意思，但是形式上的确是可行的，这个需要试下就知道效果了，如果效果好，那对于标签构造的减少非常有帮助。</p>
+<p>又比如<code>我吃饭，她吃菜。</code>，一个吃字，怎么根据这个吃字来构造数据呢？</p>
+<ol>
+<li>吃的主体</li>
+<li>吃的客体</li>
+</ol>
+<p>那么这个吃就会提出两个主体和客体，所以这里我觉得把<code>触发词</code>所在的index也给传进去从而会对训练和预测时的效果有所提升。</p>
+<p>而对于UIE呢，他的触发词估计就变成了<code>吃饭触发词</code>，所以就不会有这种歧义性的问题了，除非一个句子有多个吃饭事件。。。这个概率就会极低了。。。</p>
+<h3 id="思考总结"><a href="#思考总结" class="headerlink" title="思考总结"></a>思考总结</h3><p>对于上述思考，UIE的做法很直接，定义<code>地震触发词</code>，表明了输入一句话那我就是要提取和地震相关的论元，先提取<code>地震触发词</code>（同时也作为prompt输入），然后接着构造prompt提取其他相应的论元。</p>
+<p>整个过程直接明了，歧义与理解困难上都非常低。另外对于不同的事件，其实它都是有对应的主体，比如可以定义<code>海啸触发词</code>和<code>泥石流触发词</code>。</p>
+<blockquote>
+<p>即： 触发词即事件！！</p>
+</blockquote>
+<p>而对于语义角色标注呢，触发词更倾向的是动词，它属于格语论。以动词为中心所展开的事件论元。那么它所对应的主体或者客体才是事件。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-bert融入外部特征" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1404,92 +1651,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2022/04/01/macbert4csc%E7%BA%A0%E9%94%99/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-腾讯TexSmart备忘" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/03/14/%E8%85%BE%E8%AE%AFTexSmart%E5%A4%87%E5%BF%98/">腾讯TexSmart备忘</a>
-    </h1>
-  
-
-        
-        <a href="/2022/03/14/%E8%85%BE%E8%AE%AFTexSmart%E5%A4%87%E5%BF%98/" class="archive-article-date">
-  	<time datetime="2022-03-14T01:48:22.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-03-14</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>备忘一下～</p>
-<p>之前在看腾讯开源的词向量时，<a target="_blank" rel="noopener" href="https://ai.tencent.com/ailab/nlp/zh/embedding.html">Tencent AI Lab Embedding Corpus for Chinese Words and Phrases</a>，在看到Simple Cases那里，瞬间感到震撼！！果然大公司就是大公司，有钱有地位。。。</p>
-<p>跟着公司做了一些技术研究和项目后，发现目前nlp之所以发展没到位，最主要原因就是：<code>算法和数据分家</code>。算法层面，目前整个学术界没有大的进步，另外像GPT3这种，一般玩不起。数据层面，没人开源数据，即使开源了，标注质量参差不齐，标注标准也是如此。那大家比什么，比的只有算法喽，结果最后就是华而不实（工业上应用）～。</p>
-<p>那回到开始，觉得震撼之余，就在想那腾讯肯定也有相应的分词，结果找了半天，没找到。今天突然发现了，窃喜之余，记录一下。</p>
-<p>关于它的介绍，<a target="_blank" rel="noopener" href="https://ai.tencent.com/ailab/nlp/texsmart/zh/index.html">TexSmart: 文本理解工具与服务</a>，以及它的<a target="_blank" rel="noopener" href="https://texsmart.qq.com/zh">Demo</a>，整体效果看下来，要好于目前很多开源的（当然，你懂我意思），大家算法可能都差不多。</p>
-<p>但是分为离线版和http api版，差距有多大，这个木有尝试，反正官方说有差距。</p>
-<p>以后尝试尝试。</p>
-<p>参考地址：</p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://ai.tencent.com/ailab/nlp/zh/embedding.html">https://ai.tencent.com/ailab/nlp/zh/embedding.html</a></li>
-<li><a target="_blank" rel="noopener" href="https://ai.tencent.com/ailab/nlp/texsmart/zh/index.html">https://ai.tencent.com/ailab/nlp/texsmart/zh/index.html</a></li>
-<li><a target="_blank" rel="noopener" href="https://texsmart.qq.com/zh">https://texsmart.qq.com/zh</a></li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/03/14/%E8%85%BE%E8%AE%AFTexSmart%E5%A4%87%E5%BF%98/">展开全文 >></a>
         </p>
       
 

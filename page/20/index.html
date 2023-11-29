@@ -212,6 +212,92 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-24-03-2-实验-完成LAMP模块化搭建" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/22/24-03-2-%E5%AE%9E%E9%AA%8C-%E5%AE%8C%E6%88%90LAMP%E6%A8%A1%E5%9D%97%E5%8C%96%E6%90%AD%E5%BB%BA/">24_03_2_实验:完成LAMP模块化搭建</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/22/24-03-2-%E5%AE%9E%E9%AA%8C-%E5%AE%8C%E6%88%90LAMP%E6%A8%A1%E5%9D%97%E5%8C%96%E6%90%AD%E5%BB%BA/" class="archive-article-date">
+  	<time datetime="2015-04-22T03:14:47.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">PATH=/Download </span><br><span class="line">apr=apr-1.5.1 </span><br><span class="line">apr-util=apr-util-1.5.4 </span><br><span class="line">mysql=mysql-version </span><br><span class="line">http=http-version </span><br><span class="line">mcrypt=libmycrypt-version </span><br><span class="line">yum groupinstall -y <span class="string">&quot;Development Tools&quot;</span>  &amp;&gt;/dev/null </span><br><span class="line">tar xf <span class="variable">$PATH</span>/<span class="variable">$apr</span> &amp;&amp; <span class="built_in">cd</span> <span class="variable">$PATH</span>/<span class="variable">$apr</span>                         </span><br><span class="line">./configure --prefix=/usr/local/apr </span><br><span class="line">make  &amp;&amp; make install                                                                                                      </span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$PATH</span> &amp;&amp; tar xf <span class="variable">$&#123;apr-util&#125;</span> &amp;&amp; <span class="built_in">cd</span> <span class="variable">$&#123;apr-util&#125;</span> </span><br><span class="line">./configure --prefix=/usr/local/apr-util --with-apr=/usr/local/apr         </span><br><span class="line">make &amp;&amp; make install                                                                                          </span><br><span class="line">yum install pcre-devel openssl-devel </span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$PATH</span> &amp;&amp; tar xf <span class="variable">$http</span> &amp;&amp; <span class="built_in">cd</span> <span class="variable">$http</span> </span><br><span class="line">./configure --prefix=/usr/local/apache --sysconfdir=/etc/httpd --enable-so --enable-rewrite --enable-ssl --enable-cgi --enable-cgid </span><br><span class="line">  --enable-modules=most --enable-deflate --enable-mods-shared=most --enable-mpms-shared=all --with-mpm=event(默认) </span><br><span class="line">  --with-apr=/usr/local/apr --with-apr-util=/usr/local/apr-util </span><br><span class="line">     </span><br><span class="line">make &amp;&amp; make install </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;export PATH=<span class="variable">$PATH</span>:/usr/local/apache/bin/&quot;</span> &gt; /etc/profile.d/httpd.sh </span><br><span class="line"> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;/usr/local/apache/bin/apachectl start &amp;&gt; /dev/null&quot;</span> &gt;&gt; /etc/rc.d/rc.local </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$PATH</span> &amp;&amp; tar xf <span class="variable">$mysql</span> -C /usr/local </span><br><span class="line"><span class="built_in">cd</span> /usr/local </span><br><span class="line"><span class="built_in">ln</span> -sv <span class="variable">$mysql</span> mysql &amp;&amp; <span class="built_in">cd</span> mysql </span><br><span class="line">groupadd -r -g 306 mysql </span><br><span class="line">useradd -r  -g 306 -u 306 mysql </span><br><span class="line"> </span><br><span class="line"><span class="built_in">mkdir</span> -p /mydata/data </span><br><span class="line"><span class="built_in">chown</span> -R　mysql.mysql /mydata/data </span><br><span class="line"><span class="built_in">chmod</span> 750 /mydata/data </span><br><span class="line"> </span><br><span class="line">scripts/mysql_install_db --user=mysql --datadir=/mydata/data </span><br><span class="line"><span class="built_in">chown</span> -R root.mysql /usr/local/mysql/* </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cp</span> support-files/mysql.server /etc/init.d/mysqld </span><br><span class="line">chkconfig --add mysqld </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cp</span> support-files/my-default.cnf /etc/my.cnf </span><br><span class="line"> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;datadir = /mydata/data&quot;</span> &gt;&gt; /etc/my.cnf             </span><br><span class="line"> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;export PATH=<span class="variable">$PATH</span>:/usr/local/mysql/bin/&quot;</span> &gt;/etc/profile.d/mysql.sh </span><br><span class="line"> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;MANPATH /usr/local/mysql/man&quot;</span> &gt;&gt; /etc/man.config </span><br><span class="line"> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;/usr/local/mysql/lib&quot;</span> &gt; /etc/ld.so.conf.d/mysql.conf </span><br><span class="line">ldconfig -v &amp;&gt; /dev/null </span><br><span class="line"> </span><br><span class="line"><span class="built_in">ln</span> -s/usr/local/mysql/include /usr/include/mysql &amp;&gt;/dev/null </span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$PATH</span> &amp;&amp; tar xf <span class="variable">$mcrypt</span> </span><br><span class="line">./configure --prefix=/usr/local/mcrypt </span><br><span class="line">make &amp;&amp; make install </span><br><span class="line"> </span><br><span class="line">yum install bzip2-devel libxml2-devel zlib-devel </span><br><span class="line">./configure --prefix=/usr/local/php --with-config-file-path=/etc  --with-openssl --with-mysql=/usr/local/mysql   --with-mysqli=/usr/local/mysql/bin/mysql_config </span><br><span class="line">--enable-mbstring --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir --enable-xml --enable-sockets </span><br><span class="line">--with-apxs2=/usr/local/apache/bin/apxs --with-mcrypt=/usr/local/mycrypt  --with-config-file-scan-dir=/etc/php.d --with-bz2 --enable-maintainer-zts </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cp</span> php.ini-production /etc/php.ini </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;AddType application/x-httpd-php .php </span></span><br><span class="line"><span class="string">Addtype application/x-httpd-php-source .phps&quot;</span> &gt;&gt; /etc/httpd/httpd.conf </span><br><span class="line"> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot; </span></span><br><span class="line"><span class="string">phpinfo(); </span></span><br><span class="line"><span class="string">?&gt; </span></span><br><span class="line"><span class="string">&quot;</span> &gt; /usr/local/apache/htdocs/phpinfo.php </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot; </span></span><br><span class="line"><span class="string">&lt;?php </span></span><br><span class="line"><span class="string">    <span class="variable">$conn</span>=mysql_connect(&#x27;localhost&#x27;,&#x27;root&#x27;,&#x27;password&#x27;); </span></span><br><span class="line"><span class="string">    if (<span class="variable">$conn</span>)\n </span></span><br><span class="line"><span class="string">        echo &quot;</span>Success<span class="string">&quot;; </span></span><br><span class="line"><span class="string">    else\n </span></span><br><span class="line"><span class="string">        echo &quot;</span>Failure<span class="string">&quot;; </span></span><br><span class="line"><span class="string">?&gt;&quot;</span> &gt; /usr/local/apache/htdocs/php-mysql.php </span><br><span class="line">     </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> <span class="comment"># tar xvjf xcache </span></span><br><span class="line"> /usr/local/php/bin/phpize </span><br><span class="line"> ./configure --enable-xcache --with-php-config=/usr/local/php/bin/php-config </span><br><span class="line">make &amp;&amp; make install </span><br><span class="line">    安装结束后，会出现类似如下行: </span><br><span class="line">    Installing shared extensions:    /usr/local/php/lib/php/extensions/no-debug-zts-20131226 </span><br><span class="line"> </span><br><span class="line">2/编辑php.ini，整合php和xcache </span><br><span class="line"> </span><br><span class="line">    首先将xcache提供的样例配置导入php.ini </span><br><span class="line">    <span class="built_in">mkdir</span> /etc/php.d </span><br><span class="line">     <span class="built_in">cp</span> xcache.ini /etc/php.d </span><br><span class="line"> </span><br><span class="line">说明:xcache.ini文件在xcache的源码目录中。 </span><br><span class="line"> </span><br><span class="line">接下来编辑/etc/php.d/xcache.ini，找到zend_extension开头的行，修改为如下行: </span><br><span class="line">zend_extension = /usr/local/php/lib/php/extensions/no-debug-zts-20131226/xcache.so </span><br></pre></td></tr></table></figure>
+<p>重启http,如果在phpinfo中显示有xcache,则显示成功安装。。 </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/22/24-03-2-%E5%AE%9E%E9%AA%8C-%E5%AE%8C%E6%88%90LAMP%E6%A8%A1%E5%9D%97%E5%8C%96%E6%90%AD%E5%BB%BA/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-24-02-2-编译安装PHP" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1386,110 +1472,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/04/22/21-02Httpd%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%AE%80%E4%BB%8B/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-21-03Httpd属性配置" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/21/21-03Httpd%E5%B1%9E%E6%80%A7%E9%85%8D%E7%BD%AE/">21_03Httpd属性配置</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/21/21-03Httpd%E5%B1%9E%E6%80%A7%E9%85%8D%E7%BD%AE/" class="archive-article-date">
-  	<time datetime="2015-04-21T02:26:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-21</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>###Section 2:’Main’ server configuration </p>
-<p>DocumentRoot “&#x2F;var&#x2F;www&#x2F;html”   URL路径跟本地文件系统路径不是一码事，可自行定义，不过和下面这些属性要相连接<br><Directory /><br>    Options FollowSymLinks<br>    AllowOverride None<br></Directory><br>Options Indexes FollowSymLinks </p>
-<p>Options:<br>    indexes(索引):允许索引目录,即:每一个文件都显示给你看，作为一个web网站，一定不允许这项，如果作为下载站的时候，要启用这一项。<br>    FollowSymLinks:允许跟随符号链接<br>        例如#ln -s &#x2F;etc&#x2F;fstab &#x2F;var&#x2F;www&#x2F;html&#x2F;fstab.html,即可直接通过web查看，不过这项有较高的系统开销<br>    Includes:允许执行服务端包含<br>    ExecCGI:允许执行CGI脚本(这项应该允许)<br>    MultiViews:除非是国际化的站点，否则没必要<br>    All:启用所有选项<br>    None:什么都不启用 </p>
-<p>AllowOverride None:定义服务器的访问控制列表<br>    <br>    <br>    Order allow,deny<br>    Allow from 192.168.0.0&#x2F;24 仅允许这个网段的主机访问<br>                HOSTNAME:<a target="_blank" rel="noopener" href="http://www.baidu.com/">www.baidu.com</a><br>                DOMAINNAME:unravel.com<br>                Partial IP:172.16, 192.168.100.7<br>               <br>    Order deny,allow<br>    Deny from 192.168.0.0&#x2F;24 仅拒绝这个网段的主机访问 </p>
-<p>AllowOverride AuthConfig  认证访问<br>        AuthType Basic<br>        AuthName “Restricted Files”<br>        AuthUserFile “&#x2F;etc&#x2F;httpd&#x2F;conf&#x2F;htpasswd”<br>        Require user username(指定这一个用户，可多个) | valid-user(允许htpasswd中所有用户) </p>
-<p>    #htpasswd -c -m &#x2F;etc&#x2F;httpd&#x2F;conf&#x2F;htpasswd hadoop<br>        -c:只能用于第一次创建这个文件<br>        -m:使用md5进行加密<br>        -D:删除一个用户<br>       <br>Group File Syntax<br>    GroupName: rbowen dpitts sunge rshersey </p>
-<p>        AuthType Basic<br>        AuthName “By Invitation Only”<br>        AuthUserFile “&#x2F;etc&#x2F;httpd&#x2F;conf&#x2F;htpasswd”<br>        AuthGroupfile “&#x2F;etc&#x2F;httpd&#x2F;conf&#x2F;htgroup”<br>        Require group GroupName<br>编辑htgroup<br>    GroupName:username1 username2…<br>    注意:这些用户事先应该有用户密码(使用htpasswd创建) </p>
-<p>出现错误，可自行查看错误日志 </p>
-<p>Order allow,deny 定义顺序的，先检查allow，后deny。<br>    Allow from all    定义所有都可访问 </p>
-<IfModule mod_userdir.c> 
-    UserDir disabled 
-    #UserDir public_html 
-</IfModule> 
-    这项的意思指创建用户个人的页面，启用UserDir那行，意味着用户家目录自行创建public_html目录后，在里面添加网页，便可访问，但是，用户的家目录的权限是700，即不允许其他任何人访问，所以应该改动家目录具有x权限 
- 
-<p>    #useradd hadoop<br>    $mkdir public_html<br>    $vim index.html<br>        Hadoop site.<br>    #chmod o+x &#x2F;home&#x2F;hadoop<br>    #service httpd restart<br>    <a target="_blank" rel="noopener" href="http://ip/~hadoop">http://IP/~hadoop</a> 即可访问 </p>
-<p>其实下面有更为详细的选项，不过这个一般不用。。 </p>
-<p>AccessFileName .htaccess<br>       定义目录的访问控制，只要在希望的目录下建立这个文件，以及上面的访问控制法则，便可<br>    实现访问控制。但是，因该注意:在一个真正的生产环境下，不会启用此选项，因为资源浪费极高。 </p>
-<p>&lt;Files ~ “^.ht”&gt;<br>    Order allow,deny<br>    Deny fron all<br>    Satisfy All<br></Files><br>作模式匹配，以.ht开头，所有这样的文件不允许访问，比如需要http认证的密码文件，不是作为<br>网页为别人看的，那么这种文件就不应该被别人访问到，所以这里就是作模式匹配，匹配到的统统不允许访问。 </p>
-<p>HostnameLookups Off                &#x2F;var&#x2F;log&#x2F;httpd&#x2F;access_log记录了所有访问过的信息，默认记录的是IP，如果启用这一项，意味着web服务器将会作IP地址反解，得出主机名，<br>                                这个是极其浪费服务器资源的，线上环境一定不要开启 </p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/21/21-03Httpd%E5%B1%9E%E6%80%A7%E9%85%8D%E7%BD%AE/">展开全文 >></a>
         </p>
       
 

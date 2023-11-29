@@ -212,6 +212,108 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-10-01Raid及madadm命令之一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/17/10-01Raid%E5%8F%8Amadadm%E5%91%BD%E4%BB%A4%E4%B9%8B%E4%B8%80/">10_01Raid及madadm命令之一</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/17/10-01Raid%E5%8F%8Amadadm%E5%91%BD%E4%BB%A4%E4%B9%8B%E4%B8%80/" class="archive-article-date">
+  	<time datetime="2015-02-16T16:20:58.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-17</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>SATA是串行接口设备,多块共同使用达到并行目的。<br>—独立冗余磁盘阵列<br> 组成:<br> 多块硬盘+RAID Controller<br><a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/RAID(%E6%9B%B4%E5%A4%9A%E5%8F%AF%E7%9C%8Bwiki%E4%BB%8B%E7%BB%8D)">http://zh.wikipedia.org/wiki/RAID(更多可看wiki介绍)</a> </p>
+<p>RAID： </p>
+<ol>
+<li>0：条带<br> 数据存储时为条带化，读写速度快，无冗余(错)能力。 </li>
+<li>1：镜像(mirror)<br> 读性能提升，写性能下降，有冗余能力， </li>
+<li>10:这个更好相比01 </li>
+<li>01:<br><a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/RAID">http://zh.wikipedia.org/wiki/RAID</a></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">             10 01 </span><br><span class="line">              | | </span><br><span class="line">    |---------| |--------| </span><br><span class="line">|-------| |-------| |------| |------| </span><br><span class="line">1       1  2       2 1      2 1       2 </span><br></pre></td></tr></table></figure>
+
+<p>RAID 10是先镜射再分区数据，再将所有硬盘分为两组，<br>视为是RAID 0的最低组合，然后将这两组各自视为RAID 1运作 </p>
+<p>RAID 01则是跟RAID 10的程序相反，是先分区再将数据镜射到两组硬盘。<br>它将所有的硬盘分为两组，<br>变成RAID 1的最低组合，而将两组硬盘各自视为RAID 0运作。 </p>
+<ol start="5">
+<li><p>5：<br> 性能表现，读写提升<br> 冗余能力有，空间利用率（n-1)&#x2F;n<br>RAID 5可以理解为是RAID 0和RAID 1的折衷方案。<br>RAID 5可以为系统提供数据安全保障，<br>但保障程度要比镜像低而磁盘空间利用率要比镜像高。<br>RAID 5具有和RAID 0相近似的数据读取速度，<br>只是因为多了一个奇偶校验信息，<br>写入数据的速度相对单独写入一块硬盘的速度略慢，<br>若使用“回写缓存”可以让性能改善不少。同时由于多个数据对应一个奇偶校验信息，<br>RAID 5的磁盘空间利用率要比RAID 1高，存储成本相对较便宜。 </p>
+</li>
+<li><p>50:<br> 读写都提升<br> 有冗余能力<br> 空间利用率(n-2)&#x2F;n<br>JBOD：就是一个硬盘用满了，用下一个。<br> 性能无提升<br> 无冗余能力<br> 空间利用率100%<br>数据的存放机制是由第一颗硬盘开始依序往后存放，<br>即操作系统看到的是一个大硬盘（由许多小硬盘组成的）。<br>但如果硬盘损毁，则该颗硬盘上的所有数据将无法救回。<br>若第一颗硬盘损坏，通常无法作救援（因为大部分文件系统将磁盘分区表<br>（partition table）?存在磁盘前端，即第一颗），<br>失去磁盘分区表即失去一切数据，若遭遇磁盘阵列数据或硬盘<br>出错的状况，危险程度较RAID 0更剧。<br>它的好处是不会像RAID，每次访问都要读写全部硬盘。<br>这个在Hadoop中使用的多；；</p>
+</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/17/10-01Raid%E5%8F%8Amadadm%E5%91%BD%E4%BB%A4%E4%B9%8B%E4%B8%80/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-09-04linux压缩与归档" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1135,105 +1237,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/02/13/07-03Linux%E6%96%87%E4%BB%B6%E6%9F%A5%E6%89%BE%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-07-02bash脚本编程之六-使用脚本选项及组合条件测试" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/11/07-02bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%85%AD-%E4%BD%BF%E7%94%A8%E8%84%9A%E6%9C%AC%E9%80%89%E9%A1%B9%E5%8F%8A%E7%BB%84%E5%90%88%E6%9D%A1%E4%BB%B6%E6%B5%8B%E8%AF%95/">07_02bash脚本编程之六-使用脚本选项及组合条件测试</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/11/07-02bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%85%AD-%E4%BD%BF%E7%94%A8%E8%84%9A%E6%9C%AC%E9%80%89%E9%A1%B9%E5%8F%8A%E7%BB%84%E5%90%88%E6%9D%A1%E4%BB%B6%E6%B5%8B%E8%AF%95/" class="archive-article-date">
-  	<time datetime="2015-02-11T13:57:26.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-11</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="添加10个用户"><a href="#添加10个用户" class="headerlink" title="添加10个用户"></a>添加10个用户</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">if [ $# -ne 1 ];then </span><br><span class="line">  echo &quot;Usager:./uad.sh --add or --del.&quot; </span><br><span class="line">  exit 5 </span><br><span class="line">fi </span><br><span class="line"> </span><br><span class="line">if [ $1 == &#x27;--add&#x27; ];then </span><br><span class="line">    for x in `seq 10`;do </span><br><span class="line">      if id user$x &amp;&gt;/dev/null ;then </span><br><span class="line"> echo &quot;user$x exited&quot; </span><br><span class="line">      else  </span><br><span class="line"> useradd -m user$x &amp;&amp; echo &quot;user$x&quot; | passwd --stdin user$x &amp;&gt;/dev/null &amp;&amp; echo &quot;user$x founded&quot; </span><br><span class="line">      fi </span><br><span class="line">    done </span><br><span class="line">elif [ $1 == &#x27;--del&#x27; ];then </span><br><span class="line">    for x in `seq 10`;do </span><br><span class="line"> if id user$x &amp;&gt;/dev/null ;then </span><br><span class="line"> userdel -r user$x &amp;&amp; echo &quot;user$x deleted&quot; </span><br><span class="line"> else  </span><br><span class="line"> echo &quot;user$x not found&quot; </span><br><span class="line"> fi </span><br><span class="line">    done </span><br><span class="line">else </span><br><span class="line"> echo &quot;Unknown wrong&quot; </span><br><span class="line"> exit 6 </span><br><span class="line">fi </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="添加用户debian-gentoo-ubuntu"><a href="#添加用户debian-gentoo-ubuntu" class="headerlink" title="添加用户debian,gentoo,ubuntu"></a>添加用户debian,gentoo,ubuntu</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">if [ $1 == add ];then </span><br><span class="line">    for x in `echo $2 | sed &#x27;s/,/ /g&#x27;`;do </span><br><span class="line"> if id $x &amp;&gt;/dev/null;then </span><br><span class="line"> echo &quot;$x had exited&quot; </span><br><span class="line"> else  </span><br><span class="line"> useradd -m $x &amp;&amp; echo &quot;$x&quot; | passwd --stdin $x  &amp;&gt;/dev/null&amp;&amp; echo &quot;$x founded successful&quot; </span><br><span class="line"> fi </span><br><span class="line">    done </span><br><span class="line">elif [ $1 == del ];then </span><br><span class="line">    for x in `echo $2 | sed &#x27;s/,/ /g&#x27;`;do </span><br><span class="line"> if id $x &amp;&gt;/dev/null;then </span><br><span class="line"> userdel -r $x &amp;&amp; echo &quot; $x deleted successful&quot; </span><br><span class="line"> else </span><br><span class="line"> echo &quot;No such user&quot; </span><br><span class="line"> </span><br><span class="line">  fi </span><br><span class="line">    done </span><br><span class="line">else </span><br><span class="line"> echo &quot;Usage:./uad3.sh add or del user1,user2,user3...&quot; </span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
-
-<h2 id="如何设置多个条件"><a href="#如何设置多个条件" class="headerlink" title="如何设置多个条件"></a>如何设置多个条件</h2><blockquote>
-<p>if [ $# -gt 1 -a $# -le 3 ] <br>if [　$# -gt 1] &amp;&amp; [ $# -le 3 ] </p>
-</blockquote>
-<p>当用户输入q或Q或quit或Quit:退出 </p>
-<pre><code>
- if [ $1 == &#39;q&#39; -o &#39;Q&#39; -o &#39;quit&#39; -o &#39;Quit&#39; ];then 
- echo &quot;Quiting&quot; 
- exit 0 
-else 
- echo &quot;Unknown Error&quot; 
-</code></pre>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/11/07-02bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%85%AD-%E4%BD%BF%E7%94%A8%E8%84%9A%E6%9C%AC%E9%80%89%E9%A1%B9%E5%8F%8A%E7%BB%84%E5%90%88%E6%9D%A1%E4%BB%B6%E6%B5%8B%E8%AF%95/">展开全文 >></a>
         </p>
       
 

@@ -212,6 +212,95 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-lora原理与实现" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2023/11/29/lora%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E7%8E%B0/">lora原理与实现</a>
+    </h1>
+  
+
+        
+        <a href="/2023/11/29/lora%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E7%8E%B0/" class="archive-article-date">
+  	<time datetime="2023-11-29T07:59:56.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-11-29</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>Lora,是微软出的一种在低资源场景下进行微调大模型的实现方式，在transformers里有peft这个包进行调用，它通过固定预训练模型权重并只训练新增lora层来实现微调，目前其在比如Baichuan2、ChatGLM上都有相关资料，更多介绍可自行搜索了解。</p>
+<h3 id="简单理解"><a href="#简单理解" class="headerlink" title="简单理解"></a>简单理解</h3><p>其简单理解实现方式为，比如qkv的linear为768*768（更大模型可能会更大），那lora通过新增两个linear（lora_A和lora_B），引入一个超参<code>r</code>来降低训练参数量，其伪代码如下:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">in_feature, out_feature = <span class="number">768</span>, <span class="number">768</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># old</span></span><br><span class="line">self.q = nn.Linear(in_feature, out_feature)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Lora</span></span><br><span class="line"></span><br><span class="line">self.lora_A = nn.Linear(in_feature, r)</span><br><span class="line">self.lora_B = nn.Linear(r, out_feature)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>比如当r设置为1时，是否可以明显感受到训练参数量的变化。</p>
+<p>注意：Lora本质只有在微调阶段生效，其加速了微调，但是对于推理阶段不会加速，而且因引入了新的计算会导致推理速度略有下降。</p>
+<h3 id="paddle实现"><a href="#paddle实现" class="headerlink" title="paddle实现"></a>paddle实现</h3><p>注意，此篇文章通过介绍LoraLinear的实现，来说明Lora的工作原理。</p>
+<p>其实现在<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/5eb2eae1c73e983bbaa8302573a985ebdfa19801/paddlenlp/peft/lora/lora_layers.py#L28">这里</a>。</p>
+<h4 id="注意点1"><a href="#注意点1" class="headerlink" title="注意点1"></a>注意点1</h4><p>LoraLinear继承自nn.Linear，所以是在Linear的基础上进行改动。</p>
+<h4 id="注意点2"><a href="#注意点2" class="headerlink" title="注意点2"></a>注意点2</h4><p>Linear的<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/5eb2eae1c73e983bbaa8302573a985ebdfa19801/paddlenlp/peft/lora/lora_layers.py#L70">weight不进行训练</a>，这也符合Lora的原理说明。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">self.weight.stop_gradient=<span class="literal">True</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="注意点3"><a href="#注意点3" class="headerlink" title="注意点3"></a>注意点3</h4><p>forward部分，代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, <span class="built_in">input</span>: paddle.Tensor</span>):</span><br><span class="line">        result = F.linear(x=<span class="built_in">input</span>, weight=self.weight, bias=self.bias, name=self.name)</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> self.merged:</span><br><span class="line">            result += (self.lora_dropout(<span class="built_in">input</span>) @ self.lora_A @ self.lora_B) * self.scaling</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>我们看如果pretrained model和lora不进行merge的时候，其推理是pretrained model先计算，拿到result，然后和lora计算结果进行相加获取最终结果。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>对于Parameter Efficient fine-tune，Lora是其中一个实现方式，其他还有比如p-tuning等。但是通过Lora，我们大致理解了从原来直接对pretrained model fine-tune到现在的引入新的参数（比如）来使得我们能用低资源来使用LLM的能力。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2023/11/29/lora%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E7%8E%B0/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-document-QA-layoutLMv2" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1141,167 +1230,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2023/02/13/bert%E5%90%91%E9%87%8F%E5%8A%A0%E6%9D%83/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-IE-by-generation-t5" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2023/01/06/IE-by-generation-t5/">IE-by-generation-t5</a>
-    </h1>
-  
-
-        
-        <a href="/2023/01/06/IE-by-generation-t5/" class="archive-article-date">
-  	<time datetime="2023-01-06T07:35:06.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-01-06</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>本文主要分析<a target="_blank" rel="noopener" href="https://aistudio.baidu.com/aistudio/competition/detail/161/0/introduction">CCKS 2022 通用信息抽取 – 基于UIE的基线系统</a>代码实现，代码为<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/tree/develop/examples/information_extraction/DuUIE">DuUIE</a>。本文和目前官方在不停推广的<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/tree/develop/model_zoo/uie">UIE</a>稍微不同的是，本文是采用生成式的方式来做信息提取，也是百度最早论文所实现的方式。目前官方推广的是基于片段抽取的提取方式。对于这两者的不同，可参考<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/issues/4352">DuUIE和UIE的对比</a>。</p>
-<p>对于官方宣传的UIE的实现，之前代码也有做过分析<a href="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/" title="UIE-事件提取">UIE-事件提取</a>，感兴趣的可以去看看。</p>
-<h2 id="通用信息提取"><a href="#通用信息提取" class="headerlink" title="通用信息提取"></a>通用信息提取</h2><p>目前对于信息提取没有一个非常严格的定义，但是特点是针对不同的事件定义不同schema。针对给定的句子甚者是文章，来完成对应schema信息的提取。</p>
-<p>信息提取形式上可分为三类：</p>
-<p>1、flat（即每个schema成分都是平铺的，不存在交叉之类的现象）<br>2、nest（一个schema成分也可作为另外一个schema组合）<br>3、overlapping（比如张三、李四分别打算19号和20号回家。假设schema为：[人名、触发词、日期、动作]，那<code>打算</code>就作为一个论元被其他论元重复使用）</p>
-<p>目前信息提取比如有oneIE、casIE，各自的特点也有所不同。</p>
-<h2 id="生成式模型-T5"><a href="#生成式模型-T5" class="headerlink" title="生成式模型-T5"></a>生成式模型-T5</h2><p>T5是google提出来的，其目的为<a target="_blank" rel="noopener" href="https://arxiv.org/abs/1910.10683">Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer</a>。人如其名，其最大的特点为使用一个模型，通过对不同任务进行prompt建模，实现大一统(比如分类、摘要、翻译、文本生成等任务)。</p>
-<p>这个是非常喜欢的，原因：<br>1、站在今天看GPT3、chatGPT等模型的成功，证明了这类模型通过增大参数量，使其具备更高的能力。<br>2、通过对不同任务进行prompt建模，能够在不同的监督任务上完成学习，不需要在下游不同任务（比如multi-task共用同一个encoder）进行分别建模（decoder部分）来各自适配。</p>
-<p>相应的生成式模型也有比如bart、unilm等，此处bart应该也适用，所以跳过。后续有机会分享下unilm。更多介绍也可参考<a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/main/en/model_doc/t5#t5">huggingface T5</a>。</p>
-<h2 id="DuUIE介绍"><a href="#DuUIE介绍" class="headerlink" title="DuUIE介绍"></a>DuUIE介绍</h2><h3 id="基线说明"><a href="#基线说明" class="headerlink" title="基线说明"></a>基线说明</h3><p>本例采用面向信息抽取的统一序列到结构生成模型作为任务基线。</p>
-<p>该模型将多种不同的信息抽取目标结构表示为统一的结构化抽取语言（Structured Extraction Language，SEL），并且通过端到端生成的方式实现复杂结构的抽取。</p>
-<p>同时，该模型使用结构化框架前缀（Structural Schema Instructor，SSI）作为抽取目标来帮助模型区分不同的抽取任务。</p>
-<h4 id="结构化抽取语言"><a href="#结构化抽取语言" class="headerlink" title="结构化抽取语言"></a>结构化抽取语言</h4><p>结构化抽取语言将不同的目标结构进行统一结构表示。<br>典型的结构化抽取语言的形式如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(</span><br><span class="line">  (Spot Name: Info Span</span><br><span class="line">    (Assocation Name: Info Span)</span><br><span class="line">    (Assocation Name: Info Span)</span><br><span class="line">  )</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-<p>其中，</p>
-<ul>
-<li>Spot Name: 信息点类别，如实体类型；</li>
-<li>Assocation Name (asoc&#x2F;asso): 信息点关联类别，如关系类型、事件论元类型；</li>
-<li>Info Span: 信息点所对应的文本片段。</li>
-</ul>
-<p>以<code>2月8日上午北京冬奥会自由式滑雪女子大跳台决赛中中国选手谷爱凌以188.25分获得金牌！</code>中的信息结构为例：</p>
-<ul>
-<li>该句中的国籍关系 SEL 表达式为：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(</span><br><span class="line">  (人物: 谷爱凌</span><br><span class="line">    (国籍: 中国)</span><br><span class="line">  )</span><br><span class="line">)</span><br></pre></td></tr></table></figure></li>
-<li>该句中的夺冠事件 SEL 表达式为：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">(</span><br><span class="line">  (夺冠: 金牌</span><br><span class="line">    (夺冠时间: 2月8号上午)</span><br><span class="line">    (冠军: 谷爱凌)</span><br><span class="line">    (夺冠赛事: 北京冬奥会自由式滑雪女子大跳台决赛)</span><br><span class="line">  )</span><br><span class="line">)</span><br></pre></td></tr></table></figure></li>
-</ul>
-<p>生成SEL表达式后，我们通过解析器将表达式解析成对应的结构化抽取记录。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">records = sel2record.sel2record(</span><br><span class="line">  pred=predicted_sel,  # 生成的 SEL 表达式，例如 ((夺冠: 金牌 (冠军: 谷爱凌)))</span><br><span class="line">  text=raw_text,</span><br><span class="line">  ...</span><br><span class="line">)</span><br><span class="line">records 为解析后的抽取结果。例如 &#123;类别: 夺冠, 触发词: 金牌, 冠军: 谷爱凌&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h4 id="结构化模式前缀"><a href="#结构化模式前缀" class="headerlink" title="结构化模式前缀"></a>结构化模式前缀</h4><p>结构化模式前缀与带抽取的文本一同输入序列到结构生成模型，用于区分不同的抽取任务。<br>基线模型使用特殊字符 <code>[spot]</code>、<code>[asoc]</code> 来组织结构化模式前缀，<code>[spot]</code> 对应 SEL 中的 SpotName 类别，<code>[asoc]</code> 对应<br>不同任务的形式是：</p>
-<ul>
-<li>实体抽取：[spot] 实体类别 [text]</li>
-<li>关系抽取：[spot] 实体类别 [asoc] 关系类别 [text]</li>
-<li>事件抽取：[spot] 事件类别 [asoc] 论元类别 [text]</li>
-<li>情感抽取：[spot] 评价维度 [asoc] 观点类别 [text]</li>
-</ul>
-<p>以夺冠事件为例，其对应的SSI为 <code>[spot] 夺冠 [asoc] 夺冠事件 [asoc] 冠军 [asoc] 夺冠赛事 [text] 2月8日上午北京冬奥会自由...</code>。</p>
-<h3 id="阶段小结"><a href="#阶段小结" class="headerlink" title="阶段小结"></a>阶段小结</h3><p>别被这俩名词(SEL、SSI)给唬住了，SEL可以理解成是百度自创的一个language，将其这种树结构的转成平铺结构，如果你有看过constituency parser的话，就很类似了。之前出seq-to-seq模型结构时，就有人使用这种方式来训练constituency parser任务。SSI可以将其理解成是一种prompt构造方式，具体可参考上面，后续解码也有提及。</p>
-<h2 id="DuUIE预训练模型"><a href="#DuUIE预训练模型" class="headerlink" title="DuUIE预训练模型"></a>DuUIE预训练模型</h2><p>官方示例使用的预训练模型是uie-char-small，和T5有明显不同的地方一是引入了<code>&lt;spot&gt;</code>和<code>&lt;asoc&gt;</code>两个special tokens，还有一个uie-char-small采用字粒度，而google的T5有的是基于词的，当然导致的就是词表增大（干了我想干的哇），可以自行尝试（默认T5是不支持中文的哦，可使用mt5来进行尝试），另外要添加这俩special tokens。</p>
-<p>不过目前这种词粒度的tokenizer，除非分类，其他还是会是char粒度的。。</p>
-<p>哎，百度是做了不少东西哇，啥都要自己搞一套。这里是<a target="_blank" rel="noopener" href="https://github.com/universal-ie/UIE">pytorch版本的实现</a>。</p>
-<h2 id="DuUIE数据处理"><a href="#DuUIE数据处理" class="headerlink" title="DuUIE数据处理"></a>DuUIE数据处理</h2><p>这里不涉及数据预处理，schema的处理等操作，只涉及dataloader这些相关操作哦。</p>
-<h3 id="步骤一"><a href="#步骤一" class="headerlink" title="步骤一"></a>步骤一</h3><p>这一步目的在于<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/2d77bb80b3f34091ec6cb4341d3adfdc37e22186/examples/information_extraction/DuUIE/uie/seq2struct/utils.py#L203">数据到dataloader时</a>长这个样子。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">instance=&#123;</span><br><span class="line">	<span class="string">&#x27;id&#x27;</span>: <span class="string">&#x27;087d4f27c9e100ab27eca2d01f426edc&#x27;</span>,</span><br><span class="line">	<span class="string">&#x27;text&#x27;</span>: <span class="string">&#x27;无畏的约翰，弗兰德斯公爵菲利普二世的儿子，勃艮第菲利普三世的老爹因为领导勃艮第派与阿玛尼克-奥尔良派争夺法王可爱查理的摄政权而大打出手，葬送了查理五世亲手建立的大好局势无畏的约翰先是刺杀了奥尔良公爵路易并夺取摄政权，后又里通外国和英王亨利五世眉来眼去&#x27;</span>,</span><br><span class="line">	<span class="string">&#x27;tokens&#x27;</span>: [<span class="string">&#x27;无&#x27;</span>, <span class="string">&#x27;畏&#x27;</span>, <span class="string">&#x27;的&#x27;</span>, <span class="string">&#x27;约&#x27;</span>, <span class="string">&#x27;翰&#x27;</span>, <span class="string">&#x27;，&#x27;</span>, <span class="string">&#x27;弗&#x27;</span>, <span class="string">&#x27;兰&#x27;</span>, <span class="string">&#x27;德&#x27;</span>, <span class="string">&#x27;斯&#x27;</span>, <span class="string">&#x27;公&#x27;</span>, <span class="string">&#x27;爵&#x27;</span>, <span class="string">&#x27;菲&#x27;</span>, <span class="string">&#x27;利&#x27;</span>, <span class="string">&#x27;普&#x27;</span>, <span class="string">&#x27;二&#x27;</span>, <span class="string">&#x27;世&#x27;</span>, <span class="string">&#x27;的&#x27;</span>, <span class="string">&#x27;儿&#x27;</span>, <span class="string">&#x27;子&#x27;</span>, <span class="string">&#x27;，&#x27;</span>, <span class="string">&#x27;勃&#x27;</span>, <span class="string">&#x27;艮&#x27;</span>, <span class="string">&#x27;第&#x27;</span>, <span class="string">&#x27;菲&#x27;</span>, <span class="string">&#x27;利&#x27;</span>, <span class="string">&#x27;普&#x27;</span>, <span class="string">&#x27;三&#x27;</span>, <span class="string">&#x27;世&#x27;</span>, <span class="string">&#x27;的&#x27;</span>, <span class="string">&#x27;老&#x27;</span>, <span class="string">&#x27;爹&#x27;</span>, <span class="string">&#x27;因&#x27;</span>, <span class="string">&#x27;为&#x27;</span>, <span class="string">&#x27;领&#x27;</span>, <span class="string">&#x27;导&#x27;</span>, <span class="string">&#x27;勃&#x27;</span>, <span class="string">&#x27;艮&#x27;</span>, <span class="string">&#x27;第&#x27;</span>, <span class="string">&#x27;派&#x27;</span>, <span class="string">&#x27;与&#x27;</span>, <span class="string">&#x27;阿&#x27;</span>, <span class="string">&#x27;玛&#x27;</span>, <span class="string">&#x27;尼&#x27;</span>, <span class="string">&#x27;克&#x27;</span>, <span class="string">&#x27;-&#x27;</span>, <span class="string">&#x27;奥&#x27;</span>, <span class="string">&#x27;尔&#x27;</span>, <span class="string">&#x27;良&#x27;</span>, <span class="string">&#x27;派&#x27;</span>, <span class="string">&#x27;争&#x27;</span>, <span class="string">&#x27;夺&#x27;</span>, <span class="string">&#x27;法&#x27;</span>, <span class="string">&#x27;王&#x27;</span>, <span class="string">&#x27;可&#x27;</span>, <span class="string">&#x27;爱&#x27;</span>, <span class="string">&#x27;查&#x27;</span>, <span class="string">&#x27;理&#x27;</span>, <span class="string">&#x27;的&#x27;</span>, <span class="string">&#x27;摄&#x27;</span>, <span class="string">&#x27;政&#x27;</span>, <span class="string">&#x27;权&#x27;</span>, <span class="string">&#x27;而&#x27;</span>, <span class="string">&#x27;大&#x27;</span>, <span class="string">&#x27;打&#x27;</span>, <span class="string">&#x27;出&#x27;</span>, <span class="string">&#x27;手&#x27;</span>, <span class="string">&#x27;，&#x27;</span>, <span class="string">&#x27;葬&#x27;</span>, <span class="string">&#x27;送&#x27;</span>, <span class="string">&#x27;了&#x27;</span>, <span class="string">&#x27;查&#x27;</span>, <span class="string">&#x27;理&#x27;</span>, <span class="string">&#x27;五&#x27;</span>, <span class="string">&#x27;世&#x27;</span>, <span class="string">&#x27;亲&#x27;</span>, <span class="string">&#x27;手&#x27;</span>, <span class="string">&#x27;建&#x27;</span>, <span class="string">&#x27;立&#x27;</span>, <span class="string">&#x27;的&#x27;</span>, <span class="string">&#x27;大&#x27;</span>, <span class="string">&#x27;好&#x27;</span>, <span class="string">&#x27;局&#x27;</span>, <span class="string">&#x27;势&#x27;</span>, <span class="string">&#x27;无&#x27;</span>, <span class="string">&#x27;畏&#x27;</span>, <span class="string">&#x27;的&#x27;</span>, <span class="string">&#x27;约&#x27;</span>, <span class="string">&#x27;翰&#x27;</span>, <span class="string">&#x27;先&#x27;</span>, <span class="string">&#x27;是&#x27;</span>, <span class="string">&#x27;刺&#x27;</span>, <span class="string">&#x27;杀&#x27;</span>, <span class="string">&#x27;了&#x27;</span>, <span class="string">&#x27;奥&#x27;</span>, <span class="string">&#x27;尔&#x27;</span>, <span class="string">&#x27;良&#x27;</span>, <span class="string">&#x27;公&#x27;</span>, <span class="string">&#x27;爵&#x27;</span>, <span class="string">&#x27;路&#x27;</span>, <span class="string">&#x27;易&#x27;</span>, <span class="string">&#x27;并&#x27;</span>, <span class="string">&#x27;夺&#x27;</span>, <span class="string">&#x27;取&#x27;</span>, <span class="string">&#x27;摄&#x27;</span>, <span class="string">&#x27;政&#x27;</span>, <span class="string">&#x27;权&#x27;</span>, <span class="string">&#x27;，&#x27;</span>, <span class="string">&#x27;后&#x27;</span>, <span class="string">&#x27;又&#x27;</span>, <span class="string">&#x27;里&#x27;</span>, <span class="string">&#x27;通&#x27;</span>, <span class="string">&#x27;外&#x27;</span>, <span class="string">&#x27;国&#x27;</span>, <span class="string">&#x27;和&#x27;</span>, <span class="string">&#x27;英&#x27;</span>, <span class="string">&#x27;王&#x27;</span>, <span class="string">&#x27;亨&#x27;</span>, <span class="string">&#x27;利&#x27;</span>, <span class="string">&#x27;五&#x27;</span>, <span class="string">&#x27;世&#x27;</span>, <span class="string">&#x27;眉&#x27;</span>, <span class="string">&#x27;来&#x27;</span>, <span class="string">&#x27;眼&#x27;</span>, <span class="string">&#x27;去&#x27;</span>],</span><br><span class="line">	<span class="string">&#x27;entity&#x27;</span>: [&#123;</span><br><span class="line">		<span class="string">&#x27;type&#x27;</span>: <span class="string">&#x27;人物&#x27;</span>,</span><br><span class="line">		<span class="string">&#x27;offset&#x27;</span>: [<span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>],</span><br><span class="line">		<span class="string">&#x27;text&#x27;</span>: <span class="string">&#x27;菲利普二世&#x27;</span></span><br><span class="line">	&#125;, &#123;</span><br><span class="line">		<span class="string">&#x27;type&#x27;</span>: <span class="string">&#x27;人物&#x27;</span>,</span><br><span class="line">		<span class="string">&#x27;offset&#x27;</span>: [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>],</span><br><span class="line">		<span class="string">&#x27;text&#x27;</span>: <span class="string">&#x27;无畏的约翰&#x27;</span></span><br><span class="line">	&#125;],</span><br><span class="line">	<span class="string">&#x27;relation&#x27;</span>: [&#123;</span><br><span class="line">		<span class="string">&#x27;type&#x27;</span>: <span class="string">&#x27;父亲&#x27;</span>,</span><br><span class="line">		<span class="string">&#x27;args&#x27;</span>: [&#123;</span><br><span class="line">			<span class="string">&#x27;type&#x27;</span>: <span class="string">&#x27;人物&#x27;</span>,</span><br><span class="line">			<span class="string">&#x27;offset&#x27;</span>: [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>],</span><br><span class="line">			<span class="string">&#x27;text&#x27;</span>: <span class="string">&#x27;无畏的约翰&#x27;</span></span><br><span class="line">		&#125;, &#123;</span><br><span class="line">			<span class="string">&#x27;type&#x27;</span>: <span class="string">&#x27;人物&#x27;</span>,</span><br><span class="line">			<span class="string">&#x27;offset&#x27;</span>: [<span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>],</span><br><span class="line">			<span class="string">&#x27;text&#x27;</span>: <span class="string">&#x27;菲利普二世&#x27;</span></span><br><span class="line">		&#125;]</span><br><span class="line">	&#125;],</span><br><span class="line">	<span class="string">&#x27;event&#x27;</span>: [],</span><br><span class="line">	<span class="string">&#x27;spot_asoc&#x27;</span>: [&#123;</span><br><span class="line">		<span class="string">&#x27;span&#x27;</span>: <span class="string">&#x27;无畏的约翰&#x27;</span>,</span><br><span class="line">		<span class="string">&#x27;label&#x27;</span>: <span class="string">&#x27;人物&#x27;</span>,</span><br><span class="line">		<span class="string">&#x27;asoc&#x27;</span>: [</span><br><span class="line">			[<span class="string">&#x27;父亲&#x27;</span>, <span class="string">&#x27;菲利普二世&#x27;</span>]</span><br><span class="line">		]</span><br><span class="line">	&#125;, &#123;</span><br><span class="line">		<span class="string">&#x27;span&#x27;</span>: <span class="string">&#x27;菲利普二世&#x27;</span>,</span><br><span class="line">		<span class="string">&#x27;label&#x27;</span>: <span class="string">&#x27;人物&#x27;</span>,</span><br><span class="line">		<span class="string">&#x27;asoc&#x27;</span>: []</span><br><span class="line">	&#125;],</span><br><span class="line">	<span class="string">&#x27;spot&#x27;</span>: [<span class="string">&#x27;人物&#x27;</span>],</span><br><span class="line">	<span class="string">&#x27;asoc&#x27;</span>: [<span class="string">&#x27;父亲&#x27;</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>预处理那里新增了spot、asoc和spot_asoc这些，spot可以理解成为entity的类别，asoc代表relation的类别，这俩对应的值都可以理解成来自spot_asoc。spot_asoc代表entity1和entity2的relation。比如上面spot_asoc，一共有两个：</p>
-<ol>
-<li><code>无畏的约翰</code>表示一个entity，其类别是<code>人物</code>，其对应的<code>父亲</code>是<code>菲利普二世</code>。</li>
-<li><code>菲利普二世</code>同样是一个entity，其类别是<code>人物</code>，但是没有与之对应的relation。</li>
-</ol>
-<img src="/2023/01/06/IE-by-generation-t5/1.png" class="" title="1.png">
-
-<p>接着对instance[“text”]进行tokenizer，然后把这批数据对应的spots和asocs更新进来（这个在这批数据里都是一样的，都来自record.schema。后面涉及到schema的，都可理解成是record.schema，并包含了spots和asocs）</p>
-<h3 id="步骤二"><a href="#步骤二" class="headerlink" title="步骤二"></a>步骤二</h3><p>这一步主要目的在于如何将其转换成训练格式。也包含如何构造<a href="#%E7%BB%93%E6%9E%84%E5%8C%96%E6%A8%A1%E5%BC%8F%E5%89%8D%E7%BC%80">结构化模式前缀</a>。</p>
-<h4 id="1-构造input-id"><a href="#1-构造input-id" class="headerlink" title="1. 构造input_id"></a>1. 构造input_id</h4><p>接着走到了<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/5a44636d1fb86d845ec05e6b6ab1423382bac23a/examples/information_extraction/DuUIE/uie/seq2struct/data_collator.py#L391">collate_fn</a>这里，data是<code>List[Dict]</code>,这个Dict就是上图的inputs，具体如下图。</p>
-<img src="/2023/01/06/IE-by-generation-t5/2.png" class="" title="2.png">
-
-<p>每个data包含几部分：</p>
-<ol>
-<li>input_ids、attention_mask是对上图中的instance[“text”] tokenizer的结果</li>
-<li>spots、asocs是这批数据对应的record.schema</li>
-<li>spot_asoc就是将这条数据处理转换后的结果</li>
-<li>sample_ssi在train阶段都是true，eval阶段为false</li>
-</ol>
-<p>可以看到，最终输入给模型的<code>source_text_id（input_id） = prefix_id + text_start_id + ins[&quot;input_ids&quot;]</code>。</p>
-<p>其中<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/5a44636d1fb86d845ec05e6b6ab1423382bac23a/examples/information_extraction/DuUIE/uie/seq2struct/data_collator.py#L437">prefix_id</a>这里可以看到，前面<code>self.ssi_generator.sample_spot</code>和<code>self.ssi_generator.sample_asoc</code>即打乱了schema中<code>spots</code>和<code>asocs</code>的顺序。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&#x27; &#x27;</span>.join(self.tokenizer.convert_ids_to_tokens(prefix_id))</span><br><span class="line">Out[<span class="number">3</span>]: <span class="string">&#x27;&lt;spot&gt; 人 物 &lt;spot&gt; 地 理 位 置 &lt;spot&gt; 组 织 机 构 &lt;asoc&gt; 国 籍 &lt;asoc&gt; 妻 子 &lt;asoc&gt; 父 亲 &lt;asoc&gt; 祖 籍 &lt;asoc&gt; 丈 夫 &lt;asoc&gt; 毕 业 院 校 &lt;asoc&gt; 母 亲&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<p>text_start_id为固定值，为<code>&lt;extra_id_2&gt;</code>。</p>
-<h4 id="2-构造label"><a href="#2-构造label" class="headerlink" title="2. 构造label"></a>2. 构造label</h4><p><a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/5a44636d1fb86d845ec05e6b6ab1423382bac23a/examples/information_extraction/DuUIE/uie/seq2struct/data_collator.py#L451">代码入口</a>：<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/5a44636d1fb86d845ec05e6b6ab1423382bac23a/examples/information_extraction/DuUIE/uie/evaluation/sel2record.py#L866">convert_spot_asoc</a>，看到了么，<code>spot_asoc</code>传了半天，最终在这里将其转成训练的label。最终转换成比如：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&#x27;&lt;extra_id_0&gt; &lt;extra_id_0&gt; 组织机构 &lt;extra_id_5&gt; 哈尔滨市第五中学 &lt;extra_id_1&gt; &lt;extra_id_0&gt; 组织机构 &lt;extra_id_5&gt; 哈五中 &lt;extra_id_1&gt; &lt;extra_id_1&gt;&#x27;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h4 id="3-阶段小结"><a href="#3-阶段小结" class="headerlink" title="3. 阶段小结"></a>3. 阶段小结</h4><p>这里有两点需要注意的：</p>
-<ol>
-<li>在构造input_ids时的spots和asocs，schema数量是固定的，只是打乱了顺序。至于为什么需要将这个schema输入给模型来训练，想来想去莫非是要告诉模型这条数据的schema只有这些，抽取的话即要找到这些spots和asocs的值。但是如果record.schema中spots和asocs数量比较多的话，那就会导致需要修改喂给T5的max_source_length。</li>
-<li>label的构造太过复杂或者说不容易理解，同时也喂给T5的max_target_length过长，但是后续看了解码实现，又明白这么做的意义。</li>
-</ol>
-<p>所以整体流程为：<br>给定句子s，若record.schema为spots&#x3D;[“人物”, “地理位置”, “组织机构”]，asocs&#x3D;{“人物”: [“母亲”, “妻子”, “毕业院校”, “丈夫”, “父亲”, “国籍”, “祖籍”], “地理位置”: [], “组织机构”: []}，那么这条schema构造后喂给模型，我要抽取人物、地理位置、组织机构，如果有人物的话，那么还要抽取对应的母亲、妻子…祖籍。</p>
-<p>如果有多个schema类别，数量为n，那么就构造n次来对句子s进行信息抽取。</p>
-<h2 id="DuUIE训练"><a href="#DuUIE训练" class="headerlink" title="DuUIE训练"></a>DuUIE训练</h2><p>这部分反而没什么过多可以说的，可以参考<a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/main/en/model_doc/t5#training">T5 training建议</a>。包括数据构造，如何使用T5，学习率、generate等等。</p>
-<h2 id="DuUIE解码"><a href="#DuUIE解码" class="headerlink" title="DuUIE解码"></a>DuUIE解码</h2><p>数据处理在<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/5a44636d1fb86d845ec05e6b6ab1423382bac23a/examples/information_extraction/DuUIE/uie/seq2struct/data_collator.py#L256">这</a>，接着来到<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/5a44636d1fb86d845ec05e6b6ab1423382bac23a/examples/information_extraction/DuUIE/run_seq2struct.py#L241">generate这里</a>，这里流程如下图。</p>
-<img src="/2023/01/06/IE-by-generation-t5/3.png" class="" title="3.png">
-
-<p>看到了么，核心在<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/5a44636d1fb86d845ec05e6b6ab1423382bac23a/examples/information_extraction/DuUIE/uie/evaluation/sel2record.py#L620">sel2record</a>，感兴趣的要仔细看这里，这里重点突出了<a href="#%E7%BB%93%E6%9E%84%E5%8C%96%E6%8A%BD%E5%8F%96%E8%AF%AD%E8%A8%80">结构化抽取语言</a>的思想。。。</p>
-<p>最终形式举例：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">(</span><br><span class="line">  (&lt;extra_id_7&gt;</span><br><span class="line">    &lt;extra_id_5&gt;</span><br><span class="line">    天城公主</span><br><span class="line">    (祖籍 &lt;extra_id_5&gt; 通之)</span><br><span class="line">    (丈夫 &lt;extra_id_5&gt; 陈国峻)</span><br><span class="line">    (配偶 &lt;extra_id_5&gt; 陈国峻)</span><br><span class="line">    (国籍 &lt;extra_id_5&gt; 中国))</span><br><span class="line">  (&lt;extra_id_7&gt;</span><br><span class="line">    &lt;extra_id_5&gt;</span><br><span class="line">    陈国峻</span><br><span class="line">    (妻子 &lt;extra_id_5&gt; 天城公主)</span><br><span class="line">    (国籍 &lt;extra_id_5&gt; 中国)</span><br><span class="line">    (毕业院校 &lt;extra_id_5&gt; 北京大学)</span><br><span class="line">    (地理位置 &lt;extra_id_5&gt; 通之)</span><br><span class="line">    (祖籍 &lt;extra_id_5&gt; 通之)</span><br><span class="line">    (配偶 &lt;extra_id_5&gt; 天城公主))</span><br><span class="line">  (&lt;extra_id_7&gt; &lt;extra_id_5&gt; 天城 (人物 &lt;extra_id_5&gt; 陈国峻))</span><br><span class="line">  (&lt;extra_id_7&gt; &lt;extra_id_5&gt; 陈国 (国籍 &lt;extra_id_5&gt; 中国)))</span><br></pre></td></tr></table></figure>
-
-<p>这里可以花费更多经历在sel2record上，但是整体流程看下来，相比于UIE来讲，这个实现方式太偏学术，并且过于复杂，如果有不同的方法完成同一件事情，那么简单的做法其实会是更容易接受的做法。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>此篇文章算是开了一个新的思路，采用生成式方式来做信息提取。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2023/01/06/IE-by-generation-t5/">展开全文 >></a>
         </p>
       
 
