@@ -677,7 +677,7 @@ var _hmt = _hmt || [];
 <h2 id="训练和推理"><a href="#训练和推理" class="headerlink" title="训练和推理"></a>训练和推理</h2><p>训练就直接使用<a target="_blank" rel="noopener" href="https://github.com/THUDM/ChatGLM-6B/blob/main/ptuning/train.sh">官方代码</a>啦，<a target="_blank" rel="noopener" href="https://github.com/THUDM/ChatGLM-6B/blob/main/ptuning/evaluate.sh">推理</a>也是滴，整体流程跑通都很顺畅，整体是采用<code>quantization_bit=4</code>，所以单卡（5~6G显存）就能跑的起来。</p>
 <p>记录几个有意思的点。</p>
 <h3 id="1-p-tuning"><a href="#1-p-tuning" class="headerlink" title="1. p-tuning"></a>1. p-tuning</h3><p>这个是众多Parameter Efficient fine-tune实现方式之一，其发展历程简单理解有两个阶段，一是人工构造template，二是机器自己学习一个template。</p>
-<p>比如一开始做分类，例如“这个沙发怎么样”,那就在这句话前面（当然也可以放到后面）加上一个template，比如“情感分析，这个沙发怎么样”，“你觉得这句话是正向还是负向：这个沙发怎么样”，那训练时只对这个template进行微调，因为微调seq_len很少，所以速度杠杠滴。不过另外还有一个比较重要的点，贴和预训练模型任务。比如bert采用了mask方式来做预训练，但是你这里明明后面接个二分类，咋说也说不通啊，那为了贴和预训练任务，构造也可以这样：”情感分析，这个沙发怎么样<mask>“,那由bert来预测<mask>位置的值，比如“好”或者“坏”。但是这个呢，又不能解决通用，比如NER任务，“张三和李四谁更漂亮？”，那总不能先知道几个<mask>吧，以及bert的<mask>是字粒度的。所以构造一个template也是比较困难滴。</p>
+<p>比如一开始做分类，例如“这个沙发怎么样”,那就在这句话前面（当然也可以放到后面）加上一个template，比如<code>情感分析，这个沙发怎么样</code>，<code>你觉得这句话是正向还是负向：这个沙发怎么样</code>，那训练时只对这个template进行微调，因为微调seq_len很少，所以速度杠杠滴。不过另外还有一个比较重要的点，贴和预训练模型任务。比如bert采用了mask方式来做预训练，但是你这里明明后面接个二分类，咋说也说不通啊，那为了贴和预训练任务，构造也可以这样：<code>情感分析，这个沙发怎么样&lt;mask&gt;</code>,那由bert来预测<code>&lt;mask&gt;</code>位置的值，比如“好”或者“坏”,或者设置一堆和“好”或者“坏”同义的词（amaze、bad）。但是这个呢，又不能解决通用，比如NER任务，“张三和李四谁更漂亮？”，那总不能先知道几个<code>&lt;mask&gt;</code>吧，以及bert的<code>&lt;mask&gt;</code>是字粒度的。</p>
 <p>emmmm,扯远了，总结来说第一个阶段的peft可理解为人工构造一个template，但是呢，它是显性的，谁知道哪个template会更好。所以咱也不猜了，让模型自己去学去吧。</p>
 <p>所以这里引入了第二个阶段：模型自己来学习合适的template。</p>
 <p>p-tuning v2采用引入一个pre_seq_len，也就是PrefixEncoder，比如2, 8, 16(只要不超长都可以)，那只对这一部分进行微调，bert本身不参与微调哦，从而达成了不自己抓脑袋想一个有效的template，从而也完成了一个通用的目的。</p>
