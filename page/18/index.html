@@ -212,6 +212,204 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-35-04MySQL系列之十六－使用xtrabackup进行数据库备份" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/07/06/35-04MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E5%85%AD%EF%BC%8D%E4%BD%BF%E7%94%A8xtrabackup%E8%BF%9B%E8%A1%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E5%A4%87%E4%BB%BD/">35_04MySQL系列之十六－使用xtrabackup进行数据库备份</a>
+    </h1>
+  
+
+        
+        <a href="/2015/07/06/35-04MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E5%85%AD%EF%BC%8D%E4%BD%BF%E7%94%A8xtrabackup%E8%BF%9B%E8%A1%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E5%A4%87%E4%BB%BD/" class="archive-article-date">
+  	<time datetime="2015-07-06T01:26:22.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-07-06</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>二进制日志相关的几个选项:<br>    Innodb support xa&#x3D;{TRUE|FLASE}<br>    存储引擎事务在存储引擎内部被赋予了ACID属性，分布式(XA)事务是一种高层次的事务，它利用“准备”然后“提交”(prepare-then-commit)<br>    两段式的方式将ACID属性扩展到存储引擎外部，甚至是数据库外部。然后，“准备”阶段会导致额外的磁盘刷写操作，XA需要事务协调员，它会通知所有的参与者准备提交事务(阶段一)，当协调员从所有参与者那里收到“就绪”信息时，它会提示所有参与者进行真正的”提交“操作。<br>    此变量正是用于定义InnoDB是否支持两段式提交的分布式事务，默认为启用。事实上，所有启用了二进制日志的并支持多个线程同时向二进制日志写入数据的MySQL服务器都需要启用分布式事务，否则，多个线程对二进制日志的写入操作可能会以与原始次序不同的方式完成，这将会在基于二进制日志的恢复操作中或者是从服务器上创建出不同原始数据的结果。因此，除了仅有一个线程可以改变数据以外的其他应用场景都不应该禁用此功能。而在仅有一个线程可以修改数据的应用中，禁用此功能是安全的并可以提升InnoDB表的性能。作用范围为全局和会话级别，可用于选项文件，属动态变量； </p>
+<p>percona:<br>    ibbackup<br>        InnoDB online physical backup<br>            full<br>            incremental<br>        MyISAM: warm backup,full<br>    指ibackup可以实现对InnoDB实现在线物理备份，可以实现完全备份和增量备份，但是对MyISAM只能实现温备份和完全备份,但是授权费相当高； </p>
+<p>由于mysqldump只能实现小型数据库的备份(大型数据库备份耗费时间太长)，由于时逻辑备份，还会有损失精度的情况，所以，只适合小企业； </p>
+<p>虽然LVM几乎可以实现热备，也是物理备份，但是由于它要进行锁表，当然LVM也有现成的开源工具进行备份:<br>    mylvmbackup,使用perl 写的scripts; </p>
+<p>xtrabackup:<br>    可以实现对xtradb&#x2F;innodb存储引擎进行备份(xtradb可以看做是Innodb的增强版，如果源码编译mysql,建议使用xtradb) </p>
+<p>使用Xtrabackup进行MySQL备份: </p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><ol>
+<li><p>简介<br>xtrabackup是由percona提供的mysql数据库备份工具，据官方介绍，这特使世界上唯一一款开源的能够对InnoDB和xtradb数据库进行备份的工具，特点: </p>
+<blockquote>
+<p>备份过程快速、可靠；<br>备份过程不会打断正在执行的事务；<br>能够基于压缩等功能节约磁盘空间和流量；<br>自动实现备份检验；<br>还原速度快； </p>
+</blockquote>
+</li>
+<li><p>安装 </p>
+<blockquote>
+<p>安装.deb或者.rpm包即可；</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="备份的实现"><a href="#备份的实现" class="headerlink" title="备份的实现"></a>备份的实现</h2><ul>
+<li>完全备份</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">＃innobackupex  --user=DBUSER -password=DBPASSWD /path/to/BACKUP-DIR </span><br></pre></td></tr></table></figure>
+<p> such as:<br>     # innobackupex –user&#x3D;root –password&#x3D;test &#x2F;tmp&#x2F;xtra<br>     会在这个目录下生成这两个目录，2015-07-05_10-19-26  2015-07-05_10-19-40，其中２６那个备份的是配置文件，４０那个是数据库.<br>         也有可能只有一个文件夹，其中存放所有东西。当然只出现一个是操作成功了！！ </p>
+<p>如果要使用一个最小权限的用户进行备份，则可基于如下命令创建此类用户: </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;bkpuser&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;test&#x27;</span>; </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">REVOKE</span> <span class="keyword">ALL</span> PRIVILEGES,<span class="keyword">GRANT</span> OPTION FORM <span class="string">&#x27;bkpuser&#x27;</span>; </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> RELOAD,LOCK TABLES,REPLICATION CLIENT <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;bkpuser&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>; </span><br><span class="line">mysql<span class="operator">&gt;</span>FLUSH PRIVILEGES; </span><br></pre></td></tr></table></figure>
+<p>使用innobackupex备份时，其会调用xtrabackup备份所有的innoDB表，复制所有关于表结构定义的相关文件(.frm)、以及myISAM、MERGE、CSV和ARCHIVE表的相关文件，同时还会备份触发器和数据库配置信息相关的文件。这些文件会保存至一个以时间命令的目录中； </p>
+<p>在备份的同时，innobackupex还会在备份目录中创建如下文件; </p>
+<ol>
+<li>xtrabackup_checkpoints —–备份类型(如完全或增量)、备份状态(如是否已经为prepared状态)和LSN(日志序列号)范围信息；<br>每个InnoDB页，通常为16K,都会包含一个日志序列号(即LSN)。LSN是整个数据库系统的系统版本号。每个也变相关的LSN能够表明此页面最近是如何发生改变的； </li>
+<li>xtrabackup_binlog_info ——-mysql服务器当前正在使用的二进制日志文件及其备份这一刻为止二进制日志事件的位置。 </li>
+<li>xtrabackup_binlog_pos_innodb  —-二进制日志文件及用于InnoDB或XtraDB表的二进制日志文件的当前 position; </li>
+<li>xtrabackup_binary ——备份中用到的xtrabackup的哪个版本的可执行文件； </li>
+<li>backup-my.cnf ———备份命令用到的配置选项信息；</li>
+</ol>
+<p>在使用innobackupex进行备份时，还可以使用–no-timestamp选项来阻止命令在动创建一个以时间命令的目录；如此一来，innobackupex命令将会创建一个BACKUP-DIR目录来存储备份数据。 </p>
+<ul>
+<li>准备(prepare)一个完全备份</li>
+</ul>
+<p>一般情况下，在备份完成后，数据尚且不能用于恢复操作，因此备份的数据中可能会包含尚未提交的事务或已经提交但尚未同步至数据文件中的事务。因此，此时数据文件仍处于不一致状态。<br>!!!!!!!!”准备“的主要作用正是回滚未提交的事务及同步已经提交的事务至数据文件使得数据文件处于一致性的状态。!!!!!!!!!! </p>
+<p>innobackupex命令的–apply-log选项可用于实现上述功能。如下面的命令: </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#innobackupex --apply-log  /path/to/BACKUP-DIR/ </span></span><br></pre></td></tr></table></figure>
+<p>    such as:<br>        #innodbackupex –apply-log &#x2F;tmp&#x2F;xtra&#x2F;2015-07-05_10-19-40 </p>
+<p>如果执行正确，其最后输出的几行信息通常如下:<br>    [notice (again)]<br>  If you use binary log and don’t use any hack of group commit,<br>  the binary log position seems to be:<br>InnoDB: Last MySQL binlog file position 0 83739108, file name .&#x2F;mysql-bin.000001 </p>
+<p>xtrabackup: starting shutdown with innodb_fast_shutdown &#x3D; 1<br>150705 10:40:12  InnoDB: Starting shutdown…<br>150705 10:40:16  InnoDB: Shutdown completed; log sequence number 207833100<br>150705 10:40:16  innobackupex: completed OK!<br>    这步还是相当重要的！！ </p>
+<ul>
+<li><p>二进制日志备份(增量备份) </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">    <span class="operator">&gt;</span>flush logs </span><br><span class="line">    #cp mysql<span class="operator">-</span>bin.<span class="operator">*</span> <span class="operator">/</span>root </span><br></pre></td></tr></table></figure>
+</li>
+<li><p>还原<br>    innobackupex命令的–copy-back选项用于执行恢复操作，其通过复制所有数据相关的文件至mysql服务器DATADIR目录中来执行恢复过程，innobackupex通过backup-my.cnf来获取DATADIR目录的相关信息。</p>
+</li>
+</ul>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">    <span class="comment">#innobackupex --copy-back /path/to/BACKUP-DIR </span></span><br><span class="line">        <span class="comment">#innobackupex --copy-back /tmp/xtra/2015-07-05_10_19_40 </span></span><br><span class="line">    innobackupex: Starting to copy InnoDB <span class="built_in">log</span> files </span><br><span class="line">    innobackupex: <span class="keyword">in</span> <span class="string">&#x27;/tmp/xtra/2015-07-05_10-19-40&#x27;</span> </span><br><span class="line">    innobackupex: back to original InnoDB <span class="built_in">log</span> directory <span class="string">&#x27;/var/lib/mysql&#x27;</span> </span><br><span class="line">    innobackupex: Copying <span class="string">&#x27;/tmp/xtra/2015-07-05_10-19-40/ib_logfile0&#x27;</span> to <span class="string">&#x27;/var/lib/mysql/ib_logfile0&#x27;</span> </span><br><span class="line">    innobackupex: Copying <span class="string">&#x27;/tmp/xtra/2015-07-05_10-19-40/ib_logfile1&#x27;</span> to <span class="string">&#x27;/var/lib/mysql/ib_logfile1&#x27;</span> </span><br><span class="line">    innobackupex: Finished copying back files. </span><br><span class="line"> </span><br><span class="line">    150705 10:55:42  innobackupex: completed OK! </span><br><span class="line"> </span><br><span class="line">    但是此时的属主和属组是不正确的，应该 <span class="built_in">chown</span> -R mysql.mysql  /var/lib/mysql </span><br><span class="line"> </span><br><span class="line">    mysqlbinlog /root/mysql-bin.*      &gt;/tmp/abc.sql </span><br><span class="line">    &gt;<span class="built_in">set</span> sql_log_bin=0; </span><br><span class="line">    &gt;<span class="built_in">source</span> /tmp/abc.sql </span><br><span class="line">    &gt;<span class="built_in">set</span> sql_log_bn=1; </span><br></pre></td></tr></table></figure>
+<p>至此完成！！！！！！！！！！！！！！！！xtrabackup + 二进制日志； </p>
+<ul>
+<li>增量备份<br>    每个InnoDB的页面都会包含一个LSN信息，每当相关的数据发生改变，相关的页面的LSN就会自动增长。这正是InnoDB表可以进行增量备份的基础，即innobackupex通过备份上次完全备份之后发生改变的页面来实现；</li>
+</ul>
+<p>要实现第一次增量备份，可以使用下面的命令进行：<br>    ＃innobackupex –incremental &#x2F;backup –incremental -basedir&#x3D;BASEDIR<br>        #innobackupex –incremental  &#x2F;tmp&#x2F;incremental &#x2F;    –incremental-basedir&#x3D;&#x2F;tmp&#x2F;xtra&#x2F;2015-07-05_10_19_40 </p>
+<p>其中，BASEDIR指的是完全备份所在的目录，此命令执行结束后，innobackupex命令会在&#x2F;backup目录中创建一个以时间命令的目录以存放所有的增量备份数据。另外，在执行过增量备份之后再一次进行增量备份时，其–incremental-basedir应该指向上一次的增量备份所在的目录。 </p>
+<p>需要注意的是，增量备份仅能应用于InnoDB或XtraDB表，对于MyISAM表而言，执行增量备份时其实进行的是完全备份。 </p>
+<p>”准备“(prepare)增量备份与整理完全备份有着一些不同，尤其要注意的是:<br>    （１）需要在每个备份(包括完全和各个增量备份)上，将已经提交的事务进行”重放“，”重放“之后，所有的备份数据将合并到完全备份上；<br>    （２）基于所有的备份将未提交的事务进行”回滚“。 </p>
+<p>于是，操作变成了:<br>    #innobackupex –apply-log –redo-only BASE-DIR </p>
+<p>接着执行:<br>    #innobackupex –apply-log –redo-only BASE-DIR –incremental-dir&#x3D;<INCREMNETAL-DIR-1> </p>
+<p>而后是第二个增量:<br>    #innobaclkupex –apply-log –redo-only BASE-DIR –incremental-dir&#x3D;<INCREMENTAL-DIR-2><br>其中BASE-DIR指的是完全备份所在的目录，而INCREMENTAL-DIR-1指的是第一次增量备份的目录，INCREMENTAL-DIR-2指的是第二次增量备份的目录。其他以此类推，即如果有多次增量备份，每一次都要执行如上操作； </p>
+<p>此时进行还原的时候，只要还原BASE-DIR即可； </p>
+<p>然后chown -R mysql.mysql &#x2F;var&#x2F;lib&#x2F;mysql </p>
+<p>然后再重新进行完全备份!! </p>
+<ul>
+<li>xtrabackup的”流“及”备份压缩“功能</li>
+</ul>
+<p>xtrabackup对备份的数据文件支持”流“功能，即可以将备份的数据通过STDOUT传输给ｔａｒ程序进行归档，而不是默认的直接保存至某备份目录中。要使用此功能，仅需要使用－－stream选项即可。如:<br>    #innobackupex –stream&#x3D;tar &#x2F;backup | gzip &gt; &#x2F;backup&#x2F;<code>date+%F-%H-%M-%S</code>.tar.gz </p>
+<p>甚至也可以使用类似如下命令将数据备份至其他服务器:<br>    #innobackupex –stream&#x3D;tar &#x2F;backup | ssh <a href="mailto:&#117;&#115;&#101;&#x72;&#64;&#119;&#x77;&#x77;&#x2e;&#x74;&#x65;&#115;&#116;&#46;&#x63;&#x6f;&#x6d;">&#117;&#115;&#101;&#x72;&#64;&#119;&#x77;&#x77;&#x2e;&#x74;&#x65;&#115;&#116;&#46;&#x63;&#x6f;&#x6d;</a> “cat - &gt; &#x2F;backups&#x2F;<code>date+%F-%H-%M-%S</code>.tar” </p>
+<p>此外，在执行贝蒂备份时，还可以使用–parallel选项对多个文件进行并行复制。此选项用于执行在复制时启动的线程数目。当然，在实际进行备份时要利用此功能的便利性，也需要启用innodb_file_per_table选项或共享的表空间通过innodb_data_file_path选项存储在多个ibdata文件中。对某一个数据库的多个文件的复制无法利用到此功能，其简单使用方法如下:<br>    #innobackupex –parallel &#x2F;path&#x2F;to&#x2F;backup </p>
+<p>同时，innobackupex备份的数据文件也可以存储至远程主机，这可以使用–remote-host选项来实现:<br>    #innobackupex --remote-host&#x3D;<a href="mailto:&#x72;&#111;&#x6f;&#116;&#x40;&#119;&#119;&#x77;&#46;&#116;&#101;&#x73;&#x74;&#x2e;&#x63;&#111;&#x6d;">&#x72;&#111;&#x6f;&#116;&#x40;&#119;&#119;&#x77;&#46;&#116;&#101;&#x73;&#x74;&#x2e;&#x63;&#111;&#x6d;</a> &#x2F;PATH&#x2F;IN&#x2F;REMOTE&#x2F;HOST&#x2F;TO&#x2F;BACKUP </p>
+<ul>
+<li>导入或导出单张表</li>
+</ul>
+<p>默认情况下，InnoDB表不能通过直接复制表文件的方式在mysql服务器之间进行移植，即便用了innodb_file_per_table选项，而使用xtrabackup工具可以实现此种功能，不过，此时需要”导出”表的mysql服务器启用了innodb_file_per_table选项(严格来说，是要”导出“的表在其创建之前，mysql服务器就启用了innodb_file_per_table选项)，并且”导入“表的服务器同时启用了innodb_file_per_table和innodb_expand_import选项。 </p>
+<ol>
+<li><p>”导出“表<br>    导出表是在备份的prepare阶段进行的，因此，一旦完全备份完成，就可以在prepare过程中通过–export选项将某表导出了;<br>    #innobackupex –apply-log –export &#x2F;path&#x2F;to&#x2F;backup<br>    此命令会为每个innodb表的表空间创建一个以.exp结尾的文件，这些以.exp结尾的文件则可以用于导入至其他服务器。 </p>
+</li>
+<li><p>”导入“表<br>    要在mysql服务器上导入来自于其他服务器的某innodb表，需要现在当前服务器上创建一个跟原表表结构一致的表，而后才能实现将表导入；<br>    mysql&gt;CREATE TABLE mytable (…) ENGINE&#x3D;InnoDB:</p>
+</li>
+</ol>
+<p>    然后将此表的表空间删除：<br>    mysql&gt;ALTER TALBE mydatabase.mytable DISCARD TABLESPACE; </p>
+<p>    接下来，将来自于”导出“表的服务器的mytable表的mytable.ibd和mytable.exp文件复制到当前服务器的数据目录，然后使用如下命令将其”导入“；<br>    mysql&gt;ALTER TABLE mydatabase.mytable IMPORT TABLESPACE; </p>
+<ul>
+<li>使用xtrabackup对数据库进行部分备份<br>xtrabackup也可以实现部分备份，即只备份某个或某些指定的数据库或某数据库中的某个或某些表。但要使用此功能，必须启用innodb_file_per_table选项，即每张表保存为一个独立的文件，同时，其也不支持–stream选项，即不支持将数据通过管道传输给其他程序进行处理。</li>
+</ul>
+<p>此外，还原部分备份跟还原全部数据的备份也有所不同，即你不能通过简单的将prepared的部分备份使用–copy-back选项直接复制回数据目录，而是要通过导入表的方式来实现还原。当然，有些情况下，部分备份也可以直接通过–copy-back进行还原。但是这种方式还原而来的数据多数会产生数据不一致的问题，因此，无论如何不推荐使用这种方式。 </p>
+<p>这个非常详细:(建议可以增加看这篇文章)<br><a target="_blank" rel="noopener" href="http://jingyan.baidu.com/article/75ab0bcbef0a44d6864db23d.html">http://jingyan.baidu.com/article/75ab0bcbef0a44d6864db23d.html</a> </p>
+<p>这个算是简化版的，挺好。<br><a target="_blank" rel="noopener" href="http://blog.chinaunix.net/uid-20639775-id-154614.html">http://blog.chinaunix.net/uid-20639775-id-154614.html</a> </p>
+<h2 id="来个完整实验步骤"><a href="#来个完整实验步骤" class="headerlink" title="来个完整实验步骤"></a>来个完整实验步骤</h2><ol>
+<li>进行完全备份</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">    ＃innobackupex --user=root --password=easyheart /tmp/test </span><br><span class="line">        生成　2015-07-05_01-09-18 </span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>进行增量备份</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">     <span class="comment">#nnobackupex --incremental /tmp  --incremental-basedir=/tmp/2015-07-05_01-09-18/ </span></span><br><span class="line">         生成　 2015-07-05_01-11-06 </span><br><span class="line"> </span><br><span class="line">    <span class="comment">#innobackupex --incremental /tmp --incremental-basedir=/tmp/2015-07-05_01-11-06/ </span></span><br><span class="line">        生成　2015-07-05_01-13-26 </span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>准备</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">    <span class="comment">#innobackupex --apply-log --redo-only 2015-07-05_01-09-18/ </span></span><br><span class="line">    <span class="comment">#innobackupex --apply-log --redo-only /tmp/2015-07-05_01-09-18/ --incremental-dir=/tmp/2015-07-05_01-11-06/ </span></span><br><span class="line">     ＃innobackupex --apply-log --redo-only /tmp/2015-07-05_01-09-18/ --incremental-dir=/tmp/2015-07-05_01-13-26/ </span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>数据库崩溃</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">        <span class="comment">#rm -rf /var/lib/mysql/.* -rf </span></span><br><span class="line">        <span class="comment">#service mysqld stop </span></span><br></pre></td></tr></table></figure>
+<ol start="5">
+<li>进行恢复</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">        <span class="comment">#innobackupex --copy-back /tmp/2015-07-05_01-09-18/ </span></span><br><span class="line">        <span class="comment">#chown 　－R　mysql.mysql /var/lib/mysql </span></span><br><span class="line">        <span class="comment">#service mysqld start </span></span><br></pre></td></tr></table></figure>
+<ol start="6">
+<li>再进行重新完全备份</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/07/06/35-04MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E5%85%AD%EF%BC%8D%E4%BD%BF%E7%94%A8xtrabackup%E8%BF%9B%E8%A1%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E5%A4%87%E4%BB%BD/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-34-03MySQL系列之十一－MySQL用户和权限管理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1142,98 +1340,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/07/06/32-02MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%8C%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-32-01MySQL系列之一关系型数据库基础理论" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/07/06/32-01MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%80%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/">32_01MySQL系列之一关系型数据库基础理论</a>
-    </h1>
-  
-
-        
-        <a href="/2015/07/06/32-01MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%80%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/" class="archive-article-date">
-  	<time datetime="2015-07-06T01:05:06.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-07-06</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>数据库系统阶段管理数据的特点有如下方面:<br>(1)数据结构化<br>    数据库中的数据不再仅仅针对某个应用，而是面向全组织；这句话的意思指早期的文件基本上对应一个application,即文件仍然是面向应用的，那么当不同的应用程序所使用的数据具有共同部分时，也必须建立自己的数据文件，数据不能共享，同时，由于相同数据的重复存储、各自管理，在对数据进行更新操作时，不但浪费磁盘空间，同时也容易造成数据的不一致性。<br>    由于数据库系统不仅描述数据本身，还描述数据之间的联系，记录之间的联系可以用参照完整性来表述，进行多表查询时可以很容易的实现。<br>(2)数据共享性高、冗余度低<br>    所谓的数据共享是指数据库中的一组数据集合可为多个应用和多个用户共同使用。由于同一组数据可供多个用户或应用共享，这样便避免了同一数据在数据库中重复出现并具有不同值的现象。<br>(3)数据独立性高<br>    所以数据的独立性是指数据库中的数据与应用程序间相互独立，即数据的逻辑结构、存储结构以及存取方式的改变不影响应用程序<br>(4)有统一的数据控制功能<br>    1、数据的安全(Security)控制<br>    2、数据的完整性(Integrity)控制<br>    3、并发(Concurrency)控制<br>    4、数据恢复(Recovery)<br>    <br>那么可以看出，一个文件所可能具有的问题，如下所示:    <br>文件:<br>    数据冗余和不一致性<br>    数据访问困难<br>    数据孤立<br>    完整性问题<br>    原子性问题<br>    并发访问异常<br>    安全性问题<br>DBMS<br>    层次模型<br>    网状模型<br>    关系模型<br>    面向对象模型 </p>
-<p>关系模型(结构化数据模型)    <br>    关系模型<br>    E-R:实体-关系模型(基本成分:实体型 属性 联系(一对一、一对多、多对多))<br>    对象关系模型:基于对象的数据模型<br>    半结构化数据模型<a href="XML:扩展标记语言">XML:扩展标记语言</a> </p>
-<p>关系性数据:<br>    表示层:表<br>    逻辑层:存储引擎<br>    物理层:数据文件<br>        如果这个放在操作系统概念上来讲:表示层就是文件，逻辑层就是文件系统，物理层就是数据块。<br>RDB对象:<br>    约束(例如，更多可自行查看23_03)<br>        域约束:数据类型约束<br>        外键约束:引用完整性约束<br>        主键约束:某字段能唯一标识此字段所属的实体，并且不允许为空<br>            一张表只允许有一个主键<br>        唯一性约束:每一行的某字段不允许出现相同值，可以为空<br>            一张表中可以有多个<br>        检查性约束:age:int<br>    <br>数据存储和查询:<br>    存储管理器:<br>        权限及完整性管理器<br>        事务管理器<br>        文件管理器<br>        缓冲区管理器<br>    查询管理器:<br>        DML解释器<br>        DDL解释器<br>        查询执行引擎 
-         </p>
-<p>MySQL:<br>   单进程<br>    多线程<br>       守护线程<br>       应用线程    <br>thread reuse(线程重用):数据查询时，为了避免更多的性能降低，在查询完成以后，线程并不会销毁，下一个查询可直接重用这个线程进行查询。 </p>
-<p>MySQL最大内存使用:32bit:2.7G ； 64bit:不好说~~，所以生产环境中一定要使用64bit。<br>        <br>MySQL对smp(对称多处理器)的支持不好，意味着一条语句查询时只能使用一颗CPU，<br>这个是一个非常大的缺陷。<br>        <br>关系运算:        <br>    投影:只输出指定属性<br>    选择:只输出符合条件的行<br>    自然连接:具有相同名字的所有属性上取值相同的行<br>    笛卡尔积:(a+b)*(c+d)&#x3D;ac+ad+bc+bd      多表查询时非常有用<br>    并:集合运算<br>        <br>        <br>自然连接:<br>    例如:<br>        user.shellid&#x3D;shell.shellid<br>    有两张表，其中一张表记录了如下内容：<br>    marry  1<br>    tom       2<br>    jerry  3<br>    另外一张表:<br>    1        bash<br>    2        csh<br>    3        zsh    <br>    4        ksh<br>    5        tcsh<br>    那么，<br>    marry 1&#x3D;1    bash<br>    tom      2&#x3D;2    csh<br>    jerry 3&#x3D;3    zsh<br>这种具有等值关系的运算叫做自然连接。 
-         </p>
-<p>        <br>        <br>这篇文章部分参考《数据库原理及应用》，由于没有更为结构化、全面的认知，所以这篇文章会有很多缺陷，更多可自行参考其他书籍，以获得详细的解答，这篇文章仅作为最最低下的个人认知，<br>可完全不看。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/07/06/32-01MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%80%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/">展开全文 >></a>
         </p>
       
 

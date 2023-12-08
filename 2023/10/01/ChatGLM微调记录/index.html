@@ -7,26 +7,20 @@
   <meta name="baidu-site-verification" content="code-Wz3hIIlkFx" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://geasyheart.github.io">
-  <title>多模态-CLIP | 博客</title>
+  <title>ChatGLM微调记录 | 博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="问题多模态如何做融合，本文是对CLIP模型理解做个记录。 前提目前业界有中文开源版本的，例如Chinese-CLIP以及IDEA&#x2F;Fengshenbang-LM太乙系列，本文采用Chinese-CLIP来梳理其流程。 数据集采用wukong-dataset，预训练模型使用chinese-clip-vit-base-patch16来进行实验。 流程1. 文本处理12345678910111">
+  <meta name="description" content="介绍以ChatGLM-6B ptuning提供的微调代码来进行测试，整体代码在此。 训练和推理训练就直接使用官方代码啦，推理也是滴，整体流程跑通都很顺畅，整体是采用quantization_bit&#x3D;4，所以单卡（5~6G显存）就能跑的起来。 记录几个有意思的点。 1. p-tuning这个是众多Parameter Efficient fine-tune实现方式之一，其发展历程简单理解有两个阶段，一">
 <meta property="og:type" content="article">
-<meta property="og:title" content="多模态-CLIP">
-<meta property="og:url" content="https://geasyheart.github.io/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/index.html">
+<meta property="og:title" content="ChatGLM微调记录">
+<meta property="og:url" content="https://geasyheart.github.io/2023/10/01/ChatGLM%E5%BE%AE%E8%B0%83%E8%AE%B0%E5%BD%95/index.html">
 <meta property="og:site_name" content="博客">
-<meta property="og:description" content="问题多模态如何做融合，本文是对CLIP模型理解做个记录。 前提目前业界有中文开源版本的，例如Chinese-CLIP以及IDEA&#x2F;Fengshenbang-LM太乙系列，本文采用Chinese-CLIP来梳理其流程。 数据集采用wukong-dataset，预训练模型使用chinese-clip-vit-base-patch16来进行实验。 流程1. 文本处理12345678910111">
+<meta property="og:description" content="介绍以ChatGLM-6B ptuning提供的微调代码来进行测试，整体代码在此。 训练和推理训练就直接使用官方代码啦，推理也是滴，整体流程跑通都很顺畅，整体是采用quantization_bit&#x3D;4，所以单卡（5~6G显存）就能跑的起来。 记录几个有意思的点。 1. p-tuning这个是众多Parameter Efficient fine-tune实现方式之一，其发展历程简单理解有两个阶段，一">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://geasyheart.github.io/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/p1.png">
-<meta property="og:image" content="https://geasyheart.github.io/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/p2.png">
-<meta property="og:image" content="https://geasyheart.github.io/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/p3.png">
-<meta property="og:image" content="https://geasyheart.github.io/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/p4.png">
-<meta property="og:image" content="https://geasyheart.github.io/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/l1.png">
-<meta property="article:published_time" content="2023-10-11T08:10:42.000Z">
-<meta property="article:modified_time" content="2023-10-31T02:04:15.524Z">
+<meta property="article:published_time" content="2023-10-01T06:27:07.000Z">
+<meta property="article:modified_time" content="2023-12-08T07:38:21.123Z">
 <meta property="article:author" content="张宇">
 <meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://geasyheart.github.io/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/p1.png">
   
     <link rel="alternative" href="/atom.xml" title="博客" type="application/atom+xml">
   
@@ -219,71 +213,53 @@ var _hmt = _hmt || [];
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-多模态-CLIP" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-ChatGLM微调记录" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      多模态-CLIP
+      ChatGLM微调记录
     </h1>
   
 
         
-        <a href="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/" class="archive-article-date">
-  	<time datetime="2023-10-11T08:10:42.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-10-11</time>
+        <a href="/2023/10/01/ChatGLM%E5%BE%AE%E8%B0%83%E8%AE%B0%E5%BD%95/" class="archive-article-date">
+  	<time datetime="2023-10-01T06:27:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-10-01</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>多模态如何做融合，本文是对CLIP模型理解做个记录。</p>
-<h3 id="前提"><a href="#前提" class="headerlink" title="前提"></a>前提</h3><p>目前业界有中文开源版本的，例如<a target="_blank" rel="noopener" href="https://github.com/OFA-Sys/Chinese-CLIP">Chinese-CLIP</a>以及<a target="_blank" rel="noopener" href="https://fengshenbang-doc.readthedocs.io/zh/latest/docs/%E5%A4%AA%E4%B9%99%E7%B3%BB%E5%88%97/index.html">IDEA&#x2F;Fengshenbang-LM太乙系列</a>，本文采用<a target="_blank" rel="noopener" href="https://github.com/OFA-Sys/Chinese-CLIP">Chinese-CLIP</a>来梳理其流程。</p>
-<p>数据集采用<a target="_blank" rel="noopener" href="https://wukong-dataset.github.io/wukong-dataset/">wukong-dataset</a>，预训练模型使用<a target="_blank" rel="noopener" href="https://huggingface.co/OFA-Sys/chinese-clip-vit-base-patch16">chinese-clip-vit-base-patch16</a>来进行实验。</p>
-<h3 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h3><h4 id="1-文本处理"><a href="#1-文本处理" class="headerlink" title="1. 文本处理"></a>1. 文本处理</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">from</span> datasets <span class="keyword">import</span> Dataset</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> ChineseCLIPProcessor, ChineseCLIPModel, Trainer, TrainingArguments</span><br><span class="line"></span><br><span class="line">model_name_or_path = <span class="string">&quot;chinese-clip-vit-base-patch16&quot;</span></span><br><span class="line"></span><br><span class="line">model = ChineseCLIPModel.from_pretrained(model_name_or_path)</span><br><span class="line">processor = ChineseCLIPProcessor.from_pretrained(model_name_or_path)</span><br><span class="line"></span><br><span class="line">text_str = [<span class="string">&#x27;中国&#x27;</span>, <span class="string">&#x27;哈哈哈，我在这里&#x27;</span>]</span><br><span class="line">text_res = processor(text=text_str)</span><br><span class="line"><span class="built_in">print</span>(text_res)</span><br></pre></td></tr></table></figure>
+        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>以ChatGLM-6B ptuning提供的微调代码来进行测试，整体代码<a target="_blank" rel="noopener" href="https://github.com/THUDM/ChatGLM-6B/tree/main/ptuning">在此</a>。</p>
+<h2 id="训练和推理"><a href="#训练和推理" class="headerlink" title="训练和推理"></a>训练和推理</h2><p>训练就直接使用<a target="_blank" rel="noopener" href="https://github.com/THUDM/ChatGLM-6B/blob/main/ptuning/train.sh">官方代码</a>啦，<a target="_blank" rel="noopener" href="https://github.com/THUDM/ChatGLM-6B/blob/main/ptuning/evaluate.sh">推理</a>也是滴，整体流程跑通都很顺畅，整体是采用<code>quantization_bit=4</code>，所以单卡（5~6G显存）就能跑的起来。</p>
+<p>记录几个有意思的点。</p>
+<h3 id="1-p-tuning"><a href="#1-p-tuning" class="headerlink" title="1. p-tuning"></a>1. p-tuning</h3><p>这个是众多Parameter Efficient fine-tune实现方式之一，其发展历程简单理解有两个阶段，一是人工构造template，二是机器自己学习一个template。</p>
+<p>比如一开始做分类，例如“这个沙发怎么样”,那就在这句话前面（当然也可以放到后面）加上一个template，比如“情感分析，这个沙发怎么样”，“你觉得这句话是正向还是负向：这个沙发怎么样”，那训练时只对这个template进行微调，因为微调seq_len很少，所以速度杠杠滴。不过另外还有一个比较重要的点，贴和预训练模型任务。比如bert采用了mask方式来做预训练，但是你这里明明后面接个二分类，咋说也说不通啊，那为了贴和预训练任务，构造也可以这样：”情感分析，这个沙发怎么样<mask>“,那由bert来预测<mask>位置的值，比如“好”或者“坏”。但是这个呢，又不能解决通用，比如NER任务，“张三和李四谁更漂亮？”，那总不能先知道几个<mask>吧，以及bert的<mask>是字粒度的。所以构造一个template也是比较困难滴。</p>
+<p>emmmm,扯远了，总结来说第一个阶段的peft可理解为人工构造一个template，但是呢，它是显性的，谁知道哪个template会更好。所以咱也不猜了，让模型自己去学去吧。</p>
+<p>所以这里引入了第二个阶段：模型自己来学习合适的template。</p>
+<p>p-tuning v2采用引入一个pre_seq_len，也就是PrefixEncoder，比如2, 8, 16(只要不超长都可以)，那只对这一部分进行微调，bert本身不参与微调哦，从而达成了不自己抓脑袋想一个有效的template，从而也完成了一个通用的目的。</p>
+<p>关于p-tuning v2实现，可以参考<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/459305102">这里</a>。</p>
+<h3 id="2-速度"><a href="#2-速度" class="headerlink" title="2. 速度"></a>2. 速度</h3><p>这个真是牙痒痒，明明已经使用p-tuning了，明明也量化到4bit了，明明还使用了GPU，还这么慢，不得提前吐槽一下。。。</p>
+<p>关于速度慢，一个点是更长的上下文计算attention不可能不慢，新的技术<a target="_blank" rel="noopener" href="https://github.com/Dao-AILab/flash-attention">flash-attention</a>（torch2已经原生支持了哦，现在很多大模型都在torch2上跑了哦）更为有效解决这个问题，不过这个不是在算法本身做了优化，所以跳过。</p>
+<p>建议使用v2或v3, 如果非用这个，建议推理时采用stream_chat,或是采用Lora微调。</p>
+<h3 id="3-效果"><a href="#3-效果" class="headerlink" title="3. 效果"></a>3. 效果</h3><p>比如采用下面脚本看微调后的效果，会遇到几个比较值得注意的点。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> set_seed, AutoConfig, AutoModel, AutoTokenizer</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">set_seed(<span class="number">42</span>)</span><br><span class="line"></span><br><span class="line">model_name_or_path = <span class="string">&#x27;chatglm-6b&#x27;</span></span><br><span class="line">ptuning_checkpoint = <span class="string">&#x27;ptuning/output/adgen-chatglm-6b-pt-128-0.02/checkpoint-3000&#x27;</span></span><br><span class="line"></span><br><span class="line">config = AutoConfig.from_pretrained(model_name_or_path, trust_remote_code=<span class="literal">True</span>)</span><br><span class="line">config.pre_seq_len = <span class="number">128</span></span><br><span class="line">config.prefix_projection = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, trust_remote_code=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">model = AutoModel.from_pretrained(model_name_or_path, config=config, trust_remote_code=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">prefix_state_dict = torch.load(os.path.join(ptuning_checkpoint, <span class="string">&quot;pytorch_model.bin&quot;</span>), map_location=<span class="string">&#x27;cpu&#x27;</span>)</span><br><span class="line">new_prefix_state_dict = &#123;&#125;</span><br><span class="line"><span class="keyword">for</span> k, v <span class="keyword">in</span> prefix_state_dict.items():</span><br><span class="line">    <span class="keyword">if</span> k.startswith(<span class="string">&quot;transformer.prefix_encoder.&quot;</span>):</span><br><span class="line">        new_prefix_state_dict[k[<span class="built_in">len</span>(<span class="string">&quot;transformer.prefix_encoder.&quot;</span>):]] = v</span><br><span class="line">model.transformer.prefix_encoder.load_state_dict(new_prefix_state_dict)</span><br><span class="line">model = model.quantize(<span class="number">4</span>)</span><br><span class="line"></span><br><span class="line">model.to(<span class="string">&quot;cuda:0&quot;</span>)</span><br><span class="line">model = model.half()</span><br><span class="line">model.transformer.prefix_encoder.<span class="built_in">float</span>()</span><br><span class="line">model.<span class="built_in">eval</span>()</span><br><span class="line">start_time = time.time()</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">30</span>):</span><br><span class="line">    response, history = model.chat(tokenizer, <span class="string">&quot;你好&quot;</span>, history=[])</span><br><span class="line">    <span class="built_in">print</span>(response)</span><br><span class="line">    response, history = model.chat(tokenizer, <span class="string">&quot;晚上睡不着应该怎么办&quot;</span>, history=history)</span><br><span class="line">    <span class="built_in">print</span>(response)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># CUDA_VISIBLE_DEVICES=0 python run_finetuned_demo.py</span></span><br><span class="line"></span><br><span class="line">    response, history = model.chat(tokenizer, <span class="string">&quot;请根据以下标签为商品编写一段广告\n类型#裤*版型#显瘦*颜色#黑色*风格#简约*裤长#九分裤&quot;</span>, history=[])</span><br><span class="line">    <span class="built_in">print</span>(response)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(time.time() - start_time)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-<p>基于<a target="_blank" rel="noopener" href="https://github.com/OFA-Sys/Chinese-CLIP">ChineseClip官方说明</a>，知道其text-encoder部分都使用了<code>chinese-roberta-wwm</code>，另外一个可验证点是其<code>vocab.txt</code>的md5值和<code>chinese-roberta-wwm</code>是一样的。所以文本处理，就是找了中文版的bert来做中文的支持，故这部分到此就结束啦～</p>
-<h4 id="2-图像处理"><a href="#2-图像处理" class="headerlink" title="2. 图像处理"></a>2. 图像处理</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">from</span> datasets <span class="keyword">import</span> Dataset</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> ChineseCLIPProcessor, ChineseCLIPModel, Trainer, TrainingArguments</span><br><span class="line"></span><br><span class="line">model_name_or_path = <span class="string">&quot;chinese-clip-vit-base-patch16&quot;</span></span><br><span class="line"></span><br><span class="line">model = ChineseCLIPModel.from_pretrained(model_name_or_path)</span><br><span class="line">processor = ChineseCLIPProcessor.from_pretrained(model_name_or_path)</span><br><span class="line"></span><br><span class="line">image_str = <span class="string">&#x27;00010405-0083.jpg&#x27;</span></span><br><span class="line">image_input = Image.<span class="built_in">open</span>(image_str)</span><br><span class="line">img_res = processor(images=image_input)</span><br><span class="line"><span class="built_in">print</span>(img_res)</span><br></pre></td></tr></table></figure>
-
-<p>其流程如下所示，包括转RGB、resize、rescale、normalize、然后转CHW通道。</p>
-<img src="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/p1.png" class="">
-
-<p>注意resize那里将图片调整为(224, 224)，这里对后面处理有用。</p>
-<h4 id="3-融合"><a href="#3-融合" class="headerlink" title="3. 融合"></a>3. 融合</h4><p>重点来喽～</p>
-<p>其整理流程如下所示。</p>
-<img src="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/p2.png" class="">
-
-<h5 id="3-1-vision-model"><a href="#3-1-vision-model" class="headerlink" title="3.1  vision model"></a>3.1  vision model</h5><p>其vision_model下获取embedding如下。</p>
-<img src="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/p3.png" class="">
-
-<p>其<code>patch_embeds</code>经过conv2d，转成成了<code>torch.Size([10, 768, 14, 14])</code><strong>(224-16)&#x2F;16+1</strong>，接着<br><a target="_blank" rel="noopener" href="https://github.com/huggingface/transformers/blob/1e3c9ddacc7fc4142253bc9ddcba85c4d5b977e7/src/transformers/models/chinese_clip/modeling_chinese_clip.py#L201">201行代码</a>为：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">patch_embeds = patch_embeds.flatten(<span class="number">2</span>).transpose(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><code>14*14=196</code>,最终转换成了<code>(10, 196, 768)</code>，到这里就清晰了～</p>
-<p>不过在patch_embeds结束后，引入了一个class_embeds，这个就是类似bert中的[CLS]位置，用以做下游分类的。</p>
-<p>在拿到vision embedding之后，后面就是encoder部分啦，这里对应<code>ChineseCLIPVisionEncoder</code>，这部分本文先忽略。</p>
-<h5 id="3-2-text-model"><a href="#3-2-text-model" class="headerlink" title="3.2 text model"></a>3.2 text model</h5><p>这部分就是bert处理流程了，作者也写的很明白，就是bert那一套。</p>
-<img src="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/p4.png" class="">
+<h4 id="1-出现和重复"><a href="#1-出现和重复" class="headerlink" title="1. 出现和重复"></a>1. 出现<UNK>和重复</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">一件&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,</span><br><span class="line">BRAND这款&lt;UNK&gt;的裤子，在设计上很注重细节，衣袖和裤腿处都是&lt;UNK&gt;的&lt;UNK&gt;,&lt;UNK&gt;和&lt;UNK&gt;,&lt;UNK&gt;和&lt;UNK&gt;,&lt;UNK&gt;和&lt;UNK&gt;,&lt;UNK&gt;和&lt;UNK&gt;,</span><br><span class="line">简约修身的版型设计，上身十分显瘦，而且穿着十分有型。黑色款式设计，简约大气，时尚百搭，适合各种场合穿着。九分裤的长度设计，露出脚踝，视觉上显瘦。</span><br><span class="line">设计师对细节的把控是很高的，这样可以让整体看上去更加有设计感。而设计师在设计的同时对颜色的选择也是特别用心的，这样可以让整体看上去更加有格调，并且可以更好的展现出一种高端大气的格调。</span><br><span class="line">睡眠是身体和心灵都需要得到放松的，而晚上睡不着，可以做一些舒缓身心的活动，比如&lt;UNK&gt;，释放身心压力，缓解身心疲劳。而晚上睡不着，还可以去&lt;UNK&gt;,&lt;UNK&gt;音乐，让身心都得到放松。此外，可以做一些轻松的瑜伽，</span><br><span class="line">简约的黑色，上身更显帅气与利落，时尚修身的剪裁，穿着舒适，尽显女性魅力。九分的长度，轻松露出纤细的脚踝，更显腿长，拉长身材比例。</span><br><span class="line">采用优质的面料，使宝贝穿着舒适，保持柔软亲肤。搭配精致小立领，凸显宝贝脸型，彰显气质。搭配精致的包边工艺，使宝贝穿着舒适，方便宝贝穿脱。</span><br><span class="line">选用优质的面料，柔软亲肤，穿着舒适，穿着方便。精致小立领设计，凸显宝贝脸型，凸显宝贝气质。精致的包边工艺，方便穿脱。搭配精致的小立领，彰显宝贝气质。穿着舒适，柔软亲肤，穿着方便，穿着舒适。</span><br><span class="line">经典简约的黑色调，搭配九分裤的设计，不仅显瘦还修饰腿部曲线，上身更显腿长。修身的版型设计，展现女性优美的腿部曲线，尽显优雅气质。</span><br><span class="line">小宝贝在婴儿时期就接受了优质的营养，所以宝宝的身体健康状况良好。宝宝从婴儿时期就接受了优质的营养，因此宝宝身体健康状况良好，没有&lt;UNK&gt;。宝宝在婴儿时期就接受了优质的营养，所以宝宝身体健康。</span><br><span class="line">小宝贝从婴儿时期就接受了优质的营养，身体健康状况良好，没有&lt;UNK&gt;。小宝贝从婴儿时期就接受了优质的营养，身体健康状况良好，没有&lt;UNK&gt;。小宝贝从婴儿时期就接受了优质的营养，身体健康状况良好，没有&lt;UNK&gt;。小宝贝从婴儿</span><br><span class="line">黑色修身的九分裤，能更好的修饰腿型，让双腿显得更加修长，凸显女性的高挑。简约的修身版型，穿起来更显笔直修长。九分裤的长度，可以更好的修饰腿型，让双腿显得更加修长，显瘦效果也更好。</span><br><span class="line">非常可爱的小萌宝，可爱又甜美，非常符合儿童的审美。可爱的小萌宝，大大的眼睛，大大的眼睛，大大的眼睛，很迷人。小萌宝，小萌宝，非常可爱，非常可爱。</span><br><span class="line">儿童睡觉不踏实，晚上睡不着，是困扰许多家长的问题。在儿童睡眠中，儿童喜欢甜甜地睡觉，而且儿童喜欢甜美可爱的形象。儿童喜欢甜美可爱的形象，喜欢可爱可爱的儿童，喜欢甜美可爱的儿童。儿童喜欢甜美可爱的儿童，喜欢甜美可爱的儿童。甜美可爱的</span><br><span class="line">这条黑色的修身九分裤，简约时尚，轻松穿出帅气的感觉，上身之后非常显瘦。而且裤脚采用了松紧的设计，穿起来更加舒适。九分的长度，轻松露出纤细的脚踝，显得双腿修长又笔直。</span><br><span class="line">一件&lt;UNK&gt;的衬衫是很多人衣橱里必不可少的单品，穿着舒适，上身效果出色。而这款衬衫的面料采用的是&lt;UNK&gt;面料，柔软舒适，穿着不紧绷。</span><br><span class="line">衬衫作为女性衣橱里的必备单品，穿起来舒适又百搭，让你轻松穿出女神范。而这款衬衫选用的是柔软舒适的面料，穿着舒适又透气。而且面料表面带有&lt;UNK&gt;的纹理，看起来质感丰富。穿着舒适不紧绷，上身效果出色。而且衬衫的衣领</span><br><span class="line">一款简约而不简单的休闲裤，黑色的色调，经典百搭，彰显时尚气质。修身的版型，展现窈窕身材，搭配九分裤长，彰显干练气质。</span><br><span class="line">采用&lt;UNK&gt;面料，&lt;UNK&gt;工艺，面料轻盈舒适，不易变形。&lt;UNK&gt;面料，&lt;UNK&gt;面料，&lt;UNK&gt;面料，&lt;UNK&gt;面料，&lt;UNK&gt;面料，&lt;UNK&gt;面料，&lt;UNK&gt;面料，&lt;UNK&gt;面料，&lt;UNK&gt;</span><br><span class="line">轻薄的面料，轻盈舒适，不会引起的任何不适。面料柔软舒适，不易变形，穿着舒适，不易褶皱。采用&lt;UNK&gt;工艺，不易变形，不会引起的任何不适。面料轻盈舒适，不易变形，不会引起的任何不适。&lt;UNK&gt;面料，&lt;UNK&gt;面料，</span><br><span class="line">黑色百搭又显瘦，在裤子的设计上，设计师采用简约大方的九分裤型，上身显瘦又显腿长。腰部采用了松紧的设计，不勒腰，穿脱方便。</span><br><span class="line">来自&lt;UNK&gt;的这款儿童儿童&lt;UNK&gt;儿童儿童&lt;UNK&gt;儿童儿童&lt;UNK&gt;儿童儿童&lt;UNK&gt;儿童儿童&lt;UNK&gt;儿童儿童&lt;UNK&gt;儿童儿童儿童&lt;UNK&gt;儿童儿童&lt;UNK&gt;儿童儿童&lt;UNK&gt;儿童儿童儿童&lt;UNK&gt;儿童儿童&lt;</span><br><span class="line">儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 
-<h5 id="3-3-融合"><a href="#3-3-融合" class="headerlink" title="3.3 融合"></a>3.3 融合</h5><p>至此拿到vision_outputs和text_outputs，其vision_outputs为：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">last_hidden_state=(<span class="number">10</span>, <span class="number">197</span>, <span class="number">768</span>)</span><br><span class="line">pooler_output=(<span class="number">10</span>, <span class="number">768</span>)</span><br></pre></td></tr></table></figure>
+<p>按理说这6B大模型不应该啊！！按理说即使不做超参调整或者说generate时做重复惩罚，也应该效果好是不是～～～</p>
+<h4 id="2-灾难性遗忘"><a href="#2-灾难性遗忘" class="headerlink" title="2. 灾难性遗忘"></a>2. 灾难性遗忘</h4><p>首先这是一个现象，其issue里也讨论了蛮多关于这个话题。有人说p-tuning不就干这个的嘛，你推理时都加了p-tuning这部分参数，那肯定的啊。还有人说Lora虽然也有这个现象，但是比p-tuning要好的多。反正婆说婆有理。</p>
+<p>官方给的improve，比如在官方示例前面添加描述性文本”请根据以下标签为商品编写一段广告\n“，最终训练数据类似下面这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">请根据以下标签为商品编写一段广告\n类型#裤*版型#显瘦*颜色#黑色*风格#简约*裤长#九分裤</span><br></pre></td></tr></table></figure>
 
-<p>其text_outputs为:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">last_hidden_state=(<span class="number">10</span>, <span class="number">64</span>, <span class="number">768</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><strong>好奇：至此768维已经对齐了，为啥还要各自经过一个<code>self.visual_projection</code>和<code>self.text_projection</code>将其转为512维。。。</strong></p>
-<h5 id="3-4-计算loss"><a href="#3-4-计算loss" class="headerlink" title="3.4 计算loss"></a>3.4 计算loss</h5><img src="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/l1.png" class="">
-
-<p>这里处理跟<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/d1e060fa88c147495572d5ffc23675d858b8d9d8/examples/text_matching/simcse/model.py#L102">simcse计算loss流程</a>蛮类似的，不过这里计算loss还是蛮有意思的：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">chinese_clip_loss</span>(<span class="params">similarity: torch.Tensor</span>) -&gt; torch.Tensor:</span><br><span class="line">    caption_loss = contrastive_loss(similarity)</span><br><span class="line">    image_loss = contrastive_loss(similarity.t())</span><br><span class="line">    <span class="keyword">return</span> (caption_loss + image_loss) / <span class="number">2.0</span></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>正常来讲，我们只需要计算一次即可，这里分别进行计算，也算是一个有意思的点。</p>
-<p>至此，模型整体流程大致完成。能够用来基于文本找图像。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 备忘</span></span><br><span class="line">new_steps = (steps - kernel_size + 2padding) / strides + 1</span><br></pre></td></tr></table></figure>
-
-<p><strong>那是否有一种文本跟图像语义对齐的呢？留给以后～</strong></p>
+<p>但是我训练完还是会这样。</p>
+<p>也有人说把学习率调的更低一些，还有说官方给了10几w的训练样本，只用1～2k试试。</p>
+<p>这个本身还是有方法可以解决的，比如base大模型不动，可以在上面添加很多的prefx_encoder嘛～～～</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>多来点A100～</p>
 
       
 
@@ -379,7 +355,7 @@ var _hmt = _hmt || [];
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=https://geasyheart.github.io/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=https://geasyheart.github.io/2023/10/01/ChatGLM%E5%BE%AE%E8%B0%83%E8%AE%B0%E5%BD%95/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -393,18 +369,18 @@ var _hmt = _hmt || [];
   
 <nav id="article-nav">
   
-    <a href="/2023/10/16/%E5%A4%9A%E6%A8%A1%E6%80%81-%E5%AD%97%E5%B9%95%E7%94%9F%E6%88%90/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          多模态-字幕生成
+          多模态-CLIP
         
       </div>
     </a>
   
   
-    <a href="/2023/10/01/ChatGLM%E5%BE%AE%E8%B0%83%E8%AE%B0%E5%BD%95/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">ChatGLM微调记录</div>
+    <a href="/2023/08/25/%E7%94%9F%E6%88%90%E5%BC%8F%E6%A8%A1%E5%9E%8B%E7%9B%B8%E5%85%B3%E8%AE%B0%E5%BD%95/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">生成式模型相关记录</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -431,7 +407,7 @@ var _hmt = _hmt || [];
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E6%8F%90"><span class="toc-number">2.</span> <span class="toc-text">前提</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%81%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">流程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86"><span class="toc-number">3.1.</span> <span class="toc-text">1. 文本处理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86"><span class="toc-number">3.2.</span> <span class="toc-text">2. 图像处理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E8%9E%8D%E5%90%88"><span class="toc-number">3.3.</span> <span class="toc-text">3. 融合</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#3-1-vision-model"><span class="toc-number">3.3.1.</span> <span class="toc-text">3.1  vision model</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-2-text-model"><span class="toc-number">3.3.2.</span> <span class="toc-text">3.2 text model</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-3-%E8%9E%8D%E5%90%88"><span class="toc-number">3.3.3.</span> <span class="toc-text">3.3 融合</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-4-%E8%AE%A1%E7%AE%97loss"><span class="toc-number">3.3.4.</span> <span class="toc-text">3.4 计算loss</span></a></li></ol></li></ol></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E5%92%8C%E6%8E%A8%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">训练和推理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-p-tuning"><span class="toc-number">2.1.</span> <span class="toc-text">1. p-tuning</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E9%80%9F%E5%BA%A6"><span class="toc-number">2.2.</span> <span class="toc-text">2. 速度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%95%88%E6%9E%9C"><span class="toc-number">2.3.</span> <span class="toc-text">3. 效果</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%87%BA%E7%8E%B0%E5%92%8C%E9%87%8D%E5%A4%8D"><span class="toc-number">2.3.1.</span> <span class="toc-text">1. 出现和重复</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E7%81%BE%E9%9A%BE%E6%80%A7%E9%81%97%E5%BF%98"><span class="toc-number">2.3.2.</span> <span class="toc-text">2. 灾难性遗忘</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">3.</span> <span class="toc-text">总结</span></a></li></ol>
                     </div>
                 </span>
             </div>

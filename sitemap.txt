@@ -1,3 +1,4 @@
+https://geasyheart.github.io/2023/10/01/ChatGLM%E5%BE%AE%E8%B0%83%E8%AE%B0%E5%BD%95/
 https://geasyheart.github.io/2023/11/29/lora%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E7%8E%B0/
 https://geasyheart.github.io/2023/10/31/document-QA-layoutLMv2/
 https://geasyheart.github.io/tags/index.html

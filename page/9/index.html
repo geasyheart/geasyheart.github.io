@@ -212,6 +212,131 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-django-migration的工作机制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/">django-migration的工作机制</a>
+    </h1>
+  
+
+        
+        <a href="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/" class="archive-article-date">
+  	<time datetime="2020-03-09T08:51:14.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-03-09</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="问题来源"><a href="#问题来源" class="headerlink" title="问题来源"></a>问题来源</h3><p>之前线上代码更新的时候报了一个migration类似的错误，报错信息如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">django.db.utils.OperationalError: (1054, <span class="string">&quot;Unknown column &#x27;age&#x27; in &#x27;field list&#x27;&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>出现错误的代码模型文件为:</p>
+<img src="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/1.jpg" class="">
+
+<p>出现错误的代码对应的migration&#x2F;001.py文件为:</p>
+<img src="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/2.jpg" class="">
+
+<p>简单描述就是:</p>
+<p>migration&#x2F;001.py执行了插入动作，如上图红框所示，后台一位同学使用<code>import模型</code>的方式执行了一段python代码，简单来看这里<code>insert</code>没有任何问题，而报<code>&quot;Unknown column &#39;age&#39; in &#39;field list&#39;&quot;</code>这个错误是因为<code>age</code>字段是在migration&#x2F;001.py之后才创建的，线上代码更新时那么导入的模型是有<code>age</code>字段的，而数据库是没有这个字段的。插入的时候没有给age值，所以django认为<code>age</code>这个字段是应该存在的，但是数据库实际没有<code>age</code>字段，所以出现了这个问题。</p>
+<h3 id="解决方式"><a href="#解决方式" class="headerlink" title="解决方式"></a>解决方式</h3><p>其实这里应该有三种解决方式的:</p>
+<ol>
+<li>在migration&#x2F;001.py并没有对<code>age</code>字段做任何操作，那么理论上来说这条语句应该通过的，如果通过不了，那应该也是sql语句本身除了问题，不过这个不是这么实现的，所以这种方式我只假设是可以解决这个问题的。</li>
+<li>django引入了<code>ModelState</code>的概念来解决这个问题。(而我们系统没有这个概念，所以改写成裸sql的方式。。。)</li>
+<li>直接将模型引入到migration文件内（不过这个如果有外键或者python文件很复杂的话就不如写裸sql了，虽然有时候裸sql也很难写。。。）</li>
+</ol>
+<h3 id="漫谈migration"><a href="#漫谈migration" class="headerlink" title="漫谈migration"></a>漫谈migration</h3><blockquote>
+<p>所有代码均在django&#x2F;db&#x2F;migrations文件夹下。</p>
+</blockquote>
+<h4 id="先看makemigration的实现方式"><a href="#先看makemigration的实现方式" class="headerlink" title="先看makemigration的实现方式"></a>先看makemigration的实现方式</h4><h5 id="首先初始化MigrationLoader实例，第一步执行build-graph函数，如下图所示。"><a href="#首先初始化MigrationLoader实例，第一步执行build-graph函数，如下图所示。" class="headerlink" title="首先初始化MigrationLoader实例，第一步执行build_graph函数，如下图所示。"></a>首先初始化MigrationLoader实例，第一步执行build_graph函数，如下图所示。</h5><img src="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/3.jpg" class="">
+
+<p>self.load_disk()就是查找项目里面所有的migration文件，然后保存到<code>disk_migrations</code>变量里面。<br>整个感兴趣的，在于这个MigrationGraph，这个为有向无环图，四个for循环构造出disk migrations所有的信息，然后是一些校验。</p>
+<h5 id="检测迁移历史记录的一致性"><a href="#检测迁移历史记录的一致性" class="headerlink" title="检测迁移历史记录的一致性"></a>检测迁移历史记录的一致性</h5><img src="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/20200310134528.jpg" class="">
+
+<p>这里检查的已经保存到数据库的记录的parent是否在graph nodes里面，如果没有，则非一致性，那么则报错。</p>
+<h5 id="检测每一个migration-directory是否有多个leaf-nodes"><a href="#检测每一个migration-directory是否有多个leaf-nodes" class="headerlink" title="检测每一个migration directory是否有多个leaf nodes"></a>检测每一个migration directory是否有多个leaf nodes</h5><img src="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/4.jpg" class="">
+
+<p>如果有多个leaf nodes, 那么则是否merge，合并到一起。</p>
+<h5 id="至此，该检查的也检查了，剩下一步就是如何做diff操作，然后生成新的migration文件。"><a href="#至此，该检查的也检查了，剩下一步就是如何做diff操作，然后生成新的migration文件。" class="headerlink" title="至此，该检查的也检查了，剩下一步就是如何做diff操作，然后生成新的migration文件。"></a>至此，该检查的也检查了，剩下一步就是如何做diff操作，然后生成新的migration文件。</h5><img src="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/5.jpg" class="">
+
+<p>django会根据graph和数据库migration_history<br>的记录生成两个ProjectState,那么最终比较这两个ProjectState的不同。</p>
+<p>而在生成ProjectState的时候，有一步叫做<code>self.graph.make_state()</code>，如下图</p>
+<img src="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/20200310141652.jpg" class="">
+
+<p>这一步会根据disk migrations生成的graph，然后根据leaf nodes通过dfs进行遍历然后生成ModelState,所以在这里<code>age</code>字段不会在001.py存在的。(这个地方就是django解决代码更新的地方。6啊)</p>
+<p>所以下一步就是如何做diff操作，然后生成新的migration文件，简单如下图所示，此处忽略。</p>
+<img src="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/20200310142838.jpg" class="">
+
+<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h3><p>简单来讲，django使用MigrationGraph构造出disk migration和database migration，然后根据<code>sorted(migration)</code>构造出时间线，获得ProjectState以及相应的ModelState,所以在做migrations.RunPython方法的时候，传入的参数models即为相应对应时刻的ModelState，从而避免了代码更新而miration未及时更新导致在orm层面做些操作的时候导致的问题。重点可以看看Graph这里以及如何构造State的。其余自行理解。后面migrate也是类似，以后慢慢讲。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/tree/master/python/migration">使用graph同步组织架构图一个简单例子</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-差点漏掉了" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1503,135 +1628,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2019/06/08/APP%E9%A6%96%E9%A1%B5%E6%A1%86%E6%9E%B6%E6%90%AD%E5%BB%BA/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-MySQL长事务导致的Table-Metadata-Lock" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/05/18/MySQL%E9%95%BF%E4%BA%8B%E5%8A%A1%E5%AF%BC%E8%87%B4%E7%9A%84Table-Metadata-Lock/">MySQL长事务导致的Table Metadata Lock</a>
-    </h1>
-  
-
-        
-        <a href="/2019/05/18/MySQL%E9%95%BF%E4%BA%8B%E5%8A%A1%E5%AF%BC%E8%87%B4%E7%9A%84Table-Metadata-Lock/" class="archive-article-date">
-  	<time datetime="2019-05-18T04:34:18.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-05-18</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>前几日操作<code>truncate table</code>操作时，遇到一个问题，通过<code>show processlist</code>获取关键信息，通过<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/683bd7fcb7a0">此文章</a>了解更多，故记录于此。</p>
-<img src="/2019/05/18/MySQL%E9%95%BF%E4%BA%8B%E5%8A%A1%E5%AF%BC%E8%87%B4%E7%9A%84Table-Metadata-Lock/mysql-locktable.jpg" class="" title="show-processlist">
-
-
-<h2 id="什么是Table-Metadata-Lock"><a href="#什么是Table-Metadata-Lock" class="headerlink" title="什么是Table Metadata Lock"></a>什么是Table Metadata Lock</h2><p>在MySQL以前的版本中，存在这样一个Bug：</p>
-<img src="/2019/05/18/MySQL%E9%95%BF%E4%BA%8B%E5%8A%A1%E5%AF%BC%E8%87%B4%E7%9A%84Table-Metadata-Lock/issue.png" class="" title="bug">
-
-
-<p>大致意思如下:</p>
-<blockquote>
-<p>如果user1存在一个操作table的事务，而user2要删除这张表，当user1提交这个事务时，binlog表现出来的行为类似如下:</p>
-</blockquote>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> t;</span><br><span class="line"><span class="keyword">BEGIN</span>;</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t ...;</span><br><span class="line"><span class="keyword">COMMIT</span>;</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>这样就导致这个问题出现了。</p>
-</blockquote>
-<blockquote>
-<p>所以MySQL在后续版本中增加了Metadata Lock,只有在事务结束后才会释放Metadata lock，因此在事务提交或回滚前，是无法进行DDL(不仅仅是DDL哦)操作的。</p>
-</blockquote>
-<p>MySQL官方文档地址:</p>
-<p><a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.6/en/metadata-locking.html">http://dev.mysql.com/doc/refman/5.6/en/metadata-locking.html</a></p>
-<img src="/2019/05/18/MySQL%E9%95%BF%E4%BA%8B%E5%8A%A1%E5%AF%BC%E8%87%B4%E7%9A%84Table-Metadata-Lock/metadata-lock-desc.png" class="" title="desc">
-
-
-<h2 id="如何解决"><a href="#如何解决" class="headerlink" title="如何解决"></a>如何解决</h2><blockquote>
-<p>查询当前正在运行的事务（下面为拷贝过来的，仅作参考）</p>
-</blockquote>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> information_schema.innodb_trx\G</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> <span class="number">1.</span> <span class="type">row</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">                    trx_id: <span class="number">7202</span></span><br><span class="line">                 trx_state: <span class="keyword">RUNNING</span>                 <span class="comment">-- 事务状态，一般为RUNNING</span></span><br><span class="line">               trx_started: <span class="number">2016</span><span class="number">-07</span><span class="number">-20</span> <span class="number">23</span>:<span class="number">02</span>:<span class="number">53</span>     <span class="comment">-- 事务执行的起始时间，若时间较长，则要分析该事务是否合理</span></span><br><span class="line">     trx_requested_lock_id: <span class="keyword">NULL</span></span><br><span class="line">          trx_wait_started: <span class="keyword">NULL</span></span><br><span class="line">                trx_weight: <span class="number">0</span></span><br><span class="line">       trx_mysql_thread_id: <span class="number">52402</span>                   <span class="comment">-- MySQL的线程ID，用于kill</span></span><br><span class="line">                 trx_query: <span class="keyword">NULL</span>                    <span class="comment">-- 事务中的SQL</span></span><br><span class="line">       trx_operation_state: <span class="keyword">NULL</span></span><br><span class="line">         trx_tables_in_use: <span class="number">0</span></span><br><span class="line">         trx_tables_locked: <span class="number">0</span></span><br><span class="line">          trx_lock_structs: <span class="number">0</span></span><br><span class="line">     trx_lock_memory_bytes: <span class="number">360</span></span><br><span class="line">           trx_rows_locked: <span class="number">0</span></span><br><span class="line">         trx_rows_modified: <span class="number">0</span></span><br><span class="line">   trx_concurrency_tickets: <span class="number">0</span></span><br><span class="line">       trx_isolation_level: READ COMMITTED</span><br><span class="line">         trx_unique_checks: <span class="number">1</span></span><br><span class="line">    trx_foreign_key_checks: <span class="number">1</span></span><br><span class="line">trx_last_foreign_key_error: <span class="keyword">NULL</span></span><br><span class="line"> trx_adaptive_hash_latched: <span class="number">0</span></span><br><span class="line"> trx_adaptive_hash_timeout: <span class="number">10000</span></span><br><span class="line">          trx_is_read_only: <span class="number">0</span></span><br><span class="line">trx_autocommit_non_locking: <span class="number">0</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>查看运行的SQL语句</p>
-</blockquote>
-<p>根据查询到的trx_started时间以及trx_mysql_thread_id到MySQL的general log中查找，当然前提是开启了general log的功能，对于这句话我有一个疑惑点，如果没有开启general log时那么无法查看对应操作的SQL语句了？？？</p>
-<p>所以此处给出排查方式：</p>
-<ol>
-<li>如果开启了general log，那么根据这个方式</li>
-<li>给出两个SQL语句如下,<a target="_blank" rel="noopener" href="https://www.itcodemonkey.com/article/3771.html">参考文章</a>:</li>
-</ol>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 这条语句用于查看哪个线程被另外哪一个线程阻塞， 分别为 阻塞的线程ID、阻塞的SQL的语句、谁阻塞的、阻塞者的SQL语句</span></span><br><span class="line"><span class="keyword">SELECT</span> b.trx_mysql_thread_id             <span class="keyword">AS</span> <span class="string">&#x27;blocked_thread_id&#x27;</span></span><br><span class="line">      ,b.trx_query                      <span class="keyword">AS</span> <span class="string">&#x27;blocked_sql_text&#x27;</span></span><br><span class="line">      ,c.trx_mysql_thread_id             <span class="keyword">AS</span> <span class="string">&#x27;blocker_thread_id&#x27;</span></span><br><span class="line">      ,c.trx_query                       <span class="keyword">AS</span> <span class="string">&#x27;blocker_sql_text&#x27;</span></span><br><span class="line">      ,( Unix_timestamp() <span class="operator">-</span> Unix_timestamp(c.trx_started) )</span><br><span class="line">                              <span class="keyword">AS</span> <span class="string">&#x27;blocked_time&#x27;</span></span><br><span class="line"><span class="keyword">FROM</span>   information_schema.innodb_lock_waits a</span><br><span class="line">    <span class="keyword">INNER</span> <span class="keyword">JOIN</span> information_schema.innodb_trx b</span><br><span class="line">         <span class="keyword">ON</span> a.requesting_trx_id <span class="operator">=</span> b.trx_id</span><br><span class="line">    <span class="keyword">INNER</span> <span class="keyword">JOIN</span> information_schema.innodb_trx c</span><br><span class="line">         <span class="keyword">ON</span> a.blocking_trx_id <span class="operator">=</span> c.trx_id</span><br><span class="line"><span class="keyword">WHERE</span>  ( Unix_timestamp() <span class="operator">-</span> Unix_timestamp(c.trx_started) ) <span class="operator">&gt;</span> <span class="number">4</span>; <span class="comment">-- 时长</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 这条语句用于获取具体的阻塞语句</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> a.sql_text,</span><br><span class="line">       c.id,</span><br><span class="line">       d.trx_started</span><br><span class="line"><span class="keyword">FROM</span>   performance_schema.events_statements_current a</span><br><span class="line">       <span class="keyword">join</span> performance_schema.threads b</span><br><span class="line">         <span class="keyword">ON</span> a.thread_id <span class="operator">=</span> b.thread_id</span><br><span class="line">       <span class="keyword">join</span> information_schema.processlist c</span><br><span class="line">         <span class="keyword">ON</span> b.processlist_id <span class="operator">=</span> c.id</span><br><span class="line">       <span class="keyword">join</span> information_schema.innodb_trx d</span><br><span class="line">         <span class="keyword">ON</span> c.id <span class="operator">=</span> d.trx_mysql_thread_id</span><br><span class="line"><span class="keyword">where</span> c.id<span class="operator">=</span><span class="number">17</span> <span class="comment">-- 17 对应blocker_thread_id，</span></span><br><span class="line"><span class="keyword">ORDER</span>  <span class="keyword">BY</span> d.trx_started\G;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>但是方式2不一定能够打印出具体阻塞的语句，<a target="_blank" rel="noopener" href="http://www.cnblogs.com/kerrycode/p/5821413.html">为什么</a>,如果出现此类问题，可以先看下autocommit，哈哈…</p>
-<p>如果还是无法定位SQL，那么还是暴力一点:</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> kill <span class="number">52402</span>;</span><br></pre></td></tr></table></figure>
-
-<p>如何复现这种情况（另外对于主主&#x2F;主从复制也会出现），<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/683bd7fcb7a0">可参考文章</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/05/18/MySQL%E9%95%BF%E4%BA%8B%E5%8A%A1%E5%AF%BC%E8%87%B4%E7%9A%84Table-Metadata-Lock/">展开全文 >></a>
         </p>
       
 

@@ -212,6 +212,103 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-关于async并发的疑惑" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/07/13/%E5%85%B3%E4%BA%8Easync%E5%B9%B6%E5%8F%91%E7%9A%84%E7%96%91%E6%83%91/">关于async并发的疑惑</a>
+    </h1>
+  
+
+        
+        <a href="/2018/07/13/%E5%85%B3%E4%BA%8Easync%E5%B9%B6%E5%8F%91%E7%9A%84%E7%96%91%E6%83%91/" class="archive-article-date">
+  	<time datetime="2018-07-13T05:17:25.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-07-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>之前一直很好奇像sanic或者aiohttp是如何实现并发的，其实从网上看无非就是使用了asyncio,更底层就是事件驱动，libevent之类的，但是纯从应用层来讲，这个会是怎么一回事呢，举个例子:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">worker</span>():</span><br><span class="line">    <span class="comment"># 模拟消耗时间</span></span><br><span class="line">    <span class="keyword">await</span> asyncio.sleep(<span class="number">3</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;ok&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">concurrent</span>():</span><br><span class="line">    <span class="comment"># 模拟并发</span></span><br><span class="line">    tasks = [worker() <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>)]</span><br><span class="line">    <span class="keyword">await</span> asyncio.gather(*tasks)</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
+
+<p>从上面代码来看，整个执行周期为3s,但是有个问题是：如果请求一个一个来，如何不阻塞呢？？</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">worker</span>(<span class="params">message</span>):</span><br><span class="line">    <span class="comment"># deal message</span></span><br><span class="line">    <span class="keyword">await</span> asyncio.sleep(<span class="number">3</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;result&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">consumer</span>():</span><br><span class="line">    <span class="comment"># 此处一下过来7条消息</span></span><br><span class="line">    <span class="comment"># 这里如何实现并行执行这7条消息呢？？</span></span><br><span class="line">    <span class="comment"># await worker(message) # ?? 这样会阻塞，并不是一旦发生阻塞就调度出去.</span></span><br><span class="line">    <span class="comment"># 那如果这样呢？</span></span><br><span class="line">    asyncio.create_task(worker(message))</span><br><span class="line">    <span class="comment"># 来了消息创建一个任务，调度出去，不阻塞，这样就可以接收大量消息喽？？</span></span><br></pre></td></tr></table></figure>
+
+
+<p>如果按照例如eventlet的做法:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">procpool = GreenPool(size=poolsize)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">worker</span>(<span class="params">message</span>):</span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">consumer</span>():</span><br><span class="line">    gt = procpool.spawn(worker, message)</span><br><span class="line">    gt.link(handle_message_processed, message) <span class="comment"># 此处省略</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>消息过来，直接抛给pool，并不会进行阻塞,并且有poolsize控制池大小，</p>
+<p>额，这里是sanic源码中的一部分…</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">-------------------------------------------------</span></span><br><span class="line"><span class="string">   File Name：     serve</span></span><br><span class="line"><span class="string">   Description :</span></span><br><span class="line"><span class="string">   Author :       yu.zhang</span></span><br><span class="line"><span class="string">   date：          18-7-13</span></span><br><span class="line"><span class="string">-------------------------------------------------</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> asyncio</span><br><span class="line"><span class="keyword">from</span> functools <span class="keyword">import</span> partial</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EchoServer</span>(asyncio.Protocol):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, loop, connections=<span class="built_in">set</span>(<span class="params"></span>)</span>):</span><br><span class="line">        self.connections = connections</span><br><span class="line">        self.transport = <span class="literal">None</span></span><br><span class="line">        self.loop = loop</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">connection_made</span>(<span class="params">self, transport</span>):</span><br><span class="line">        self.connections.add(self)</span><br><span class="line">        self.transport = transport</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">connection_lost</span>(<span class="params">self, exc</span>):</span><br><span class="line">        self.connections.discard(self)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;closed:&#x27;</span>, <span class="built_in">len</span>(self.connections))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">data_received</span>(<span class="params">self, data</span>):</span><br><span class="line">        <span class="built_in">print</span>(data)</span><br><span class="line">        self.transport.write(data)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">serve</span>(<span class="params">host, port, connections=<span class="literal">None</span>, protocol=EchoServer, loop=<span class="literal">None</span>, reuse_port=<span class="literal">False</span></span>):</span><br><span class="line">    connections = connections <span class="keyword">if</span> connections <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">else</span> <span class="built_in">set</span>()</span><br><span class="line">    server = partial(protocol,</span><br><span class="line">                     loop=loop,</span><br><span class="line">                     connections=connections)</span><br><span class="line"></span><br><span class="line">    server_coroutine = loop.create_server(server, host, port, reuse_port=reuse_port)</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        echo_server = loop.run_until_complete(server_coroutine)</span><br><span class="line">    <span class="keyword">except</span> BaseException:</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        loop.run_forever()</span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        <span class="keyword">for</span> connection <span class="keyword">in</span> connections:</span><br><span class="line">            <span class="built_in">print</span>(<span class="built_in">dir</span>(connection))</span><br><span class="line">        loop.run_until_complete(echo_server.wait_closed())</span><br><span class="line">        loop.close()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    loop = asyncio.get_event_loop()</span><br><span class="line">    serve(<span class="string">&#x27;127.0.0.1&#x27;</span>, <span class="number">8080</span>, loop=loop)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/07/13/%E5%85%B3%E4%BA%8Easync%E5%B9%B6%E5%8F%91%E7%9A%84%E7%96%91%E6%83%91/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-异步mq的窘境" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1274,104 +1371,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2018/04/10/%E4%B8%8D%E5%90%8C%E7%94%A8%E6%88%B7%E7%9A%84%E5%A4%9A%E6%9D%A1%E6%93%8D%E4%BD%9C%E6%97%B6%E9%97%B4%E5%B7%AE%E5%80%BC%E5%B9%B3%E5%9D%87%E5%80%BC/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-SQLAlchemy字段类型" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/10/SQLAlchemy%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/">SQLAlchemy字段类型</a>
-    </h1>
-  
-
-        
-        <a href="/2018/04/10/SQLAlchemy%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/" class="archive-article-date">
-  	<time datetime="2018-04-10T02:31:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-10</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="基本类型"><a href="#基本类型" class="headerlink" title="基本类型"></a>基本类型</h3><p>字段类型是在定义模型时, 对每个<code>Column</code>的类型约定. 不同类型的字段类型在输入输出上, 及支持的操作方面, 有所区别.<br>这里只介绍<code>sqlalchemy.types.*</code>中的类型, SQL 标准类型方面, 是写什么最后生成的<code>DDL</code>语句就是什么, 比如 <code>BIGINT</code>, <code>BLOG</code> 这些, 但是这些类型并不一定在所有数据库中都有支持. 除此而外, <code>SQLAlchemy</code> 也支持一些特定数据库的特定类型, 这些需要从具体的 <code>dialects</code> 实现里导入.</p>
-<h4 id="Integer-BigInteger-SmallInteger"><a href="#Integer-BigInteger-SmallInteger" class="headerlink" title="Integer&#x2F;BigInteger&#x2F;SmallInteger"></a>Integer&#x2F;BigInteger&#x2F;SmallInteger</h4><p>整形.</p>
-<h4 id="Boolean"><a href="#Boolean" class="headerlink" title="Boolean"></a>Boolean</h4><p>布尔类型. Python 中表现为 True&#x2F;False , 数据库根据支持情况, 表现为 BOOLEAN 或SMALLINT . 实例化时可以指定是否创建约束(默认创建).</p>
-<h4 id="Date-DateTime-Time-timezone-False"><a href="#Date-DateTime-Time-timezone-False" class="headerlink" title="Date&#x2F;DateTime&#x2F;Time (timezone&#x3D;False)"></a>Date&#x2F;DateTime&#x2F;Time (timezone&#x3D;False)</h4><p>日期类型, Time 和 DateTime 实例化时可以指定是否带时区信息.</p>
-<h4 id="Interval"><a href="#Interval" class="headerlink" title="Interval"></a>Interval</h4><p>时间偏差类型. 在 Python 中表现为 datetime.timedelta() , 数据库不支持此类型则存为日期.</p>
-<h4 id="Enum-enums-kw"><a href="#Enum-enums-kw" class="headerlink" title="Enum (*enums, **kw)"></a>Enum (*enums, **kw)</h4><p>枚举类型, 根据数据库支持情况, SQLAlchemy 会使用原生支持或者使用 VARCHAR 类型附加约束的方式实现. 原生支持中涉及新类型创建, 细节在实例化时控制.</p>
-<h4 id="Float"><a href="#Float" class="headerlink" title="Float"></a>Float</h4><p>浮点小数.</p>
-<h4 id="Numeric-precision-None-scale-None-decimal-return-scale-None-…"><a href="#Numeric-precision-None-scale-None-decimal-return-scale-None-…" class="headerlink" title="Numeric (precision&#x3D;None, scale&#x3D;None, decimal_return_scale&#x3D;None, …)"></a>Numeric (precision&#x3D;None, scale&#x3D;None, decimal_return_scale&#x3D;None, …)</h4><p>定点小数, Python 中表现为 Decimal .</p>
-<h4 id="LargeBinary-length-None"><a href="#LargeBinary-length-None" class="headerlink" title="LargeBinary (length&#x3D;None)"></a>LargeBinary (length&#x3D;None)</h4><p>字节数据. 根据数据库实现, 在实例化时可能需要指定大小.</p>
-<h4 id="PickleType"><a href="#PickleType" class="headerlink" title="PickleType"></a>PickleType</h4><p>Python 对象的序列化类型.</p>
-<h4 id="String-length-None-collation-None-…"><a href="#String-length-None-collation-None-…" class="headerlink" title="String (length&#x3D;None, collation&#x3D;None, …)"></a>String (length&#x3D;None, collation&#x3D;None, …)</h4><p>字符串类型, Python 中表现为 Unicode , 数据库表现为 VARCHAR , 通常都需要指定长度.</p>
-<h4 id="Unicode"><a href="#Unicode" class="headerlink" title="Unicode"></a>Unicode</h4><p>类似与字符串类型, 在某些数据库实现下, 会明确表示支持非 ASCII 字符. 同时输入输出也强制是 Unicode 类型.</p>
-<h4 id="Text"><a href="#Text" class="headerlink" title="Text"></a>Text</h4><p>长文本类型, Python 表现为 Unicode , 数据库表现为 TEXT .</p>
-<h4 id="UnicodeText"><a href="#UnicodeText" class="headerlink" title="UnicodeText"></a>UnicodeText</h4><p>参考 Unicode .</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">SQLAlchemy</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/SQLAlchemy//" class="article-tag-list-link color1">SQLAlchemy</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/04/10/SQLAlchemy%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/">展开全文 >></a>
         </p>
       
 

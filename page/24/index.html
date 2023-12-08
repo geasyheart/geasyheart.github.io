@@ -212,6 +212,103 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-14-04-2-启动流程各部分讲解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/03/13/14-04-2-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%90%84%E9%83%A8%E5%88%86%E8%AE%B2%E8%A7%A3/">14_04_2_启动流程各部分讲解</a>
+    </h1>
+  
+
+        
+        <a href="/2015/03/13/14-04-2-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%90%84%E9%83%A8%E5%88%86%E8%AE%B2%E8%A7%A3/" class="archive-article-date">
+  	<time datetime="2015-03-13T14:32:10.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>init:<br>详解:<a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/Init">http://zh.wikipedia.org/wiki/Init</a> </p>
+<p>init（为英语：initialization的简写）是 Unix 和 类Unix 系统中用来产生其它所有进程的程序。它以守护进程的方式存在，其进程号为1。 </p>
+<p>Unix 系列中(如 System III 和 System V)init的作用，和研究中的 Unix 和 BSD 派生版本相比，发生了一些变化。<br>大多数Linux发行版是和 System V 相兼容的，但是一些发行版如 Arch 和 Slackware 采用的是BSD风格，其它的如 Gentoo 是自己定制的。<br>Ubuntu和其它一些发行版现在开始采用来代替传统的 init 进程,不过貌似Ubuntu15.10将会采用systemd。 </p>
+<p>BSD风格:<br> BSD init 运行存放于’&#x2F;etc&#x2F;rc’的初始化 shell 脚本，然后启动基于文本模式的终端(getty)或者基于图形界面的终端(窗口系统，如 X)。<br>这里没有运行模式的问题，因为文件 ‘rc’ 决定了 init 如何执行。<br> 优点: 简单且易于手动编辑。 </p>
+<p>缺点: 如果第三方软件需要在启动过程执行它自身的初始化脚本，它必须修改已经存在的启动脚本，<br>一旦这种过程中有一个小错误，都将导致系统无法正常启动。<br>SysV风格:<br> System V init 检查 ‘&#x2F;etc&#x2F;inittab’ 文件中是否含有 ‘initdefault’ 项。 <br>这告诉 init 系统是否有一个默认运行模式。如果没有默认的运行模式，那么用户将进入系统控制台，手动决定进入何种运行模式。 </p>
+<p>优点: 灵活性强 </p>
+<p>缺陷: 比较复杂 </p>
+<p>跳过init:<br>Linux系统中，现代的bootloader(如 LILO 或者 GRUB)，用户可以在初始化过程中最后启动的进程来取代默认的 &#x2F;sbin&#x2F;init。<br> 通常是在 bootloader 环境中通过执行 init&#x3D;&#x2F;foo&#x2F;bar 命令。例如，如果执行 init&#x3D;&#x2F;bin&#x2F;bash，启动单用户 root 的 shell 环境，无需用户密码。<br> <br>initrd:<br>Initrd ramdisk或者””initrd””是指一个临时文件系统，它在启动阶段被Linux内核调用。<br>initrd主要用于当“根”文件系统被挂载之前，进行准备工作。 </p>
+<p>initrd 系统中的文件在开机阶段可以被核心访问，里面的内容会被挂载成一个 loop 型态的文件，<br>早期是将 initrd 放在小的软盘片内。initrd 通常被压缩成 gzip 类型，在开机的时候由 bootloader(LILO, GRUB)<br> 来告知核心 initrd 的位置。不过在2.6版本内核之后出现了initramfs，它和initrd实现同样的功能，<br> 但是它基于一种cpio档，无须挂载就可以展开成一个文件系统，因此省去了各种相关的权限，在自动化方面更方便了。<br> <br>initramfs:<br>如上介绍，initramfs就是为内核通往根文件系统的桥梁。其中包含了必要的环境，比如基本的C库，动态库的链接加载器，在初始化最后，内核运行initramfs中的<br>init程序，该程序将探测硬件设备、加载驱动，挂载真正的文件系统，执行文件系统上的&#x2F;sbin&#x2F;init，进而切换到真正的用户空间。 </p>
+<p>initrd和initramfs口语化描述:<br>initramfs是initrd的升级版，initrd基于ramdisk技术，而ramdisk就是一个基于内存的块设备，内核访问initrd仍需要缓存机制。<br>initramfs基于ramfs，Linus Torvalds基于已有的缓存机制实现了ramfs，而ramfs是基于缓存的一个文件系统。 </p>
+<p>rootfs:其实就是一个ramfs，rootfs存在于内存中，内核不需要特殊的驱动就可以挂碍rootfs，是一个过渡的桥梁。 </p>
+<p>systemd:<br><a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/Systemd">http://zh.wikipedia.org/wiki/Systemd</a><br>systemd是Linux下的一种init软件，由Lennart Poettering带头开发，其开发目标是最终代替现在常用的System V与BSD风格init程序。 </p>
+<p>从设计构思上说，由于systemd使用了cgroup与fanotify等组件以实现其特性，所以只适用于Linux。<br>有鉴于此，考虑到kFreeBSD分支的软件源无法纳入systemd，为与其他分支保持一致，Debian开发者尽力<br>避免纳入systemd。但Lennart Poettering本人对此并不在意，并称“Debian GNU&#x2F;kFreeBSD不过是玩具系统”。<br>(所以个人认为这是Debian分家的一个小理由，个人纯属猜测)</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/03/13/14-04-2-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%90%84%E9%83%A8%E5%88%86%E8%AE%B2%E8%A7%A3/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-14-03bash脚本编程之十一-Linux启动流程之三-SysV服务脚本" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1170,100 +1267,6 @@ traceroute:
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/02/21/10-03LVM%E5%AE%9E%E4%BD%9C%E6%B5%81%E7%A8%8B/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-10-02Raid及mdadm命令之二" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/21/10-02Raid%E5%8F%8Amdadm%E5%91%BD%E4%BB%A4%E4%B9%8B%E4%BA%8C/">10_02Raid及mdadm命令之二</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/21/10-02Raid%E5%8F%8Amdadm%E5%91%BD%E4%BB%A4%E4%B9%8B%E4%BA%8C/" class="archive-article-date">
-  	<time datetime="2015-02-21T13:31:59.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-21</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>IDE:133Mbps,并行<br>USB:串行<br>SCSI:UitraSCSI，320Mbps，并行<br><a target="_blank" rel="noopener" href="http://soft.zol.com.cn/2005/0126/149010.shtml">http://soft.zol.com.cn/2005/0126/149010.shtml</a><br>一般做RAID的就是下面两种，SAS硬盘小&#x2F;贵<br>SAS:串行的SCSI<br><a target="_blank" rel="noopener" href="http://baike.baidu.com/link?url=0blKbgAUIn8q6g8Aue-XU_mslil6G0wsBlbBkHUebBM0HkVydjuP6uS5wAofGpzqgcSV2d3DGPb5A4X0dn8jZa">http://baike.baidu.com/link?url=0blKbgAUIn8q6g8Aue-XU_mslil6G0wsBlbBkHUebBM0HkVydjuP6uS5wAofGpzqgcSV2d3DGPb5A4X0dn8jZa</a><br>SATA(Serial ATA):6Gbps，串行<br><a target="_blank" rel="noopener" href="http://bbs.zol.com.cn/diybbs/d34440_582.html">http://bbs.zol.com.cn/diybbs/d34440_582.html</a><br>可以简单认为:<br> SCSI–&gt;SATA–&gt;SAS </p>
-<p>&#x2F;proc&#x2F;filesystems<br>查看系统支持的所有文件系统类型<br>SCSI:<br> 8:<br> 1个initiator,7个target<br> 16:<br> 1个initiator，15个target </p>
-<p>mdadm: multi disks administer<br> &#x2F;dev&#x2F;md0<br> &#x2F;dev&#x2F;md1,2…<br> 类型是fd </p>
-<p>&#x2F;proc&#x2F;mdstat:<br> 显示所有启动raid的信息<br>mdadm：将任何块设备做成RAID<br>模式化的命令:<br> 创建模式<br> -C<br> 专用选项:<br> -l:级别<br> -n:设备个数<br> -a{yes|no}:自动为其创建设备文件<br> -c:CHUNK大小 (即一个raid的块设备大小，大小:2*n,默认是64K)<br> 所以在格式化的时候可以mke2fs -j -E　stride&#x3D;16 -b 4096 &#x2F;dev&#x2F;md0  (会使性能提升)<br> -x:指定空闲盘个数(其中的一个磁盘损坏然后下一个磁盘代替)<br> 管理模式<br> –add, –remove,–fail<br> –add|-a:添加<br> mdadm &#x2F;dev&#x2F;md1 -a &#x2F;dev&#x2F;sda9<br> –fail|-f:模拟成损坏<br> mdadm  &#x2F;dev&#x2F;md#(设备) -f &#x2F;dev&#x2F;sdb<br> –remove|-r:删除<br> mdadm -r &#x2F;dev&#x2F;md0 &#x2F;dev&#x2F;sda7 <br> 监控模式<br> -F<br> 增长模式<br> -G<br> 装配模式<br> -A </p>
-<blockquote>
-<p>mdsdm -A &#x2F;dev&#x2F;md0 &#x2F;dev&#x2F;sda5 &#x2F;dev&#x2F;sda6<br> 详细信息<br> -D|–detail: <br>mdadm -D  –scan 显示所有mdadm设备<br> 将当前RAID信息保存至配置文件，一边以后进行装配<br>mdadm -D　–scan &gt; &#x2F;etc&#x2F;mdadm.conf<br> 停用阵列:<br> -S <br>mdadm -S　&#x2F;dev&#x2F;md0<br>RAID0:<br> 2+2G <br>cfdisk &#x2F;dev&#x2F;sdb,c   Type:fd<br>partprobe &#x2F;dev&#x2F;sdb &#x2F;dev&#x2F;sdc (可以是分区)<br>mdadm -C &#x2F;dev&#x2F;md0 -a yes -l 0 -n 2 &#x2F;dev&#x2F;sd{b,c}<br> (然后会提示会覆盖掉所有数据，问是否同意，yes即可。)<br> mke2fs -j &#x2F;dev&#x2F;md0  &#x2F;&#x2F; mkfs.Type &#x2F;dev&#x2F;md0<br>mount &#x2F;dev&#x2F;md0 &#x2F;mnt<br>就搞定了。<br>mdadm -D &#x2F;dev&#x2F;md0可以查看详细信息<br>RAID1:<br> 2+2G<br>mdadm -C &#x2F;dev&#x2F;md1 -a yes -n 2 -l 1 &#x2F;dev&#x2F;sda7 &#x2F;dev&#x2F;sda8<br>cat &#x2F;proc&#x2F;mdstat (可以看到正在使两个硬盘同步)<br>mkfs.Type &#x2F;dev&#x2F;md1<br>mount &#x2F;dev&#x2F;md1 &#x2F;media </p>
-</blockquote>
-<p>RAID5: </p>
-<p> <a target="_blank" rel="noopener" href="http://blog.csdn.net/hbdys/article/details/5911589">http://blog.csdn.net/hbdys/article/details/5911589</a> </p>
-<p>watch:周期性的执行指定命令，并以全屏方式显示结果<br>watch <code>cat /proc/mdstat</code><br>默认是以2S运行&#96;&#96;内的命令<br> -n:指定周期长度，默认是2S<br> watch -n 3 <code>cat /proc/mdstat</code> </p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/21/10-02Raid%E5%8F%8Amdadm%E5%91%BD%E4%BB%A4%E4%B9%8B%E4%BA%8C/">展开全文 >></a>
         </p>
       
 

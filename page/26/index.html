@@ -212,6 +212,129 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-07-03Linux文件查找详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/13/07-03Linux%E6%96%87%E4%BB%B6%E6%9F%A5%E6%89%BE%E8%AF%A6%E8%A7%A3/">07_03Linux文件查找详解</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/13/07-03Linux%E6%96%87%E4%BB%B6%E6%9F%A5%E6%89%BE%E8%AF%A6%E8%A7%A3/" class="archive-article-date">
+  	<time datetime="2015-02-12T17:05:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>文件查找：<br> locate:<br> 非实时，查找是根据全系统文件数据库运行的；<br> updatedb ，手动生成文件数据库<br> 速度快<br> find:<br> 实时<br> 精确<br> 支持众多查找标准<br> 遍历指定目录中的所有文件完成查找，速度慢<br>Usage：<br> find查找路径，查找标准，查找到以后的处理运作<br> 查找路径：默认为当前目录<br> 查找标准：默认为指定路径下的所有文件<br> 处理运作：默认为显示 </p>
+<p>匹配标准：<br> -name “filename”，对文件名作精确匹配<br> 文件名匹配:<br> *:<br> .:<br> ?:<br> -iname “filename”:对文件名不区分大小写<br> -regex PATTERN：基于正则表达式进行文件查找(这个用的不多)<br> -user USERNAME :基于用户名进行查找<br> -group GROUPNAME:基于属组进行查找<br> -uid ：这个要说明，用户存在的时候可以不用这个，但是当用户删除的时候，他所拥有的文件的拥有者将会变成他原来名称的uid，所以这个价值体现在这；<br> -gid:根据GID查找<br> -nouser:查找没有属主的文件(这个挺重要)<br> -nogroup:查找没有属组的文件<br> -type：根据文件类型进行查找<br> f：普通文件<br> d:目录<br> c:字符设备<br> b:块设备<br> l:链接<br> p:管道设备<br> s:套接字<br> -size:根据文件大小今次那个查找<br> [+:大于&#x2F; -:小于]k:<br> M:<br> G:<br> 说明，在进行精确查找时，1M意味着按一定规则的都认为是1M;; </p>
+<p> 组合条件:<br> -a 与<br> -o 或<br> -not 非 </p>
+<blockquote>
+<p>find &#x2F;tmp -not -user root<br>find &#x2F;tmp -user root -o  -user geasyheart<br>find &#x2F;tmp -not user1 -a -not user2<br>find .&#x2F; -not (-user user1 -a -type d) </p>
+</blockquote>
+<p> -mtime：修改时间<br> -ctime:改变时间<br> -atime:访问时间<br> [+,-]:+5至少5天没访问过 -5:最近5天访问过<br> -mmin<br> -cmin<br> -amin：分钟；；； </p>
+<p> 然后可以使用stat + 文件名进行查看这个文件的信息 </p>
+<p> 根据文件权限进行查找：<br> -perm mode 每一位权限必须精确匹配<br> -perm -mode  文件包含的权限包含查找的权限就可匹配出来<br> -perm &#x2F;mode 只要有一位就可以 </p>
+<blockquote>
+<p>find .&#x2F; -perm 644<br>find .&#x2F; -perm &#x2F;011 组或其他user具有执行权限<br>find .&#x2F; -perm -011 组和其他user具有执行权限<br>运作：<br> -print:显示<br> -ls:类似ls -l 的形式显示每一个文件的详细信息<br> -ok COMMAND {} ;每一步都需要用户确认<br> -exec COMMAND () ; <br>find -perm -006 –exec chmod o-w {} ;<br>find .&#x2F; -perm -020 –exec mv {} {}.new ;<br> (!!!所以，{}的意思是指匹配到的的集合!!!) </p>
+</blockquote>
+<p>练习: </p>
+<ol>
+<li>查找&#x2F;var目录下属主为root并且数组为mail的所有文件; <blockquote>
+<p>find &#x2F;var -user root -a -group mail  </p>
+</blockquote>
+</li>
+<li>查找&#x2F;usr目录下不属于root,bin,或student的文件； <blockquote>
+<p>find &#x2F;usr -not  -user root -a -not -user bin -a -not -user student <br>find &#x2F;usr -not ( -user root -o -user bin -o -user student ) </p>
+</blockquote>
+</li>
+<li>查找&#x2F;etc目录下最近一周内内容修改过且不属于root及student用户的文件； <blockquote>
+<p>find &#x2F;etc –mtime -7 -a  ( - not -user root -a -not -user student ) </p>
+</blockquote>
+</li>
+<li>查找当前系统上没有属主或属组且最近1天内曾经访问过的文件，并将其属主属组均修改为root <blockquote>
+<p>find &#x2F; (-nouser -o -nogroup) -a -atime -1 -exec chmod root:root {} ; </p>
+</blockquote>
+</li>
+<li>查找&#x2F;etc目录下大于1M的文件，并将其文件名写入到&#x2F;tmp&#x2F;etc.largefiles文件中 <blockquote>
+<p>find &#x2F;etc -size +1M &gt;&gt; &#x2F;tmp&#x2F;etc.largefiles<br>find &#x2F;etc -size +1M | xargs echo &gt;&gt; &#x2F;tmp&#x2F;etc.largefiles </p>
+</blockquote>
+</li>
+<li>查找&#x2F;etc目录下所有用户都没有写权限的文件，显示出其详细信息 <blockquote>
+<p>find &#x2F;etc  -not -perm &#x2F;222 -ls</p>
+</blockquote>
+</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/13/07-03Linux%E6%96%87%E4%BB%B6%E6%9F%A5%E6%89%BE%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-07-02bash脚本编程之六-使用脚本选项及组合条件测试" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     

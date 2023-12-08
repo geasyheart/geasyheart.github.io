@@ -212,6 +212,84 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-数据增强" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/06/28/%E6%95%B0%E6%8D%AE%E5%A2%9E%E5%BC%BA/">数据增强</a>
+    </h1>
+  
+
+        
+        <a href="/2021/06/28/%E6%95%B0%E6%8D%AE%E5%A2%9E%E5%BC%BA/" class="archive-article-date">
+  	<time datetime="2021-06-28T01:40:08.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-28</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>图像常见数据增强有翻转，旋转，缩放比例等不同的transforms。<br>对于文本，可以增加噪声干扰，也可以通过添加slide window（此处重点，嘿嘿。）</p>
+<p>举个简单例子描述下滑动窗口。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">a = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>]</span><br><span class="line"></span><br><span class="line">[a[i: i + <span class="number">1</span>] <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(a), <span class="number">1</span>)]</span><br><span class="line">Out[<span class="number">36</span>]: [[<span class="number">1</span>], [<span class="number">2</span>], [<span class="number">3</span>], [<span class="number">4</span>], [<span class="number">5</span>]]</span><br><span class="line"></span><br><span class="line">[a[i: i + <span class="number">2</span>] <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(a), <span class="number">2</span>)]</span><br><span class="line">Out[<span class="number">37</span>]: [[<span class="number">1</span>, <span class="number">2</span>], [<span class="number">3</span>, <span class="number">4</span>], [<span class="number">5</span>]]</span><br><span class="line"></span><br><span class="line">[a[i: i + <span class="number">3</span>] <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(a), <span class="number">3</span>)]</span><br><span class="line">Out[<span class="number">38</span>]: [[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>], [<span class="number">4</span>, <span class="number">5</span>]]</span><br><span class="line"></span><br><span class="line">[a[i: i + <span class="number">4</span>] <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(a), <span class="number">4</span>)]</span><br><span class="line">Out[<span class="number">39</span>]: [[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], [<span class="number">5</span>]]</span><br><span class="line"></span><br><span class="line">[a[i: i + <span class="number">5</span>] <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(a), <span class="number">5</span>)]</span><br><span class="line">Out[<span class="number">40</span>]: [[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]]</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>但是在某些训练结果下，其作用貌似并不大，反正可以尝试。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/06/28/%E6%95%B0%E6%8D%AE%E5%A2%9E%E5%BC%BA/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-bert取平均向量方式2" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1015,131 +1093,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2020/06/10/%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%90%E8%B0%83%E7%A0%94/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-django-migration的工作机制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/">django-migration的工作机制</a>
-    </h1>
-  
-
-        
-        <a href="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/" class="archive-article-date">
-  	<time datetime="2020-03-09T08:51:14.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-03-09</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="问题来源"><a href="#问题来源" class="headerlink" title="问题来源"></a>问题来源</h3><p>之前线上代码更新的时候报了一个migration类似的错误，报错信息如下:</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">django.db.utils.OperationalError: (1054, <span class="string">&quot;Unknown column &#x27;age&#x27; in &#x27;field list&#x27;&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>出现错误的代码模型文件为:</p>
-<img src="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/1.jpg" class="">
-
-<p>出现错误的代码对应的migration&#x2F;001.py文件为:</p>
-<img src="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/2.jpg" class="">
-
-<p>简单描述就是:</p>
-<p>migration&#x2F;001.py执行了插入动作，如上图红框所示，后台一位同学使用<code>import模型</code>的方式执行了一段python代码，简单来看这里<code>insert</code>没有任何问题，而报<code>&quot;Unknown column &#39;age&#39; in &#39;field list&#39;&quot;</code>这个错误是因为<code>age</code>字段是在migration&#x2F;001.py之后才创建的，线上代码更新时那么导入的模型是有<code>age</code>字段的，而数据库是没有这个字段的。插入的时候没有给age值，所以django认为<code>age</code>这个字段是应该存在的，但是数据库实际没有<code>age</code>字段，所以出现了这个问题。</p>
-<h3 id="解决方式"><a href="#解决方式" class="headerlink" title="解决方式"></a>解决方式</h3><p>其实这里应该有三种解决方式的:</p>
-<ol>
-<li>在migration&#x2F;001.py并没有对<code>age</code>字段做任何操作，那么理论上来说这条语句应该通过的，如果通过不了，那应该也是sql语句本身除了问题，不过这个不是这么实现的，所以这种方式我只假设是可以解决这个问题的。</li>
-<li>django引入了<code>ModelState</code>的概念来解决这个问题。(而我们系统没有这个概念，所以改写成裸sql的方式。。。)</li>
-<li>直接将模型引入到migration文件内（不过这个如果有外键或者python文件很复杂的话就不如写裸sql了，虽然有时候裸sql也很难写。。。）</li>
-</ol>
-<h3 id="漫谈migration"><a href="#漫谈migration" class="headerlink" title="漫谈migration"></a>漫谈migration</h3><blockquote>
-<p>所有代码均在django&#x2F;db&#x2F;migrations文件夹下。</p>
-</blockquote>
-<h4 id="先看makemigration的实现方式"><a href="#先看makemigration的实现方式" class="headerlink" title="先看makemigration的实现方式"></a>先看makemigration的实现方式</h4><h5 id="首先初始化MigrationLoader实例，第一步执行build-graph函数，如下图所示。"><a href="#首先初始化MigrationLoader实例，第一步执行build-graph函数，如下图所示。" class="headerlink" title="首先初始化MigrationLoader实例，第一步执行build_graph函数，如下图所示。"></a>首先初始化MigrationLoader实例，第一步执行build_graph函数，如下图所示。</h5><img src="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/3.jpg" class="">
-
-<p>self.load_disk()就是查找项目里面所有的migration文件，然后保存到<code>disk_migrations</code>变量里面。<br>整个感兴趣的，在于这个MigrationGraph，这个为有向无环图，四个for循环构造出disk migrations所有的信息，然后是一些校验。</p>
-<h5 id="检测迁移历史记录的一致性"><a href="#检测迁移历史记录的一致性" class="headerlink" title="检测迁移历史记录的一致性"></a>检测迁移历史记录的一致性</h5><img src="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/20200310134528.jpg" class="">
-
-<p>这里检查的已经保存到数据库的记录的parent是否在graph nodes里面，如果没有，则非一致性，那么则报错。</p>
-<h5 id="检测每一个migration-directory是否有多个leaf-nodes"><a href="#检测每一个migration-directory是否有多个leaf-nodes" class="headerlink" title="检测每一个migration directory是否有多个leaf nodes"></a>检测每一个migration directory是否有多个leaf nodes</h5><img src="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/4.jpg" class="">
-
-<p>如果有多个leaf nodes, 那么则是否merge，合并到一起。</p>
-<h5 id="至此，该检查的也检查了，剩下一步就是如何做diff操作，然后生成新的migration文件。"><a href="#至此，该检查的也检查了，剩下一步就是如何做diff操作，然后生成新的migration文件。" class="headerlink" title="至此，该检查的也检查了，剩下一步就是如何做diff操作，然后生成新的migration文件。"></a>至此，该检查的也检查了，剩下一步就是如何做diff操作，然后生成新的migration文件。</h5><img src="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/5.jpg" class="">
-
-<p>django会根据graph和数据库migration_history<br>的记录生成两个ProjectState,那么最终比较这两个ProjectState的不同。</p>
-<p>而在生成ProjectState的时候，有一步叫做<code>self.graph.make_state()</code>，如下图</p>
-<img src="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/20200310141652.jpg" class="">
-
-<p>这一步会根据disk migrations生成的graph，然后根据leaf nodes通过dfs进行遍历然后生成ModelState,所以在这里<code>age</code>字段不会在001.py存在的。(这个地方就是django解决代码更新的地方。6啊)</p>
-<p>所以下一步就是如何做diff操作，然后生成新的migration文件，简单如下图所示，此处忽略。</p>
-<img src="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/20200310142838.jpg" class="">
-
-<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h3><p>简单来讲，django使用MigrationGraph构造出disk migration和database migration，然后根据<code>sorted(migration)</code>构造出时间线，获得ProjectState以及相应的ModelState,所以在做migrations.RunPython方法的时候，传入的参数models即为相应对应时刻的ModelState，从而避免了代码更新而miration未及时更新导致在orm层面做些操作的时候导致的问题。重点可以看看Graph这里以及如何构造State的。其余自行理解。后面migrate也是类似，以后慢慢讲。</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/tree/master/python/migration">使用graph同步组织架构图一个简单例子</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/03/09/django-migration%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6/">展开全文 >></a>
         </p>
       
 

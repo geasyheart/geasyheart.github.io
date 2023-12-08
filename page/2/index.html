@@ -212,6 +212,81 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-bert向量加权" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2023/02/13/bert%E5%90%91%E9%87%8F%E5%8A%A0%E6%9D%83/">bert向量加权</a>
+    </h1>
+  
+
+        
+        <a href="/2023/02/13/bert%E5%90%91%E9%87%8F%E5%8A%A0%E6%9D%83/" class="archive-article-date">
+  	<time datetime="2023-02-13T02:39:58.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-02-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这个是对<a href="/2021/06/25/bert%E4%BB%A5%E9%A6%96%E5%AD%97%E8%A1%A8%E7%A4%BA%E8%AF%8D%E5%90%91%E9%87%8F(2)/" title="bert以首字表示词向量(2)">bert以首字表示词向量(2)</a>文章的扩充，是对指定span index进行加权。</p>
+<p>整体思想来自<a href="/2021/12/17/coreference-resolution/" title="coreference resolution">coreference resolution</a>中<code>#word-level实现demo</code>部分。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">WordEncoder</span>(torch.nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, n_in, p=<span class="number">0.1</span></span>):</span><br><span class="line">        <span class="built_in">super</span>(WordEncoder, self).__init__()</span><br><span class="line">        self.n_in = n_in</span><br><span class="line">        self.p = p</span><br><span class="line">        self.linear = torch.nn.Linear(in_features=n_in, out_features=<span class="number">1</span>)</span><br><span class="line">        self.dp = torch.nn.Dropout(p)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x, indices</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        如果indices中为padding，那么就(0, bert_out.size(1))</span></span><br><span class="line"><span class="string">        :param x:</span></span><br><span class="line"><span class="string">        :param indices:</span></span><br><span class="line"><span class="string">        :return:</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="comment"># x: BS, SL, HS</span></span><br><span class="line">        <span class="comment"># indices: BS, L</span></span><br><span class="line">        start_end_indices_to_tensor = torch.tensor(indices).to(x.device)</span><br><span class="line">        start_indices = start_end_indices_to_tensor[:, :, <span class="number">0</span>]</span><br><span class="line">        end_indices = start_end_indices_to_tensor[:, :, <span class="number">1</span>]</span><br><span class="line">        mask = torch.arange(x.shape[<span class="number">1</span>]).expand(x.shape[<span class="number">0</span>], <span class="built_in">len</span>(indices[<span class="number">0</span>]), x.shape[<span class="number">1</span>]).to(x.device)</span><br><span class="line">        attn_mask = (mask &gt;= start_indices.unsqueeze(<span class="number">2</span>)) * (mask &lt; end_indices.unsqueeze(<span class="number">2</span>))</span><br><span class="line">        attn_mask = torch.log(attn_mask.to(torch.<span class="built_in">float</span>))</span><br><span class="line"></span><br><span class="line">        attn_scores = self.linear(x).permute(<span class="number">0</span>, <span class="number">2</span>, <span class="number">1</span>)</span><br><span class="line">        attn_scores = attn_scores.expand(x.shape[<span class="number">0</span>], <span class="built_in">len</span>(indices[<span class="number">0</span>]), x.shape[<span class="number">1</span>])</span><br><span class="line">        attn_scores = attn_scores + attn_mask</span><br><span class="line">        output = torch.softmax(attn_scores, dim=<span class="number">2</span>).bmm(x)</span><br><span class="line">        <span class="keyword">return</span> self.dp(output)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    <span class="comment"># 我 是 中国人</span></span><br><span class="line">    <span class="comment"># 我 中国人 null</span></span><br><span class="line">    word_feature = torch.arange(<span class="number">60</span>, dtype=torch.<span class="built_in">float</span>).view(<span class="number">2</span>, <span class="number">5</span>, <span class="number">6</span>)</span><br><span class="line">    start_end_indices = [</span><br><span class="line">        [(<span class="number">0</span>, <span class="number">1</span>), (<span class="number">1</span>, <span class="number">2</span>), (<span class="number">2</span>, <span class="number">5</span>)],</span><br><span class="line">        [(<span class="number">0</span>, <span class="number">1</span>), (<span class="number">1</span>, <span class="number">4</span>), (<span class="number">0</span>, <span class="number">0</span>)]</span><br><span class="line">    ]</span><br><span class="line">    w = WordEncoder(<span class="number">6</span>)</span><br><span class="line">    w(word_feature, start_end_indices)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># single</span></span><br><span class="line">    <span class="comment"># word_feature = torch.arange(50, dtype=torch.float).view(1, 5, 10)</span></span><br><span class="line">    <span class="comment"># # 那么index是：</span></span><br><span class="line">    <span class="comment"># start_end_indices = [[(0, 1), (1, 2), (2, 5)]]</span></span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    <span class="comment"># we = WordEncoder(n_in=10, p=0.1)</span></span><br><span class="line">    <span class="comment"># output = we.forward(word_feature, start_end_indices)</span></span><br><span class="line">    <span class="comment"># print(output)</span></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2023/02/13/bert%E5%90%91%E9%87%8F%E5%8A%A0%E6%9D%83/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-IE-by-generation-t5" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1210,105 +1285,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2022/08/18/UIE-%E5%AE%9E%E4%BD%93%E8%AF%86%E5%88%AB/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-UIE-情感分类" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/08/17/UIE-%E6%83%85%E6%84%9F%E5%88%86%E7%B1%BB/">UIE-情感分类</a>
-    </h1>
-  
-
-        
-        <a href="/2022/08/17/UIE-%E6%83%85%E6%84%9F%E5%88%86%E7%B1%BB/" class="archive-article-date">
-  	<time datetime="2022-08-17T08:09:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-17</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>在上一篇文章<a href="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/" title="UIE-事件提取">UIE-事件提取</a>中，介绍了doccano的用法，也介绍了基于prompt事件提取的做法。本篇文章继续介绍基于prompt情感分类的做法。</p>
-<h2 id="数据标注"><a href="#数据标注" class="headerlink" title="数据标注"></a>数据标注</h2><p>关于doccano使用，请看<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/develop/model_zoo/uie/doccano.md#42-%E6%9E%84%E5%BB%BA%E5%88%86%E7%B1%BB%E5%BC%8F%E4%BB%BB%E5%8A%A1%E6%A0%87%E7%AD%BE">构建分类式任务标签</a>和<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/develop/model_zoo/uie/doccano.md#55-%E5%8F%A5%E5%AD%90%E7%BA%A7%E5%88%86%E7%B1%BB%E4%BB%BB%E5%8A%A1">句子级分类任务</a>。标注完成后生成下面文件。</p>
-<blockquote>
-<p>doccano_txt.json</p>
-</blockquote>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">7</span><span class="punctuation">,</span> <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这个产品用起来真的很流畅，我非常喜欢&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;正向&quot;</span><span class="punctuation">]</span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">8</span><span class="punctuation">,</span> <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这个产品非常low&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;负向&quot;</span><span class="punctuation">]</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-
-<p>使用<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/develop/model_zoo/uie/doccano.md#72-%E5%8F%A5%E5%AD%90%E7%BA%A7%E5%88%86%E7%B1%BB%E4%BB%BB%E5%8A%A1%E6%95%B0%E6%8D%AE%E8%BD%AC%E6%8D%A2">句子级分类任务数据转换</a>转换后，生成的样本如下所示：</p>
-<blockquote>
-<p>train.txt</p>
-</blockquote>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这个产品用起来真的很流畅，我非常喜欢&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;result_list&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;正向&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;start&quot;</span><span class="punctuation">:</span> <span class="number">-7</span><span class="punctuation">,</span> <span class="attr">&quot;end&quot;</span><span class="punctuation">:</span> <span class="number">-5</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="attr">&quot;prompt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;情感倾向[正向,负向]&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>test.txt</p>
-</blockquote>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这个产品非常low&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;result_list&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;负向&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;start&quot;</span><span class="punctuation">:</span> <span class="number">-7</span><span class="punctuation">,</span> <span class="attr">&quot;end&quot;</span><span class="punctuation">:</span> <span class="number">-5</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="attr">&quot;prompt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;情感倾向[负向,正向]&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="训练"><a href="#训练" class="headerlink" title="训练"></a>训练</h2><p>注意，输入到模型的prompt是固定的，每个句子的prompt都是固定的，比如：</p>
-<blockquote>
-<p><code>[cls]</code>情感倾向[负向,正向]<code>[SEP]</code>这个产品用起来真的很流畅，我非常喜欢[SEP]<br><code>[cls]</code>情感倾向[负向,正向]<code>[SEP]</code>这个产品非常low[SEP]</p>
-</blockquote>
-<p>** 这里你会好奇一个问题了，正向和负向这个label怎么表示呢，貌似原句中也没有这俩词？**<br>注意：模型结构都是固定的（这里不知道的请看上篇文章）</p>
-<p>请看训练样本，其中的start和end都是负值，这个经过<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/493dc101ebf0ba5065bfc115f3b07b8e4c28e9da/model_zoo/uie/utils.py#L153">convert_example</a>转换后，就变成了prompt中对应的<code>正向</code>和<code>负向</code>所对应的index，即答案来自prompt中。</p>
-<h2 id="推理"><a href="#推理" class="headerlink" title="推理"></a>推理</h2><p>prompt是固定的，即<code>情感倾向[负向,正向]</code>，其他没有什么特殊需要注意的了。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>对于prompt learning，模板的构造是比较关键的，百度这种做法值得借鉴！</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/08/17/UIE-%E6%83%85%E6%84%9F%E5%88%86%E7%B1%BB/">展开全文 >></a>
         </p>
       
 

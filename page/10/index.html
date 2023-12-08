@@ -212,6 +212,135 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-MySQL长事务导致的Table-Metadata-Lock" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/05/18/MySQL%E9%95%BF%E4%BA%8B%E5%8A%A1%E5%AF%BC%E8%87%B4%E7%9A%84Table-Metadata-Lock/">MySQL长事务导致的Table Metadata Lock</a>
+    </h1>
+  
+
+        
+        <a href="/2019/05/18/MySQL%E9%95%BF%E4%BA%8B%E5%8A%A1%E5%AF%BC%E8%87%B4%E7%9A%84Table-Metadata-Lock/" class="archive-article-date">
+  	<time datetime="2019-05-18T04:34:18.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-05-18</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>前几日操作<code>truncate table</code>操作时，遇到一个问题，通过<code>show processlist</code>获取关键信息，通过<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/683bd7fcb7a0">此文章</a>了解更多，故记录于此。</p>
+<img src="/2019/05/18/MySQL%E9%95%BF%E4%BA%8B%E5%8A%A1%E5%AF%BC%E8%87%B4%E7%9A%84Table-Metadata-Lock/mysql-locktable.jpg" class="" title="show-processlist">
+
+
+<h2 id="什么是Table-Metadata-Lock"><a href="#什么是Table-Metadata-Lock" class="headerlink" title="什么是Table Metadata Lock"></a>什么是Table Metadata Lock</h2><p>在MySQL以前的版本中，存在这样一个Bug：</p>
+<img src="/2019/05/18/MySQL%E9%95%BF%E4%BA%8B%E5%8A%A1%E5%AF%BC%E8%87%B4%E7%9A%84Table-Metadata-Lock/issue.png" class="" title="bug">
+
+
+<p>大致意思如下:</p>
+<blockquote>
+<p>如果user1存在一个操作table的事务，而user2要删除这张表，当user1提交这个事务时，binlog表现出来的行为类似如下:</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> t;</span><br><span class="line"><span class="keyword">BEGIN</span>;</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> t ...;</span><br><span class="line"><span class="keyword">COMMIT</span>;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这样就导致这个问题出现了。</p>
+</blockquote>
+<blockquote>
+<p>所以MySQL在后续版本中增加了Metadata Lock,只有在事务结束后才会释放Metadata lock，因此在事务提交或回滚前，是无法进行DDL(不仅仅是DDL哦)操作的。</p>
+</blockquote>
+<p>MySQL官方文档地址:</p>
+<p><a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.6/en/metadata-locking.html">http://dev.mysql.com/doc/refman/5.6/en/metadata-locking.html</a></p>
+<img src="/2019/05/18/MySQL%E9%95%BF%E4%BA%8B%E5%8A%A1%E5%AF%BC%E8%87%B4%E7%9A%84Table-Metadata-Lock/metadata-lock-desc.png" class="" title="desc">
+
+
+<h2 id="如何解决"><a href="#如何解决" class="headerlink" title="如何解决"></a>如何解决</h2><blockquote>
+<p>查询当前正在运行的事务（下面为拷贝过来的，仅作参考）</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> information_schema.innodb_trx\G</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> <span class="number">1.</span> <span class="type">row</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">                    trx_id: <span class="number">7202</span></span><br><span class="line">                 trx_state: <span class="keyword">RUNNING</span>                 <span class="comment">-- 事务状态，一般为RUNNING</span></span><br><span class="line">               trx_started: <span class="number">2016</span><span class="number">-07</span><span class="number">-20</span> <span class="number">23</span>:<span class="number">02</span>:<span class="number">53</span>     <span class="comment">-- 事务执行的起始时间，若时间较长，则要分析该事务是否合理</span></span><br><span class="line">     trx_requested_lock_id: <span class="keyword">NULL</span></span><br><span class="line">          trx_wait_started: <span class="keyword">NULL</span></span><br><span class="line">                trx_weight: <span class="number">0</span></span><br><span class="line">       trx_mysql_thread_id: <span class="number">52402</span>                   <span class="comment">-- MySQL的线程ID，用于kill</span></span><br><span class="line">                 trx_query: <span class="keyword">NULL</span>                    <span class="comment">-- 事务中的SQL</span></span><br><span class="line">       trx_operation_state: <span class="keyword">NULL</span></span><br><span class="line">         trx_tables_in_use: <span class="number">0</span></span><br><span class="line">         trx_tables_locked: <span class="number">0</span></span><br><span class="line">          trx_lock_structs: <span class="number">0</span></span><br><span class="line">     trx_lock_memory_bytes: <span class="number">360</span></span><br><span class="line">           trx_rows_locked: <span class="number">0</span></span><br><span class="line">         trx_rows_modified: <span class="number">0</span></span><br><span class="line">   trx_concurrency_tickets: <span class="number">0</span></span><br><span class="line">       trx_isolation_level: READ COMMITTED</span><br><span class="line">         trx_unique_checks: <span class="number">1</span></span><br><span class="line">    trx_foreign_key_checks: <span class="number">1</span></span><br><span class="line">trx_last_foreign_key_error: <span class="keyword">NULL</span></span><br><span class="line"> trx_adaptive_hash_latched: <span class="number">0</span></span><br><span class="line"> trx_adaptive_hash_timeout: <span class="number">10000</span></span><br><span class="line">          trx_is_read_only: <span class="number">0</span></span><br><span class="line">trx_autocommit_non_locking: <span class="number">0</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>查看运行的SQL语句</p>
+</blockquote>
+<p>根据查询到的trx_started时间以及trx_mysql_thread_id到MySQL的general log中查找，当然前提是开启了general log的功能，对于这句话我有一个疑惑点，如果没有开启general log时那么无法查看对应操作的SQL语句了？？？</p>
+<p>所以此处给出排查方式：</p>
+<ol>
+<li>如果开启了general log，那么根据这个方式</li>
+<li>给出两个SQL语句如下,<a target="_blank" rel="noopener" href="https://www.itcodemonkey.com/article/3771.html">参考文章</a>:</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 这条语句用于查看哪个线程被另外哪一个线程阻塞， 分别为 阻塞的线程ID、阻塞的SQL的语句、谁阻塞的、阻塞者的SQL语句</span></span><br><span class="line"><span class="keyword">SELECT</span> b.trx_mysql_thread_id             <span class="keyword">AS</span> <span class="string">&#x27;blocked_thread_id&#x27;</span></span><br><span class="line">      ,b.trx_query                      <span class="keyword">AS</span> <span class="string">&#x27;blocked_sql_text&#x27;</span></span><br><span class="line">      ,c.trx_mysql_thread_id             <span class="keyword">AS</span> <span class="string">&#x27;blocker_thread_id&#x27;</span></span><br><span class="line">      ,c.trx_query                       <span class="keyword">AS</span> <span class="string">&#x27;blocker_sql_text&#x27;</span></span><br><span class="line">      ,( Unix_timestamp() <span class="operator">-</span> Unix_timestamp(c.trx_started) )</span><br><span class="line">                              <span class="keyword">AS</span> <span class="string">&#x27;blocked_time&#x27;</span></span><br><span class="line"><span class="keyword">FROM</span>   information_schema.innodb_lock_waits a</span><br><span class="line">    <span class="keyword">INNER</span> <span class="keyword">JOIN</span> information_schema.innodb_trx b</span><br><span class="line">         <span class="keyword">ON</span> a.requesting_trx_id <span class="operator">=</span> b.trx_id</span><br><span class="line">    <span class="keyword">INNER</span> <span class="keyword">JOIN</span> information_schema.innodb_trx c</span><br><span class="line">         <span class="keyword">ON</span> a.blocking_trx_id <span class="operator">=</span> c.trx_id</span><br><span class="line"><span class="keyword">WHERE</span>  ( Unix_timestamp() <span class="operator">-</span> Unix_timestamp(c.trx_started) ) <span class="operator">&gt;</span> <span class="number">4</span>; <span class="comment">-- 时长</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 这条语句用于获取具体的阻塞语句</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> a.sql_text,</span><br><span class="line">       c.id,</span><br><span class="line">       d.trx_started</span><br><span class="line"><span class="keyword">FROM</span>   performance_schema.events_statements_current a</span><br><span class="line">       <span class="keyword">join</span> performance_schema.threads b</span><br><span class="line">         <span class="keyword">ON</span> a.thread_id <span class="operator">=</span> b.thread_id</span><br><span class="line">       <span class="keyword">join</span> information_schema.processlist c</span><br><span class="line">         <span class="keyword">ON</span> b.processlist_id <span class="operator">=</span> c.id</span><br><span class="line">       <span class="keyword">join</span> information_schema.innodb_trx d</span><br><span class="line">         <span class="keyword">ON</span> c.id <span class="operator">=</span> d.trx_mysql_thread_id</span><br><span class="line"><span class="keyword">where</span> c.id<span class="operator">=</span><span class="number">17</span> <span class="comment">-- 17 对应blocker_thread_id，</span></span><br><span class="line"><span class="keyword">ORDER</span>  <span class="keyword">BY</span> d.trx_started\G;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>但是方式2不一定能够打印出具体阻塞的语句，<a target="_blank" rel="noopener" href="http://www.cnblogs.com/kerrycode/p/5821413.html">为什么</a>,如果出现此类问题，可以先看下autocommit，哈哈…</p>
+<p>如果还是无法定位SQL，那么还是暴力一点:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> kill <span class="number">52402</span>;</span><br></pre></td></tr></table></figure>
+
+<p>如何复现这种情况（另外对于主主&#x2F;主从复制也会出现），<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/683bd7fcb7a0">可参考文章</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2019/05/18/MySQL%E9%95%BF%E4%BA%8B%E5%8A%A1%E5%AF%BC%E8%87%B4%E7%9A%84Table-Metadata-Lock/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-【搬运】神经网络浅讲：从神经元到深度学习" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1066,103 +1195,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2018/09/02/%E6%B8%B8%E9%98%85%E6%B1%9F%E6%A5%BC%E8%AE%B0/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-关于async并发的疑惑" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/07/13/%E5%85%B3%E4%BA%8Easync%E5%B9%B6%E5%8F%91%E7%9A%84%E7%96%91%E6%83%91/">关于async并发的疑惑</a>
-    </h1>
-  
-
-        
-        <a href="/2018/07/13/%E5%85%B3%E4%BA%8Easync%E5%B9%B6%E5%8F%91%E7%9A%84%E7%96%91%E6%83%91/" class="archive-article-date">
-  	<time datetime="2018-07-13T05:17:25.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-07-13</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>之前一直很好奇像sanic或者aiohttp是如何实现并发的，其实从网上看无非就是使用了asyncio,更底层就是事件驱动，libevent之类的，但是纯从应用层来讲，这个会是怎么一回事呢，举个例子:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">worker</span>():</span><br><span class="line">    <span class="comment"># 模拟消耗时间</span></span><br><span class="line">    <span class="keyword">await</span> asyncio.sleep(<span class="number">3</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;ok&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">concurrent</span>():</span><br><span class="line">    <span class="comment"># 模拟并发</span></span><br><span class="line">    tasks = [worker() <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>)]</span><br><span class="line">    <span class="keyword">await</span> asyncio.gather(*tasks)</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
-
-<p>从上面代码来看，整个执行周期为3s,但是有个问题是：如果请求一个一个来，如何不阻塞呢？？</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">worker</span>(<span class="params">message</span>):</span><br><span class="line">    <span class="comment"># deal message</span></span><br><span class="line">    <span class="keyword">await</span> asyncio.sleep(<span class="number">3</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;result&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">consumer</span>():</span><br><span class="line">    <span class="comment"># 此处一下过来7条消息</span></span><br><span class="line">    <span class="comment"># 这里如何实现并行执行这7条消息呢？？</span></span><br><span class="line">    <span class="comment"># await worker(message) # ?? 这样会阻塞，并不是一旦发生阻塞就调度出去.</span></span><br><span class="line">    <span class="comment"># 那如果这样呢？</span></span><br><span class="line">    asyncio.create_task(worker(message))</span><br><span class="line">    <span class="comment"># 来了消息创建一个任务，调度出去，不阻塞，这样就可以接收大量消息喽？？</span></span><br></pre></td></tr></table></figure>
-
-
-<p>如果按照例如eventlet的做法:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">procpool = GreenPool(size=poolsize)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">worker</span>(<span class="params">message</span>):</span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">consumer</span>():</span><br><span class="line">    gt = procpool.spawn(worker, message)</span><br><span class="line">    gt.link(handle_message_processed, message) <span class="comment"># 此处省略</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>消息过来，直接抛给pool，并不会进行阻塞,并且有poolsize控制池大小，</p>
-<p>额，这里是sanic源码中的一部分…</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">-------------------------------------------------</span></span><br><span class="line"><span class="string">   File Name：     serve</span></span><br><span class="line"><span class="string">   Description :</span></span><br><span class="line"><span class="string">   Author :       yu.zhang</span></span><br><span class="line"><span class="string">   date：          18-7-13</span></span><br><span class="line"><span class="string">-------------------------------------------------</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="keyword">import</span> asyncio</span><br><span class="line"><span class="keyword">from</span> functools <span class="keyword">import</span> partial</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EchoServer</span>(asyncio.Protocol):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, loop, connections=<span class="built_in">set</span>(<span class="params"></span>)</span>):</span><br><span class="line">        self.connections = connections</span><br><span class="line">        self.transport = <span class="literal">None</span></span><br><span class="line">        self.loop = loop</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">connection_made</span>(<span class="params">self, transport</span>):</span><br><span class="line">        self.connections.add(self)</span><br><span class="line">        self.transport = transport</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">connection_lost</span>(<span class="params">self, exc</span>):</span><br><span class="line">        self.connections.discard(self)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;closed:&#x27;</span>, <span class="built_in">len</span>(self.connections))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">data_received</span>(<span class="params">self, data</span>):</span><br><span class="line">        <span class="built_in">print</span>(data)</span><br><span class="line">        self.transport.write(data)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">serve</span>(<span class="params">host, port, connections=<span class="literal">None</span>, protocol=EchoServer, loop=<span class="literal">None</span>, reuse_port=<span class="literal">False</span></span>):</span><br><span class="line">    connections = connections <span class="keyword">if</span> connections <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">else</span> <span class="built_in">set</span>()</span><br><span class="line">    server = partial(protocol,</span><br><span class="line">                     loop=loop,</span><br><span class="line">                     connections=connections)</span><br><span class="line"></span><br><span class="line">    server_coroutine = loop.create_server(server, host, port, reuse_port=reuse_port)</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        echo_server = loop.run_until_complete(server_coroutine)</span><br><span class="line">    <span class="keyword">except</span> BaseException:</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        loop.run_forever()</span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        <span class="keyword">for</span> connection <span class="keyword">in</span> connections:</span><br><span class="line">            <span class="built_in">print</span>(<span class="built_in">dir</span>(connection))</span><br><span class="line">        loop.run_until_complete(echo_server.wait_closed())</span><br><span class="line">        loop.close()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    loop = asyncio.get_event_loop()</span><br><span class="line">    serve(<span class="string">&#x27;127.0.0.1&#x27;</span>, <span class="number">8080</span>, loop=loop)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/07/13/%E5%85%B3%E4%BA%8Easync%E5%B9%B6%E5%8F%91%E7%9A%84%E7%96%91%E6%83%91/">展开全文 >></a>
         </p>
       
 

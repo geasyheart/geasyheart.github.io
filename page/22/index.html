@@ -212,6 +212,104 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-18-03OpenSSH服务及其相关应用-sshd-config" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/03/28/18-03OpenSSH%E6%9C%8D%E5%8A%A1%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E5%BA%94%E7%94%A8-sshd-config/">18_03OpenSSH服务及其相关应用_sshd_config_</a>
+    </h1>
+  
+
+        
+        <a href="/2015/03/28/18-03OpenSSH%E6%9C%8D%E5%8A%A1%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E5%BA%94%E7%94%A8-sshd-config/" class="archive-article-date">
+  	<time datetime="2015-03-28T14:51:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-28</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>可以先参考16_04Linux系统裁剪之六为系统添加ssh服务,本文更多讲&#x2F;etc&#x2F;ssh&#x2F;sshd_config配置文件 </p>
+<p>telnet: TCP&#x2F;23； 远程连接<br>    认证明文<br>    数据传输也是明文 </p>
+<p>OpenSSH: </p>
+<p>客户端:<br>    Linux:ssh<br>    Windows:putty,SecureCRT,SSHSecureShellClient（支持图形化），Xmanager </p>
+<p>服务器端:<br>    sshd </p>
+<p>#rpm -qa | grep ssh </p>
+<p>netstat -ntlp<br>    r:监听路由表<br>    n:表示以数字显示的服务<br>    t:表示tcp连接的服务<br>    l:表示正在监听的服务<br>    p:表示哪一个进程监听的<br>    u:表示udp连接的服务 </p>
+<p>&#x2F;etc&#x2F;ssh&#x2F;<br>    ssh_config<br>    sshd_config </p>
+<p>sshd_config: </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 关于 SSH Server 的整体设定，包含使用的 port 啦，以及使用的密码演算方式 </span></span><br><span class="line">Port 22　　　　　　　        <span class="comment"># SSH 预设使用 22 这个 port，您也可以使用多的 port ！ </span></span><br><span class="line">　　　　　　　　　　　　　         <span class="comment"># 亦即重复使用 port 这个设定项目即可！ </span></span><br><span class="line">Protocol 2,1　　　　　　　     <span class="comment"># 选择的 SSH 协议版本，可以是 1 也可以是 2 ， </span></span><br><span class="line">　　　　　　　　　　　　　           <span class="comment"># 如果要同时支持两者，就必须要使用 2,1 这个分隔了！ </span></span><br><span class="line"><span class="comment">#ListenAddress 0.0.0.0　　# 监听的主机适配卡！举个例子来说，如果您有两个 IP， </span></span><br><span class="line">　　　　　　　　　　　　　         <span class="comment"># 分别是 192.168.0.100 及 192.168.2.20 ，那么只想要 </span></span><br><span class="line">      　　　　　　　　　　　　　 <span class="comment"># 开放 192.168.0.100 时，就可以写如同下面的样式： </span></span><br><span class="line">            ListenAddress 192.168.0.100           </span><br><span class="line">            <span class="comment"># 只监听来自 192.168.0.100 这个 IP 的SSH联机。 </span></span><br><span class="line">     　　　　　　　　　　　　　　　　　　 <span class="comment"># 如果不使用设定的话，则预设所有接口均接受 SSH </span></span><br><span class="line">PidFile /var/run/sshd.pid　　　　　　<span class="comment"># 可以放置 SSHD 这个 PID 的档案！左列为默认值 </span></span><br><span class="line">LoginGraceTime 600　　　　  <span class="comment"># 当使用者连上 SSH server 之后，会出现输入密码的画面， </span></span><br><span class="line">　　　　　　　　　　　　　         <span class="comment"># 在该画面中，在多久时间内没有成功连上 SSH server ， </span></span><br><span class="line">　　　　　　　　　　　　　            <span class="comment"># 就断线！时间为秒！ </span></span><br><span class="line">Compression <span class="built_in">yes</span>　　　　　　    <span class="comment"># 是否可以使用压缩指令？当然可以啰！ </span></span><br><span class="line">　 </span><br><span class="line"><span class="comment"># 2. 说明主机的 Private Key 放置的档案，预设使用下面的档案即可！ </span></span><br><span class="line">HostKey /etc/ssh/ssh_host_key　　　  　<span class="comment"># SSH version 1 使用的私钥 </span></span><br><span class="line">HostKey /etc/ssh/ssh_host_rsa_key　　<span class="comment"># SSH version 2 使用的 RSA 私钥 </span></span><br><span class="line">HostKey /etc/ssh/ssh_host_dsa_key　　<span class="comment"># SSH version 2 使用的 DSA 私钥 </span></span><br><span class="line"> </span><br><span class="line">KeyRegenerationInterval 1h　 　　　    <span class="comment"># 由前面联机的说明可以知道， version 1 会使用 </span></span><br><span class="line">　　　　　　　　　　　　　　　　　　           <span class="comment"># server 的 Public Key ，那么如果这个 Public </span></span><br><span class="line">　　　　　　　　　　　　　　　　　　           <span class="comment"># Key 被偷的话，岂不完蛋？所以需要每隔一段时间 </span></span><br><span class="line">　　　　　　　　　　　　　　　　　　            <span class="comment"># 来重新建立一次！ </span></span><br><span class="line">ServerKeyBits 1024 　　　　　　　　　       <span class="comment"># 没错！这个就是 Server key 的长度！(fedora21默认值) </span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># 3. 关于登录文件的讯息数据放置与 daemon 的名称！ </span></span><br><span class="line">SyslogFacility AUTH　　　　　　　　　<span class="comment"># 当有人使用 SSH 登入系统的时候，SSH会记录资 </span></span><br><span class="line">　    　　　　　　　　　　　　　　　　　 <span class="comment"># 讯，这个信息要记录在什么 daemon name 底下？ </span></span><br><span class="line">　    　　　　　　　　　　　　　　　　　 <span class="comment"># 预设是以 AUTH 来设定的，即是 /var/log/secure </span></span><br><span class="line">　    　　　　　　　　　　　　　　　　　 <span class="comment"># 里面！什么？忘记了！回到 Linux 基础去翻一下 </span></span><br><span class="line">　　　　　　　　　　　　　　　　　　        <span class="comment"># 其它可用的 daemon name 为：DAEMON,USER,AUTH, </span></span><br><span class="line">　　　　　　　　　　　　　　　　　　           <span class="comment"># LOCAL0,LOCAL1,LOCAL2,LOCAL3,LOCAL4,LOCAL5, </span></span><br><span class="line">LogLevel INFO　　　　　　　　　　　　 <span class="comment"># 登录记录的等级！嘿嘿！任何讯息！ </span></span><br><span class="line">　　　　　　　　　　　　　　　　　　      <span class="comment"># 同样的，忘记了就回去参考！ </span></span><br><span class="line"><span class="comment"># 4. 安全设定项目！极重要！ </span></span><br><span class="line"><span class="comment"># 4.1 登入设定部分 </span></span><br><span class="line">PermitRootLogin no　　 　　   <span class="comment"># 是否允许 root 登入！预设是允许的，但是建议设定成 no！ </span></span><br><span class="line">UserLogin no　　　　　　　       <span class="comment"># 在 SSH 底下本来就不接受 login 这个程序的登入！ </span></span><br><span class="line">StrictModes <span class="built_in">yes</span>　　　　　　      <span class="comment"># 当使用者的 host key 改变之后，Server 就不接受联机， </span></span><br><span class="line">　　　　　　　　　　　　　           <span class="comment"># 可以抵挡部分的木马程序！ </span></span><br><span class="line"><span class="comment">#RSAAuthentication yes　　  # 是否使用纯的 RSA 认证！？仅针对 version 1 ！ </span></span><br><span class="line">PubkeyAuthentication <span class="built_in">yes</span>　 <span class="comment"># 是否允许 Public Key ？当然允许啦！只有 version 2 </span></span><br><span class="line">AuthorizedKeysFile      .ssh/authorized_keys </span><br><span class="line">        　　　　　　　　　　　　　 <span class="comment"># 上面这个在设定若要使用不需要密码登入的账号时，那么那个 </span></span><br><span class="line">　　　　　　　　　　　　        　 <span class="comment"># 账号的存放档案所在档名！ </span></span><br><span class="line"><span class="comment"># 4.2 认证部分 </span></span><br><span class="line">RhostsAuthentication no　　 <span class="comment"># 本机系统不止使用 .rhosts ，因为仅使用 .rhosts 太 </span></span><br><span class="line">       　　　　　　　　　　　　　  <span class="comment"># 不安全了，所以这里一定要设定为 no ！ </span></span><br><span class="line">IgnoreRhosts <span class="built_in">yes</span>　　　　　       <span class="comment"># 是否取消使用 ~/.ssh/.rhosts 来做为认证！当然是！ </span></span><br><span class="line">RhostsRSAAuthentication no     <span class="comment"># 这个选项是专门给 version 1 用的，使用 rhosts 档案在 </span></span><br><span class="line">          　　　　　　　　　　　　　 <span class="comment"># /etc/hosts.equiv配合 RSA 演算方式来进行认证！不要使用 </span></span><br><span class="line">HostbasedAuthentication no     <span class="comment"># 这个项目与上面的项目类似，不过是给 version 2 使用的！ </span></span><br><span class="line">IgnoreUserKnownHosts no　    <span class="comment"># 是否忽略家目录内的 ~/.ssh/known_hosts 这个档案所记录 </span></span><br><span class="line">　　　　　　　　　　　　　             <span class="comment"># 的主机内容？当然不要忽略，所以这里就是 no 啦！ </span></span><br><span class="line">PasswordAuthentication <span class="built_in">yes</span>     <span class="comment"># 密码验证当然是需要的！所以这里写 yes 啰！ </span></span><br><span class="line">PermitEmptyPasswords no　　    <span class="comment"># 若上面那一项如果设定为 yes 的话，这一项就最好设定 </span></span><br><span class="line">　　　　　　　　　　　            <span class="comment"># 为 no ，这个项目在是否允许以空的密码登入！当然不许！ </span></span><br><span class="line">ChallengeResponseAuthentication <span class="built_in">yes</span>      <span class="comment"># 挑战任何的密码认证！所以，任何 login.conf </span></span><br><span class="line">             　　　　　　　　　　　　　　　　　　 <span class="comment"># 规定的认证方式，均可适用！ </span></span><br><span class="line"><span class="comment">#PAMAuthenticationViaKbdInt yes         # 是否启用其它的 PAM 模块！启用这个模块将会 </span></span><br><span class="line">　　　　　　　　　　        　       　　　　　　　 <span class="comment"># 导致 PasswordAuthentication 设定失效！ </span></span><br><span class="line">　 </span><br><span class="line"><span class="comment"># 4.3 与 Kerberos 有关的参数设定！因为我们没有 Kerberos 主机，所以底下不用设定！ </span></span><br><span class="line"><span class="comment">#KerberosAuthentication no </span></span><br><span class="line"><span class="comment">#KerberosOrLocalPasswd yes </span></span><br><span class="line"><span class="comment">#KerberosTicketCleanup yes </span></span><br><span class="line"><span class="comment">#KerberosTgtPassing no </span></span><br><span class="line">　 </span><br><span class="line"><span class="comment"># 4.4 底下是有关在 X-Window 底下使用的相关设定！ </span></span><br><span class="line">X11Forwarding <span class="built_in">yes</span> </span><br><span class="line"><span class="comment">#X11DisplayOffset 10 </span></span><br><span class="line"><span class="comment">#X11UseLocalhost yes </span></span><br><span class="line"><span class="comment"># 4.5 登入后的项目： </span></span><br><span class="line">PrintMotd no              <span class="comment"># 登入后是否显示出一些信息呢？例如上次登入的时间、地点等 </span></span><br><span class="line">         　　　　　　　　　　　　　<span class="comment"># 等，预设是 yes ，但是，如果为了安全，可以考虑改为 no ！ </span></span><br><span class="line">PrintLastLog <span class="built_in">yes</span>　　　　　      <span class="comment"># 显示上次登入的信息！可以啊！预设也是 yes ！ </span></span><br><span class="line">KeepAlive <span class="built_in">yes</span>　　　　　    　 <span class="comment"># 一般而言，如果设定这项目的话，那么 SSH Server 会传送 </span></span><br><span class="line">　　　　　　　　　　　　　               <span class="comment">#  KeepAlive 的讯息给 Client 端，以确保两者的联机正常！ </span></span><br><span class="line">        　　　　　　　　　　<span class="comment"># 在这个情况下，任何一端死掉后， SSH 可以立刻知道！而不会 </span></span><br><span class="line">　　　　　　　　　　　　　          <span class="comment"># 有僵尸程序的发生！ </span></span><br><span class="line">UsePrivilegeSeparation <span class="built_in">yes</span> <span class="comment"># 使用者的权限设定项目！就设定为 yes 吧！ </span></span><br><span class="line">MaxStartups 10　　　　　　 <span class="comment"># 同时允许几个尚未登入的联机画面？当我们连上 SSH ， </span></span><br><span class="line">    　　　　　　　　　　　　　<span class="comment"># 但是尚未输入密码时，这个时候就是我们所谓的联机画面啦！ </span></span><br><span class="line">    　　　　　　　　　　　　　<span class="comment"># 在这个联机画面中，为了保护主机，所以需要设定最大值， </span></span><br><span class="line">    　　　　　　　　　　　　　<span class="comment"># 预设最多十个联机画面，而已经建立联机的不计算在这十个当中 </span></span><br><span class="line"><span class="comment"># 4.6 关于使用者抵挡的设定项目： </span></span><br><span class="line">DenyUsers *　　　　　　　 <span class="comment"># 设定受抵挡的使用者名称，如果是全部的使用者，那就是全部 </span></span><br><span class="line">　　　　　　　　　　　      　　<span class="comment"># 挡吧！若是部分使用者，可以将该账号填入！例如下列！ </span></span><br><span class="line">DenyUsers <span class="built_in">test</span> </span><br><span class="line">DenyGroups <span class="built_in">test</span>　　　　<span class="comment"># 与 DenyUsers 相同！仅抵挡几个群组而已！ </span></span><br><span class="line"><span class="comment"># 5. 关于 SFTP 服务的设定项目！ </span></span><br><span class="line">Subsystem       sftp    /usr/lib/ssh/sftp-server </span><br></pre></td></tr></table></figure>
+<p>转自:<br><a target="_blank" rel="noopener" href="http://linux.chinaunix.net/techdoc/system/2009/08/31/1133210.shtml">http://linux.chinaunix.net/techdoc/system/2009/08/31/1133210.shtml</a> </p>
+<p>sftp：转自:<a target="_blank" rel="noopener" href="http://www.cnblogs.com/chen1987lei/archive/2010/11/26/1888391.html">http://www.cnblogs.com/chen1987lei/archive/2010/11/26/1888391.html</a> </p>
+<p>sftp 是一个交互式文件传输程式。它类似于 ftp, 但它进行加密传输，比FTP有更高的安全性。下边就简单介绍一下如何远程连接主机，进行文件的上传和下载，以及一些相关操作。<br>举例，如远程主机的 IP 是 202.206.64.33或者是域名<a target="_blank" rel="noopener" href="http://www.hebust.edu.cn,用户名是/">www.hebust.edu.cn,用户名是</a>  fyt ,在命令行模式下:sftp <a href="mailto:&#102;&#x79;&#116;&#64;&#x32;&#x30;&#50;&#46;&#x32;&#x30;&#54;&#46;&#x36;&#x34;&#x2e;&#51;&#51;">&#102;&#x79;&#116;&#64;&#x32;&#x30;&#50;&#46;&#x32;&#x30;&#54;&#46;&#x36;&#x34;&#x2e;&#51;&#51;</a>或者  <a href="mailto:&#102;&#121;&#116;&#64;&#x77;&#119;&#119;&#x2e;&#104;&#x65;&#98;&#117;&#x73;&#x74;&#46;&#101;&#x64;&#117;&#x2e;&#99;&#x6e;">&#102;&#121;&#116;&#64;&#x77;&#119;&#119;&#x2e;&#104;&#x65;&#98;&#117;&#x73;&#x74;&#46;&#101;&#x64;&#117;&#x2e;&#99;&#x6e;</a>。回车提示输入密码。进入提示符<br>sftp&gt;<br>如果登陆远程机器不是为了上传下载文件，而是要修改远程主机上的某些文件。可以<br>ssh  <a href="mailto:&#x66;&#121;&#x74;&#64;&#x32;&#48;&#50;&#x2e;&#x32;&#48;&#x36;&#46;&#54;&#x34;&#x2e;&#51;&#51;">&#x66;&#121;&#x74;&#64;&#x32;&#48;&#50;&#x2e;&#x32;&#48;&#x36;&#46;&#54;&#x34;&#x2e;&#51;&#51;</a> （其实sftp就是ssh 的一个程式。）<br>sftp&gt; get &#x2F;var&#x2F;www&#x2F;fuyatao&#x2F;index.php  &#x2F;home&#x2F;fuyatao&#x2F;<br>这条语句将从远程主机的  &#x2F;var&#x2F;www&#x2F;fuyatao&#x2F;目录下将 index.php 下载到本地  &#x2F;home&#x2F;fuyatao&#x2F;目录下。<br>sftp&gt; put &#x2F;home&#x2F;fuyatao&#x2F;downloads&#x2F;Linuxgl.pdf &#x2F;var&#x2F;www&#x2F;fuyatao&#x2F;<br>这条语句将把本地 &#x2F;home&#x2F;fuyatao&#x2F;downloads&#x2F;目录下的 linuxgl.pdf文件上传至远程主机&#x2F;var&#x2F;www&#x2F;fuyatao&#x2F; 目录下。<br>你如果不知道远程主机的目录是什么样， pwd命令可以帮您查询远程主机的当前路径。查询本机当前工作目录 lpwd.<br>改变路径可以用cd ，改变本机路径可以用 lcd;<br>ls rm rmdir mkdir 这些命令都可以使用。同理调用本机都是加 l , 即 lls lrm.<br>要离开sftp，用exit 或quit、 bye 均可。详细情况可以查阅 man  sftp.<br>如果觉得在命令行模式下不太方便，可以 sudo apt-get install gftp。在图形界面下操作就简便多了。 </p>
+<p>ftps:<a target="_blank" rel="noopener" href="http://www.bing.com/knows/search?q=ftps&mkt=zh-cn">http://www.bing.com/knows/search?q=ftps&amp;mkt=zh-cn</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/03/28/18-03OpenSSH%E6%9C%8D%E5%8A%A1%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E5%BA%94%E7%94%A8-sshd-config/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-18-01加密类型及其相关算法" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1320,102 +1418,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/03/22/37-01Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9B%9B-LVS-DR%E8%AF%A6%E8%A7%A3%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%BF%87%E7%A8%8B/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-29-04samba之二" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/22/29-04samba%E4%B9%8B%E4%BA%8C/">29_04samba之二</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/22/29-04samba%E4%B9%8B%E4%BA%8C/" class="archive-article-date">
-  	<time datetime="2015-03-22T09:57:01.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>#yum install samba-client </p>
-<p>查看samba服务器共享情况<br>smbclient  -L 服务器名 -U Samba用户名 </p>
-<p>使用samba共享资源<br>mount -t cifs -o username&#x3D;samba用户名 &#x2F;&#x2F;samba主机名或IP&#x2F;共享目录 &#x2F;本地挂载点<br>mount -t cifs -o username&#x3D;leon &#x2F;&#x2F;example.com&#x2F;test &#x2F;mnt </p>
-<p>如何开机自动挂载: </p>
-<p>192.168.100.2&#x2F;tools &#x2F;mnt cifs credentials&#x3D;&#x2F;etc&#x2F;samba&#x2F;cred.passwd 0 0 </p>
-<p>vim &#x2F;etc&#x2F;samba&#x2F;cred.passwd<br>username&#x3D;user1<br>password&#x3D;user1passwd<br>chmod 700 &#x2F;etc&#x2F;samba&#x2F;cred.passwd </p>
-<p>samba：基于IP的访问控制<br>iptables:<br>    139,445<br>    137,138 </p>
-<p>samba配置文件中:<br>hosts all &#x3D; 白名单 </p>
-<p>这个可以以网页的形式管理samba服务器:(非常方便)<br>可以参考这个:<a target="_blank" rel="noopener" href="http://yuanbin.blog.51cto.com/363003/117105/">http://yuanbin.blog.51cto.com/363003/117105/</a><br>yum install samba-swat<br>vim &#x2F;etc&#x2F;xinetd.d&#x2F;swat disable &#x3D; no<br>service xinetd start<br>(如果允许其他控制端访问901端口，需要vim &#x2F;etc&#x2F;xinetd.d&#x2F;swat 中only_from &#x3D; ip,重启即可)<br>例如:<br>127.0.0.1&#x2F;901<br>另外在Password–&gt;server password management–&gt;username所属的管理员从root改为其他用户，这样可以在samba攻破后不会获得root权限。 </p>
-<p>练习:<br>新建一个共享:tools,开放给组mygroup中的所有用户具有读写权限，其他用户只有读权限。<br>[tools]<br>comment &#x3D; mygroup<br>path &#x3D; &#x2F;shared&#x2F;samba<br>public &#x3D; yes<br>writable &#x3D; yes<br>write list &#x3D; @mygroup </p>
-<p>chown tangseng.qujing &#x2F;shared&#x2F;samba<br>chmod 2775 &#x2F;shared&#x2F;samba </p>
-<p>这个写的不错：<br><a target="_blank" rel="noopener" href="http://zhidao.baidu.com/link?url=WFPRekOkeDWuLtgYhIH19FFTqa7b4lwowxrqH8dvvO4bHzVNP_ag_2KybsHUVDhHh5C2vbWR-JnAex77elH7YFbm7pGdH2uFLbZUJag7--3">http://zhidao.baidu.com/link?url=WFPRekOkeDWuLtgYhIH19FFTqa7b4lwowxrqH8dvvO4bHzVNP_ag_2KybsHUVDhHh5C2vbWR-JnAex77elH7YFbm7pGdH2uFLbZUJag7--3</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/22/29-04samba%E4%B9%8B%E4%BA%8C/">展开全文 >></a>
         </p>
       
 

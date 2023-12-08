@@ -212,6 +212,100 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-10-02Raid及mdadm命令之二" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/21/10-02Raid%E5%8F%8Amdadm%E5%91%BD%E4%BB%A4%E4%B9%8B%E4%BA%8C/">10_02Raid及mdadm命令之二</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/21/10-02Raid%E5%8F%8Amdadm%E5%91%BD%E4%BB%A4%E4%B9%8B%E4%BA%8C/" class="archive-article-date">
+  	<time datetime="2015-02-21T13:31:59.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-21</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>IDE:133Mbps,并行<br>USB:串行<br>SCSI:UitraSCSI，320Mbps，并行<br><a target="_blank" rel="noopener" href="http://soft.zol.com.cn/2005/0126/149010.shtml">http://soft.zol.com.cn/2005/0126/149010.shtml</a><br>一般做RAID的就是下面两种，SAS硬盘小&#x2F;贵<br>SAS:串行的SCSI<br><a target="_blank" rel="noopener" href="http://baike.baidu.com/link?url=0blKbgAUIn8q6g8Aue-XU_mslil6G0wsBlbBkHUebBM0HkVydjuP6uS5wAofGpzqgcSV2d3DGPb5A4X0dn8jZa">http://baike.baidu.com/link?url=0blKbgAUIn8q6g8Aue-XU_mslil6G0wsBlbBkHUebBM0HkVydjuP6uS5wAofGpzqgcSV2d3DGPb5A4X0dn8jZa</a><br>SATA(Serial ATA):6Gbps，串行<br><a target="_blank" rel="noopener" href="http://bbs.zol.com.cn/diybbs/d34440_582.html">http://bbs.zol.com.cn/diybbs/d34440_582.html</a><br>可以简单认为:<br> SCSI–&gt;SATA–&gt;SAS </p>
+<p>&#x2F;proc&#x2F;filesystems<br>查看系统支持的所有文件系统类型<br>SCSI:<br> 8:<br> 1个initiator,7个target<br> 16:<br> 1个initiator，15个target </p>
+<p>mdadm: multi disks administer<br> &#x2F;dev&#x2F;md0<br> &#x2F;dev&#x2F;md1,2…<br> 类型是fd </p>
+<p>&#x2F;proc&#x2F;mdstat:<br> 显示所有启动raid的信息<br>mdadm：将任何块设备做成RAID<br>模式化的命令:<br> 创建模式<br> -C<br> 专用选项:<br> -l:级别<br> -n:设备个数<br> -a{yes|no}:自动为其创建设备文件<br> -c:CHUNK大小 (即一个raid的块设备大小，大小:2*n,默认是64K)<br> 所以在格式化的时候可以mke2fs -j -E　stride&#x3D;16 -b 4096 &#x2F;dev&#x2F;md0  (会使性能提升)<br> -x:指定空闲盘个数(其中的一个磁盘损坏然后下一个磁盘代替)<br> 管理模式<br> –add, –remove,–fail<br> –add|-a:添加<br> mdadm &#x2F;dev&#x2F;md1 -a &#x2F;dev&#x2F;sda9<br> –fail|-f:模拟成损坏<br> mdadm  &#x2F;dev&#x2F;md#(设备) -f &#x2F;dev&#x2F;sdb<br> –remove|-r:删除<br> mdadm -r &#x2F;dev&#x2F;md0 &#x2F;dev&#x2F;sda7 <br> 监控模式<br> -F<br> 增长模式<br> -G<br> 装配模式<br> -A </p>
+<blockquote>
+<p>mdsdm -A &#x2F;dev&#x2F;md0 &#x2F;dev&#x2F;sda5 &#x2F;dev&#x2F;sda6<br> 详细信息<br> -D|–detail: <br>mdadm -D  –scan 显示所有mdadm设备<br> 将当前RAID信息保存至配置文件，一边以后进行装配<br>mdadm -D　–scan &gt; &#x2F;etc&#x2F;mdadm.conf<br> 停用阵列:<br> -S <br>mdadm -S　&#x2F;dev&#x2F;md0<br>RAID0:<br> 2+2G <br>cfdisk &#x2F;dev&#x2F;sdb,c   Type:fd<br>partprobe &#x2F;dev&#x2F;sdb &#x2F;dev&#x2F;sdc (可以是分区)<br>mdadm -C &#x2F;dev&#x2F;md0 -a yes -l 0 -n 2 &#x2F;dev&#x2F;sd{b,c}<br> (然后会提示会覆盖掉所有数据，问是否同意，yes即可。)<br> mke2fs -j &#x2F;dev&#x2F;md0  &#x2F;&#x2F; mkfs.Type &#x2F;dev&#x2F;md0<br>mount &#x2F;dev&#x2F;md0 &#x2F;mnt<br>就搞定了。<br>mdadm -D &#x2F;dev&#x2F;md0可以查看详细信息<br>RAID1:<br> 2+2G<br>mdadm -C &#x2F;dev&#x2F;md1 -a yes -n 2 -l 1 &#x2F;dev&#x2F;sda7 &#x2F;dev&#x2F;sda8<br>cat &#x2F;proc&#x2F;mdstat (可以看到正在使两个硬盘同步)<br>mkfs.Type &#x2F;dev&#x2F;md1<br>mount &#x2F;dev&#x2F;md1 &#x2F;media </p>
+</blockquote>
+<p>RAID5: </p>
+<p> <a target="_blank" rel="noopener" href="http://blog.csdn.net/hbdys/article/details/5911589">http://blog.csdn.net/hbdys/article/details/5911589</a> </p>
+<p>watch:周期性的执行指定命令，并以全屏方式显示结果<br>watch <code>cat /proc/mdstat</code><br>默认是以2S运行&#96;&#96;内的命令<br> -n:指定周期长度，默认是2S<br> watch -n 3 <code>cat /proc/mdstat</code> </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/21/10-02Raid%E5%8F%8Amdadm%E5%91%BD%E4%BB%A4%E4%B9%8B%E4%BA%8C/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-10-01Raid及madadm命令之一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1114,129 +1208,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/02/13/07-04%E7%89%B9%E6%AE%8A%E6%9D%83%E9%99%90SUID%E7%AD%89%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-07-03Linux文件查找详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/13/07-03Linux%E6%96%87%E4%BB%B6%E6%9F%A5%E6%89%BE%E8%AF%A6%E8%A7%A3/">07_03Linux文件查找详解</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/13/07-03Linux%E6%96%87%E4%BB%B6%E6%9F%A5%E6%89%BE%E8%AF%A6%E8%A7%A3/" class="archive-article-date">
-  	<time datetime="2015-02-12T17:05:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-13</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>文件查找：<br> locate:<br> 非实时，查找是根据全系统文件数据库运行的；<br> updatedb ，手动生成文件数据库<br> 速度快<br> find:<br> 实时<br> 精确<br> 支持众多查找标准<br> 遍历指定目录中的所有文件完成查找，速度慢<br>Usage：<br> find查找路径，查找标准，查找到以后的处理运作<br> 查找路径：默认为当前目录<br> 查找标准：默认为指定路径下的所有文件<br> 处理运作：默认为显示 </p>
-<p>匹配标准：<br> -name “filename”，对文件名作精确匹配<br> 文件名匹配:<br> *:<br> .:<br> ?:<br> -iname “filename”:对文件名不区分大小写<br> -regex PATTERN：基于正则表达式进行文件查找(这个用的不多)<br> -user USERNAME :基于用户名进行查找<br> -group GROUPNAME:基于属组进行查找<br> -uid ：这个要说明，用户存在的时候可以不用这个，但是当用户删除的时候，他所拥有的文件的拥有者将会变成他原来名称的uid，所以这个价值体现在这；<br> -gid:根据GID查找<br> -nouser:查找没有属主的文件(这个挺重要)<br> -nogroup:查找没有属组的文件<br> -type：根据文件类型进行查找<br> f：普通文件<br> d:目录<br> c:字符设备<br> b:块设备<br> l:链接<br> p:管道设备<br> s:套接字<br> -size:根据文件大小今次那个查找<br> [+:大于&#x2F; -:小于]k:<br> M:<br> G:<br> 说明，在进行精确查找时，1M意味着按一定规则的都认为是1M;; </p>
-<p> 组合条件:<br> -a 与<br> -o 或<br> -not 非 </p>
-<blockquote>
-<p>find &#x2F;tmp -not -user root<br>find &#x2F;tmp -user root -o  -user geasyheart<br>find &#x2F;tmp -not user1 -a -not user2<br>find .&#x2F; -not (-user user1 -a -type d) </p>
-</blockquote>
-<p> -mtime：修改时间<br> -ctime:改变时间<br> -atime:访问时间<br> [+,-]:+5至少5天没访问过 -5:最近5天访问过<br> -mmin<br> -cmin<br> -amin：分钟；；； </p>
-<p> 然后可以使用stat + 文件名进行查看这个文件的信息 </p>
-<p> 根据文件权限进行查找：<br> -perm mode 每一位权限必须精确匹配<br> -perm -mode  文件包含的权限包含查找的权限就可匹配出来<br> -perm &#x2F;mode 只要有一位就可以 </p>
-<blockquote>
-<p>find .&#x2F; -perm 644<br>find .&#x2F; -perm &#x2F;011 组或其他user具有执行权限<br>find .&#x2F; -perm -011 组和其他user具有执行权限<br>运作：<br> -print:显示<br> -ls:类似ls -l 的形式显示每一个文件的详细信息<br> -ok COMMAND {} ;每一步都需要用户确认<br> -exec COMMAND () ; <br>find -perm -006 –exec chmod o-w {} ;<br>find .&#x2F; -perm -020 –exec mv {} {}.new ;<br> (!!!所以，{}的意思是指匹配到的的集合!!!) </p>
-</blockquote>
-<p>练习: </p>
-<ol>
-<li>查找&#x2F;var目录下属主为root并且数组为mail的所有文件; <blockquote>
-<p>find &#x2F;var -user root -a -group mail  </p>
-</blockquote>
-</li>
-<li>查找&#x2F;usr目录下不属于root,bin,或student的文件； <blockquote>
-<p>find &#x2F;usr -not  -user root -a -not -user bin -a -not -user student <br>find &#x2F;usr -not ( -user root -o -user bin -o -user student ) </p>
-</blockquote>
-</li>
-<li>查找&#x2F;etc目录下最近一周内内容修改过且不属于root及student用户的文件； <blockquote>
-<p>find &#x2F;etc –mtime -7 -a  ( - not -user root -a -not -user student ) </p>
-</blockquote>
-</li>
-<li>查找当前系统上没有属主或属组且最近1天内曾经访问过的文件，并将其属主属组均修改为root <blockquote>
-<p>find &#x2F; (-nouser -o -nogroup) -a -atime -1 -exec chmod root:root {} ; </p>
-</blockquote>
-</li>
-<li>查找&#x2F;etc目录下大于1M的文件，并将其文件名写入到&#x2F;tmp&#x2F;etc.largefiles文件中 <blockquote>
-<p>find &#x2F;etc -size +1M &gt;&gt; &#x2F;tmp&#x2F;etc.largefiles<br>find &#x2F;etc -size +1M | xargs echo &gt;&gt; &#x2F;tmp&#x2F;etc.largefiles </p>
-</blockquote>
-</li>
-<li>查找&#x2F;etc目录下所有用户都没有写权限的文件，显示出其详细信息 <blockquote>
-<p>find &#x2F;etc  -not -perm &#x2F;222 -ls</p>
-</blockquote>
-</li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/13/07-03Linux%E6%96%87%E4%BB%B6%E6%9F%A5%E6%89%BE%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
         </p>
       
 
