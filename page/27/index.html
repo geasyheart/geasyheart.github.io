@@ -7,12 +7,12 @@
   <meta name="baidu-site-verification" content="code-Wz3hIIlkFx" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://geasyheart.github.io">
-  <title>Archives | 博客</title>
+  <title>博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="张宇个人博客">
 <meta property="og:type" content="website">
 <meta property="og:title" content="博客">
-<meta property="og:url" content="https://geasyheart.github.io/archives/page/6/index.html">
+<meta property="og:url" content="https://geasyheart.github.io/page/27/index.html">
 <meta property="og:site_name" content="博客">
 <meta property="og:description" content="张宇个人博客">
 <meta property="og:locale" content="zh_CN">
@@ -212,402 +212,158 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-04-01Linux用户管理命令详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
   
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/05/04-01Linux%E7%94%A8%E6%88%B7%E7%AE%A1%E7%90%86%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/">04-01Linux用户管理命令详解</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/05/04-01Linux%E7%94%A8%E6%88%B7%E7%AE%A1%E7%90%86%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/" class="archive-article-date">
+  	<time datetime="2015-02-05T10:52:39.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-05</time>
+</a>
+        
+      </header>
     
-    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="etc-shadow"><a href="#etc-shadow" class="headerlink" title="&#x2F;etc&#x2F;shadow"></a>&#x2F;etc&#x2F;shadow</h2><p>用户名:密码:最近一次修改密码的时间:最短使用期限:最长使用期限:警告时间:非活动时间:过期时间 </p>
+<blockquote>
+<p>–用户名<br>–密码<br>–从1970年1月1日起到上次修改密码所经过的天数<br>–密码再过几天可以被变更(0表示随时可以改变)<br>–密码再过几天必须被变更(99999表示永不过期)<br>–密码过期前几天提醒用户(默认为一周)<br>–密码过期几天后帐号被禁用<br>–从1970年1月1日算起，多少天后账号失效 </p>
+</blockquote>
+<p>  </p>
+<h2 id="useradd"><a href="#useradd" class="headerlink" title="useradd"></a>useradd</h2><blockquote>
+<p>-u UID(&gt;&#x3D;500)<br>-g GID<br>-G　附加组１，附加组２　<br>-c　注释信息<br>-d &#x2F;path&#x2F;to&#x2F;somedirectory (可以自定义家目录名称)<br>-s 指定shell cat &#x2F;etc&#x2F;shells 可查看所有支持的shell<br>-m 创建家目录（强制创建，如果不存在）<br>不过一般要结合-k使用，-k：当创建用户的时候，用户的基本配置信息存放在&#x2F;etc&#x2F;skel目录下，会自动copy到你创建的目录里；<br>即使不指定，也是创建，不过使用，就会确保创建；；<br>-M 不创建家目录 &#x2F;<br>-r 创建一个系统账号<br>useradd -c “Tony” -d &#x2F;home&#x2F;tony -s &#x2F;sbin&#x2F;nologin user4 </p>
+</blockquote>
+<p>所有默认的配置信息的配置方式，都保存&#x2F;etc&#x2F;login.defs </p>
+<h2 id="userdel"><a href="#userdel" class="headerlink" title="userdel"></a>userdel</h2><p> 如果直接userdel,不会删除家目录<br> -r 删除家目录 </p>
+<h2 id="finger-username"><a href="#finger-username" class="headerlink" title="finger username:"></a>finger username:</h2><p> 查看用户的账号信息还有登陆时间；；； </p>
+<h2 id="usermod"><a href="#usermod" class="headerlink" title="usermod:"></a>usermod:</h2><blockquote>
+<p>-u UID<br>-g GID<br>-G  -a GID 不使用 -a 选项，会覆盖此前的附加组，就是去除了此前的组；；<br>-d -m  指定新的家目录，并移动此前家目录下的内容至新家目录<br>-s  shell<br>-l 改变登陆名称<br>-L 锁定账号<br>-U 解锁账号<br>-e 修改账号的有效时间 usermod -e 20150202 easyheart<br>-f 修改账号过期后多少天即关闭账号<br>usermod -e 20150202 -f 0 easyheart </p>
+</blockquote>
+<h2 id="chsh"><a href="#chsh" class="headerlink" title="chsh"></a>chsh</h2><p> 改变用户的shell </p>
+<blockquote>
+<p>chsh -s shell username </p>
+</blockquote>
+<h2 id="chfn"><a href="#chfn" class="headerlink" title="chfn"></a>chfn</h2><p> 修改注释信息<br> 比如会提示办公室、办公室号码等；； </p>
+<h2 id="passwd"><a href="#passwd" class="headerlink" title="passwd"></a>passwd</h2><blockquote>
+<p>–stdin (可以用于脚本自动执行)  echo “redhat” | passwd –stdin xiaoming  (小明的密码就自动设置好了)<br>-l 锁定账号<br>-u 解锁账号<br>-d 删除密码 </p>
+</blockquote>
+<h2 id="pwck"><a href="#pwck" class="headerlink" title="pwck"></a>pwck</h2><p> 可以用来检查密码文件的完整性 </p>
+<h2 id="groupadd"><a href="#groupadd" class="headerlink" title="groupadd"></a>groupadd</h2><blockquote>
+<p>-g 指定GID<br>-r 添加一个系统组 </p>
+</blockquote>
+<h2 id="groupmod"><a href="#groupmod" class="headerlink" title="groupmod"></a>groupmod</h2><blockquote>
+<p>-g GID<br>-n GRNAME </p>
+</blockquote>
+<h2 id="groupdel"><a href="#groupdel" class="headerlink" title="groupdel"></a>groupdel</h2><h2 id="newgrp：切换到另外一个组"><a href="#newgrp：切换到另外一个组" class="headerlink" title="newgrp：切换到另外一个组"></a>newgrp：切换到另外一个组</h2><blockquote>
+<p>可以创建一个文件可以查看切换组了；；；<br>输入exit可以退出转换的组；；； </p>
+</blockquote>
+<h2 id="gpasswd"><a href="#gpasswd" class="headerlink" title="gpasswd"></a>gpasswd</h2><blockquote>
+<p>给组加密码<br>这个命令一般可用于当用户使用newgrp进行切换到其他组的时候，会提示输入密码，这个密码就是gpasswd<br>设定的密码，如果为空，自动切换，可以设定好密码进行切换 </p>
+</blockquote>
+<h2 id="chage"><a href="#chage" class="headerlink" title="chage"></a>chage</h2><blockquote>
+<p>-d 指定密码最近一次的修改时间<br>-E：过期时间<br>-r：非活动时间<br>-m：最短使用期限<br>-M：最长使用期限<br>-W：警告时间 </p>
+</blockquote>
+<p>练习： </p>
+<ol>
+<li>创建一个用户mandriva,其ID号为2002，基本组为distro（GID&#x3D;3003），附加组为linux <blockquote>
+<p>groupadd -g 3003 distro<br>groupadd linux<br> useradd -u 2002 -g distro -G linux mandriva </p>
+</blockquote>
+</li>
+<li>创建一个用户fedora,其全名为Fedora Community,默认shell为tcsh <blockquote>
+<p>useradd -c “Fedora Community” -s &#x2F;bin&#x2F;tcsh fedora </p>
+</blockquote>
+</li>
+<li>修改mandriva的ID号为4004，基本组为linux，附加组为distro和fedora <blockquote>
+<p>usermod -u 4004 -g linux -G distro,fedora mandriva </p>
+</blockquote>
+</li>
+<li>给fedora加密码，并设密码最短使用期限为2天，最长为50天： <blockquote>
+<p>passwd -n 2 -x 50 fedora </p>
+</blockquote>
+</li>
+<li>将mamdriva的默认shell改为&#x2F;bin&#x2F;bash <blockquote>
+<p>usermod -s &#x2F;bin&#x2F;bash mandriva<br>chsh &#x2F;bin&#x2F;bash mndriva </p>
+</blockquote>
+</li>
+<li>添加系统用户hbase,并不允许其登陆系统 <blockquote>
+<p>useradd -s &#x2F;sbin&#x2F;nologin hbase</p>
+</blockquote>
+</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/11/15/%E8%AF%AD%E4%B9%89%E4%BE%9D%E5%AD%98%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-11-15T15:41:54.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-11-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/11/15/%E8%AF%AD%E4%B9%89%E4%BE%9D%E5%AD%98%E5%88%86%E6%9E%90/">语义依存分析</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/11/12/bio-based%E8%AF%AD%E4%B9%89%E8%A7%92%E8%89%B2%E6%A0%87%E6%B3%A8/" class="archive-article-date">
-  	<time datetime="2021-11-12T08:22:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-11-12</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/11/12/bio-based%E8%AF%AD%E4%B9%89%E8%A7%92%E8%89%B2%E6%A0%87%E6%B3%A8/">bio-based语义角色标注</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/05/04-01Linux%E7%94%A8%E6%88%B7%E7%AE%A1%E7%90%86%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/11/02/%E5%9F%BA%E4%BA%8E%E6%A0%91%E5%BD%A2%E6%9D%A1%E4%BB%B6%E9%9A%8F%E6%9C%BA%E5%9C%BA%E7%9A%84%E9%AB%98%E9%98%B6%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-11-02T06:22:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-11-02</time>
-</a>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/11/02/%E5%9F%BA%E4%BA%8E%E6%A0%91%E5%BD%A2%E6%9D%A1%E4%BB%B6%E9%9A%8F%E6%9C%BA%E5%9C%BA%E7%9A%84%E9%AB%98%E9%98%B6%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/">基于树形条件随机场的高阶句法分析</a>
-    </h1>
-  
+        
+        
+    </div>
+</aside>
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/10/30/%E5%B1%9E%E6%80%A7%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/" class="archive-article-date">
-  	<time datetime="2021-10-30T15:12:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-30</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/10/30/%E5%B1%9E%E6%80%A7%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/">属性抽取调研-工业界</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/10/30/%E5%85%B3%E7%B3%BB%E6%8A%BD%E5%8F%96-%E5%AD%A6%E6%9C%AF%E7%95%8C/" class="archive-article-date">
-  	<time datetime="2021-10-30T14:04:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-30</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/10/30/%E5%85%B3%E7%B3%BB%E6%8A%BD%E5%8F%96-%E5%AD%A6%E6%9C%AF%E7%95%8C/">关系抽取-学术界</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/10/30/%E5%85%B3%E7%B3%BB%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/" class="archive-article-date">
-  	<time datetime="2021-10-30T12:04:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-30</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/10/30/%E5%85%B3%E7%B3%BB%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/">关系抽取调研-工业界</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/10/28/bert%E5%92%8Cxlnet/" class="archive-article-date">
-  	<time datetime="2021-10-28T01:35:10.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-28</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/10/28/bert%E5%92%8Cxlnet/">bert和xlnet</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/10/16/biaffine%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-10-16T15:45:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-16</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/10/16/biaffine%E5%88%86%E6%9E%90/">biaffine分析</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/10/15/%E6%88%90%E5%88%86%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-10-15T15:30:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/10/15/%E6%88%90%E5%88%86%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/">成分句法分析</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/10/15/%E4%BE%9D%E5%AD%98%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-10-15T12:45:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/10/15/%E4%BE%9D%E5%AD%98%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/">依存句法分析</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
   
-    </div></section>
-  
-
-    
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/page/5/">&amp;laquo; Prev</a><a class="page-number" href="/archives/">1</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/4/">4</a><a class="page-number" href="/archives/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/archives/page/7/">7</a><a class="page-number" href="/archives/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/27/">27</a><a class="extend next" rel="next" href="/archives/page/7/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/26/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/25/">25</a><a class="page-number" href="/page/26/">26</a><span class="page-number current">27</span>
     </nav>
   
 
@@ -631,9 +387,9 @@ var _hmt = _hmt || [];
     <script>
 	var yiliaConfig = {
 		mathjax: false,
-		isHome: false,
+		isHome: true,
 		isPost: false,
-		isArchive: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

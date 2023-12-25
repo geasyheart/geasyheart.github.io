@@ -212,6 +212,105 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-38-01Linux集群系列之七-高可用集群原理详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/02/38-01Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%83-%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/">38_01Linux集群系列之七--高可用集群原理详解</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/02/38-01Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%83-%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/" class="archive-article-date">
+  	<time datetime="2015-04-02T10:19:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-02</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>有两个节点运行webserver集群,RS1平时响应客户请求,RS2做备用在RS1节点故障的时候来取代它来响应用户请求，但是RS2怎么知道RS1出现故障了呢？<br>方法:<br>1&gt; 每隔几秒钟RS2去检测RS2的状态，如果检测不到RS2就取代它；<br>2&gt;两台主机用心跳线连接起来，大家相互传递心跳信息(通过UDP)，如果在某一个时候感受不到RS1的心跳信息了，RS2就去取代它响应客户请求。<br>假如每３秒进行探测一下，那么当刚检测完，服务挂了，那么有３秒的空闲，所以在高可用的时候更多使用的是第二种方法，所有集群用心跳线连接，平时在心跳线传递心跳状态信息，当某台主机出现状况，其他节点随时可知道它的状况，在逻辑上这个称为信息层(Messaging Layer); </p>
+<p>逻辑上它是信息层，但是我们需要用软件来实现这个功能，而且这个软件运行在每一个节点上，平时他们通过心跳线传递着健康状态信息，常见的软件有:<br>1&gt;HeartBeat<br>2&gt;Keepalived<br>3&gt;ultramonkey<br>4&gt;Corosync(OpenAIS的子项目) </p>
+<p>HeartBeat是比较常用的软件，Keepalived配置相对来说比较简单，ultramonkey使用的比较少，而Corosync的功能要比Heartbeat要强大； </p>
+<p> 但是知道信息层仅传递状态信息，对于服务或主机出现问题他不负责解决，但是他为其他程序提供了API，可供其他程序调用，来实现服务的转移，这个软件在逻辑层上称之为集群资源管理器(Cluster Resource Manager);<br> 在每一个节点上CRM都维护有一个CIB(集群信息库 XML文档)和LRM（本地资源管理器）组件。<br> 对于CIB，只有工作在DC（主节点）上的文档是可以修改的，其他CIB都是复制DC上的那个文档而来的。<br> 对于LRM,是执行CRM传递过来的在本地执行某个资源的执行和停止的具体执行人。当某个节点发生故障之后，是由DC通过PE（策略引擎）和TE（实施引擎）来决定是否抢夺资源。<br>PE（Policy Engine）：策略引擎，来定义资源转移的一整套转移方式，但只是做策略者，并不亲自来参加资源转移的过程，而是让TE来执行自己的策略。<br>TE（Transition Engine）： 就是来执行PE做出的策略的并且只有DC上才运行PE和TE。<br> 实现功能的软件有:<br>1&gt;Cman(RedHat开发的，主要可能会在5系列上看到)<br>2&gt;pacemaker(这个是非常常见的一个) </p>
+<p>集群资源管理器来决定集群资源的启动与停止，又因为资源之间是有相互关系的，比如集群资源有:IP,Httpd,共享存储，首先应该有共享存储，然后启动Httpd服务，这样那个才是一个正常的启动状态，所以对资源定义了约束，常见的约束有: </p>
+<p>资源约束: Constraint<br>    排列约束:location<br>        定义资源是否能够运行在同一个节点<br>        正值:可以在一起<br>        负值:不能在一起<br>    位置约束:coloation<br>        正值:倾向于此节点<br>        负值:倾向于逃离此节点<br>            可以用资源粘性来看待；<br>    顺序约束:order<br>        定义资源启动或关闭时的次序 </p>
+<p>资源粘性:资源对某点的依赖程序，通过score定义<br>    资源更倾向于运行于哪个节点(体现在两个调度器上，调度器A是主调度器，由于故障那么将要转到B调度器上，由于整体成本的考虑，B的性能要不如A,那么，当A一旦好了，就要重新转移到A调度器上) </p>
+<p>我们知道CRM是来决定各个资源的启动与终止的，有这种情况，RS1和RS2平时用共享存储，平时RS1挂在着共享存储，来响应客户的请求，假如RS1出现了故障，RS1不能检测它的状态信息了，这个时候假如RS1仍可以继续工作只是联系不上RS2了，这个时候RS2上，那么会出现资源争夺，所以需要资源隔离:<br>资源隔离:<br>    节点级别:STONITHM<br>    资源级别:<br>        例如:FC SAN switch可以实现在存储资源级别拒绝某节点访问 </p>
+<p>比如出现了这种状况总共５个节点，由于某种原因分为了两个组，一个组３个节点，另一个组２个节点，那到底哪个组启动服务呢，这个时候引入quorum，即法定票数．在一个集群中会有一个角色叫DC(推举的事物协调员)，他负责统计整个集群的事物信息，然后形成CIB(集群信息库)，然后同步到各个节点上，当节点出现分裂后，每个组将会推选DC,由他来统计各个组的法定票数quorum,大于原来总票数的1&#x2F;2的一组将提供服务，小于的将停止．另外每个节点可投的票数可能不一样，例如２个节点的某一个机器性能强悍，就可以多提供几票，使其结果大于３个节点的。 </p>
+<p>接着，集群资源管理器来决定是否集群继续或停止，如果满足策略，将会继续运行，这个时候怎样来启动呢，CRM将会调用RA(Resource Agent)资源代理来实现资源的启动或停止；例如常见的RA:<br>RA:<br>1&gt;LSB(Linux Standard Base):这个就是&#x2F;etc&#x2F;init.d&#x2F;*<br>2&gt;OCF(Open cluster framework):OCF脚本是一种比LSB更加强大的脚本；<br>3&gt;STONITH：直接终止主机的RA设备，比如电源交换机。 </p>
+<p>在做MySQL双主的时候，MySQL共享一台存储设备，这个时候肯定会好奇，不是会产生资源紊乱么，这个其实可以到文件系统那层来解决，由于常用的文件系统不支持多个服务共享一个存储设备，那么如果能对其加锁，当一个MySQL写的时候，另外一个不能进行写，那么就可以，这样的文件系统称之为cluster filesystem;<br>常见的cluster filesystem有：<br>1&gt;GFS<br>2&gt;OCFS2<br>但是，这样的集群文件系统只是用在DAS和SAN上，不能用于NAS设备上； </p>
+<p>更多可直接参考这个:<br><a target="_blank" rel="noopener" href="http://freeloda.blog.51cto.com/2033581/1265304">http://freeloda.blog.51cto.com/2033581/1265304</a> </p>
+<p>##################建议一定要看#####################<br>Linux高可用集群之Heartbeat详解 </p>
+<p><a target="_blank" rel="noopener" href="http://www.linuxidc.com/Linux/2013-08/88521.htm">http://www.linuxidc.com/Linux/2013-08/88521.htm</a> </p>
+<p><a target="_blank" rel="noopener" href="http://www.linuxidc.com/Linux/2013-08/88521p2.htm">http://www.linuxidc.com/Linux/2013-08/88521p2.htm</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/02/38-01Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%83-%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-18-03OpenSSH服务及其相关应用-sshd-config" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1339,117 +1438,9 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-37-01Linux集群系列之四-LVS-DR详解及配置过程" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/22/37-01Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9B%9B-LVS-DR%E8%AF%A6%E8%A7%A3%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%BF%87%E7%A8%8B/">37_01Linux集群系列之四--LVS-DR详解及配置过程</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/22/37-01Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9B%9B-LVS-DR%E8%AF%A6%E8%A7%A3%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%BF%87%E7%A8%8B/" class="archive-article-date">
-  	<time datetime="2015-03-22T10:19:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>VS&#x2F;DR的架构：<br>１、调度器和服务器组都必须在物理上有一个网卡通过局域网相连，如通过高速的交换机或者HUB相连。<br>２、VIP地址被调度器和服务器共享，调度器配置的VIP地址是对外可见的，用于接收虚拟服务的请求报文。<br>３、所有的服务器把VIP地址配置在各自的Non-ARP网络设备上，它对外是不可见的，只是用于处理目标地址为VIP的网络请求。 </p>
-<p>VS&#x2F;DR的连接调度和管理与VS&#x2F;NAT和VS&#x2F;TUN一样，但它的报文转发方法不同：它将报文直接路由给目标服务器。<br>在VS&#x2F;DR中，调度器根据各自服务器的负载情况，动态的选择一台服务器， </p>
-<p>“不修改也不封装IP报文，而是将数据帧的MAC地址改为选出服务器的MAC地址，再将修改后的数据帧在服务器组所在的局域网内发送“； </p>
-<p>因为数据帧的MAC地址是选出的服务器，所以服务器肯定可以收到这个数据帧，从中可以获得该IP报文。<br>当服务器发现报文的目标地址(VIP地址)是在本地的网络设备上，服务器处理则个报文后，就会根据路由表将响应报文直接返回给客户。 </p>
-<p>在VS&#x2F;DR中，根据默认的TCP&#x2F;IP协议栈处理，请求报文的目标地址为VIP,响应报文的源地址肯定也为VIP,所以响应报文不需要做任何修改，可以直接返回给客户，客户得到正常的服务，<br>但不会知道是哪一台服务器处理的。 </p>
-<p>VS&#x2F;DR负载调度器与VS&#x2F;TUN一样，只处于从客户到服务器的半连接中，按照半连接的TCP有限状态机进行状态迁移。 </p>
-<p>当client发送请求到路由器时，此时的报文是CIP|VIP,应该发往VIP,作为DR模型来讲，所有主机均共享一个IP,那么，这就出问题了，这个报文到底发往哪个服务器上，是发往realserver上还是director上，本应该是发往director,进行调度的，但是由于具有相同的ip,就不知道应该发往哪台主机，那么，就在这个数据帧改一个MAC地址，表明director的地址，这样固然是对的，但是Router怎么知道你的MAC地址呢，而且这个Router未必是你的，有可能是运营商的，当然是自己的更好，往Router写上MAC就行，这个就是第一种方式:<br>１、VIP:手动绑定MAC地址<br>但是，通用的来讲，这种固然不行，那么就出现一种情况，谁先响应我就认为谁是director,额，肯定不行，所以应该给realserver设定规则，当是VIP的目标地址时，realserver的响应级别就没有director的响应级别高，那么，就好办了，，所以在RedHat系列的OS上，有一个arptables表，这个表记录了IP到MAC地址之间的关系，允不允许响应，允不允许访问，这个也挺好，可实现<br>２、arptables:写规则不予响应<br>但是作为一个OS，能在内核上实现必然是最好的，Linux具有了这个功能，如下所示，第一个定义响应级别，第二个定义通告级别<br>３、Kernel parameter:<br> arp_ignore：接收到ARP请求时的响应级别；<br> ０：只要本地配置的有相应地址就给予相应；<br> １：仅在请求的目标地址与请求到达的接口上的时候才给予响应；<br> …<br> arp_announce：定义将自己地址向外通告时的通告级别；<br> 默认都为０<br> ０：将本机任何接口上的任何地址向外通告<br> １：试图仅向目标网络通告与其网络匹配的地址<br> ２：仅向与本地接口上地址匹配的网络进行通告 </p>
-<p>Director:<br> eth0,DIP:172.16.100.2<br> eth0:0 , VIP:172.16.100.1 </p>
-<p>RS1:<br> eth0,RIP1:172.16.100.7<br> LO:0,VIP:172.16.100.1<br>RS2:<br> eth0,RIP1:172.16.100.8<br> LO:0,VIP:172.16.100.1 </p>
-<p>都为桥接<br>Director:<br>setup–&gt; eth0 172.16.100.2&#x2F;16<br>ifconfig eth0:0 172.16.100.1&#x2F;16<br>#route add -host 172.16.100.1 dev eth0:0<br>#ipvsadm -A -t 172.16.100.1:80 -s wlc<br>#ipvsadm -a -t 172.16.100.1:80 -r 172.16.100.7 -g <br>#ipvsadm -a -t 172.16.100.1:80 -r 172.16.100.8 -g  </p>
-<p>RS1:<br>#vim &#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-eth0<br>DEVICE&#x3D;eth0<br>BOOTPROTO&#x3D;none<br>ONBOOT&#x3D;no<br>NETMASK&#x3D;255.255.0.0<br>IPADDR&#x3D;172.16.100.7<br>GATEWAY&#x3D;172.16.0.1<br>TYPE&#x3D;Ethernet </p>
-<p>#cd &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;conf&#x2F; </p>
-<h1 id="sysctl-w-net-ipv4-conf-eth0-arp-announce-2"><a href="#sysctl-w-net-ipv4-conf-eth0-arp-announce-2" class="headerlink" title="sysctl -w net.ipv4.conf.eth0.arp_announce&#x3D;2"></a>sysctl -w net.ipv4.conf.eth0.arp_announce&#x3D;2</h1><h1 id="sysctl-w-net-ipv4-conf-all-arp-announce-2"><a href="#sysctl-w-net-ipv4-conf-all-arp-announce-2" class="headerlink" title="sysctl -w net.ipv4.conf.all.arp_announce&#x3D;2"></a>sysctl -w net.ipv4.conf.all.arp_announce&#x3D;2</h1><p>#sysctl -w net.ipv4.conf.eth0.arp_ignore&#x3D;1<br>#sysctl -w net.ipv4.conf.all.arp_ignore&#x3D;1 </p>
-<p>#ifconfig lo:0 172.16.100.1 broadcast 172.16.100.1 netmask 255.255.255.255  up<br>#route add -host 172.16.100.1 dev lo:0 </p>
-<p>echo “RS1” &gt; &#x2F;var&#x2F;www&#x2F;html&#x2F;index.html  &amp; service httpd start </p>
-<p>RS2:<br>#vim &#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-eth0<br>NETMASK&#x3D;255.255.0.0<br>IPADDR&#x3D;172.16.100.8<br>GATEWAY&#x3D;172.16.0.1<br>TYPE&#x3D;Ethernet </p>
-<p>#cd &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;conf&#x2F; </p>
-<h1 id="sysctl-w-net-ipv4-conf-eth0-arp-announce-2-1"><a href="#sysctl-w-net-ipv4-conf-eth0-arp-announce-2-1" class="headerlink" title="sysctl -w net.ipv4.conf.eth0.arp_announce&#x3D;2"></a>sysctl -w net.ipv4.conf.eth0.arp_announce&#x3D;2</h1><h1 id="sysctl-w-net-ipv4-conf-all-arp-announce-2-1"><a href="#sysctl-w-net-ipv4-conf-all-arp-announce-2-1" class="headerlink" title="sysctl -w net.ipv4.conf.all.arp_announce&#x3D;2"></a>sysctl -w net.ipv4.conf.all.arp_announce&#x3D;2</h1><p>#sysctl -w net.ipv4.conf.eth0.arp_ignore&#x3D;1<br>#sysctl -w net.ipv4.conf.all.arp_ignore&#x3D;1 </p>
-<p>#ifconfig lo:0 172.16.100.1 broadcast 172.16.100.1 netmask 255.255.255.255  up<br>#route add -host 172.16.100.1 dev lo:0 </p>
-<p>echo “RS2” &gt; &#x2F;var&#x2F;www&#x2F;html&#x2F;index.html  &amp; service httpd start </p>
-<p>访问172.16.100.1即可；； </p>
-<p>如果其中的RS2坏了怎么办，例如<br> iptables  -t -A  INPUT -p tcp  –dport 80 -d 172.16.100.8 -j REJECT<br>这是就没法轮询到RS2 </p>
-<p>转下一个<br>有脚本。。。。。。。。。。 </p>
-<p>更多可直接参考这个:<br><a target="_blank" rel="noopener" href="http://www.it165.net/admin/html/201305/1169.html">http://www.it165.net/admin/html/201305/1169.html</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/22/37-01Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9B%9B-LVS-DR%E8%AF%A6%E8%A7%A3%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%BF%87%E7%A8%8B/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/21/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/20/">20</a><a class="page-number" href="/page/21/">21</a><span class="page-number current">22</span><a class="page-number" href="/page/23/">23</a><a class="page-number" href="/page/24/">24</a><span class="space">&hellip;</span><a class="page-number" href="/page/26/">26</a><a class="extend next" rel="next" href="/page/23/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/21/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/20/">20</a><a class="page-number" href="/page/21/">21</a><span class="page-number current">22</span><a class="page-number" href="/page/23/">23</a><a class="page-number" href="/page/24/">24</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/23/">Next &amp;raquo;</a>
     </nav>
   
 

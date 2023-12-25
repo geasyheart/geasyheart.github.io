@@ -212,6 +212,90 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-41-03Linux集群系列之二十一-ISCSI、clvm和GFS2" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/09/29/41-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%8C%E5%8D%81%E4%B8%80-ISCSI%E3%80%81clvm%E5%92%8CGFS2/">41_03Linux集群系列之二十一--ISCSI、clvm和GFS2</a>
+    </h1>
+  
+
+        
+        <a href="/2015/09/29/41-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%8C%E5%8D%81%E4%B8%80-ISCSI%E3%80%81clvm%E5%92%8CGFS2/" class="archive-article-date">
+  	<time datetime="2015-09-29T05:41:46.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-29</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br></pre></td><td class="code"><pre><span class="line">target: </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#yum install scsi-targets-utils luci　(这里安装luci,是作为集群配置终端存在的) </span></span><br><span class="line"><span class="comment">#vim /etc/tgt/targets.conf </span></span><br><span class="line"> </span><br><span class="line">&lt;target iqn.2013-05.com.test:tsan.disk1&gt; </span><br><span class="line">    &lt;backing-store /dev/sdb&gt; </span><br><span class="line">        vendor_id <span class="built_in">test</span> </span><br><span class="line">        lun 1 </span><br><span class="line">    &lt;/backing-store&gt; </span><br><span class="line">    initiator-address 172.16.0.0/16 </span><br><span class="line">    incominguser sanuser sanpass </span><br><span class="line">&lt;/target&gt; </span><br><span class="line"> </span><br><span class="line"><span class="comment">#service tgtd start </span></span><br><span class="line"><span class="comment">#tgtadm --lld iscsi --mode  target --op show </span></span><br><span class="line"><span class="comment">#chkconfig tgtd on </span></span><br><span class="line"> </span><br><span class="line">initiator: </span><br><span class="line"> </span><br><span class="line"><span class="comment">#for I in &#123;1..3&#125;;do ssh node$I &#x27;echo &quot;InitiatorName=`iscsi-iname -p iqn.2013-05.com.test`&quot;&#x27; &gt; /etc/iscsi/initiatorname.iscsi&#x27; ;done </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#vim /root/iscsi.sed </span></span><br><span class="line">s@<span class="comment">#node.session.auth.authmethod = CHAP@node.session.auth.authmethod = CHAP@ </span></span><br><span class="line">s@node.session.auth.username= username@node.session.auth.username = sanuser@ </span><br><span class="line">s@node.session.auth.password = password@node.session.auth.password = sanpass@ </span><br><span class="line"> </span><br><span class="line">sed -i -f /root/iscsi.sed /etc/iscsi/iscsid.conf </span><br><span class="line"> </span><br><span class="line">service iscsi start &amp;&amp; chkconfig iscsi on </span><br><span class="line"> </span><br><span class="line">iscsiadm -m discovery -t st -p 172.16.100.100 </span><br><span class="line"> </span><br><span class="line">iscsiadm -m node -T iqn.2013-05.com.test:tsan.disk1 -p 172.16.100.100 -l </span><br><span class="line"> </span><br><span class="line"><span class="comment">#################这个地方也可以直接参考前面41_01(2);;; </span></span><br><span class="line"><span class="comment">#################如果已经搭建了ISCSI服务，搭建GFS2可以参考下面；；； </span></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">实现cLVM: </span><br><span class="line">initiator: </span><br><span class="line"><span class="comment">#yum install -y cman rgmanager gfs2-utils lvm2-cluster ricci(如果只是作为共享存储，可以不启动这个) </span></span><br><span class="line"> </span><br><span class="line">ccs_tool create tcluster　　　　(这个名字一定要注意，和下面的GFS2下面必须一样) </span><br><span class="line">ccs_tool addfence meatware fence_manual </span><br><span class="line">ccs_tool lsfence </span><br><span class="line">ccs_tool addnode -n 1 -f meatware node1.test.com </span><br><span class="line">ccs_tool addnode -n 2 -f meatware node2.test.com </span><br><span class="line">ccs_tool addnode -n 3 -f meatware node3.test.com　　(有多少节点，就添加多少个) </span><br><span class="line">ccs_tool lsnode </span><br><span class="line"> </span><br><span class="line">service NetworkManager stop &amp;&amp; chkconfig NetworkManager off </span><br><span class="line">service cman start </span><br><span class="line">如果起不来，也有可能是组播地址重复； </span><br><span class="line">如果出现： </span><br><span class="line">cman not started:Can<span class="string">&#x27;t determine address family of nodename /usr/sbin/cman_tool:aisexec daemon did&#x27;</span>t start </span><br><span class="line">可以尝试把/etc/cluster/cluster.conf 拷贝到其他节点上； </span><br><span class="line">出现这种状况的原因是多个集群相互干扰所导致的； </span><br><span class="line"> </span><br><span class="line">启动逻辑卷功能: </span><br><span class="line"><span class="comment">#ha ssh node$I &#x27;lvmconf --enable-cluster&#x27;;done 启动cLVM, 这个命令类似下面: </span></span><br><span class="line">sed -i <span class="string">&#x27;s/Lockingtype=1/Lockingtype=3/g&#x27;</span> /etc/lvm/lvm.conf </span><br><span class="line"> </span><br><span class="line"><span class="comment">#ha ssh node$I &#x27;service clvmd start&#x27;;done </span></span><br><span class="line"><span class="comment">#ha ssh node$I &#x27;chkconfig clvmd on;chkconfig cman on ;chkconfig rgmanager on&#x27;;done </span></span><br><span class="line"> </span><br><span class="line">创建逻辑卷: </span><br><span class="line"><span class="comment">#pvcreate /dev/sdb </span></span><br><span class="line"><span class="comment">#pvs </span></span><br><span class="line"><span class="comment">#vgcreate clustervg /dev/sdb </span></span><br><span class="line"><span class="comment">#lvcreate -L 10G -n clusterlv clustervg </span></span><br><span class="line"><span class="comment">#lvs </span></span><br><span class="line"><span class="comment">#mkfs.gfs2 -j 2 -p lock_dlm -t tcluster:lktb1 /dev/clustervg/clusterlv </span></span><br><span class="line"><span class="comment">#mkdir /mydata </span></span><br><span class="line"><span class="comment">#mount -t gfs2 /dev/clustervg/clusterlv /mydata </span></span><br><span class="line"><span class="comment">#gfs2_tool df /mydata   查看当前的状态信息 </span></span><br><span class="line"> </span><br><span class="line">至此，就可以成功搭建GFS2环境，在进行挂载时，可以使用： </span><br><span class="line">/dev/clustervg/clusterlv /var/www/html   gfs2 defaults,noatime,nodiratime 0  0 </span><br><span class="line">如果只是作为共享存储的话，也就可以了，而如果想搭建集群的话，可以启动luci和ricci即可；；；； </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">查看当前设备的所有可调参数： </span><br><span class="line">＃gfs2_tool gettune /mydata    注释:/mydata后面不能加/,否则会报错 </span><br><span class="line">new_files_directio = 0  直接写到磁盘上 </span><br><span class="line">new_files_jdata = 0 </span><br><span class="line">quota_scale = 1.0000 </span><br><span class="line">logd_secs =1 </span><br><span class="line">recoverd_secs = 60 </span><br><span class="line">statfs_quantum = 30 </span><br><span class="line">stall_secs = 600 </span><br><span class="line">quota_cache_secs = 300 </span><br><span class="line">quota_simul_sync = 64 </span><br><span class="line">statfs_slow = 0 </span><br><span class="line">complain_secs = 10 </span><br><span class="line">max_readahead = 262144 </span><br><span class="line">quota_quantum = 60 </span><br><span class="line">quota_warn_period = 10 </span><br><span class="line">jindex_refresh_secs = 60 </span><br><span class="line">log_flush_secs = 60   日志每多长时间自动刷新一次 </span><br><span class="line">incore_log_blocks = 1024 </span><br><span class="line"> </span><br><span class="line">调整当前设备的参数: </span><br><span class="line">gfs2_tool settune &lt;mountpoint&gt; &lt;parameter&gt; &lt;value&gt; </span><br><span class="line"> </span><br><span class="line"><span class="comment">#gfs2_tool settune /mydata  new_files_directio 1 </span></span><br><span class="line"><span class="comment">#gfs2_tool gettune /mydata </span></span><br><span class="line"> </span><br><span class="line">冻结一个文件系统: </span><br><span class="line">gfs2_tool freeze /mydata </span><br><span class="line">意味着这个文件系统只是可读的了．．． </span><br><span class="line"> </span><br><span class="line">解冻: </span><br><span class="line">gfs2_tool unfreeze /mydata </span><br><span class="line"> </span><br><span class="line">挂载时的挂载参数: </span><br><span class="line">gfs2_tool getargs /mydata </span><br><span class="line">设置挂载参数 </span><br><span class="line">gfs2_tool setgetargs ..... </span><br><span class="line"> </span><br><span class="line">添加一个日志文件: </span><br><span class="line">gfs2_jadd -j 1 /dev/clustervg/clusterlv </span><br><span class="line">gfs2_tool journals /mydata </span><br><span class="line"> </span><br><span class="line">扩展一个逻辑卷大小: </span><br><span class="line">gfs_glow -h      </span><br><span class="line">    -q   Quiet,reduce verbosity </span><br><span class="line">    -T   Test,<span class="keyword">do</span> everyting except udate FS </span><br><span class="line">    -V   Version information </span><br><span class="line">    -v   Verbose,increase verbosity </span><br><span class="line"> </span><br><span class="line"><span class="comment">#lvextend -L 15G /dev/clustervg/clusterlv </span></span><br><span class="line"><span class="comment">#gfs2_grow /dev/clustervg/clusterlv </span></span><br><span class="line"> </span><br><span class="line">fsck.gfs2 检测文件系统</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/09/29/41-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%8C%E5%8D%81%E4%B8%80-ISCSI%E3%80%81clvm%E5%92%8CGFS2/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-41-02Linux集群系列之二十-ISCSI及GFS2" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1153,119 +1237,9 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-2015年08月31日" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/08/31/2015%E5%B9%B408%E6%9C%8831%E6%97%A5/">2015年08月31日</a>
-    </h1>
-  
-
-        
-        <a href="/2015/08/31/2015%E5%B9%B408%E6%9C%8831%E6%97%A5/" class="archive-article-date">
-  	<time datetime="2015-08-31T03:26:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-08-31</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>实验:<br> CentOS 6.5 &#x2F; DHCP Server 4.1.1-P1 </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#yum -y install dhcp </span><br><span class="line">#cp /usr/share/doc/dhcp-4.1.1/dhcpd.conf.sample /etc/dhcp/dhcpd.conf  </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">ddns-update-style interim; </span><br><span class="line">log-facility local7; </span><br><span class="line">subnet 192.168.0.0 netmask 255.255.255.0 &#123; </span><br><span class="line">  range 192.168.0.111 192.168.0.200;     #分配IP与DHCP服务器要在同一个网段 </span><br><span class="line">  option domain-name-servers 192.168.0.12;       #DNS的ip地址 </span><br><span class="line">  option domain-name &quot;unravel.com&quot;;      #DNS域名 </span><br><span class="line">  option routers 192.168.0.1; </span><br><span class="line">  option broadcast-address 192.168.0.255; </span><br><span class="line">  default-lease-time 21600; </span><br><span class="line">  max-lease-time 43200; </span><br><span class="line">&#125; </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h2 id="指定主机给其分配ip"><a href="#指定主机给其分配ip" class="headerlink" title="指定主机给其分配ip"></a>指定主机给其分配ip</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">host boss &#123;                                     boss为主机名，随便取； </span><br><span class="line">  hardware ethernet 00:0C:29:6D:A7:F2;        主机网卡的mac地址； </span><br><span class="line">  fixed-address 192.168.0.10;                   给其分配的ip； </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
-<p>可能出现的状况:(不过一般出错，就是配置不正确，另外就是dhcpd.conf没放正确位置) </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#service dhcpd start </span><br></pre></td></tr></table></figure>
-
-<p> [failure] </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#tail -n 25 /var/log/messages </span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>Can’t chown new lease file: Operation not permitted </p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#vim /etc/rc.d/init.d/dhcpd </span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>user&#x3D;dhcpd<br>group&#x3D;dhcpd<br>改为<br>user&#x3D;root<br>group&#x3D;root </p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#service dhcpd start即可； </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#netstat -ntulp </span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>udp        0      0 0.0.0.0:67                  0.0.0.0:*                    5346&#x2F;dhcpd </p>
-</blockquote>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/08/31/2015%E5%B9%B408%E6%9C%8831%E6%97%A5/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/16/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="page-number current">17</span><a class="page-number" href="/page/18/">18</a><a class="page-number" href="/page/19/">19</a><span class="space">&hellip;</span><a class="page-number" href="/page/26/">26</a><a class="extend next" rel="next" href="/page/18/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/16/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="page-number current">17</span><a class="page-number" href="/page/18/">18</a><a class="page-number" href="/page/19/">19</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/18/">Next &amp;raquo;</a>
     </nav>
   
 

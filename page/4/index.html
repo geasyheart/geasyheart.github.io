@@ -212,6 +212,201 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-使用GAN思想进行纠错" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/">使用GAN思想进行纠错</a>
+    </h1>
+  
+
+        
+        <a href="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/" class="archive-article-date">
+  	<time datetime="2022-04-21T00:34:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-04-21</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>书接<a href="/2022/04/01/macbert4csc%E7%BA%A0%E9%94%99/">上文</a>，上文在计算loss时一共分为两个。</p>
+<ol>
+<li>mlm loss(即macbert预测的loss)</li>
+<li>二分类loss(即hidden states降维到1后与原始数据集的loss，即原始文本和正确文本相比，不同为1,相同为0)。</li>
+</ol>
+<p>例如：</p>
+<img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/desc1.svg" class="" title="模型结构">
+
+
+<table>
+<thead>
+<tr>
+<th>训练数据集</th>
+<th>样本</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>original_text</td>
+<td>我和你在一其</td>
+</tr>
+<tr>
+<td>correct_text</td>
+<td>我和你在一起</td>
+</tr>
+<tr>
+<td>det_labels</td>
+<td>0 0 0 0 0 1</td>
+</tr>
+</tbody></table>
+<ol>
+<li>将original_text输入到bert后，获得mlm_result，即<code>我和你在一器</code>。此为mlm loss。</li>
+<li>在获得mlm_result同时，也可以获取hidden_states，将hidden_states输入到linear，再与det_labels做二分类。此为二分类loss。</li>
+<li>分配两个loss不同的weight，作为最终loss，此为上篇文章的实现思路。</li>
+</ol>
+<blockquote>
+<p>那这篇文章改动了什么？</p>
+</blockquote>
+<h2 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h2><p>det_labels的获取方式更改了，怎么更改的？以mlm_result和correct_text进行对比进行获取。<br>如上例：即mlm_result输出<code>我和你在一器</code>，和correct_text<code>我和你在一起</code>进行对比。</p>
+<p>即用GAN的思想来进行corrector!</p>
+<h2 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h2><p>此处我将mlm预测称为<code>generator</code>（<code>G</code>）,二分类判别称为<code>discriminator</code>(<code>D</code>)。</p>
+<p>分配<code>G</code>和<code>D</code>两者loss不同的weight。</p>
+<h3 id="1-当weight分配是1和50"><a href="#1-当weight分配是1和50" class="headerlink" title="1. 当weight分配是1和50"></a>1. 当weight分配是<code>1</code>和<code>50</code></h3><table>
+<thead>
+<tr>
+<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_50_dev.png" class="" title="50_dev"></th>
+<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_50_train.png" class="" title="d_50_train"></th>
+</tr>
+</thead>
+</table>
+<p>可以看到一个现象，不管dev_metric还是train_metric，在epoch2和epoch3的时候，它的准确度很突然下降，对应的loss也会比刚开始的大的许多。随后效果才会慢慢的提升。</p>
+<h3 id="2-当weight分配是0-9和0-1"><a href="#2-当weight分配是0-9和0-1" class="headerlink" title="2. 当weight分配是0.9和0.1"></a>2. 当weight分配是<code>0.9</code>和<code>0.1</code></h3><table>
+<thead>
+<tr>
+<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_0.1_dev.png" class="" title="d_0.1_dev"></th>
+<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_0.1_train.png" class="" title="d_0.1_train"></th>
+</tr>
+</thead>
+</table>
+<p>如果我把上图dev_metric展开下再和train_metric放到一起对比：</p>
+<table>
+<thead>
+<tr>
+<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_0.1_dev_2.png" class="" title="d_0.1_dev_2"></th>
+<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_0.1_train.png" class="" title="d_0.1_train"></th>
+</tr>
+</thead>
+</table>
+<p>可以看到效果：</p>
+<ol>
+<li>在epoch1出来时，效果基本就已经非常不错了。</li>
+<li>在随后的epochs里，准确度的提升非常缓慢。</li>
+</ol>
+<h3 id="3-当weight分配是0-1和0-9"><a href="#3-当weight分配是0-1和0-9" class="headerlink" title="3. 当weight分配是0.1和0.9"></a>3. 当weight分配是<code>0.1</code>和<code>0.9</code></h3><table>
+<thead>
+<tr>
+<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_0.9_dev.png" class="" title="d_0.9_dev"></th>
+<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_0.9_train.png" class="" title="d_0.9_train"></th>
+</tr>
+</thead>
+</table>
+<h3 id="4-当weight分配是0-1和0-9，并且判别器添加GELU"><a href="#4-当weight分配是0-1和0-9，并且判别器添加GELU" class="headerlink" title="4. 当weight分配是0.1和0.9，并且判别器添加GELU"></a>4. 当weight分配是<code>0.1</code>和<code>0.9</code>，并且判别器添加GELU</h3><table>
+<thead>
+<tr>
+<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_0.9_dev_gelu.png" class="" title="d_0.9_dev_gelu"></th>
+<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_0.9_train_gelu.png" class="" title="d_0.9_train_gelu"></th>
+</tr>
+</thead>
+</table>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>上面这些实验例子都有一个共同的现象：</p>
+<ol>
+<li>epoch1时准确率就已经不错了，相比上文。</li>
+<li>都有抖动现象，就是在某个epoch时不管dev还是train都有抖动，随后再回到正常。</li>
+</ol>
+<h3 id="1-当weight分配是1和50-1"><a href="#1-当weight分配是1和50-1" class="headerlink" title="1. 当weight分配是1和50"></a>1. 当weight分配是<code>1</code>和<code>50</code></h3><p>首先解释为什么选择1和50,这个地方来自electra地方的思想，可看上文。</p>
+<h3 id="2-当weight分配是0-9和0-1-1"><a href="#2-当weight分配是0-9和0-1-1" class="headerlink" title="2. 当weight分配是0.9和0.1"></a>2. 当weight分配是<code>0.9</code>和<code>0.1</code></h3><p>整体很平滑，仿佛判别器没有起到作用似的或者作用很小。</p>
+<h3 id="3-当weight分配是0-1和0-9-1"><a href="#3-当weight分配是0-1和0-9-1" class="headerlink" title="3. 当weight分配是0.1和0.9"></a>3. 当weight分配是<code>0.1</code>和<code>0.9</code></h3><p>没什么大的意外。</p>
+<p>但是让我意外的是下面4情况。</p>
+<h3 id="4-当weight分配是0-1和0-9，并且判别器添加GELU-1"><a href="#4-当weight分配是0-1和0-9，并且判别器添加GELU-1" class="headerlink" title="4. 当weight分配是0.1和0.9，并且判别器添加GELU"></a>4. 当weight分配是<code>0.1</code>和<code>0.9</code>，并且判别器添加GELU</h3><p>我在看《机器学习实战：基于Scikit-Learn和TensorFlow》第二版 时里面讲到训练GAN有些小trick，比如可以给判别器添加一个激活函数。</p>
+<p>但是当添加后，发现其抖动的更为严重。。。</p>
+<h3 id="5-为什么我选择0-1和0-9"><a href="#5-为什么我选择0-1和0-9" class="headerlink" title="5. 为什么我选择0.1和0.9"></a>5. 为什么我选择0.1和0.9</h3><p>这个是个实验值，没有具体理论依据哈，本身就是超参。看下图：</p>
+<table>
+<thead>
+<tr>
+<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_loss_0.9.png" class="" title="d_loss_0.9"></th>
+<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/g_loss_0.9.png" class="" title="g_loss_0.9"></th>
+</tr>
+</thead>
+</table>
+<p>d_loss和g_loss分别是判别器和生成器各自的loss。</p>
+<p>从上图可以看出，d_loss比g_loss小大概9~10倍，所以依据来源在此。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>当然还有一些其他的小技巧，就不做实验了，gan本来就难搞。。。</p>
+<p>比如：</p>
+<ol>
+<li>生成器的网络空间大小相比判别器调到1&#x2F;4 ~ 1&#x2F;2（来自electra）。具体做法就是减少层数或者降低每层的空间大小。</li>
+<li>使用不一样的优化器。</li>
+<li>改变训练技巧。生成器和判别器分别训练，当训练一个时，另外一个trainable&#x3D;False。使其达到一个均衡。。</li>
+</ol>
+<p>啥是模式崩溃？<br>就是当生成器学会苹果后，那判别器就会判别苹果。当生成器转头学会橘子后，那判别器会对橘子判别更准。<br>而对苹果和橘子共同存在的情况下效果不好。而达到一个纳什均衡。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E7%BA%B3%E4%BB%80%E5%9D%87%E8%A1%A1">纳什均衡</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/319540757">模式崩溃</a></li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-macbert4csc纠错" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1418,122 +1613,9 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-动态词向量之elmo" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/12/28/%E5%8A%A8%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8Belmo/">动态词向量之elmo</a>
-    </h1>
-  
-
-        
-        <a href="/2021/12/28/%E5%8A%A8%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8Belmo/" class="archive-article-date">
-  	<time datetime="2021-12-28T14:43:05.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-28</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>elmo是用于解决静态词向量无法一词多义的模型。</p>
-<p>在介绍如何实现elmo模型的时候，此处穿插进来<code>Conv1d layer（一维卷积层）</code>。</p>
-<p>本文代码以<a target="_blank" rel="noopener" href="https://github.com/HIT-SCIR/plm-nlp-code/blob/main/chp6/train_elmo.py">plm-nlp-code chp6</a>为准，可直接参考。</p>
-<h2 id="Conv1d"><a href="#Conv1d" class="headerlink" title="Conv1d"></a>Conv1d</h2><h3 id="介绍-1"><a href="#介绍-1" class="headerlink" title="介绍"></a>介绍</h3><p>卷积有Conv1d（序列）,Conv2d（图像）,Conv3d（立体数据），主要区别在于不同方向上进行卷积。因为文字是一维结构的，从而在nlp领域使用Conv1d。</p>
-<p>一维卷积适合在句子对于时序结构上体现不重要的方面有更加的优势。比如一句话中关键词位置的变动不影响句子的语义。<br>但是对时序结构通常效果并不好，因为时间序列通常不满足平移不变的假设。</p>
-<p>此处不过多介绍关于Conv1d的原理，感兴趣可看<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/161689789">一维卷积tensorflow2版本的Conv1D以及Pytroch的nn.Conv1d用法</a>。</p>
-<p>此处只关心input和output，卷积核和padding等。</p>
-<p>假设<code>o</code>为上一层的hidden_size输出维度，<code>kernel_size</code>为卷积核大小,<code>padding</code>为使用边界填充，<code>stride</code>为步长，那么：<br>卷积后的维度: (<code>o</code> - <code>kernel_size</code> + 2 * <code>padding</code>) &#x2F; <code>stride</code> + 1<br>池化后的维度: (<code>o</code> - <code>kernel_size</code>) &#x2F; <code>stride</code> + 1</p>
-<h3 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h3><p>torch中的输入为(batch_size, hidden_size, seq_length)。</p>
-<ul>
-<li>步长为1,不使用padding<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">m = nn.Conv1d(<span class="number">16</span>, <span class="number">33</span>, <span class="number">3</span>, stride=<span class="number">1</span>)</span><br><span class="line"><span class="built_in">input</span> = torch.randn(<span class="number">20</span>, <span class="number">16</span>, <span class="number">50</span>)</span><br><span class="line">output = m(<span class="built_in">input</span>)</span><br><span class="line"><span class="built_in">print</span>(output.shape)</span><br><span class="line"></span><br><span class="line">torch.Size([<span class="number">20</span>, <span class="number">33</span>, <span class="number">48</span>])</span><br><span class="line">（<span class="number">50</span> - <span class="number">3</span>）/ <span class="number">1</span> + <span class="number">1</span> = <span class="number">48</span></span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
-<li>步长为2,不使用padding<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">m = nn.Conv1d(<span class="number">16</span>, <span class="number">33</span>, <span class="number">3</span>, stride=<span class="number">2</span>)</span><br><span class="line"><span class="built_in">input</span> = torch.randn(<span class="number">20</span>, <span class="number">16</span>, <span class="number">50</span>)</span><br><span class="line">output = m(<span class="built_in">input</span>)</span><br><span class="line"><span class="built_in">print</span>(output.shape)</span><br><span class="line"></span><br><span class="line">torch.Size([<span class="number">20</span>, <span class="number">33</span>, <span class="number">24</span>])</span><br><span class="line"></span><br><span class="line">（<span class="number">50</span> - <span class="number">3</span>）/ <span class="number">2</span> + <span class="number">1</span> = <span class="number">24</span></span><br></pre></td></tr></table></figure></li>
-<li>步长为1,使用padding<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">m = nn.Conv1d(<span class="number">16</span>, <span class="number">33</span>, <span class="number">3</span>, stride=<span class="number">1</span>,padding=<span class="literal">True</span>)</span><br><span class="line"><span class="built_in">input</span> = torch.randn(<span class="number">20</span>, <span class="number">16</span>, <span class="number">50</span>)</span><br><span class="line">output = m(<span class="built_in">input</span>)</span><br><span class="line"><span class="built_in">print</span>(output.shape)</span><br><span class="line">torch.Size([<span class="number">20</span>, <span class="number">33</span>, <span class="number">50</span>])</span><br><span class="line"></span><br><span class="line">（<span class="number">50</span> - <span class="number">3</span> + <span class="number">2</span>）/ <span class="number">1</span> + <span class="number">1</span> = <span class="number">50</span></span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
-<li>步长为2,使用padding<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">m = nn.Conv1d(<span class="number">16</span>, <span class="number">33</span>, <span class="number">3</span>, stride=<span class="number">2</span>, padding=<span class="literal">True</span>)</span><br><span class="line"><span class="built_in">input</span> = torch.randn(<span class="number">20</span>, <span class="number">16</span>, <span class="number">50</span>)</span><br><span class="line">output = m(<span class="built_in">input</span>)</span><br><span class="line"><span class="built_in">print</span>(output.shape)</span><br><span class="line"></span><br><span class="line">torch.Size([<span class="number">20</span>, <span class="number">33</span>, <span class="number">25</span>])</span><br><span class="line"></span><br><span class="line">（<span class="number">50</span> - <span class="number">3</span> + <span class="number">2</span>）/ <span class="number">2</span> + <span class="number">1</span> = <span class="number">25</span></span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
-</ul>
-<h2 id="Elmo过程"><a href="#Elmo过程" class="headerlink" title="Elmo过程"></a>Elmo过程</h2><h3 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h3><h4 id="构建语料"><a href="#构建语料" class="headerlink" title="构建语料"></a>构建语料</h4><p>这地方主要分成两部分：</p>
-<ol>
-<li>构建词和字级别的词典</li>
-<li>通过词</li>
-</ol>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">load_corpus</span>(<span class="params">path, max_tok_len=<span class="literal">None</span>, max_seq_len=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="comment"># Read raw text file</span></span><br><span class="line">    <span class="comment"># and build vocabulary for both words and chars</span></span><br><span class="line">    text = []</span><br><span class="line">    charset = &#123;BOS_TOKEN, EOS_TOKEN, PAD_TOKEN, BOW_TOKEN, EOW_TOKEN&#125;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Loading corpus from <span class="subst">&#123;path&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">with</span> codecs.<span class="built_in">open</span>(path, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf-8&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> tqdm(f):</span><br><span class="line">            tokens = line.rstrip().split(<span class="string">&quot; &quot;</span>)</span><br><span class="line">            <span class="keyword">if</span> max_seq_len <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> <span class="built_in">len</span>(tokens) + <span class="number">2</span> &gt; max_seq_len:</span><br><span class="line">                tokens = line[:max_seq_len-<span class="number">2</span>]</span><br><span class="line">            <span class="comment"># 每句话添加&lt;bos&gt;和&lt;eos&gt;</span></span><br><span class="line">            sent = [BOS_TOKEN]</span><br><span class="line">            <span class="keyword">for</span> token <span class="keyword">in</span> tokens:</span><br><span class="line">                <span class="keyword">if</span> max_tok_len <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> <span class="built_in">len</span>(token) + <span class="number">2</span> &gt; max_tok_len:</span><br><span class="line">                    token = token[:max_tok_len-<span class="number">2</span>]</span><br><span class="line">                sent.append(token)</span><br><span class="line">                <span class="comment"># 统计样本中所有字</span></span><br><span class="line">                <span class="keyword">for</span> ch <span class="keyword">in</span> token:</span><br><span class="line">                    charset.add(ch)</span><br><span class="line">            sent.append(EOS_TOKEN)</span><br><span class="line">            text.append(sent)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 构造词和单个字级别的词典</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Building word-level vocabulary&quot;</span>)</span><br><span class="line">    vocab_w = Vocab.build(</span><br><span class="line">        text,</span><br><span class="line">        min_freq=<span class="number">2</span>,</span><br><span class="line">        reserved_tokens=[PAD_TOKEN, BOS_TOKEN, EOS_TOKEN]</span><br><span class="line">    )</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Building char-level vocabulary&quot;</span>)</span><br><span class="line">    vocab_c = Vocab(tokens=<span class="built_in">list</span>(charset))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Construct corpus using word_voab and char_vocab</span></span><br><span class="line">    corpus_w = [vocab_w.convert_tokens_to_ids(sent) <span class="keyword">for</span> sent <span class="keyword">in</span> text]</span><br><span class="line">    corpus_c = []</span><br><span class="line">    bow = vocab_c[BOW_TOKEN]</span><br><span class="line">    eow = vocab_c[EOW_TOKEN]</span><br><span class="line">    <span class="keyword">for</span> i, sent <span class="keyword">in</span> <span class="built_in">enumerate</span>(text):</span><br><span class="line">        sent_c = []</span><br><span class="line">        <span class="keyword">for</span> token <span class="keyword">in</span> sent:</span><br><span class="line">            <span class="comment"># 对每个token（即词级别）进行分割，构建字级别的</span></span><br><span class="line">            <span class="comment"># 添加&lt;bow&gt;和&lt;eow&gt;</span></span><br><span class="line">            <span class="keyword">if</span> token == BOS_TOKEN <span class="keyword">or</span> token == EOS_TOKEN:</span><br><span class="line">                token_c = [bow, vocab_c[token], eow]</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="comment"># subtoken</span></span><br><span class="line">                token_c = [bow] + vocab_c.convert_tokens_to_ids(token) + [eow]</span><br><span class="line">            sent_c.append(token_c)</span><br><span class="line">        <span class="keyword">assert</span> <span class="built_in">len</span>(sent_c) == <span class="built_in">len</span>(corpus_w[i])</span><br><span class="line">        corpus_c.append(sent_c)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">assert</span> <span class="built_in">len</span>(corpus_w) == <span class="built_in">len</span>(corpus_c)</span><br><span class="line">    <span class="comment"># word level   subtoken level</span></span><br><span class="line">    <span class="keyword">return</span> corpus_w, corpus_c, vocab_w, vocab_c</span><br></pre></td></tr></table></figure>
-
-<h4 id="构建训练数据集"><a href="#构建训练数据集" class="headerlink" title="构建训练数据集"></a>构建训练数据集</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">BiLMDataset</span>(<span class="title class_ inherited__">Dataset</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, corpus_w, corpus_c, vocab_w, vocab_c</span>):</span><br><span class="line">        <span class="built_in">super</span>(BiLMDataset, self).__init__()</span><br><span class="line">        self.pad_w = vocab_w[PAD_TOKEN]</span><br><span class="line">        self.pad_c = vocab_c[PAD_TOKEN]</span><br><span class="line"></span><br><span class="line">        self.data = []</span><br><span class="line">        <span class="keyword">for</span> sent_w, sent_c <span class="keyword">in</span> tqdm(<span class="built_in">zip</span>(corpus_w, corpus_c)):</span><br><span class="line">            self.data.append((sent_w, sent_c))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__len__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">len</span>(self.data)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__getitem__</span>(<span class="params">self, i</span>):</span><br><span class="line">        <span class="keyword">return</span> self.data[i]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">collate_fn</span>(<span class="params">self, examples</span>):</span><br><span class="line">        <span class="comment"># lengths: batch_size</span></span><br><span class="line">        seq_lens = torch.LongTensor([<span class="built_in">len</span>(ex[<span class="number">0</span>]) <span class="keyword">for</span> ex <span class="keyword">in</span> examples])</span><br><span class="line"></span><br><span class="line">        <span class="comment"># inputs_w</span></span><br><span class="line">        inputs_w = [torch.tensor(ex[<span class="number">0</span>]) <span class="keyword">for</span> ex <span class="keyword">in</span> examples]</span><br><span class="line">        inputs_w = pad_sequence(inputs_w, batch_first=<span class="literal">True</span>, padding_value=self.pad_w)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># inputs_c: batch_size * max_seq_len * max_tok_len</span></span><br><span class="line">        batch_size, max_seq_len = inputs_w.shape</span><br><span class="line">        max_tok_len = <span class="built_in">max</span>([<span class="built_in">max</span>([<span class="built_in">len</span>(tok) <span class="keyword">for</span> tok <span class="keyword">in</span> ex[<span class="number">1</span>]]) <span class="keyword">for</span> ex <span class="keyword">in</span> examples])</span><br><span class="line"></span><br><span class="line">        inputs_c = torch.LongTensor(batch_size, max_seq_len, max_tok_len).fill_(self.pad_c)</span><br><span class="line">        <span class="keyword">for</span> i, (sent_w, sent_c) <span class="keyword">in</span> <span class="built_in">enumerate</span>(examples):</span><br><span class="line">            <span class="keyword">for</span> j, tok <span class="keyword">in</span> <span class="built_in">enumerate</span>(sent_c):</span><br><span class="line">                inputs_c[i][j][:<span class="built_in">len</span>(tok)] = torch.LongTensor(tok)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># fw_input_indexes, bw_input_indexes = [], []</span></span><br><span class="line">        targets_fw = torch.LongTensor(inputs_w.shape).fill_(self.pad_w)</span><br><span class="line">        targets_bw = torch.LongTensor(inputs_w.shape).fill_(self.pad_w)</span><br><span class="line">        <span class="keyword">for</span> i, (sent_w, sent_c) <span class="keyword">in</span> <span class="built_in">enumerate</span>(examples):</span><br><span class="line">            <span class="comment"># </span></span><br><span class="line">            targets_fw[i][:<span class="built_in">len</span>(sent_w)-<span class="number">1</span>] = torch.LongTensor(sent_w[<span class="number">1</span>:])</span><br><span class="line">            targets_bw[i][<span class="number">1</span>:<span class="built_in">len</span>(sent_w)] = torch.LongTensor(sent_w[:<span class="built_in">len</span>(sent_w)-<span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> inputs_w, inputs_c, seq_lens, targets_fw, targets_bw</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">BiLM(</span><br><span class="line">  (token_embedder): ConvTokenEmbedder(</span><br><span class="line">    (char_embeddings): Embedding(<span class="number">2147</span>, <span class="number">50</span>, padding_idx=<span class="number">1846</span>)</span><br><span class="line">    (convolutions): ModuleList(</span><br><span class="line">      (<span class="number">0</span>): Conv1d(<span class="number">50</span>, <span class="number">32</span>, kernel_size=(<span class="number">1</span>,), stride=(<span class="number">1</span>,))</span><br><span class="line">      (<span class="number">1</span>): Conv1d(<span class="number">50</span>, <span class="number">32</span>, kernel_size=(<span class="number">2</span>,), stride=(<span class="number">1</span>,))</span><br><span class="line">      (<span class="number">2</span>): Conv1d(<span class="number">50</span>, <span class="number">64</span>, kernel_size=(<span class="number">3</span>,), stride=(<span class="number">1</span>,))</span><br><span class="line">      (<span class="number">3</span>): Conv1d(<span class="number">50</span>, <span class="number">128</span>, kernel_size=(<span class="number">4</span>,), stride=(<span class="number">1</span>,))</span><br><span class="line">      (<span class="number">4</span>): Conv1d(<span class="number">50</span>, <span class="number">256</span>, kernel_size=(<span class="number">5</span>,), stride=(<span class="number">1</span>,))</span><br><span class="line">      (<span class="number">5</span>): Conv1d(<span class="number">50</span>, <span class="number">512</span>, kernel_size=(<span class="number">6</span>,), stride=(<span class="number">1</span>,))</span><br><span class="line">    )</span><br><span class="line">    (highways): Highway(</span><br><span class="line">      (layers): ModuleList(</span><br><span class="line">        (<span class="number">0</span>): Linear(in_features=<span class="number">1024</span>, out_features=<span class="number">2048</span>, bias=<span class="literal">True</span>)</span><br><span class="line">        (<span class="number">1</span>): Linear(in_features=<span class="number">1024</span>, out_features=<span class="number">2048</span>, bias=<span class="literal">True</span>)</span><br><span class="line">      )</span><br><span class="line">    )</span><br><span class="line">    (projection): Linear(in_features=<span class="number">1024</span>, out_features=<span class="number">512</span>, bias=<span class="literal">True</span>)</span><br><span class="line">  )</span><br><span class="line">  (encoder): ELMoLstmEncoder(</span><br><span class="line">    (forward_layers): ModuleList(</span><br><span class="line">      (<span class="number">0</span>): LSTM(<span class="number">512</span>, <span class="number">4096</span>, batch_first=<span class="literal">True</span>)</span><br><span class="line">      (<span class="number">1</span>): LSTM(<span class="number">512</span>, <span class="number">4096</span>, batch_first=<span class="literal">True</span>)</span><br><span class="line">    )</span><br><span class="line">    (backward_layers): ModuleList(</span><br><span class="line">      (<span class="number">0</span>): LSTM(<span class="number">512</span>, <span class="number">4096</span>, batch_first=<span class="literal">True</span>)</span><br><span class="line">      (<span class="number">1</span>): LSTM(<span class="number">512</span>, <span class="number">4096</span>, batch_first=<span class="literal">True</span>)</span><br><span class="line">    )</span><br><span class="line">    (forward_projections): ModuleList(</span><br><span class="line">      (<span class="number">0</span>): Linear(in_features=<span class="number">4096</span>, out_features=<span class="number">512</span>, bias=<span class="literal">True</span>)</span><br><span class="line">      (<span class="number">1</span>): Linear(in_features=<span class="number">4096</span>, out_features=<span class="number">512</span>, bias=<span class="literal">True</span>)</span><br><span class="line">    )</span><br><span class="line">    (backward_projections): ModuleList(</span><br><span class="line">      (<span class="number">0</span>): Linear(in_features=<span class="number">4096</span>, out_features=<span class="number">512</span>, bias=<span class="literal">True</span>)</span><br><span class="line">      (<span class="number">1</span>): Linear(in_features=<span class="number">4096</span>, out_features=<span class="number">512</span>, bias=<span class="literal">True</span>)</span><br><span class="line">    )</span><br><span class="line">  )</span><br><span class="line">  (classifier): Linear(in_features=<span class="number">512</span>, out_features=<span class="number">1479</span>, bias=<span class="literal">True</span>)</span><br><span class="line">)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>这个网络结构和<a target="_blank" rel="noopener" href="https://github.com/HIT-SCIR/ELMoForManyLangs">ELMoForManyLangs</a>基本一样，除了没有使用lstm。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">Model(</span><br><span class="line">  (token_embedder): ConvTokenEmbedder(</span><br><span class="line">    (word_emb_layer): EmbeddingLayer(</span><br><span class="line">      (embedding): Embedding(<span class="number">71222</span>, <span class="number">100</span>, padding_idx=<span class="number">3</span>)</span><br><span class="line">    )</span><br><span class="line">    (char_emb_layer): EmbeddingLayer(</span><br><span class="line">      (embedding): Embedding(<span class="number">6169</span>, <span class="number">50</span>, padding_idx=<span class="number">6166</span>)</span><br><span class="line">    )</span><br><span class="line">    (convolutions): ModuleList(</span><br><span class="line">      (<span class="number">0</span>): Conv1d(<span class="number">50</span>, <span class="number">32</span>, kernel_size=(<span class="number">1</span>,), stride=(<span class="number">1</span>,))</span><br><span class="line">      (<span class="number">1</span>): Conv1d(<span class="number">50</span>, <span class="number">32</span>, kernel_size=(<span class="number">2</span>,), stride=(<span class="number">1</span>,))</span><br><span class="line">      (<span class="number">2</span>): Conv1d(<span class="number">50</span>, <span class="number">64</span>, kernel_size=(<span class="number">3</span>,), stride=(<span class="number">1</span>,))</span><br><span class="line">      (<span class="number">3</span>): Conv1d(<span class="number">50</span>, <span class="number">128</span>, kernel_size=(<span class="number">4</span>,), stride=(<span class="number">1</span>,))</span><br><span class="line">      (<span class="number">4</span>): Conv1d(<span class="number">50</span>, <span class="number">256</span>, kernel_size=(<span class="number">5</span>,), stride=(<span class="number">1</span>,))</span><br><span class="line">      (<span class="number">5</span>): Conv1d(<span class="number">50</span>, <span class="number">512</span>, kernel_size=(<span class="number">6</span>,), stride=(<span class="number">1</span>,))</span><br><span class="line">      (<span class="number">6</span>): Conv1d(<span class="number">50</span>, <span class="number">1024</span>, kernel_size=(<span class="number">7</span>,), stride=(<span class="number">1</span>,))</span><br><span class="line">    )</span><br><span class="line">    (highways): Highway(</span><br><span class="line">      (_layers): ModuleList(</span><br><span class="line">        (<span class="number">0</span>): Linear(in_features=<span class="number">2048</span>, out_features=<span class="number">4096</span>, bias=<span class="literal">True</span>)</span><br><span class="line">        (<span class="number">1</span>): Linear(in_features=<span class="number">2048</span>, out_features=<span class="number">4096</span>, bias=<span class="literal">True</span>)</span><br><span class="line">      )</span><br><span class="line">    )</span><br><span class="line">    (projection): Linear(in_features=<span class="number">2148</span>, out_features=<span class="number">512</span>, bias=<span class="literal">True</span>)</span><br><span class="line">  )</span><br><span class="line">  (encoder): ElmobiLm(</span><br><span class="line">    (forward_layer_0): LstmCellWithProjection(</span><br><span class="line">      (input_linearity): Linear(in_features=<span class="number">512</span>, out_features=<span class="number">16384</span>, bias=<span class="literal">False</span>)</span><br><span class="line">      (state_linearity): Linear(in_features=<span class="number">512</span>, out_features=<span class="number">16384</span>, bias=<span class="literal">True</span>)</span><br><span class="line">      (state_projection): Linear(in_features=<span class="number">4096</span>, out_features=<span class="number">512</span>, bias=<span class="literal">False</span>)</span><br><span class="line">    )</span><br><span class="line">    (backward_layer_0): LstmCellWithProjection(</span><br><span class="line">      (input_linearity): Linear(in_features=<span class="number">512</span>, out_features=<span class="number">16384</span>, bias=<span class="literal">False</span>)</span><br><span class="line">      (state_linearity): Linear(in_features=<span class="number">512</span>, out_features=<span class="number">16384</span>, bias=<span class="literal">True</span>)</span><br><span class="line">      (state_projection): Linear(in_features=<span class="number">4096</span>, out_features=<span class="number">512</span>, bias=<span class="literal">False</span>)</span><br><span class="line">    )</span><br><span class="line">    (forward_layer_1): LstmCellWithProjection(</span><br><span class="line">      (input_linearity): Linear(in_features=<span class="number">512</span>, out_features=<span class="number">16384</span>, bias=<span class="literal">False</span>)</span><br><span class="line">      (state_linearity): Linear(in_features=<span class="number">512</span>, out_features=<span class="number">16384</span>, bias=<span class="literal">True</span>)</span><br><span class="line">      (state_projection): Linear(in_features=<span class="number">4096</span>, out_features=<span class="number">512</span>, bias=<span class="literal">False</span>)</span><br><span class="line">    )</span><br><span class="line">    (backward_layer_1): LstmCellWithProjection(</span><br><span class="line">      (input_linearity): Linear(in_features=<span class="number">512</span>, out_features=<span class="number">16384</span>, bias=<span class="literal">False</span>)</span><br><span class="line">      (state_linearity): Linear(in_features=<span class="number">512</span>, out_features=<span class="number">16384</span>, bias=<span class="literal">True</span>)</span><br><span class="line">      (state_projection): Linear(in_features=<span class="number">4096</span>, out_features=<span class="number">512</span>, bias=<span class="literal">False</span>)</span><br><span class="line">    )</span><br><span class="line">  )</span><br><span class="line">)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h4 id="HighWay"><a href="#HighWay" class="headerlink" title="HighWay"></a>HighWay</h4><p><img src="https://www.zhihu.com/equation?tex=%5Cmathbf%7Bz%7D+=+%5Cmathbf%7Bg%7D(%5Cmathbf%7Bx%7D)+%5Codot+%5Cmathbf%7Bx%7D+++(1+-++%5Cmathbf%7Bg%7D(%5Cmathbf%7Bx%7D))+%5Codot++%5Cmathbf%7By%7D" alt="HighWay"></p>
-<p>这个讲解可以看<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/279426970">Highway net</a>。但是这个给我的直观感觉有点类似lstm的门控制机制，用于遗忘与记忆。</p>
-<h4 id="ConvTokenEmbedding"><a href="#ConvTokenEmbedding" class="headerlink" title="ConvTokenEmbedding"></a>ConvTokenEmbedding</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ConvTokenEmbedder</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params"></span></span><br><span class="line"><span class="params">        self,</span></span><br><span class="line"><span class="params">        vocab_c,</span></span><br><span class="line"><span class="params">        char_embedding_dim,</span></span><br><span class="line"><span class="params">        char_conv_filters,</span></span><br><span class="line"><span class="params">        num_highways,</span></span><br><span class="line"><span class="params">        output_dim,</span></span><br><span class="line"><span class="params">        pad=<span class="string">&quot;&lt;pad&gt;&quot;</span></span></span><br><span class="line"><span class="params">    </span>):</span><br><span class="line">        <span class="built_in">super</span>(ConvTokenEmbedder, self).__init__()</span><br><span class="line">        self.vocab_c = vocab_c</span><br><span class="line"></span><br><span class="line">        self.char_embeddings = nn.Embedding(</span><br><span class="line">            <span class="built_in">len</span>(vocab_c),</span><br><span class="line">            char_embedding_dim,</span><br><span class="line">            padding_idx=vocab_c[pad]</span><br><span class="line">        )</span><br><span class="line">        self.char_embeddings.weight.data.uniform_(-<span class="number">0.25</span>, <span class="number">0.25</span>)</span><br><span class="line"></span><br><span class="line">        self.convolutions = nn.ModuleList()</span><br><span class="line">        <span class="keyword">for</span> kernel_size, out_channels <span class="keyword">in</span> char_conv_filters:</span><br><span class="line">            conv = torch.nn.Conv1d(</span><br><span class="line">                in_channels=char_embedding_dim,</span><br><span class="line">                out_channels=out_channels,</span><br><span class="line">                kernel_size=kernel_size,</span><br><span class="line">                bias=<span class="literal">True</span></span><br><span class="line">            )</span><br><span class="line">            self.convolutions.append(conv)</span><br><span class="line"></span><br><span class="line">        self.num_filters = <span class="built_in">sum</span>(f[<span class="number">1</span>] <span class="keyword">for</span> f <span class="keyword">in</span> char_conv_filters)</span><br><span class="line">        self.num_highways = num_highways</span><br><span class="line">        self.highways = Highway(self.num_filters, self.num_highways, activation=F.relu)</span><br><span class="line"></span><br><span class="line">        self.projection = nn.Linear(self.num_filters, output_dim, bias=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, inputs</span>):</span><br><span class="line">        batch_size, seq_len, token_len = inputs.shape</span><br><span class="line">        inputs = inputs.view(batch_size * seq_len, -<span class="number">1</span>)</span><br><span class="line">        char_embeds = self.char_embeddings(inputs)</span><br><span class="line">        char_embeds = char_embeds.transpose(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">        conv_hiddens = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(self.convolutions)):</span><br><span class="line">            conv_hidden = self.convolutions[i](char_embeds)</span><br><span class="line">            conv_hidden, _ = torch.<span class="built_in">max</span>(conv_hidden, dim=-<span class="number">1</span>)</span><br><span class="line">            conv_hidden = F.relu(conv_hidden)</span><br><span class="line">            conv_hiddens.append(conv_hidden)</span><br><span class="line"></span><br><span class="line">        token_embeds = torch.cat(conv_hiddens, dim=-<span class="number">1</span>)</span><br><span class="line">        token_embeds = self.highways(token_embeds)</span><br><span class="line">        token_embeds = self.projection(token_embeds)</span><br><span class="line">        token_embeds = token_embeds.view(batch_size, seq_len, -<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> token_embeds</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>这个地方比较有意思，使用不同大小的kernel_size来捕捉上下文信息，这地方没啥可说的。<br>主要在concat后的操作，比如说不同的kernel_size后的concat到一起后，它到底代表什么含义呢？比如我可以降维到2，表示分类。<br>后面它用了一个linear以及view重新获得了seq_len每一个token的hidden_size。这地方骚气。</p>
-<h3 id="训练过程"><a href="#训练过程" class="headerlink" title="训练过程"></a>训练过程</h3><p>太懒了，目前先跳过。。。</p>
-<p>简单来说就是使用不同大小的kernel_size的卷积核来捕捉上下文信息，注意是char level的。随后经过一个前向的lstm和一个后向的lstm捕捉不同方向的语义信息。那么从整体网络看来，不同层代表的含义也就比较清晰明了，token embedding更倾向是词法等信息，往后就更倾向深层次的信息，比如语义。那么从使用角度上一是可以按需使用自己的层，二是可以给予不同层不同的权重。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>感觉看完了没有很清晰明了的感觉，有可能是中间涉及到太多的转换，elmo解决一词多义的原理可能更多是使用lstm这种以及用char level token来拟合词。</p>
-<p>另外elmo不同layer代表的含义不一样，这个在SIFRank中有不同的用法，后续可以关注。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">活到老学到老nlp</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/12/28/%E5%8A%A8%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8Belmo/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/3/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/26/">26</a><a class="extend next" rel="next" href="/page/5/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/3/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/5/">Next &amp;raquo;</a>
     </nav>
   
 

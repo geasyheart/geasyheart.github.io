@@ -212,6 +212,137 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-不同用户的多条操作时间差值平均值" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/10/%E4%B8%8D%E5%90%8C%E7%94%A8%E6%88%B7%E7%9A%84%E5%A4%9A%E6%9D%A1%E6%93%8D%E4%BD%9C%E6%97%B6%E9%97%B4%E5%B7%AE%E5%80%BC%E5%B9%B3%E5%9D%87%E5%80%BC/">不同用户的多条操作时间差值平均值</a>
+    </h1>
+  
+
+        
+        <a href="/2018/04/10/%E4%B8%8D%E5%90%8C%E7%94%A8%E6%88%B7%E7%9A%84%E5%A4%9A%E6%9D%A1%E6%93%8D%E4%BD%9C%E6%97%B6%E9%97%B4%E5%B7%AE%E5%80%BC%E5%B9%B3%E5%9D%87%E5%80%BC/" class="archive-article-date">
+  	<time datetime="2018-04-10T10:30:31.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-10</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>例如: 一站表</p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>uid</th>
+<th>login_time</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>1</td>
+<td>2018-04-10 18:19:14</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1</td>
+<td>2019-04-10 18:19:14</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1</td>
+<td>2020-04-10 18:19:14</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2</td>
+<td>2019-04-10 18:19:14</td>
+</tr>
+</tbody></table>
+<p>那么，最终结果类似于:</p>
+<table>
+<thead>
+<tr>
+<th>uid</th>
+<th>average</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>(2020-04-10 18:19:14 - 2018-04-10 18:19:14) &#x2F; 2</td>
+</tr>
+</tbody></table>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">select</span> uid, timestampdiff(<span class="keyword">day</span>, <span class="built_in">min</span>(login_time), <span class="built_in">max</span>(login_time)) <span class="operator">/</span> (<span class="built_in">count</span>(<span class="operator">*</span>) <span class="operator">-</span> <span class="number">1</span>) <span class="keyword">from</span> table_name <span class="keyword">group</span> <span class="keyword">by</span> uid <span class="keyword">having</span> <span class="built_in">count</span>(<span class="operator">*</span>) <span class="operator">&gt;</span> <span class="number">1</span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>需要买本高级查询的书了-_-!</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/04/10/%E4%B8%8D%E5%90%8C%E7%94%A8%E6%88%B7%E7%9A%84%E5%A4%9A%E6%9D%A1%E6%93%8D%E4%BD%9C%E6%97%B6%E9%97%B4%E5%B7%AE%E5%80%BC%E5%B9%B3%E5%9D%87%E5%80%BC/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-SQLAlchemy字段类型" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1374,95 +1505,9 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-django-migrate运行python函数" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/01/22/django-migrate%E8%BF%90%E8%A1%8Cpython%E5%87%BD%E6%95%B0/">django-migrate运行python函数</a>
-    </h1>
-  
-
-        
-        <a href="/2018/01/22/django-migrate%E8%BF%90%E8%A1%8Cpython%E5%87%BD%E6%95%B0/" class="archive-article-date">
-  	<time datetime="2018-01-22T10:26:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-01-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>之前代码里面的contact是可以重复的，现在要将其改成unique的，改代码容易，但是还要兼容之前的数据，就要想办法将之前重复的给改掉<br>方法1: 手动写SQL，在执行到具体的migrations时先执行SQL，但是这个不太统一，另外推代码时容易忘记。 </p>
-<p>方法2: 框架用的人多就是好，不要重复造轮子，如下: </p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Migration</span>(migrations.Migration): </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">unique_contact</span>(<span class="params">self,*args,**kwargs</span>): </span><br><span class="line">        <span class="comment"># 这个函数在更改contact字段时会先执行到这里 </span></span><br><span class="line">        <span class="comment">#将重复的contact更改掉 </span></span><br><span class="line"> </span><br><span class="line">    migrations.RunPython(unique_contact), <span class="comment"># 这个要在前面    </span></span><br><span class="line">    migrations.AlterField(model_name=<span class="string">&#x27;lofter_low&#x27;</span>,name=<span class="string">&#x27;contact&#x27;</span>,field=models.CharField(unique=<span class="literal">True</span>, max_length=<span class="number">20</span>),),] </span><br><span class="line">     </span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/01/22/django-migrate%E8%BF%90%E8%A1%8Cpython%E5%87%BD%E6%95%B0/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/11/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><span class="page-number current">12</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="space">&hellip;</span><a class="page-number" href="/page/26/">26</a><a class="extend next" rel="next" href="/page/13/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/11/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><span class="page-number current">12</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/13/">Next &amp;raquo;</a>
     </nav>
   
 

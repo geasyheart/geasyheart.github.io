@@ -212,6 +212,114 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-37-01Linux集群系列之四-LVS-DR详解及配置过程" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/03/22/37-01Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9B%9B-LVS-DR%E8%AF%A6%E8%A7%A3%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%BF%87%E7%A8%8B/">37_01Linux集群系列之四--LVS-DR详解及配置过程</a>
+    </h1>
+  
+
+        
+        <a href="/2015/03/22/37-01Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9B%9B-LVS-DR%E8%AF%A6%E8%A7%A3%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%BF%87%E7%A8%8B/" class="archive-article-date">
+  	<time datetime="2015-03-22T10:19:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>VS&#x2F;DR的架构：<br>１、调度器和服务器组都必须在物理上有一个网卡通过局域网相连，如通过高速的交换机或者HUB相连。<br>２、VIP地址被调度器和服务器共享，调度器配置的VIP地址是对外可见的，用于接收虚拟服务的请求报文。<br>３、所有的服务器把VIP地址配置在各自的Non-ARP网络设备上，它对外是不可见的，只是用于处理目标地址为VIP的网络请求。 </p>
+<p>VS&#x2F;DR的连接调度和管理与VS&#x2F;NAT和VS&#x2F;TUN一样，但它的报文转发方法不同：它将报文直接路由给目标服务器。<br>在VS&#x2F;DR中，调度器根据各自服务器的负载情况，动态的选择一台服务器， </p>
+<p>“不修改也不封装IP报文，而是将数据帧的MAC地址改为选出服务器的MAC地址，再将修改后的数据帧在服务器组所在的局域网内发送“； </p>
+<p>因为数据帧的MAC地址是选出的服务器，所以服务器肯定可以收到这个数据帧，从中可以获得该IP报文。<br>当服务器发现报文的目标地址(VIP地址)是在本地的网络设备上，服务器处理则个报文后，就会根据路由表将响应报文直接返回给客户。 </p>
+<p>在VS&#x2F;DR中，根据默认的TCP&#x2F;IP协议栈处理，请求报文的目标地址为VIP,响应报文的源地址肯定也为VIP,所以响应报文不需要做任何修改，可以直接返回给客户，客户得到正常的服务，<br>但不会知道是哪一台服务器处理的。 </p>
+<p>VS&#x2F;DR负载调度器与VS&#x2F;TUN一样，只处于从客户到服务器的半连接中，按照半连接的TCP有限状态机进行状态迁移。 </p>
+<p>当client发送请求到路由器时，此时的报文是CIP|VIP,应该发往VIP,作为DR模型来讲，所有主机均共享一个IP,那么，这就出问题了，这个报文到底发往哪个服务器上，是发往realserver上还是director上，本应该是发往director,进行调度的，但是由于具有相同的ip,就不知道应该发往哪台主机，那么，就在这个数据帧改一个MAC地址，表明director的地址，这样固然是对的，但是Router怎么知道你的MAC地址呢，而且这个Router未必是你的，有可能是运营商的，当然是自己的更好，往Router写上MAC就行，这个就是第一种方式:<br>１、VIP:手动绑定MAC地址<br>但是，通用的来讲，这种固然不行，那么就出现一种情况，谁先响应我就认为谁是director,额，肯定不行，所以应该给realserver设定规则，当是VIP的目标地址时，realserver的响应级别就没有director的响应级别高，那么，就好办了，，所以在RedHat系列的OS上，有一个arptables表，这个表记录了IP到MAC地址之间的关系，允不允许响应，允不允许访问，这个也挺好，可实现<br>２、arptables:写规则不予响应<br>但是作为一个OS，能在内核上实现必然是最好的，Linux具有了这个功能，如下所示，第一个定义响应级别，第二个定义通告级别<br>３、Kernel parameter:<br> arp_ignore：接收到ARP请求时的响应级别；<br> ０：只要本地配置的有相应地址就给予相应；<br> １：仅在请求的目标地址与请求到达的接口上的时候才给予响应；<br> …<br> arp_announce：定义将自己地址向外通告时的通告级别；<br> 默认都为０<br> ０：将本机任何接口上的任何地址向外通告<br> １：试图仅向目标网络通告与其网络匹配的地址<br> ２：仅向与本地接口上地址匹配的网络进行通告 </p>
+<p>Director:<br> eth0,DIP:172.16.100.2<br> eth0:0 , VIP:172.16.100.1 </p>
+<p>RS1:<br> eth0,RIP1:172.16.100.7<br> LO:0,VIP:172.16.100.1<br>RS2:<br> eth0,RIP1:172.16.100.8<br> LO:0,VIP:172.16.100.1 </p>
+<p>都为桥接<br>Director:<br>setup–&gt; eth0 172.16.100.2&#x2F;16<br>ifconfig eth0:0 172.16.100.1&#x2F;16<br>#route add -host 172.16.100.1 dev eth0:0<br>#ipvsadm -A -t 172.16.100.1:80 -s wlc<br>#ipvsadm -a -t 172.16.100.1:80 -r 172.16.100.7 -g <br>#ipvsadm -a -t 172.16.100.1:80 -r 172.16.100.8 -g  </p>
+<p>RS1:<br>#vim &#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-eth0<br>DEVICE&#x3D;eth0<br>BOOTPROTO&#x3D;none<br>ONBOOT&#x3D;no<br>NETMASK&#x3D;255.255.0.0<br>IPADDR&#x3D;172.16.100.7<br>GATEWAY&#x3D;172.16.0.1<br>TYPE&#x3D;Ethernet </p>
+<p>#cd &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;conf&#x2F; </p>
+<h1 id="sysctl-w-net-ipv4-conf-eth0-arp-announce-2"><a href="#sysctl-w-net-ipv4-conf-eth0-arp-announce-2" class="headerlink" title="sysctl -w net.ipv4.conf.eth0.arp_announce&#x3D;2"></a>sysctl -w net.ipv4.conf.eth0.arp_announce&#x3D;2</h1><h1 id="sysctl-w-net-ipv4-conf-all-arp-announce-2"><a href="#sysctl-w-net-ipv4-conf-all-arp-announce-2" class="headerlink" title="sysctl -w net.ipv4.conf.all.arp_announce&#x3D;2"></a>sysctl -w net.ipv4.conf.all.arp_announce&#x3D;2</h1><p>#sysctl -w net.ipv4.conf.eth0.arp_ignore&#x3D;1<br>#sysctl -w net.ipv4.conf.all.arp_ignore&#x3D;1 </p>
+<p>#ifconfig lo:0 172.16.100.1 broadcast 172.16.100.1 netmask 255.255.255.255  up<br>#route add -host 172.16.100.1 dev lo:0 </p>
+<p>echo “RS1” &gt; &#x2F;var&#x2F;www&#x2F;html&#x2F;index.html  &amp; service httpd start </p>
+<p>RS2:<br>#vim &#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-eth0<br>NETMASK&#x3D;255.255.0.0<br>IPADDR&#x3D;172.16.100.8<br>GATEWAY&#x3D;172.16.0.1<br>TYPE&#x3D;Ethernet </p>
+<p>#cd &#x2F;proc&#x2F;sys&#x2F;net&#x2F;ipv4&#x2F;conf&#x2F; </p>
+<h1 id="sysctl-w-net-ipv4-conf-eth0-arp-announce-2-1"><a href="#sysctl-w-net-ipv4-conf-eth0-arp-announce-2-1" class="headerlink" title="sysctl -w net.ipv4.conf.eth0.arp_announce&#x3D;2"></a>sysctl -w net.ipv4.conf.eth0.arp_announce&#x3D;2</h1><h1 id="sysctl-w-net-ipv4-conf-all-arp-announce-2-1"><a href="#sysctl-w-net-ipv4-conf-all-arp-announce-2-1" class="headerlink" title="sysctl -w net.ipv4.conf.all.arp_announce&#x3D;2"></a>sysctl -w net.ipv4.conf.all.arp_announce&#x3D;2</h1><p>#sysctl -w net.ipv4.conf.eth0.arp_ignore&#x3D;1<br>#sysctl -w net.ipv4.conf.all.arp_ignore&#x3D;1 </p>
+<p>#ifconfig lo:0 172.16.100.1 broadcast 172.16.100.1 netmask 255.255.255.255  up<br>#route add -host 172.16.100.1 dev lo:0 </p>
+<p>echo “RS2” &gt; &#x2F;var&#x2F;www&#x2F;html&#x2F;index.html  &amp; service httpd start </p>
+<p>访问172.16.100.1即可；； </p>
+<p>如果其中的RS2坏了怎么办，例如<br> iptables  -t -A  INPUT -p tcp  –dport 80 -d 172.16.100.8 -j REJECT<br>这是就没法轮询到RS2 </p>
+<p>转下一个<br>有脚本。。。。。。。。。。 </p>
+<p>更多可直接参考这个:<br><a target="_blank" rel="noopener" href="http://www.it165.net/admin/html/201305/1169.html">http://www.it165.net/admin/html/201305/1169.html</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/03/22/37-01Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9B%9B-LVS-DR%E8%AF%A6%E8%A7%A3%E5%8F%8A%E9%85%8D%E7%BD%AE%E8%BF%87%E7%A8%8B/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-29-04samba之二" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1283,133 +1391,9 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-14-04-3-Linux启动和内核初涉" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/14/14-04-3-Linux%E5%90%AF%E5%8A%A8%E5%92%8C%E5%86%85%E6%A0%B8%E5%88%9D%E6%B6%89/">14_04_3_Linux启动和内核初涉</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/14/14-04-3-Linux%E5%90%AF%E5%8A%A8%E5%92%8C%E5%86%85%E6%A0%B8%E5%88%9D%E6%B6%89/" class="archive-article-date">
-  	<time datetime="2015-03-14T14:32:10.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-14</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>实验环境:<br>centos6.5 linux-2.6.32.65 </p>
-<p>声明:以下所有均实验自《深度探索Linux操作系统 系统构建和原理解析》<br>没有深入探索，仅为了解整个启动流程，如感兴趣，可自行查阅原书。<br>整个系统的启动流程:<br> bootloader–&gt;kernel(initrd&#x2F;initramfs)–&gt;init(&#x2F;etc&#x2F;inittab) </p>
-<p>构建内核:<br>ELF:<br> 可执行和可链接格式 （英语：Executable and Linkable Format，缩写为ELF），常被称为ELF格式，在计算机科学中，是一种用于执行档、目的档、共享库和核心转储的标准文件格式。<br>1999年，被86open项目选为x86架构上的类Unix操作系统的二进制文件格式标准，用来取代COFF。因其可扩展性与灵活性，也可应用在其它处理器、计算机系统架构的操作系统上。 </p>
-<p>映像的格式:<br> 操作系统映像没必要使用ELF格式来组织，将代码和数据顺次存放即可，即所谓的裸二进制格式。所以，内核映像都采用裸二进制格式进行存储。 </p>
-<p>交叉编译:<br> 内核构建系统默认内核是本地编译，即编译的内核是运行在与宿主系统相同的体系架构上，如果是为其他的架构编译内核，即交叉编译。 </p>
-<p>基本内核配置: 3种情况 </p>
-<ol>
-<li>如果存在宿主系统，可以将宿主系统的内核配置文件复制到要编译的内核的目录下，命名为.config，然后运行make oldconfig,然后使用make menuconfig进行微调。 </li>
-<li>內核默认为很多平台提供了默认的配置文件，存放在arch&#x2F;<arch>&#x2F;configs目录下。 <blockquote>
-<p>make x86_64_defconfig </p>
-</blockquote>
-</li>
-<li>kbuild提供了创建最小配置的方法 <blockquote>
-<p>make allnoconfig</p>
-</blockquote>
-</li>
-</ol>
-<p>配置处理器: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#cat /proc/cpuinfo | grep &quot;model name&quot; </span></span><br><span class="line"><span class="comment">#make mrproper (如果以前有编译过，要备份.config) </span></span><br><span class="line"><span class="comment">#make allnoconfig(不知为何，我实验时如果使用这步，然后按照下面走，不能成功，不知为何，然后我跳这一步，然后就成功了) </span></span><br><span class="line"><span class="comment">#make menuconfig (如果直接使用这一步，剩下的会默认配置上，只要改动CPU信息，以及不想要的即可，加快编译速度) </span></span><br></pre></td></tr></table></figure>
-<p>processor type and features–&gt;…<br>配置内核支持SMP<br>processor type and features–&gt;symmetric multi-processing support </p>
-<p>配置内核支持模块<br>Enable loadable module support<br>Module unloading </p>
-<p>配置硬盘控制器驱动 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#lspvi -v </span></span><br><span class="line"> 配置PCI总线--&gt;PCI support </span><br><span class="line"> 配置SCSI: </span><br><span class="line"> Device Drivers--&gt;SCSI device support --&gt;SCSI disk support </span><br><span class="line"> Device Drivers--&gt;Serial ATA and Parallel ATA drivers--&gt;Intel ESB,ICH,PIIX3,PIIX4, PATA/SATA support </span><br><span class="line">配置文件系统: </span><br><span class="line">File systems--&gt; The Extended 4(ext4)filesystem </span><br><span class="line">File systems--&gt;use ext4 <span class="keyword">for</span> ext2/ext3 file system(NEW) </span><br><span class="line">File systems--&gt;ext4 extended attributes(NEW) </span><br><span class="line">配置内核支持ELF文件格式 </span><br><span class="line">Executable file formats/Emulations--&gt;Kernel support <span class="keyword">for</span> ELF binaries </span><br><span class="line">Executable file formats/Emulations--&gt;Write ELF core dumps with partial segments(NEW)  </span><br><span class="line">说明:上面这些全部加载到内核，不是以模块挂载。  </span><br><span class="line">这时引导启动会遇到No init found,init会干什么呢?源码中:先找initramfs，目前我们没有使用initramfs，所以内核会接着找/sbin/init </span><br><span class="line">/etc/init /bin/init /bin/sh   </span><br><span class="line">这个时候如果不是拿原系统的内核做实验，则需要自己编译bash，然后 </span><br><span class="line"><span class="comment">#ln -s bin/bash bin/sh </span></span><br><span class="line"><span class="comment">#ldd bin/bash 移植所需要的库。 </span></span><br><span class="line"><span class="comment">#cd /mnt/sysroot &amp;&amp; mkdir dev proc usr var usr/bin usr/sbin sbin bin etc  </span></span><br><span class="line"><span class="built_in">timeout</span>=5 </span><br><span class="line"> root (hd0,0)  </span><br><span class="line"> kernel /bzImage ro root=/dev/sda2 init=/bin/bash </span><br><span class="line">这个时候内核就能基本启动了，可以见得，initramf并不是必须需要的，不过一个基本的系统也就这样起来了。 </span><br></pre></td></tr></table></figure>
-<p>挂载rootfs: </p>
-<p>解压initramfs到rootfs:<br> 需要指明，需在内核配置中选择对initramfs的支持。(否则这个并不是那么必须的，例如在gentoo编译中，只是默认编译内核，Options中可以直接下载编译好的。) </p>
-<p>配置内核支持initramfs:<br> General setup–&gt;Initial RAM filesystem and RAM disk(initramfs&#x2F;initrd) support </p>
-<p> 在挂载了rootfs后，内核将bootloader加载到内存中的initramfs中的文件解压到rootfs中。而这些文件中包含了子驱动以及挂载真正的根文件系统的工具，<br>内核通过加载这些驱动，使用这些工具实现挂载真正的根文件系统。<br> 挂载真正的根文件系统后，rootfs中的内容已经没有保留的意义，但是并不能将rootfs卸载，因为rootfs是整个虚拟文件系统的根。因此，<br>为了不占用内存空间，将rootfs中的内容释放掉即可，然后将真正的根文件系统移动到虚拟文件系统的根，最后再将进程的文件系统的namespace<br>切换到真正的根文件系统。<br>rf<br>构建基本的initramfs: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> initramfs </span><br><span class="line">vim initramfs/init </span><br><span class="line"><span class="comment">#!/bin/bash </span></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;\033[033mHello,welcome to my Linux\033[0m&quot;</span> </span><br><span class="line"><span class="built_in">exec</span> /bin/bash </span><br><span class="line"><span class="built_in">chmod</span> +x init </span><br></pre></td></tr></table></figure>
-<p>将硬盘驱动编译为模块<br> initramfs的重要作用之一就是允许内核将保存根文件系统的存储设备的驱动不再编译进内核。 </p>
-<p> 配置devtmpfs<br>既然提到设备，需要说设备文件或者设备节点，通常情况下，某些需要从用户空间访问的设备都会在文件系统中建立一个设备文件，作为用户空间<br>访问设备的接口，<br> 在Linux系统早期，设备文件是静态创建的，所有的设备节点是手动、事先创建的。这样就存在一个问题，随着设备的种类越来越多，该目录将会越来越大，<br>就会造成不需要的进驻空间，浪费资源。<br> 后来出现成功的是udev，是的设备命名策略、权限控制等都在用户控件完成。如此，设备文件不再是静态创建，而是有udev根据内核检测到的<br>实际连接的设备，创建相应的设备文件。<br> 从2.6.18开始使用udev，&#x2F;dev目录使用了基于内存的文件系统tmpfs管理设备文件。<br> 2009初，开发人员又提出devtmpfs，内核引导时，devtmpfs将所有注册的设备在devtmpfs中建立相应的设备文件，一旦进入用户空间，在启动udev前，<br>就可以将devtmpfs挂载到&#x2F;dev目录下。 </p>
-<p>配置内核支持devtmpfs:<br> Device Drivers–&gt;Generic Driver options –&gt; Maintain a devtmpfs filesystem to mount at &#x2F;dev </p>
-<p>将硬盘控制器驱动配置为模块(改动前面的)<br>Intel ESB,ICH,PIIX3,PIIX4, PATA&#x2F;SATA support </p>
-<p>配置内核支持NETLINK<br> 内核与udevd通过Unix Domain Sockets使用NETLINK协议进行通信。<br>Networking support–&gt;Networking options–&gt;unix domain sockets </p>
-<p>配置内核支持inotify<br> 因为udev使用inotify机制监测udev的规则文件是否发生变化，所以配置内核使其支持inotify机制，否则udevd将因为初始化inotify失败而退出。<br> Eile system–&gt;Inotify support for userspace </p>
-<p>配置内核支持网络<br> 配置内核支持TCP&#x2F;IP协议<br> TCP&#x2F;IP networking <br> 配置内核支持网卡<br> lspci 查看Ethernet controller,得到网卡的型号。<br> Device Drivers–&gt;Network device support–&gt;选择相应的类别。 </p>
-<p>安装X的输入设备驱动<br> Device Drivers–&gt;USB support–&gt;UHCI HCD(most Intel and VIA)support </p>
-<p>配置时间处理模块<br> Device Drivers–&gt;Input device support–&gt;Event interface </p>
-<p>配置AGP总线:<br> Device Drivers–&gt;Graphics support–&gt;&#x2F;dev&#x2F;agpgart(AGP Support)–&gt;选择对应的(such as:Intel&#x2F;NVIDIA) </p>
-<p>配置DRM模块<br> Device Drivers–&gt;Graphics support–&gt;Enable modesetting on intel by default </p>
-<p>额，大概先弄到这里，默认情况下，这些都已选上，在真实的机子上，要有以太网网卡，无线网卡，显卡等，如果以后还回到这里，会继续更新。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/14/14-04-3-Linux%E5%90%AF%E5%8A%A8%E5%92%8C%E5%86%85%E6%A0%B8%E5%88%9D%E6%B6%89/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/22/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/21/">21</a><a class="page-number" href="/page/22/">22</a><span class="page-number current">23</span><a class="page-number" href="/page/24/">24</a><a class="page-number" href="/page/25/">25</a><a class="page-number" href="/page/26/">26</a><a class="extend next" rel="next" href="/page/24/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/22/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/21/">21</a><a class="page-number" href="/page/22/">22</a><span class="page-number current">23</span><a class="page-number" href="/page/24/">24</a><a class="page-number" href="/page/25/">25</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/24/">Next &amp;raquo;</a>
     </nav>
   
 

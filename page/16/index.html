@@ -212,6 +212,442 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-45-01http反向代理及haproxy" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/10/29/45-01http%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E5%8F%8Ahaproxy/">45_01http反向代理及haproxy</a>
+    </h1>
+  
+
+        
+        <a href="/2015/10/29/45-01http%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E5%8F%8Ahaproxy/" class="archive-article-date">
+  	<time datetime="2015-10-29T14:20:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-29</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <ol>
+<li>HAProxy是工作在网络7层之上。</li>
+<li>能够补充Nginx的一些缺点比如Session的保持，Cookie的引导等工作</li>
+<li>支持url检测后端的服务器出问题的检测会有很好的帮助。</li>
+<li>更多的负载均衡策略比如：动态加权轮循(Dynamic Round Robin)，加权源地址哈希(Weighted Source Hash)，加权URL哈希和加权参数哈希(Weighted Parameter Hash)已经实现</li>
+<li>单纯从效率上来讲HAProxy更会比Nginx有更出色的负载均衡速度。</li>
+<li>HAProxy可以对Mysql进行负载均衡，对后端的DB节点进行检测和负载均衡。</li>
+</ol>
+<p>如果做负载均衡，建议使用haproxy;;<br>由于haproxy是单进程的程序，在处理高并发的时候会做的很好，当然由于单进程，在多CPU的场景中，就要对haproxy进行调整，以便能够有效利用多CPU;</p>
+<h2 id="配置HAProxy"><a href="#配置HAProxy" class="headerlink" title="配置HAProxy"></a>配置HAProxy</h2><ol>
+<li>配置文件格式</li>
+</ol>
+<p>HAProxy的配置处理3类主要参数来源:</p>
+<ul>
+<li>最优先处理的命令行参数；</li>
+<li>“global”配置段，用于设定全局配置参数；</li>
+<li>proxy相关配置段，如”defaults”、”listen”、”frontend”和”backend”;</li>
+</ul>
+<ol start="2">
+<li>时间格式</li>
+</ol>
+<p>一些包含了值的参数表示时间，如超时时长，这些值一般以毫秒为单位，但也可以使用其他的时间单位后缀。</p>
+<ul>
+<li>us:微秒，即1&#x2F;1000000秒；</li>
+<li>ms:毫秒，即1&#x2F;1000秒；</li>
+<li>s:秒</li>
+<li>m:分钟</li>
+<li>h:小时</li>
+<li>d:天</li>
+</ul>
+<ol start="3">
+<li>例子</li>
+</ol>
+<p>下面的例子配置了一个监听在所有接口的80端口上HTTP proxy服务，它转发所有的请求至后端监听在127.0.0.1:8000上的”server”.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">global</span><br><span class="line">    daemon</span><br><span class="line">    maxconn 25600</span><br><span class="line"></span><br><span class="line">defaults</span><br><span class="line">    mode http</span><br><span class="line">    timeout connect 5000ms</span><br><span class="line">    timeout client     50000ms</span><br><span class="line">    timeout server    50000ms</span><br><span class="line"></span><br><span class="line">frontend http-in</span><br><span class="line">    bind *:80</span><br><span class="line">    default_backend servers</span><br><span class="line"></span><br><span class="line">backend servers</span><br><span class="line">    server server1 127.0.0.1:8080 maxconn 32</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>全局配置</li>
+</ol>
+<p>“global”配置中的参数为进程级别的参数，且通常与其运行的OS相关；</p>
+<p>*进程管理及安全相关的参数</p>
+<ul>
+<li>chroot <jail dir>:修改haproxy的工作目录至指定的目录并在放弃权限之前执行chroot()<br>操作,可以提升haproxy的安全级别，不过需要注意的是要确保指定的目录为空目录且任何用户均不能有写权限；</li>
+<li>daemon:让haproxy以守护进程的方式工作于后台，其等同于”-D”选项的功能，当然，也可以在命令行中以”-db”选项将其禁用；</li>
+<li>gid<number>:以指定的GID运行haproxy,建议使用专用于运行haproxy的GID,以免因权限问题带来风险；</li>
+<li>group <group name>:同gid，不过指定的组名；</li>
+<li>log <address><facility>[max level][min level]]:定义全局的syslog服务器，最多可以定义两个</li>
+<li>log-send-hostname[<string>]:在syslog信息的首部添加当前主机名，可以为”string”指定的名称，也可以缺省使用当前主机名；</li>
+<li>nbproc<number>:指定启动的haproxy进程个数，只能用于守护进程模式的haproxy,默认只启动一个进程，鉴于调试困难等多方面的原因，一般只在单进程仅能打开少数文件描述符的场景中才使用多进程模式；</li>
+<li>pidfile;</li>
+<li><pre><code>uid:以指定的UID身份运行haproxy进程
+</code></pre>
+</li>
+<li><pre><code>ulimit-n : 设定每进程所能够打开的最大文件描述符数目，默认情况下其会自动进行计算，因此不推荐修改此选项；
+</code></pre>
+</li>
+<li>user:同uid,但使用的是用户名；</li>
+<li>stats:</li>
+<li>node:定义当前节点的名称，用户HA场景中多haproxy进程共享同一个IP地址时；</li>
+<li>description:当前实例的描述信息；</li>
+</ul>
+<p>*性能调整相关的参数</p>
+<ul>
+<li>maxconn <number>：设定每个haproxy进程所接收的最大并发连接数，其等同于命令行选项”-n”;”ulimit -n”自动计算的结果正是参照此参数设定的；</li>
+<li>maxpipes <number>：haproxy使用pipe完成基于内核的tcp报文重组，此选项则用于设定每进程所允许使用的pipe个数，每个pipe会打开两个文件描述符，因此，”ulimit -n”自动计算时会根据需要调大此值，默认为maxconn&#x2F;4，其通常会显得过大；</li>
+<li>noepoll:在Linux系统上禁用epoll机制；</li>
+<li>nokqueue:在BSD系统上禁用kqueue机制;</li>
+<li>nopoll:禁用poll机制；</li>
+<li>nosepoll:禁用poll机制;</li>
+<li>nosplice:禁止在Linux套接字上使用内核tcp重组，这回导致更多的recv&#x2F;send系统调用，不过，在Linux 2.6.25-28系列的内核上，tcp重组功能有bug存在；</li>
+<li>spread-checks &lt;0..50,in percent&gt;:在haproxy后端有着众多服务器的场景中，在精确的时间间隔后统一对众服务器进行健康状况检查可能会带来意外问题:此选项用于将其检查的时间间隔长度上增加或减小一定的随机时长；</li>
+<li>tune,bufsize <number>:设定buffer的大小，同样的内存条件下，较小的值可以让haproxy有能力接收更多的并发连接，较大的值可以让某些应用程序使用较大的cookie信息:默认是16384，其可以在编译时修改，不过强烈建议使用默认值；</li>
+<li>tune.chksize <number>:设定检查缓冲区的大小，单位为字节，更大的值有助于在较大的页面中完成基于字符串或模式的文本查找，但也会占用更多的系统资源，不建议修改；</li>
+<li>tune.maxaccept <number>:设定haproxy进程内核调度运行时一次性可以接收的连接的个数，较大的值可以带来较大的吞吐率，默认在单进程模式下为100,多进程模式下为8,设定为-1可以禁止此限制；一般不建议修改；</li>
+<li>tune.maxrewrite <number>:设定为首部重写或追加而预留的缓冲空间，建议使用1024左右的大小，在需要使用更大的空间时，haproxy会自动增加其值；</li>
+<li>tune.rcvbuf.server <number>:设定内核套接字中服务端或客户端接收缓冲的大小，单位为字节，强烈建议使用默认值；</li>
+</ul>
+<ul>
+<li>Debug相关的参数</li>
+</ul>
+<ul>
+<li>debug</li>
+<li>quiet</li>
+</ul>
+<ol start="5">
+<li>代理</li>
+</ol>
+<p>代理相关的配置可以如下配置段中。</p>
+<ul>
+<li>defaults <name></li>
+<li>frontend <name></li>
+<li>backend <name></li>
+<li>listen      <name></li>
+</ul>
+<blockquote>
+<p>“defaults”段用于为所有其他配置段提供默认参数，这配置默认参数可由下一个”defaults”所重新设定；<br>“frontend”段可用于定义一系列监听的套接字，这些套接字可接收客户端请　求并与之建立连接；<br>“backend”段用于定义一系列”后端”服务器，代理将会将对应客户端的请求转发至这些服务器<br>“listen”段通过关联”前端”和”后端”定义一个完整的代理，通常只对TCP流量有用；<br>所有代理的名称只能使用大写字母，小写字母，数字，中线，下划线，点号，冒号，此外，ACL名称会区分字母大小写；</p>
+</blockquote>
+<pre><code> 　
+</code></pre>
+<h2 id="配置文件中的关键字参考"><a href="#配置文件中的关键字参考" class="headerlink" title="配置文件中的关键字参考"></a>配置文件中的关键字参考</h2><ol>
+<li>balance</li>
+</ol>
+<blockquote>
+<p>balance <algorithm> [<arguments>]<br>balance url_param <param> [check_post[max_wait]]</p>
+</blockquote>
+<p>定义负载均衡算法，可用于”defaults”、”listen”和”backend”。<br><alogrithm>用于在负载均衡场景中挑选一个server,其仅应用于持久信息不可用的条件下或需要将一个连接重新派发至另一个服务器时，支持的算法有:</p>
+<ul>
+<li>roundrobin:基于权重进行轮叫，在服务器的处理时间保持均匀分布时，这是最平衡，公平的算法，此算法是动态的，这表示其权重可以在运行时进行调整，不过，在设计上，每个后端服务器仅能最多接收4128的个连接；</li>
+<li>static-rr:基于权重进行轮叫，与roundrobin类似，但是为静态方法，在运行时调整其服务器权重不会生效，不顾，在后端服务器连接数上没有限制；</li>
+<li>leastconn:新的连接请求被派发至具有最少连接数目的后端服务器，在有着较长时间会话的场景中推荐使用此算法，如LDAP,SQL等，其并不太适用于较短会话的应用层协议，如HTTP;此算法是动态的，可以在运行时调整其权重；</li>
+<li>source:将请求的源地址进行hash运算，并由后端服务器的权重总和相除后派发至某匹配的服务器，这可以使得同一个客户端IP的请求始终被派发至某特定的服务器，不过，当服务器权重总数发生变化时，如某服务器宕机或添加了新的服务器，许多客户端的请求可能会被派发至此前请求不同的服务器：常用于负载均衡无cookie功能的基于TCP的协议，默认为静态，不过也可以使用hash-type修改此特性；</li>
+<li>uri:对URI的左半部分(“问题”标记之前的部分)或整个URI进行hash计算，并有服务器的总权重相除后派发至某匹配的服务器，这可以使得对同一个URI的请求总是被派发至某特定的服务器，除非服务器的权重总数发生了变化，此算法常用于代理缓存或反病毒代理以提高缓存的命中率，需要注意的是，此算法仅应用于hTTP后端服务器的场景，其默认为静态算法，不过也可以使用hash-type修改此特性；</li>
+<li>url_param:通过<argument>为指定的参数在每个HTTPGET请求中将会被检索，如果找到了指定的参数且其通过等于号”&#x3D;”被赋予了一个值，那么此值被执行hash运算并被服务器的总权重相除后派发至某匹配的服务器，此算法可以通过追踪请求中的用户标识进而确保同一个用户ID的请求将被送往同一个特定的服务器，除非服务器的总权重发生了变化，如果某请求中没有出现制定的参数或没有有效值，则使用轮叫算法对响应请求进行调度:此算法默认是静态的，不过其也可以使用hash-type修改此特性；</li>
+<li>hdr(<name>):对于每个HTTP请求，通过<name>指定的HTTP首部将会被检索，如果相应的首部没有出现或其没有有效值，则使用轮叫算法对响应请求进行调度，其有一个可选选项”use_domain_only”,可在制定检索类似host类的首部时仅计算域名部分(比如通过<a target="_blank" rel="noopener" href="http://www.test.com来说,仅计算test字符串的hash值)以降低hash算法的运算量,此算法默认为静态的,不过其也可以使用hash-type修改此特性;/">www.test.com来说，仅计算test字符串的hash值)以降低hash算法的运算量，此算法默认为静态的，不过其也可以使用hash-type修改此特性；</a></li>
+<li>rdp-cookie</li>
+<li>rdp-cookie(name)</li>
+</ul>
+<ol start="2">
+<li>bind<br> bind [<address>]:<port_range>[,…] interface <interface><br> 此指令仅能用于fronend和listen区段，用于定义一个或几个监听的套接字；</li>
+</ol>
+<p>　</p>
+<ul>
+<li><address>:可选选项，其可以为主机名、IPv4、ipv6地址或*,省略此选项，将其指定为*或0.0.0.0时，将监听当前系统的所有IPv4地址；</li>
+<li><port_range>:可以是一个特定的TCP端口，也可是一个端口范围(如5005-5010)，代理服务器将通过指定的端口来接收客户端请求，需要注意的是，每组监听的套接字<a href="address:port">address:port</a>在同一个实例上只能使用一次，而且小于1024的端口需要有特定权限的用户才能使用，这可能需要通过uid参数来定义；</li>
+<li><interface>:制定物理接口的名称，仅能在Linux系统上使用，其不能使用接口别名，而仅能物理接口名称，而且只能管理有权限指定绑定的物理接口；</li>
+</ul>
+<ol start="3">
+<li>mode<br> mode {tcp|http|health}<br>设定实例的运行模式或协议，当实现内容交换时，前端和后端必须工作于同一种模式(一般说都是http模式)，否则将无法启动实例；</li>
+</ol>
+<ul>
+<li>tcp:实例运行于纯TCP模式，在客户端和服务器端之间建立一个全双工的连接，且不会对7层报文做任何类型的检查，此为默认模式，通常用于SSL,SSH,SMTP等应用;</li>
+<li>http:实例运行于HTTP模式，客户端请求在转发至后端服务器之前将被深度分析，所有不与RFC格式兼容的请求都被拒绝；</li>
+<li>health:实例工作于health模式，其对入站请求仅响应”OK”信息并关闭连接，且不会记录任何日志信息，此模式将用于响应外部组件的健康状态检查请求，目前来讲，此模式已经废弃，因为tcp或http模式中的monitor关键字可完成类似功能；</li>
+</ul>
+<ol start="4">
+<li>hash-type</li>
+</ol>
+<p>hash-type <method></p>
+<p>定义用于将hash码映射至后端服务器的方法，其不恩能够用于frontend区段，可用方法有map-based和consistent，在大多数场景下推荐使用默认的map-based方法；</p>
+<ul>
+<li>map-based：hash表是一个包含了所有在线服务器的静态数组，其hash值将会非常平滑，会将权重考虑在列，但其为静态方法，对在线服务器的权重进行调整并不会生效，这意味着其部支持慢速启动，此外，挑选服务器是根据是根据其在数组中的位置进行的，因此，当一台服务器宕机或添加了一台服务器时，大多数连接将会被重新派发至一个此前不同的服务器上，对于缓存服务器的工作场景来说，此方法不甚适用；</li>
+<li>consistent：hash表是一个由各服务器填充而成的树状结构，基于hash键在hash树中查找相应的服务器时，最近的服务器将被选中，此方法是动态的，支持在运行时修改服务器权重，因此兼容慢速启动的特性，添加一个新的服务器时，仅会对一小部分请求产生影响，因此，尤其适用于后端服务器为cache的场景，不过此算法平滑，派发至各服务器的请求未必达到理想的均衡效果，因此，可能需要不时的调整服务器的权重以获得更好的均衡性；</li>
+</ul>
+<ol start="5">
+<li>log<blockquote>
+<p>   log global<br>   log <address> <facility> [<level>[<minlevel>]]<br>为每个实例启用时间和流量日志，因此可用于用于区段，每个实例最多可以指定两个log参数，不过，如果使用了”log global”且”global”段已经定义了两个log参数时，多余了log参数将被忽略；</p>
+</blockquote>
+</li>
+</ol>
+<ul>
+<li>global:的拿钱实例的日志系统参数同”global”端中的定义时，将使用此格式:每个实例仅能定义一次”log global”语句，且其没有任何额外参数；</li>
+<li><address>:定义日志发往的位置，其格式之一可以为<IPv4_address:PORT>,其中的port为UDP协议端口，默认为514,格式之二为unix套接字文件路径，单需要留心chroot应用及用户的读取权限；</li>
+<li><facility>:可以为syslog系统的标准facility之一;</li>
+<li><level>:定义日志级别，即输出信息过滤器，默认为所有信息，指定级别时，所有等于或高于此级别的日志信息将会被发送；</li>
+</ul>
+<ol start="6">
+<li>maxconn</li>
+</ol>
+<blockquote>
+<p>maxconn <conns></p>
+</blockquote>
+<p>设定一个前端的最大并发连接数，因此，其不能用于backend区段，对于大型站点来说，可以尽可能调大此值以便让haproxy管理连接队列，从而避免无法应答用户请求。当然，此最大值不能超出”global”段中的定义。此外，需要留心的是，haproxy会为每个连接维持两个缓冲，每个缓冲的大小为8KB,再加上其他的数据，每个连接将大约占用17KB的RAM空间。这意味着经过适当优化后，有着1GB的可用RAM空间将能维护40000-50000并发连接。</p>
+<p>如果为<conns>指定了一个过大值，极端情况下，其最终占据的空间将会超出当前主机的可用内存，这可能带来意想不到的结果，因此，将其设定了一个可接受值为明智选择，其默认为2000;</p>
+<ol start="7">
+<li>default_backend</li>
+</ol>
+<blockquote>
+<p>default_backend <backend></p>
+</blockquote>
+<p>在没有匹配的”use_backend”规则时为实例指定使用的默认后端，因此，其不可应用于backend区段，在”frontend”和”backend”之间进行内容交换时，通常使用”use_backend”定义其匹配规则，而没有被规则匹配到的请求将有此参数指定的后端接收。</p>
+<p><backend>：指定使用的后端的名称:<br>使用案例:</p>
+<p>use_backend      dynamic   if  url_dyn<br>use_backend      static         if  url_css url_img extension_img<br>default_backend   dynamic</p>
+<ol start="8">
+<li>server</li>
+</ol>
+<blockquote>
+<p>server <name> <address><a href="%E4%B8%BA%E6%AD%A4%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%AE%BE%E5%AE%9A%E7%9A%84%E4%B8%80%E7%B3%BB%E5%8F%82%E6%95%B0:%E5%85%B6%E5%8F%AF%E7%94%A8%E7%9A%84%E5%8F%82%E6%95%B0%E9%9D%9E%E5%B8%B8%E5%A4%9A%EF%BC%8C%E5%85%B7%E4%BD%93%E5%8F%AF%E5%8F%82%E7%9C%8B%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3,%E4%B8%8B%E5%88%97%E4%BB%85%E8%AF%B4%E6%98%8E%E5%87%A0%E4%B8%AA%E5%B8%B8%E7%94%A8%E7%9A%84%E5%8F%82%E6%95%B0:">:port</a></p>
+</blockquote>
+<p>为后端声明一个server，因此，不能够用于defaults和frontend区段</p>
+<ul>
+<li><name>:为此服务器指定的内部名称，其将会出现在日志及警告信息中，如果设定了”http-send-server-name”,它还将被添加至发往此服务器的请求首部中；</li>
+<li><address>:此服务器的IPv4地址，也支持使用可解析的主机名，只不过在启动时需要解析主机名至相应的IPv4地址；</li>
+<li></li>
+<li></li>
+</ul>
+<p>服务器或默认服务器参数:</p>
+<ul>
+<li>backup:设定为备用服务器，仅在负载均衡场景中的其他server均不可用于启用此server;</li>
+<li>check:启动对此server执行健康状态检查，其可以借助于额外的其他参数完成更精细的设定,如:<blockquote>
+<p>   inter <delay>:设定健康状态检查的时间间隔，单位为毫秒，默认为2000,也可以使用fastinter和downinter来根据服务器端状态优化此时间延迟；<br>   rise <count>:设定健康状态检查中，某离线的server从离线状态转至正常状态需要成功检查的次数；<br>   fall <count>:确认server从正常状态转换为不可用状态需要检查的次数；</p>
+</blockquote>
+</li>
+<li>cookie <value>:为指定server设定cookie值，此处指定的值将在请求入站时被检查，第一次为此值挑选的server将在后续的请求中被选中，其目的在于实现持久连接的功能;</li>
+<li>maxconn <maxconn>:指定此服务器接受的最大并发连接数，如果发往此服务器的连接数目高于此处指定的值，其将被放置于请求队列，以等待其他连接被释放；</li>
+<li>maxqueue <maxqueue>:设定请求队列的最大长度；</li>
+<li>observe <mode>:用过观察服务器的通信状况来判定其健康状态，默认为禁用，其支持的类型有layer4和layer7,layer7仅能用于http代理场景；</li>
+<li>redir <prefix>:启用重定向功能，将发往此服务器的GET和HEAD请求均已302状态码响应，需要注意的是，在prefix后面不能使用&#x2F;，且不能使用相对地址以免造成循环，例如:<blockquote>
+<p>   server srv1 172.16.100.6:80 redir <a target="_blank" rel="noopener" href="http://www.test.com/">http://www.test.com</a> check</p>
+</blockquote>
+</li>
+<li>weight <weight>:权重，默认为1,最大值为256,0表示不参与负载均衡；</li>
+</ul>
+<p>检查方法:</p>
+<blockquote>
+<p>option httpchk<br>option httpchk <uri><br>opeion httpchk <method> <uri><br>option httpchk <method> <uri> <version>,不能用于frontend段，例如:</p>
+</blockquote>
+<blockquote>
+<p>backend https_relay<br>   mode tcp<br>   option httpchk OPTIONS * HTTP&#x2F;1.1\r\nHost:\ www<br>   server apache1 192.168.1.1:443 check port 80</p>
+</blockquote>
+<p>使用案例;</p>
+<blockquote>
+<p>server first 172.16.100.7:1080 cookie first check inter 1000<br>server second 172.16.100.8:1080 cookie second check inter 1000</p>
+</blockquote>
+<ol start="9">
+<li>capture request header</li>
+</ol>
+<blockquote>
+<p>capture request header <name> len <length></p>
+</blockquote>
+<p>捕获并记录指定的请求首部最近一次出现时的第一个值，仅能用于”frontend”和”listen”区段，捕获的首部值使用花括号{}括起来后添加进日志中。如果需要捕获多个首部值，他们将以指定的次序出现在日志文件中，并以竖线”|”作为分隔符。不存在的首部记录为空字符串，最常需要捕获的首部包括在虚拟主机环境中使用的”Host”、上传请求首部中的”Content-length”、快速区别真实用户和网络机器人的”User-agent”,以及代理环境中记录真实请求来源的”X-Forward-For”。</p>
+<ul>
+<li><name>:要捕获的首部的名称，此名称不区分字符大小写，但建议与他们出现在首部中的格式相同，比如大写首字母，需要注意的是，记录在日志中的是首部对应的值，而非首部名称。</li>
+<li><length>:指定记录首部的个数没有限制，但每个捕获最多只能记录64个字符。为了保证同一个frontend中日志格式的统一性，首部捕获仅能在frontend中定义；</li>
+</ul>
+<ol start="10">
+<li>capture response header</li>
+</ol>
+<blockquote>
+<p>capture response header <name> len <length><br>捕获并记录响应首部，其格式和药店同请求首部。</p>
+</blockquote>
+<ol start="11">
+<li>stats enable</li>
+</ol>
+<p>启用基于程序编译时默认设置的统计报告，不能用于”frontend”区段。只要没有别外的其他设定，他们就会使用如下的配置:</p>
+<blockquote>
+<ul>
+<li>stats uri       :  &#x2F;haproxyadmin?stats</li>
+<li>stats realm  : “HAProxy Statistics”</li>
+<li>stats auth    : no authentication</li>
+<li>stats scope  : no restriction</li>
+</ul>
+</blockquote>
+<p>尽管”stats enable”一条就能够启用统计报告，但还是建议设定其他所有的参数，以免其依赖于默认设定而带来非期后果，下面是一个配置案例:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">backend public_www</span><br><span class="line">    server websrv1 172.16.100.11:80</span><br><span class="line">    stats enable</span><br><span class="line">    stats hide-version</span><br><span class="line">    stats scope</span><br><span class="line">    stats uri       /haproxyadmin?stats</span><br><span class="line">    stats realm Haproxy\ Statistics</span><br><span class="line">    stats auth    statsadmin:password</span><br><span class="line">    stats auth    statsmaster:password</span><br></pre></td></tr></table></figure>
+
+<ol start="12">
+<li>stats hide-version</li>
+</ol>
+<blockquote>
+<p>stats hide-version</p>
+</blockquote>
+<p>启用统计报告并隐藏HAProxy版本报告，不能用于”frontend”区段，默认情况下，统计页面会显示一些游泳信息，包括HAProxy的版本号，然后，向所有人公开HAProxy的精确版本号是非常有风险的，因为他能帮助恶意用户快速定为版本的缺陷和漏洞，尽管”stats hide-version”一条就能够启用统计报告，但还是建议设定其他所有的参数，以免其依赖于默认设定而带来非期后果，具体请参照”stats enable”一节的说明。</p>
+<ol start="13">
+<li>stats realm</li>
+</ol>
+<blockquote>
+<p>stats realm <realm></p>
+</blockquote>
+<p>启用统计报告并高精认证领域，不能用于”frontend”区段，haproxy在读取realm时会将其视作一个单词，因此，中间的任何空白字符都必须使用反斜线进行转义，此参数仅在于”stats auth”配置使用时有意义。</p>
+<p><realm>:实现HTTP基本认证时显示在浏览器中的领域名称，用于提示用户输入一个用户名和密码。</p>
+<p>尽管”stats realm “ 一条就能够启用统计报告，但还是建议设定其他所有的参数，以免其依赖于默认设定而带来非期后果，具体请参照”stats enable”一节的说明。</p>
+<ol start="14">
+<li>stats scope</li>
+</ol>
+<blockquote>
+<p>stats scope { <name> | “ . “}</p>
+</blockquote>
+<p>启用统计报告并限定报告的区段，不能用于”frontend”区段，当指定此语句时，统计报告将仅显示其列举出区段的报告信息，所有其他区段的信息将被隐藏。如果需要显示多个区段的统计报告，此语句可以定义多次。需要注意的是，区段名称检测仅仅是以字符串比较的方式进行，他不会真检测指定的区段是否真正存在。</p>
+<p><name>:可以是一个”listen”、”frontend”或”backend”区段的名称，而”.”则表示stats scope语句所定义的当前区段。</p>
+<p>尽管”stats scope”一条就能够启用统计报告，但还是建议设定其他所有的参数，以免其依赖于默认设定而带来非其后果。下面是一个配置案例。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">backend private_monitoring</span><br><span class="line">    stats enable</span><br><span class="line">    stats uri  /haproxyadmin?stats</span><br><span class="line">    stats refresh 10s</span><br></pre></td></tr></table></figure>
+
+<ol start="15">
+<li>stats auth</li>
+</ol>
+<blockquote>
+<p>stats auth <user>:<passwd></p>
+</blockquote>
+<p>启用带认证的统计报告功能并授权一个用户账号，其不能用于”frontend”区段。</p>
+<blockquote>
+<p><user>:授权进行访问的用户名；<br><passwd>:此用户的访问密码，明文格式。</p>
+</blockquote>
+<p>此语句将基于默认设定启用统计报告功能，并仅允许其定义的用户访问，其也可以定义多次以授权多个用户找好，尅结合”stats realm”参数在提示用户认证是给出一个领域说明信息，在使用非法用户访问统计功能时，其将会响应一个”401 Forbidden”页面。其认证方式为HTTP　Basic认证，密码传输会以明文方式进行，因此，配置文件中也使用明文方式进行，因此，配置文件中也使用明文方式存储以说明其非保密信息故此不能相同于其他关键性账号的密码。</p>
+<p>尽管”stats auth”一条就能够启用统计报告，但还是建议设定其他所有的参数，以免其依赖于默认设定而代理非期后果。</p>
+<ol start="16">
+<li>stats admin</li>
+</ol>
+<blockquote>
+<p>stats admin {if | unless} <cond></p>
+</blockquote>
+<p>在指定的条件满足时启用统计报告页面的管理级别功能，它允许通过web接口启用或禁用服务器，不过，基于安全的角度考虑，统计高博爱页面应该尽可能是只读的。此外，如果启用了HAProxy的多进程模式，启用此管理级别将有可能导致异常行为。</p>
+<p>目前来说，POST请求方法被限制于金恩能够使用缓冲区域去保留部分之外的空间，因此，服务器列表不能过长，否则，此请求将无法正常工作，因此，建议一次仅调整少数几个服务器，下面是两个案例，第一个限制了仅能在本机打开报告页面时启用管理级别功能，第二个定义了仅允许通过认证的用户使用管理级别功能。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">backend stats_localhost</span><br><span class="line">    stats <span class="built_in">enable</span></span><br><span class="line">    stats admin <span class="keyword">if</span> LOCALHOST</span><br><span class="line"></span><br><span class="line">backend stats_auth</span><br><span class="line">    stats <span class="built_in">enable</span></span><br><span class="line">    stats auth haproxyadmin:password</span><br><span class="line">    stats admin <span class="keyword">if</span> TRUE</span><br></pre></td></tr></table></figure>
+<ol start="17">
+<li>option httplog</li>
+</ol>
+<blockquote>
+<p>option httplog [clf]<br>启用记录HTTP请求，会话状态和计时器的功能。</p>
+</blockquote>
+<p>clf:使用CLF格式来代替HAProxy默认的HTTP格式，通常在使用仅支持CLF格式的特定日志分析器时才需要使用此格式。</p>
+<p>默认情况下，日志输入格式非常简陋，因为其仅包含源地址、目标地址和实例名称，而”option httplog”参数将会使得日志格式变得丰富许多，其通常包括但不限于HTTP请求、连接计时器、会话状态、连接数、捕获的首部及cookie、”frontend”、”backend”及服务器名称，当然也包括源地址和端口号等。</p>
+<ol start="18">
+<li>option logasap<blockquote>
+<p>no option logasap<br>启用或禁用提前将HTTP请求记入日志，不能用于”backend”区段。</p>
+</blockquote>
+</li>
+</ol>
+<p>默认情况下，HTTP请求是在请求结束时金牛星记录一百年能就爱你勾起整体传输时长和字节数记入日志，由此，传较大的对象时，其记入日志的时长可能会略有延迟。”option logasap”参数能够在服务器发送complete首部时及时记录日志，只不过，此时将不记录整体传输时长和字节数。此情形下，捕获”Content-Length”响应首部来记录传输的字节数是一个较好选择。下面是一个例子.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">listen http_proxy 0.0.0.0:80</span><br><span class="line">    mode http</span><br><span class="line">    option httplog</span><br><span class="line">    option logasap</span><br><span class="line">    log 172.16.100.9 local2</span><br></pre></td></tr></table></figure>
+<ol start="19">
+<li>option forwardofor</li>
+</ol>
+<blockquote>
+<p>option forwardfor [except <network>] [header <name>] [if-none]</p>
+</blockquote>
+<p>允许在发往服务器的请求首部中插入”X-Forwarded-For”首部。</p>
+<p><network>:可选选项，当指定时，源地址为匹配至此网络中的请求都禁用此功能。<br><name>:可选参数，可使用一个自定义的首部，如”X-Client”来替代”X-Forwarded-For”,有些独特的web服务器的确需要用于一个独特的首部。<br>if-none:仅在此首部不存在时才将其添加至请求报文中。</p>
+<p>HAProxy工作于反向代理模式，其发往服务器的请求中的客户端IP均为HAProxy主机的地址而非真正客户端的地址，这会使得服务器端的日志信息记录不了真正的请求来源，”X-Forwarded-For”首部则可用于解决此问题，HAProxy可以向每个发往服务器的请求上添加此首部，并以客户端IP为其value。</p>
+<p>需要注意的是，HAProxy工作于隧道模式，其仅检查每一个连接的第一个请求，因此，仅第一个请求报文被附加此首部，如果想为每一个请求都附加此首部，请确保同时使用了”option httpclose”、”option forceclose”和”option http-server-close”几个option。</p>
+<p>下面是一个例子:</p>
+<p>frontend www<br>    mode http<br>    option forwardfor except 127.0.0.1</p>
+<ol start="20">
+<li>errorfile<blockquote>
+<p>errorfile <code><file></p>
+</blockquote>
+</li>
+</ol>
+<p>在用户请求不存在的页面时，返回一个页面文件给客户端而非有haproxy生成的错误代码，可用于所有段中;</p>
+<p><code>:指定对HTTP的哪些状态码返回指定的页面，这里可用的状态码有200,400,403,408,500,502,503和504;<br><file>:指定用于响应的页面文件:</p>
+<p>例如:</p>
+<blockquote>
+<p>errorfile 400 /etc/haproxy/errorpages/400badreq.http<br>errorfile 403 /etc/haproxy/errorpages/403forbid.http<br>errorfile 503 /etc/haproxy/errorpages/503sorry.http</p>
+</blockquote>
+<ol start="21">
+<li>errorloc 和 errorloc302</li>
+</ol>
+<blockquote>
+<p>errorloc <code> <url><br>errorloc302 <code> <url></p>
+</blockquote>
+<p>请求错误时，返回一个HTTP重定向至某URL的信息，可用于所有配置段中。</p>
+<p><code>:指定对HTTP的哪些状态码返回指定的页面，这里可用的状态码有200、400、403、408、500、502、503和504;</p>
+<p><url>:Location首部中指定的页面位置的具体路径，可以是在当前服务器上的页面的相对路径，也可以使用绝对路径，需要注意的是，如果URI自身错误时产生某特定状态码信息的话，有可能会导致循环定向；</p>
+<p>需要留意的是，这两个关键字都会返回302状态码，这将使得客户端使用同样的HTTP方法获取指定的URL,对于非GET的场景中(如POST)来说会产生问题，因为返回客户的URL是不允许使用GET以外的其他方法的。如果的确有这种问题，可以使用errorloc303来返回303状态码给客户端。</p>
+<ol start="22">
+<li>errorloc 303</li>
+</ol>
+<blockquote>
+<p>errorloc 303 <code><url></p>
+</blockquote>
+<p>请求错误时，返回一个HTTP重定向至某URL的信息给客户端：可用于所有配置段中。</p>
+<p><code>:指定对HTTP的那些状态码返回指定的页面，这里可用的状态码有400,403,408,500,502,504;<br><url>:Location首部中指定的页面位置的具体路径，可以是在当前服务器上的页面的相对路径，也可以使用绝对路径，需要注意的是，如果URI自身错误时产生某特定状态码信息的话，有可能会导致循环定向；</p>
+<p>例如:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">backend webserver</span><br><span class="line">    server 172.16.100.6  172.16.100.6:80 check maxconn 3000 cookie srv01</span><br><span class="line">    server 172.16.100. 7 172.16.100.7:80 check maxconn 3000 cookie srv02</span><br><span class="line">    errorloc 403 /etc/haproxy/errorpages/sorry.htm</span><br><span class="line">    errorloc 503 /etc/haproxy/errorpages/sorry.htm</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/10/29/45-01http%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E5%8F%8Ahaproxy/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-44-03-2-实验：memcached安装配置" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1259,93 +1695,9 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-41-03Linux集群系列之二十一-ISCSI、clvm和GFS2" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/09/29/41-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%8C%E5%8D%81%E4%B8%80-ISCSI%E3%80%81clvm%E5%92%8CGFS2/">41_03Linux集群系列之二十一--ISCSI、clvm和GFS2</a>
-    </h1>
-  
-
-        
-        <a href="/2015/09/29/41-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%8C%E5%8D%81%E4%B8%80-ISCSI%E3%80%81clvm%E5%92%8CGFS2/" class="archive-article-date">
-  	<time datetime="2015-09-29T05:41:46.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-29</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br></pre></td><td class="code"><pre><span class="line">target: </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#yum install scsi-targets-utils luci　(这里安装luci,是作为集群配置终端存在的) </span></span><br><span class="line"><span class="comment">#vim /etc/tgt/targets.conf </span></span><br><span class="line"> </span><br><span class="line">&lt;target iqn.2013-05.com.test:tsan.disk1&gt; </span><br><span class="line">    &lt;backing-store /dev/sdb&gt; </span><br><span class="line">        vendor_id <span class="built_in">test</span> </span><br><span class="line">        lun 1 </span><br><span class="line">    &lt;/backing-store&gt; </span><br><span class="line">    initiator-address 172.16.0.0/16 </span><br><span class="line">    incominguser sanuser sanpass </span><br><span class="line">&lt;/target&gt; </span><br><span class="line"> </span><br><span class="line"><span class="comment">#service tgtd start </span></span><br><span class="line"><span class="comment">#tgtadm --lld iscsi --mode  target --op show </span></span><br><span class="line"><span class="comment">#chkconfig tgtd on </span></span><br><span class="line"> </span><br><span class="line">initiator: </span><br><span class="line"> </span><br><span class="line"><span class="comment">#for I in &#123;1..3&#125;;do ssh node$I &#x27;echo &quot;InitiatorName=`iscsi-iname -p iqn.2013-05.com.test`&quot;&#x27; &gt; /etc/iscsi/initiatorname.iscsi&#x27; ;done </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#vim /root/iscsi.sed </span></span><br><span class="line">s@<span class="comment">#node.session.auth.authmethod = CHAP@node.session.auth.authmethod = CHAP@ </span></span><br><span class="line">s@node.session.auth.username= username@node.session.auth.username = sanuser@ </span><br><span class="line">s@node.session.auth.password = password@node.session.auth.password = sanpass@ </span><br><span class="line"> </span><br><span class="line">sed -i -f /root/iscsi.sed /etc/iscsi/iscsid.conf </span><br><span class="line"> </span><br><span class="line">service iscsi start &amp;&amp; chkconfig iscsi on </span><br><span class="line"> </span><br><span class="line">iscsiadm -m discovery -t st -p 172.16.100.100 </span><br><span class="line"> </span><br><span class="line">iscsiadm -m node -T iqn.2013-05.com.test:tsan.disk1 -p 172.16.100.100 -l </span><br><span class="line"> </span><br><span class="line"><span class="comment">#################这个地方也可以直接参考前面41_01(2);;; </span></span><br><span class="line"><span class="comment">#################如果已经搭建了ISCSI服务，搭建GFS2可以参考下面；；； </span></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">实现cLVM: </span><br><span class="line">initiator: </span><br><span class="line"><span class="comment">#yum install -y cman rgmanager gfs2-utils lvm2-cluster ricci(如果只是作为共享存储，可以不启动这个) </span></span><br><span class="line"> </span><br><span class="line">ccs_tool create tcluster　　　　(这个名字一定要注意，和下面的GFS2下面必须一样) </span><br><span class="line">ccs_tool addfence meatware fence_manual </span><br><span class="line">ccs_tool lsfence </span><br><span class="line">ccs_tool addnode -n 1 -f meatware node1.test.com </span><br><span class="line">ccs_tool addnode -n 2 -f meatware node2.test.com </span><br><span class="line">ccs_tool addnode -n 3 -f meatware node3.test.com　　(有多少节点，就添加多少个) </span><br><span class="line">ccs_tool lsnode </span><br><span class="line"> </span><br><span class="line">service NetworkManager stop &amp;&amp; chkconfig NetworkManager off </span><br><span class="line">service cman start </span><br><span class="line">如果起不来，也有可能是组播地址重复； </span><br><span class="line">如果出现： </span><br><span class="line">cman not started:Can<span class="string">&#x27;t determine address family of nodename /usr/sbin/cman_tool:aisexec daemon did&#x27;</span>t start </span><br><span class="line">可以尝试把/etc/cluster/cluster.conf 拷贝到其他节点上； </span><br><span class="line">出现这种状况的原因是多个集群相互干扰所导致的； </span><br><span class="line"> </span><br><span class="line">启动逻辑卷功能: </span><br><span class="line"><span class="comment">#ha ssh node$I &#x27;lvmconf --enable-cluster&#x27;;done 启动cLVM, 这个命令类似下面: </span></span><br><span class="line">sed -i <span class="string">&#x27;s/Lockingtype=1/Lockingtype=3/g&#x27;</span> /etc/lvm/lvm.conf </span><br><span class="line"> </span><br><span class="line"><span class="comment">#ha ssh node$I &#x27;service clvmd start&#x27;;done </span></span><br><span class="line"><span class="comment">#ha ssh node$I &#x27;chkconfig clvmd on;chkconfig cman on ;chkconfig rgmanager on&#x27;;done </span></span><br><span class="line"> </span><br><span class="line">创建逻辑卷: </span><br><span class="line"><span class="comment">#pvcreate /dev/sdb </span></span><br><span class="line"><span class="comment">#pvs </span></span><br><span class="line"><span class="comment">#vgcreate clustervg /dev/sdb </span></span><br><span class="line"><span class="comment">#lvcreate -L 10G -n clusterlv clustervg </span></span><br><span class="line"><span class="comment">#lvs </span></span><br><span class="line"><span class="comment">#mkfs.gfs2 -j 2 -p lock_dlm -t tcluster:lktb1 /dev/clustervg/clusterlv </span></span><br><span class="line"><span class="comment">#mkdir /mydata </span></span><br><span class="line"><span class="comment">#mount -t gfs2 /dev/clustervg/clusterlv /mydata </span></span><br><span class="line"><span class="comment">#gfs2_tool df /mydata   查看当前的状态信息 </span></span><br><span class="line"> </span><br><span class="line">至此，就可以成功搭建GFS2环境，在进行挂载时，可以使用： </span><br><span class="line">/dev/clustervg/clusterlv /var/www/html   gfs2 defaults,noatime,nodiratime 0  0 </span><br><span class="line">如果只是作为共享存储的话，也就可以了，而如果想搭建集群的话，可以启动luci和ricci即可；；；； </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">查看当前设备的所有可调参数： </span><br><span class="line">＃gfs2_tool gettune /mydata    注释:/mydata后面不能加/,否则会报错 </span><br><span class="line">new_files_directio = 0  直接写到磁盘上 </span><br><span class="line">new_files_jdata = 0 </span><br><span class="line">quota_scale = 1.0000 </span><br><span class="line">logd_secs =1 </span><br><span class="line">recoverd_secs = 60 </span><br><span class="line">statfs_quantum = 30 </span><br><span class="line">stall_secs = 600 </span><br><span class="line">quota_cache_secs = 300 </span><br><span class="line">quota_simul_sync = 64 </span><br><span class="line">statfs_slow = 0 </span><br><span class="line">complain_secs = 10 </span><br><span class="line">max_readahead = 262144 </span><br><span class="line">quota_quantum = 60 </span><br><span class="line">quota_warn_period = 10 </span><br><span class="line">jindex_refresh_secs = 60 </span><br><span class="line">log_flush_secs = 60   日志每多长时间自动刷新一次 </span><br><span class="line">incore_log_blocks = 1024 </span><br><span class="line"> </span><br><span class="line">调整当前设备的参数: </span><br><span class="line">gfs2_tool settune &lt;mountpoint&gt; &lt;parameter&gt; &lt;value&gt; </span><br><span class="line"> </span><br><span class="line"><span class="comment">#gfs2_tool settune /mydata  new_files_directio 1 </span></span><br><span class="line"><span class="comment">#gfs2_tool gettune /mydata </span></span><br><span class="line"> </span><br><span class="line">冻结一个文件系统: </span><br><span class="line">gfs2_tool freeze /mydata </span><br><span class="line">意味着这个文件系统只是可读的了．．． </span><br><span class="line"> </span><br><span class="line">解冻: </span><br><span class="line">gfs2_tool unfreeze /mydata </span><br><span class="line"> </span><br><span class="line">挂载时的挂载参数: </span><br><span class="line">gfs2_tool getargs /mydata </span><br><span class="line">设置挂载参数 </span><br><span class="line">gfs2_tool setgetargs ..... </span><br><span class="line"> </span><br><span class="line">添加一个日志文件: </span><br><span class="line">gfs2_jadd -j 1 /dev/clustervg/clusterlv </span><br><span class="line">gfs2_tool journals /mydata </span><br><span class="line"> </span><br><span class="line">扩展一个逻辑卷大小: </span><br><span class="line">gfs_glow -h      </span><br><span class="line">    -q   Quiet,reduce verbosity </span><br><span class="line">    -T   Test,<span class="keyword">do</span> everyting except udate FS </span><br><span class="line">    -V   Version information </span><br><span class="line">    -v   Verbose,increase verbosity </span><br><span class="line"> </span><br><span class="line"><span class="comment">#lvextend -L 15G /dev/clustervg/clusterlv </span></span><br><span class="line"><span class="comment">#gfs2_grow /dev/clustervg/clusterlv </span></span><br><span class="line"> </span><br><span class="line">fsck.gfs2 检测文件系统</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/09/29/41-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%8C%E5%8D%81%E4%B8%80-ISCSI%E3%80%81clvm%E5%92%8CGFS2/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/15/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="page-number" href="/page/15/">15</a><span class="page-number current">16</span><a class="page-number" href="/page/17/">17</a><a class="page-number" href="/page/18/">18</a><span class="space">&hellip;</span><a class="page-number" href="/page/26/">26</a><a class="extend next" rel="next" href="/page/17/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/15/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="page-number" href="/page/15/">15</a><span class="page-number current">16</span><a class="page-number" href="/page/17/">17</a><a class="page-number" href="/page/18/">18</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/17/">Next &amp;raquo;</a>
     </nav>
   
 

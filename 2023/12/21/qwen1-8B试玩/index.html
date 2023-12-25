@@ -7,17 +7,22 @@
   <meta name="baidu-site-verification" content="code-Wz3hIIlkFx" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://geasyheart.github.io">
-  <title>Archives | 博客</title>
+  <title>qwen1.8B试玩 | 博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="张宇个人博客">
-<meta property="og:type" content="website">
-<meta property="og:title" content="博客">
-<meta property="og:url" content="https://geasyheart.github.io/archives/page/6/index.html">
+  <meta name="description" content="介绍阿里出了个qwen1.8B，对于资源有所要求的场景或者需要支持长文本的场景，应该是目前国内在这个量级内最优的选择了吧。接下来以此来打通微调、部署各个流程，算是一次记录。 微调首先按照要求和快速使用来跑起来，安装flash-attn，先跑下推理，正常，接下来就进入微调阶段。 按照微调流程，这里采用LoRA进行微调，但是需要注意的是，虽然官方给出了显存占用及训练速度，但是我在1080Ti上得到的显">
+<meta property="og:type" content="article">
+<meta property="og:title" content="qwen1.8B试玩">
+<meta property="og:url" content="https://geasyheart.github.io/2023/12/21/qwen1-8B%E8%AF%95%E7%8E%A9/index.html">
 <meta property="og:site_name" content="博客">
-<meta property="og:description" content="张宇个人博客">
+<meta property="og:description" content="介绍阿里出了个qwen1.8B，对于资源有所要求的场景或者需要支持长文本的场景，应该是目前国内在这个量级内最优的选择了吧。接下来以此来打通微调、部署各个流程，算是一次记录。 微调首先按照要求和快速使用来跑起来，安装flash-attn，先跑下推理，正常，接下来就进入微调阶段。 按照微调流程，这里采用LoRA进行微调，但是需要注意的是，虽然官方给出了显存占用及训练速度，但是我在1080Ti上得到的显">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://geasyheart.github.io/2023/12/21/qwen1-8B%E8%AF%95%E7%8E%A9/Figure_1.png">
+<meta property="article:published_time" content="2023-12-21T06:52:58.000Z">
+<meta property="article:modified_time" content="2023-12-25T01:56:28.239Z">
 <meta property="article:author" content="张宇">
+<meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://geasyheart.github.io/2023/12/21/qwen1-8B%E8%AF%95%E7%8E%A9/Figure_1.png">
   
     <link rel="alternative" href="/atom.xml" title="博客" type="application/atom+xml">
   
@@ -210,36 +215,78 @@ var _hmt = _hmt || [];
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-qwen1-8B试玩" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      qwen1.8B试玩
+    </h1>
+  
+
+        
+        <a href="/2023/12/21/qwen1-8B%E8%AF%95%E7%8E%A9/" class="archive-article-date">
+  	<time datetime="2023-12-21T06:52:58.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-12-21</time>
+</a>
+        
+      </header>
     
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>阿里出了个qwen1.8B，对于资源有所要求的场景或者需要支持长文本的场景，应该是目前国内在这个量级内最优的选择了吧。接下来以此来打通微调、部署各个流程，算是一次记录。</p>
+<h2 id="微调"><a href="#微调" class="headerlink" title="微调"></a>微调</h2><p>首先按照<a target="_blank" rel="noopener" href="https://github.com/QwenLM/Qwen/blob/main/README_CN.md#%E8%A6%81%E6%B1%82">要求</a>和<a target="_blank" rel="noopener" href="https://github.com/QwenLM/Qwen/blob/main/README_CN.md#%E5%BF%AB%E9%80%9F%E4%BD%BF%E7%94%A8">快速使用</a>来跑起来，安装flash-attn，先跑下推理，正常，接下来就进入微调阶段。</p>
+<p>按照<a target="_blank" rel="noopener" href="https://github.com/QwenLM/Qwen/blob/main/README_CN.md#%E5%BE%AE%E8%B0%83">微调流程</a>，这里采用LoRA进行微调，但是需要注意的是，虽然官方给出了<a target="_blank" rel="noopener" href="https://github.com/QwenLM/Qwen/blob/main/README_CN.md#%E6%98%BE%E5%AD%98%E5%8D%A0%E7%94%A8%E5%8F%8A%E8%AE%AD%E7%BB%83%E9%80%9F%E5%BA%A6">显存占用及训练速度</a>，但是我在1080Ti上得到的显存占用还是要更高一些，大家可以将这个指标理解成为运行起来至少需要的显存，在进行训练时，还是会有一些增高。</p>
+<p>训练的话采用<code>finetune_lora_single_gpu.sh</code>默认配置，幸亏我没有采用train，而是使用了dev数据集，7500条数据，8个多小时，，不过整个loss还是蛮正常的，没有出现issue里出现的各种问题。。。</p>
+<img src="/2023/12/21/qwen1-8B%E8%AF%95%E7%8E%A9/Figure_1.png" class="" title="loss">
+
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>我这里保存到了outout_qwen,下面为调用LoRA微调后的模型。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">path = <span class="string">&#x27;Qwen-1_8B-Chat&#x27;</span></span><br><span class="line">tokenizer = AutoTokenizer.from_pretrained(path, trust_remote_code=<span class="literal">True</span>)</span><br><span class="line">model = AutoPeftModelForCausalLM.from_pretrained(</span><br><span class="line">     <span class="string">&#x27;Qwen/output_qwen&#x27;</span>,</span><br><span class="line">     device_map=<span class="string">&#x27;auto&#x27;</span>,</span><br><span class="line">     trust_remote_code=<span class="literal">True</span></span><br><span class="line">)</span><br><span class="line">model.generation_config = GenerationConfig.from_pretrained(path, trust_remote_code=<span class="literal">True</span>)</span><br><span class="line">model.<span class="built_in">eval</span>()</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>注意的是，如果到此就打算部署的话，也要将<code>adapter_config.json</code>中的<code>base_model_name_or_path</code>正确引用，不过官方也给了合并代码，可以将LoRA和qwen合并到一起。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> peft <span class="keyword">import</span> AutoPeftModelForCausalLM</span><br><span class="line"></span><br><span class="line">model = AutoPeftModelForCausalLM.from_pretrained(</span><br><span class="line">    path_to_adapter, <span class="comment"># path to the output directory</span></span><br><span class="line">    device_map=<span class="string">&quot;auto&quot;</span>,</span><br><span class="line">    trust_remote_code=<span class="literal">True</span></span><br><span class="line">).<span class="built_in">eval</span>()</span><br><span class="line"></span><br><span class="line">merged_model = model.merge_and_unload()</span><br><span class="line"><span class="comment"># max_shard_size and safe serialization are not necessary. </span></span><br><span class="line"><span class="comment"># They respectively work for sharding checkpoint and save the model to safetensors</span></span><br><span class="line">merged_model.save_pretrained(new_model_directory, max_shard_size=<span class="string">&quot;2048MB&quot;</span>, safe_serialization=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="llama-cpp"><a href="#llama-cpp" class="headerlink" title="llama.cpp"></a>llama.cpp</h2><p>如果需要使用<a target="_blank" rel="noopener" href="https://github.com/ggerganov/llama.cpp">llama.cpp</a>，这里还是建议进行上述步骤合并的，使用llama.cpp也不是很复杂，可按照官方README安装cmake编译安装，后续也不是很复杂，官方提供了非常清晰的使用说明。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> build</span><br><span class="line"><span class="built_in">cd</span> build</span><br><span class="line">cmake ..</span><br><span class="line">cmake --build . --config Release</span><br></pre></td></tr></table></figure>
+
+
+
+<p>不过需要注意的是，用不用量化或者说要不要做转换，本身上还是要根据转换后的效果和效率来决定的，由于目前我们直接跑在GPU上，后续有机会单独针对llama.cpp尝试深入一下～</p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/assets/alipay.png">
+                      <span class="reward-type">支付宝</span>
+                    </div>
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/11/15/%E8%AF%AD%E4%B9%89%E4%BE%9D%E5%AD%98%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-11-15T15:41:54.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-11-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/11/15/%E8%AF%AD%E4%B9%89%E4%BE%9D%E5%AD%98%E5%88%86%E6%9E%90/">语义依存分析</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -251,364 +298,118 @@ var _hmt = _hmt || [];
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://geasyheart.github.io/2023/12/21/qwen1-8B%E8%AF%95%E7%8E%A9/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/11/12/bio-based%E8%AF%AD%E4%B9%89%E8%A7%92%E8%89%B2%E6%A0%87%E6%B3%A8/" class="archive-article-date">
-  	<time datetime="2021-11-12T08:22:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-11-12</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2023/11/29/lora%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E7%8E%B0/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">lora原理与实现</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/11/12/bio-based%E8%AF%AD%E4%B9%89%E8%A7%92%E8%89%B2%E6%A0%87%E6%B3%A8/">bio-based语义角色标注</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AE%E8%B0%83"><span class="toc-number">2.</span> <span class="toc-text">微调</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#llama-cpp"><span class="toc-number">4.</span> <span class="toc-text">llama.cpp</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+        
+    </div>
+</aside>
+
+
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/11/02/%E5%9F%BA%E4%BA%8E%E6%A0%91%E5%BD%A2%E6%9D%A1%E4%BB%B6%E9%9A%8F%E6%9C%BA%E5%9C%BA%E7%9A%84%E9%AB%98%E9%98%B6%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-11-02T06:22:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-11-02</time>
-</a>
-        </div>
-    	 
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/11/02/%E5%9F%BA%E4%BA%8E%E6%A0%91%E5%BD%A2%E6%9D%A1%E4%BB%B6%E9%9A%8F%E6%9C%BA%E5%9C%BA%E7%9A%84%E9%AB%98%E9%98%B6%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/">基于树形条件随机场的高阶句法分析</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/10/30/%E5%B1%9E%E6%80%A7%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/" class="archive-article-date">
-  	<time datetime="2021-10-30T15:12:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-30</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/10/30/%E5%B1%9E%E6%80%A7%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/">属性抽取调研-工业界</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/10/30/%E5%85%B3%E7%B3%BB%E6%8A%BD%E5%8F%96-%E5%AD%A6%E6%9C%AF%E7%95%8C/" class="archive-article-date">
-  	<time datetime="2021-10-30T14:04:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-30</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/10/30/%E5%85%B3%E7%B3%BB%E6%8A%BD%E5%8F%96-%E5%AD%A6%E6%9C%AF%E7%95%8C/">关系抽取-学术界</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/10/30/%E5%85%B3%E7%B3%BB%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/" class="archive-article-date">
-  	<time datetime="2021-10-30T12:04:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-30</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/10/30/%E5%85%B3%E7%B3%BB%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/">关系抽取调研-工业界</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/10/28/bert%E5%92%8Cxlnet/" class="archive-article-date">
-  	<time datetime="2021-10-28T01:35:10.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-28</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/10/28/bert%E5%92%8Cxlnet/">bert和xlnet</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/10/16/biaffine%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-10-16T15:45:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-16</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/10/16/biaffine%E5%88%86%E6%9E%90/">biaffine分析</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/10/15/%E6%88%90%E5%88%86%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-10-15T15:30:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/10/15/%E6%88%90%E5%88%86%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/">成分句法分析</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/10/15/%E4%BE%9D%E5%AD%98%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-10-15T12:45:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/10/15/%E4%BE%9D%E5%AD%98%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/">依存句法分析</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/page/5/">&amp;laquo; Prev</a><a class="page-number" href="/archives/">1</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/4/">4</a><a class="page-number" href="/archives/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/archives/page/7/">7</a><a class="page-number" href="/archives/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/27/">27</a><a class="extend next" rel="next" href="/archives/page/7/">Next &amp;raquo;</a>
-    </nav>
   
 
 
@@ -632,8 +433,8 @@ var _hmt = _hmt || [];
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

@@ -212,6 +212,92 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-django-migrate运行python函数" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/01/22/django-migrate%E8%BF%90%E8%A1%8Cpython%E5%87%BD%E6%95%B0/">django-migrate运行python函数</a>
+    </h1>
+  
+
+        
+        <a href="/2018/01/22/django-migrate%E8%BF%90%E8%A1%8Cpython%E5%87%BD%E6%95%B0/" class="archive-article-date">
+  	<time datetime="2018-01-22T10:26:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-01-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>之前代码里面的contact是可以重复的，现在要将其改成unique的，改代码容易，但是还要兼容之前的数据，就要想办法将之前重复的给改掉<br>方法1: 手动写SQL，在执行到具体的migrations时先执行SQL，但是这个不太统一，另外推代码时容易忘记。 </p>
+<p>方法2: 框架用的人多就是好，不要重复造轮子，如下: </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Migration</span>(migrations.Migration): </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">unique_contact</span>(<span class="params">self,*args,**kwargs</span>): </span><br><span class="line">        <span class="comment"># 这个函数在更改contact字段时会先执行到这里 </span></span><br><span class="line">        <span class="comment">#将重复的contact更改掉 </span></span><br><span class="line"> </span><br><span class="line">    migrations.RunPython(unique_contact), <span class="comment"># 这个要在前面    </span></span><br><span class="line">    migrations.AlterField(model_name=<span class="string">&#x27;lofter_low&#x27;</span>,name=<span class="string">&#x27;contact&#x27;</span>,field=models.CharField(unique=<span class="literal">True</span>, max_length=<span class="number">20</span>),),] </span><br><span class="line">     </span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/01/22/django-migrate%E8%BF%90%E8%A1%8Cpython%E5%87%BD%E6%95%B0/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-2017年终总结" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1032,101 +1118,9 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-关于tornado-rabbitmq" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/06/30/%E5%85%B3%E4%BA%8Etornado-rabbitmq/">关于tornado+rabbitmq</a>
-    </h1>
-  
-
-        
-        <a href="/2017/06/30/%E5%85%B3%E4%BA%8Etornado-rabbitmq/" class="archive-article-date">
-  	<time datetime="2017-06-30T07:36:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-06-30</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="接触到的文章"><a href="#接触到的文章" class="headerlink" title="接触到的文章:"></a>接触到的文章:</h3><ul>
-<li><a target="_blank" rel="noopener" href="http://blog.csdn.net/weiyang7545/article/details/51742290">http://blog.csdn.net/weiyang7545/article/details/51742290</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/geasyheart/swift_rpc">https://github.com/geasyheart/swift_rpc</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/zetaops/websocket-tornado-rabbitmq-example">https://github.com/zetaops/websocket-tornado-rabbitmq-example</a></li>
-</ul>
-<p>今天开始测试发送工作..</p>
-<p>rabbitmq pub:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> pika</span><br><span class="line"><span class="keyword">import</span> tornado.ioloop</span><br><span class="line"><span class="keyword">from</span> tornado.web <span class="keyword">import</span> Application</span><br><span class="line"><span class="keyword">from</span> tornado.websocket <span class="keyword">import</span> WebSocketHandler</span><br><span class="line"></span><br><span class="line">LOG_FORMAT = (<span class="string">&#x27;%(levelname) -10s %(asctime)s %(name) -30s %(funcName) &#x27;</span></span><br><span class="line">              <span class="string">&#x27;-35s %(lineno) -5d: %(message)s&#x27;</span>)</span><br><span class="line">LOGGER = logging.Logger(__name__)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Publisher</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    EXCHANGE = <span class="string">&#x27;logs&#x27;</span></span><br><span class="line">    EXCHANGE_TYPE = <span class="string">&#x27;fanout&#x27;</span></span><br><span class="line">    ROUTING_KEY = <span class="string">&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, amqp_url</span>):</span><br><span class="line">        self._connection = <span class="literal">None</span></span><br><span class="line">        self._channel = <span class="literal">None</span></span><br><span class="line">        self._stopping = <span class="literal">False</span></span><br><span class="line">        self._url = amqp_url</span><br><span class="line">        self._closing = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">connect</span>(<span class="params">self</span>):</span><br><span class="line">        LOGGER.info(<span class="string">&#x27;Connecting to %s&#x27;</span>, self._url)</span><br><span class="line">        self._connection = pika.adapters.TornadoConnection(pika.URLParameters(self._url),</span><br><span class="line">                                                           self.on_connection_open)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_connection_open</span>(<span class="params">self, unused_connection</span>):</span><br><span class="line">        LOGGER.info(<span class="string">&#x27;Connection opened&#x27;</span>)</span><br><span class="line">        self.open_channel()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">open_channel</span>(<span class="params">self</span>):</span><br><span class="line">        LOGGER.info(<span class="string">&#x27;Creating a new channel&#x27;</span>)</span><br><span class="line">        self._connection.channel(on_open_callback=self.on_channel_open)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_channel_open</span>(<span class="params">self, channel</span>):</span><br><span class="line">        LOGGER.info(<span class="string">&#x27;Channel opened&#x27;</span>)</span><br><span class="line">        self._channel = channel</span><br><span class="line">        self.setup_exchange(self.EXCHANGE)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">setup_exchange</span>(<span class="params">self, exchange_name</span>):</span><br><span class="line">        LOGGER.info(<span class="string">&#x27;Declaring exchange %s&#x27;</span>, exchange_name)</span><br><span class="line">        self._channel.exchange_declare(self.on_exchange_declareok,</span><br><span class="line">                                       exchange_name,</span><br><span class="line">                                       self.EXCHANGE_TYPE)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_exchange_declareok</span>(<span class="params">self, unused_frame</span>):</span><br><span class="line">        LOGGER.info(<span class="string">&#x27;Exchange declared&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">publish_message</span>(<span class="params">self, message</span>):</span><br><span class="line">        properties = pika.BasicProperties(delivery_mode=<span class="number">2</span>, )</span><br><span class="line"></span><br><span class="line">        self._channel.basic_publish(self.EXCHANGE, self.ROUTING_KEY,</span><br><span class="line">                                    json.dumps(message, ensure_ascii=<span class="literal">False</span>),</span><br><span class="line">                                    properties)</span><br><span class="line"></span><br><span class="line">        LOGGER.info(<span class="string">&#x27;Published message&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">IndexHandler</span>(<span class="title class_ inherited__">WebSocketHandler</span>):</span><br><span class="line">    links = []</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">open</span>(<span class="params">self</span>):</span><br><span class="line">        self.links.append(self)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_message</span>(<span class="params">self, message</span>):</span><br><span class="line">        app.pika.publish_message(message)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">app = Application([</span><br><span class="line">    (<span class="string">r&#x27;/&#x27;</span>, IndexHandler)</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">url = <span class="string">&quot;amqp://zy:123456@192.168.1.158:5672/%2F?connection_attempts=3&amp;heartbeat_interval=3600&quot;</span></span><br><span class="line">app.pika = Publisher(url)</span><br><span class="line">app.listen(<span class="number">80</span>)</span><br><span class="line">ioloop = tornado.ioloop.IOLoop.current()</span><br><span class="line">ioloop.add_timeout(<span class="number">500</span>, app.pika.connect)</span><br><span class="line">ioloop.start()</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/06/30/%E5%85%B3%E4%BA%8Etornado-rabbitmq/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/12/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="page-number" href="/page/12/">12</a><span class="page-number current">13</span><a class="page-number" href="/page/14/">14</a><a class="page-number" href="/page/15/">15</a><span class="space">&hellip;</span><a class="page-number" href="/page/26/">26</a><a class="extend next" rel="next" href="/page/14/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/12/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="page-number" href="/page/12/">12</a><span class="page-number current">13</span><a class="page-number" href="/page/14/">14</a><a class="page-number" href="/page/15/">15</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/14/">Next &amp;raquo;</a>
     </nav>
   
 
