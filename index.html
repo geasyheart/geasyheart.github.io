@@ -212,6 +212,123 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-LLM-RHLF工作原理一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2024/04/07/LLM-RHLF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/">LLM-RHLF工作原理一</a>
+    </h1>
+  
+
+        
+        <a href="/2024/04/07/LLM-RHLF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/" class="archive-article-date">
+  	<time datetime="2024-04-07T07:41:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-04-07</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>大模型最近很是火啊，媒体铺天盖地的宣传，候选者简历中写到LLM微调等等。本文希望介绍下RHLF在整个训练工作中的位置以及起到的作用，方便理解与后续应用。</p>
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><p>本文以<a target="_blank" rel="noopener" href="https://github.com/huggingface/trl/blob/main/examples/notebooks/">huggingface trl&#x2F;RHLF notebooks</a>讲到的几个例子作为入口。在这个文件夹下，一共有三个例子：</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://github.com/huggingface/trl/blob/main/examples/notebooks/gpt2-sentiment.ipynb">gpt2-sentiment.ipynb</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/huggingface/trl/blob/main/examples/notebooks/gpt2-sentiment-control.ipynb">gpt2-sentiment-control.ipynb</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/huggingface/trl/blob/main/examples/notebooks/best_of_n.ipynb">best_of_n.ipynb</a></li>
+</ol>
+<p>同时也按照上述这三个文件顺序进行分析。</p>
+<h3 id="一、gpt2-sentiment-ipynb"><a href="#一、gpt2-sentiment-ipynb" class="headerlink" title="一、gpt2-sentiment.ipynb"></a>一、gpt2-sentiment.ipynb</h3><blockquote>
+<p>目的：这个文件实现的是如何利用RHLF学会生成正向评论。</p>
+</blockquote>
+<img src="/2024/04/07/LLM-RHLF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/1.png" class="" title="流程图">
+
+
+<h4 id="1-Load-IMDB-dataset"><a href="#1-Load-IMDB-dataset" class="headerlink" title="1. Load IMDB dataset"></a>1. Load IMDB dataset</h4><p>数据集默认有两个字段，<code>text</code> 和<code>label</code>，即用户对一部电影的评论和这条评论的情感倾向（正向、负向）。</p>
+<p>这里对<code>text</code>字段随机截断长度为n后面的文本，例如：text&#x3D;<code>这个电影我觉得很棒</code>。 截取后变成query&#x3D;<code>这个电影</code>。</p>
+<h4 id="2-Model和Ref-Model"><a href="#2-Model和Ref-Model" class="headerlink" title="2. Model和Ref Model"></a>2. Model和Ref Model</h4><p>这里采用GPT2作为训练model,ref model和model是一样的，可先理解成model是用来训练的，ref model是用来参考的。<br>ref model是RHLF训练过程中不可缺少的一部分，也跟在generation model后面添加ValueHead层是一个道理，关于强化学习更细力度，本文先忽略。</p>
+<h4 id="3-reward-model"><a href="#3-reward-model" class="headerlink" title="3. reward model"></a>3. reward model</h4><p>这里采用distilbert-imdb模型来作为打分模型，这个模型的作用是输入一条评论，它会给出positive、negative的打分。</p>
+<h4 id="4-训练"><a href="#4-训练" class="headerlink" title="4. 训练"></a>4. 训练</h4><p>即让model基于query生成指max_new_tokens的文本，然后让reward model来打分，以positive score为目标，不断优化model,使其能够基于用户给定的文本开头来生成正向评论。</p>
+<p>这里的max_new_tokens也比较有意思，它可以有两层的不同解释：</p>
+<ol>
+<li>一条文本的长度不会很长</li>
+<li>折扣因子</li>
+</ol>
+<p>关于后者，我觉得会是一个比较有意思的点。在RHLF中，有针对每一步给一个score，还有走完后针对整条路径给一个score。那这里的max_new_tokens是不是就可以理解成是中间的状态～<br>既不会因为每一步都打分造成训练效率低下也不会因为对整条路径打分导致某些点决策失误所带来的更大偏差，尽量环节这种情况。</p>
+<p>结束。</p>
+<h3 id="二、gpt2-sentiment-control-ipynb"><a href="#二、gpt2-sentiment-control-ipynb" class="headerlink" title="二、gpt2-sentiment-control.ipynb"></a>二、gpt2-sentiment-control.ipynb</h3><blockquote>
+<p>目的：通过添加prompt来控制生成评论的情感。</p>
+</blockquote>
+<img src="/2024/04/07/LLM-RHLF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/2.png" class="" title="流程图">
+
+<p>这里的prompt有三类：positive、negative、neutral。由于neutral是reward model本身能力所不具备的，看到这里也可以跳过。</p>
+<p>其构造示例如下：</p>
+<figure class="highlight md"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">query=&quot;[positive]这个电影很&quot;</span><br></pre></td></tr></table></figure>
+
+<p>那么预期目标是<code>好</code>。</p>
+<p>如果是</p>
+<figure class="highlight md"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">query=&quot;[negative]这个电影很&quot;</span><br></pre></td></tr></table></figure>
+
+<p>那么预期目标是<code>不好</code>，<code>差</code>之类的情感。</p>
+<p>剩下流程和上面文件一致，此处忽略。</p>
+<h3 id="三、best-of-n-ipynb"><a href="#三、best-of-n-ipynb" class="headerlink" title="三、best_of_n.ipynb"></a>三、best_of_n.ipynb</h3><p>目的：RHLF的目标是超越原有天花板，那这种是选取ref model的best of n来和RHLF训练后的做个比对。</p>
+<p>整体下来，reward model占据很重要的作用，决定了RHLF的效果，需要注意。</p>
+<p>更多看下原代码，整体流程不是很复杂。又水水水了一篇。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2024/04/07/LLM-RHLF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-qwen1-8B试玩" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1162,95 +1279,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-simcse模型" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2023/03/07/simcse%E6%A8%A1%E5%9E%8B/">simcse模型</a>
-    </h1>
-  
-
-        
-        <a href="/2023/03/07/simcse%E6%A8%A1%E5%9E%8B/" class="archive-article-date">
-  	<time datetime="2023-03-07T07:18:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-03-07</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>如何使用无监督的方式来判断两个句子的相似度呢？simcse给你答案！</p>
-<p>相关资料：<br><a target="_blank" rel="noopener" href="https://kexue.fm/archives/8348">中文任务还是SOTA吗？我们给SimCSE补充了一些实验</a><br><a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/tree/develop/applications/neural_search/recall/simcse">paddleNLP simcse</a></p>
-<h2 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h2><p>请先看<a href="/2023/03/07/in-batch-negative%E6%95%B0%E6%8D%AE%E5%A2%9E%E5%BC%BA/" title="in-batch-negative数据增强">in-batch-negative数据增强</a>这篇文章，模型，推理，所有步骤都不变，就一个地方：<code>构造训练数据集</code>。</p>
-<p>train.tsv如下所示:</p>
-<p>第一列为query，第二列为doc</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">如何使用无监督的方式来判断两个句子的相似度呢？simcse给你答案！  如何使用无监督的方式来判断两个句子的相似度呢？simcse给你答案！</span><br><span class="line">相关资料    相关资料</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>query和doc是一模一样的！</p>
-</blockquote>
-<p>那这个模型是如何工作的呢？</p>
-<blockquote>
-<p>分别对同一个句子进行两次dropout，然后判断这两个向量的相似度。</p>
-</blockquote>
-<h2 id="评估"><a href="#评估" class="headerlink" title="评估"></a>评估</h2><p>评估和<a href="/2023/03/07/in-batch-negative%E6%95%B0%E6%8D%AE%E5%A2%9E%E5%BC%BA/" title="in-batch-negative数据增强">in-batch-negative数据增强</a>里面的评估部分一模一样。</p>
-<p>完结。。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2023/03/07/simcse%E6%A8%A1%E5%9E%8B/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
@@ -1265,7 +1293,7 @@ var _hmt = _hmt || [];
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2023 张宇
+    		&copy; 2024 张宇
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten

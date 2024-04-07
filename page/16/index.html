@@ -212,6 +212,96 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-45-02http反向代理及haproxy" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/10/29/45-02http%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E5%8F%8Ahaproxy/">45_02http反向代理及haproxy</a>
+    </h1>
+  
+
+        
+        <a href="/2015/10/29/45-02http%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E5%8F%8Ahaproxy/" class="archive-article-date">
+  	<time datetime="2015-10-29T14:22:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-29</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>配置实例: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">#Global settings </span><br><span class="line"># </span><br><span class="line">global </span><br><span class="line">    log         127.0.0.1 local2 </span><br><span class="line">    chroot         /var/lib/haproxy </span><br><span class="line">    pidfile        /var/run/haproxy.pid </span><br><span class="line">    maxconn    4000 </span><br><span class="line">    user        haproxy </span><br><span class="line">    group        haproxy </span><br><span class="line">    spread-check 3 </span><br><span class="line">    nbproc 1 </span><br><span class="line">    daemon </span><br><span class="line"> </span><br><span class="line">defaults </span><br><span class="line">    mode             http </span><br><span class="line">    log            global </span><br><span class="line">    option            httplog </span><br><span class="line">    option            httpclose </span><br><span class="line">    option            dontlognull </span><br><span class="line">    option    http-server-close </span><br><span class="line">    option     forwardfor     except 127.0.0.0/8 </span><br><span class="line">    option            redispatch </span><br><span class="line">    retries             3 </span><br><span class="line">    timeout http-request    10s </span><br><span class="line">    timeout queue        1m </span><br><span class="line">    timeout connect    10s </span><br><span class="line">    timeout client        1m </span><br><span class="line">    timeout server      1m </span><br><span class="line">    timeout http-keep-alive 10s </span><br><span class="line">    timeout check         10s </span><br><span class="line">    maxconn        3000 </span><br><span class="line"> </span><br><span class="line">listen stats </span><br><span class="line">    mode     http </span><br><span class="line">    bind    0.0.0.0:1080 </span><br><span class="line">    stats    enable </span><br><span class="line">    stats     hide-version </span><br><span class="line">    stats     uri    /haproxyadmin?stats </span><br><span class="line">    stats     realm    Haproxy\ Statistics </span><br><span class="line">    stats     auth     admin:admin　　　　这个要修改 </span><br><span class="line">    stats     admin       if     TRUE </span><br><span class="line"> </span><br><span class="line">frontend    http-in </span><br><span class="line">    bind     *:80 </span><br><span class="line">    mode     http </span><br><span class="line">    log     global </span><br><span class="line">    option    httpclose </span><br><span class="line">    option     logasap </span><br><span class="line">    option     dontlognull </span><br><span class="line">    capture        request     header     Host     len     20 </span><br><span class="line">    capture     request     header    Referer len     60 </span><br><span class="line">    default_backend     servers </span><br><span class="line"> </span><br><span class="line">frontend     healthcheck </span><br><span class="line">    bind    :1099 </span><br><span class="line">    mode     http </span><br><span class="line">    option    httpclose </span><br><span class="line">    option     forwardfor </span><br><span class="line">    default_backend     servers </span><br><span class="line"> </span><br><span class="line">backend     servers </span><br><span class="line">    balance     roundrobin </span><br><span class="line">    server     websrv1     192.168.10.11:80     check     maxconn     2000 </span><br><span class="line">    server     websrv2     192.168.10.12:80    check     maxconn    2000 </span><br></pre></td></tr></table></figure>
+<p>规划 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">director: </span><br><span class="line">eth0: 172.16.100.107 </span><br><span class="line">eth0: 192.168.10.7 </span><br><span class="line"> </span><br><span class="line">realserver:         route: </span><br><span class="line">192.168.10.11        192.168.10.7 </span><br><span class="line">192.168.10.12        192.168.10.7 </span><br><span class="line"> </span><br><span class="line">director: </span><br><span class="line">    #yum  -y install haproxy </span><br><span class="line">    #cp /etc/haproxy/haproxy.conf /root/ </span><br><span class="line">    #vim /etc/sysconfig/rsyslog </span><br><span class="line">    改为: </span><br><span class="line">    SYSLOGD_OPTIONS=&quot;-c 2 -r&quot; </span><br><span class="line">    ＃vim /etc/haproxy/haproxy.conf </span><br><span class="line">    添加 local2.*     /var/log/haproxy.log </span><br><span class="line">    #service haproxy start            先确保日志是否正确，然后再更改配置文件 </span><br><span class="line">　 </span><br><span class="line">#service haproxy restart </span><br><span class="line"> </span><br><span class="line">访问172.16.100.107 </span><br><span class="line"> </span><br><span class="line">访问状态: </span><br><span class="line">172.16.100.107:1080/haproxyadmin?stats </span><br><span class="line">用户，密码:admin admin </span><br><span class="line"> </span><br><span class="line">当一台服务器停止了，会有显示的 </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">关于对mysql实现负载均衡: </span><br><span class="line"> </span><br><span class="line">listen ..... </span><br><span class="line"> </span><br><span class="line">frontend mysql </span><br><span class="line">    bind *:3306 </span><br><span class="line">    mode tcp </span><br><span class="line">    log global </span><br><span class="line">    default_backend mysqlservers </span><br><span class="line"> </span><br><span class="line">backend mysqlservers </span><br><span class="line">    balance leastconn </span><br><span class="line">    server dbsrv1  192.168.10.11:3306 check port 3306 intval 2 rise 1 fall 2   maxconn   300 </span><br><span class="line">    server dbsrv2  192.168.10.12:3306 check port 3306 intval 2 rise 1 fall 2   maxconn   300 </span><br></pre></td></tr></table></figure>
+<p>实验:<br>Keepalived + haproxy<br>Keepalived + nginx </p>
+<p>这个地方只是最简单的，可自行参考《构建高可用Linux服务器》</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/10/29/45-02http%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E5%8F%8Ahaproxy/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-45-01http反向代理及haproxy" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1592,109 +1682,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-41-04Linux集群系列之二十二-Keepalived详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/09/30/41-04Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%8C%E5%8D%81%E4%BA%8C-Keepalived%E8%AF%A6%E8%A7%A3/">41_04Linux集群系列之二十二--Keepalived详解</a>
-    </h1>
-  
-
-        
-        <a href="/2015/09/30/41-04Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%8C%E5%8D%81%E4%BA%8C-Keepalived%E8%AF%A6%E8%A7%A3/" class="archive-article-date">
-  	<time datetime="2015-09-30T03:43:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-30</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>我认为Keepalived主要实现的功能有： </p>
-<ol>
-<li>VIP漂移； </li>
-<li>自定义脚本，另外不停的检测脚本； </li>
-<li>当资源切换到其他主机时，资源应该做哪些服务；</li>
-</ol>
-<p>我对于前两条的认知在于：比如运行了MySQL服务，那么不停的检测MySQL服务，如果MySQL服务停止，那么VIP漂移；<br>而对于Keepalived+LVS这种模型，只需要指明Real server以及sorry server web服务即可，并不需要做这些，而如果Nginx作为Director的话，就需要这么做了；；； </p>
-<p>如何利用keepalived实现ipvs的高可用?<br>VIP:<br>172.16.100.1<br>RS:<br>172.16.100.11<br>172.16.100.12 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line">１．先搭建好DR模型的LVS集群 </span><br><span class="line">２．yum -y install ipvsadm keepalived </span><br><span class="line"><span class="built_in">cp</span> /etc/keepalived/keepalived.conf /root </span><br><span class="line">vim /etc/keepalived/keepalived.conf </span><br><span class="line"> </span><br><span class="line">global_defs &#123; </span><br><span class="line">   notification_email &#123;   万一出故障，应该发给谁 </span><br><span class="line">     root@localhost </span><br><span class="line">   &#125; </span><br><span class="line"> notification_email_from keepalived@localhost    是谁发的，但是由于是本地发的，并不会验证这个用户是否存在 </span><br><span class="line">   smtp_server 127.0.0.1 </span><br><span class="line">   smtp_connect_timeout 30 </span><br><span class="line">   router_id LVS_DEVEL </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">vrrp_instance VI_1 &#123;  定义虚拟路由 </span><br><span class="line">    state MASTER      定义为主节点 </span><br><span class="line">    interface eth0 </span><br><span class="line">    virtual_router_id 51 </span><br><span class="line">    priority 101　 </span><br><span class="line">    优先级减去出现故障后降低的优先级大小要小于备节点的大小才行,备节点的优先级要稍微小于这个值 </span><br><span class="line">    advert_int 1 </span><br><span class="line">    authentication &#123; </span><br><span class="line">        auth_type PASS </span><br><span class="line">        auth_pass Your_passwd    认证 </span><br><span class="line">    &#125; </span><br><span class="line">    virtual_ipaddress &#123; </span><br><span class="line">        172.16.100.1/16 dev eth0 label eth0:0 </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line">virtual_server 172.16.100.1 80 &#123; </span><br><span class="line">    delay_loop 6 </span><br><span class="line">    lb_algo rr　　　调度算法 </span><br><span class="line">    lb_kind DR　　LVS模型 </span><br><span class="line">    net_mask 255.255.0.0 </span><br><span class="line">    persistence_timeout 50   持久连接 </span><br><span class="line">    protocol TCP </span><br><span class="line"> </span><br><span class="line">real_server 172.16.100.11 80 &#123; </span><br><span class="line">        weight 1  定义权重 </span><br><span class="line">        HTTP_GET &#123; </span><br><span class="line">            url &#123;　　　定义url,可以定义多个，看man </span><br><span class="line">              path / </span><br><span class="line">              status_code 200 </span><br><span class="line">            &#125; </span><br><span class="line">            connect_timeout 3    定义连接时常 </span><br><span class="line">            nb_get_retry 3　　　重试次数 </span><br><span class="line">            delay_before_retry 3　延迟时间 </span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">real_server 172.16.100.12 80 &#123; </span><br><span class="line">        weight 1  定义权重 </span><br><span class="line">        HTTP_GET &#123; </span><br><span class="line">            url &#123;　　　定义url,可以定义多个，看man </span><br><span class="line">              path / </span><br><span class="line">              status_code 200 </span><br><span class="line">            &#125; </span><br><span class="line">            connect_timeout 3    定义连接时常 </span><br><span class="line">            nb_get_retry 3　　　重试次数 </span><br><span class="line">            delay_before_retry 3　延迟时间 </span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#cp keepalived.conf node2:/etc/keepalived/ </span></span><br><span class="line">需要把 </span><br><span class="line">state MASTER 改为state BACKUP </span><br><span class="line">priority 100　　　　　　　这个值要小于主节点的优先级值，不过不要小太多，因为后面还有定义，可以是主:101,备:100 </span><br><span class="line"> </span><br><span class="line">＃<span class="keyword">for</span> I <span class="keyword">in</span> &#123;1..2&#125;;<span class="keyword">do</span> ssh root@node<span class="variable">$I</span> <span class="string">&#x27;serice keepalived start&#x27;</span>;<span class="keyword">done</span> </span><br><span class="line">＃<span class="built_in">tail</span> /var/log/message </span><br><span class="line"> </span><br><span class="line">测试，如果RS中的一台主机服务出现错误，例如模仿: </span><br><span class="line">[RS1]<span class="comment">#service httpd stop </span></span><br><span class="line">[VIP]<span class="comment">#ipvsadm -L -n </span></span><br><span class="line">可以看到RS1的条目被删除，并且会收到邮件 </span><br><span class="line">[RS1]<span class="comment">#service httpd start </span></span><br><span class="line">[VIP]<span class="comment">#ipvsadm -L -n </span></span><br><span class="line">可以看到RS1的条目重新加入; </span><br><span class="line"> </span><br><span class="line">１．如果所有的realserver都出现故障了怎么办? </span><br><span class="line"> </span><br><span class="line">DIP1:172.16.100.6 </span><br><span class="line">DIP2:172.16.100.7 </span><br><span class="line">yum -y install httpd 都做 </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Under maintainence......&quot;</span> &gt; /var/www/html/index.html </span><br><span class="line">service httpd start </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">vim /etc/keepalived/keepalived.conf </span><br><span class="line">在virtual_server下面添加sorry_server,例如: </span><br><span class="line">state MASTER </span><br><span class="line">priority 101 </span><br><span class="line">sorry_server 127.0.0.1 80 </span><br><span class="line"> </span><br><span class="line">dip2: </span><br><span class="line">scp dip1:/etc/keepalived/keepalived.conf /etc/keepalived/ </span><br><span class="line"> </span><br><span class="line">vim /etc/keepalived/keepalived.conf </span><br><span class="line">添加: </span><br><span class="line">state BACKUP </span><br><span class="line">priority 100 </span><br><span class="line">sorry_server 127.0.0.1 80 </span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> I <span class="keyword">in</span> &#123;1..2&#125;;<span class="keyword">do</span> ssh dip<span class="variable">$I</span> <span class="string">&#x27;service keepalived start &#x27;</span>;<span class="keyword">done</span> </span><br><span class="line"><span class="built_in">tail</span> /var/log/messages </span><br><span class="line"> </span><br><span class="line">测试:当两个realserver都down掉的时候? </span><br><span class="line"> </span><br><span class="line">rs1:service httpd stop </span><br><span class="line">rs2:service httpd stop </span><br><span class="line"> </span><br><span class="line">ipvsadm -L -n  可以看到两个节点都停止了； </span><br><span class="line">127.0.0.1上去了； </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
-<p>２．自写检测脚本，完成维护模式切换? </p>
-<p>DIP: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">在实例之外添加内容: </span><br><span class="line">vrrp_script chk_schedown &#123; </span><br><span class="line">    script <span class="string">&quot;killall -0 haproxy&quot;</span> </span><br><span class="line">    interval 2 </span><br><span class="line">        <span class="comment">#check every 2 seconds </span></span><br><span class="line">    weight -2  一旦检测失败，权重-2 </span><br><span class="line">        <span class="comment">#if failed,decrease 2 of the priority </span></span><br><span class="line">    fall 2    检测失败两次则失败 </span><br><span class="line">        <span class="comment">#require 2 failures for failures </span></span><br><span class="line">    rise 1 </span><br><span class="line">        <span class="comment">#require 1 successes for ok </span></span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">例: </span><br><span class="line"><span class="comment">#vim /etc/keepalived/keepalived.conf </span></span><br><span class="line">在实例之外添加内容(即另找一行添加): </span><br><span class="line">vrrp_script chk_schedown&#123; </span><br><span class="line">    script <span class="string">&quot;[ -e /etc/keepalived/down ] &amp;&amp; exit 1 || exit 0&quot;</span> </span><br><span class="line">     interval 2 </span><br><span class="line">     weight -2 </span><br><span class="line">     fall 2 </span><br><span class="line">     rise 1 </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">补充:这个脚本必须在vrrp_instance　VI_1的上面，配置文件可看总结(1)keepalived功能小测试 </span><br><span class="line"> </span><br><span class="line">上述脚本怎么执行，如何执行， </span><br><span class="line">在vrrp_instance VI_1 中定义，即: </span><br><span class="line">定义在实例之中,添加: </span><br><span class="line">track_script&#123; </span><br><span class="line">    chk_schedown </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="comment">#service keepalived restart </span></span><br><span class="line"> </span><br><span class="line">测试:100.6 </span><br><span class="line"><span class="comment">#touch  /etc/keepalived/down </span></span><br><span class="line"><span class="comment">#tail /var/log/messages </span></span><br><span class="line">会发现eth0:0不再有了，移到另外一个DIP主机上； </span><br></pre></td></tr></table></figure>
-<p>３．如何在vrrp事务发生时，发送警告邮件给指定的管理员? </p>
-<p>标题: vip added to HA1<br>正文:日期　时间，HA1 STATE from MASTER to BACKUP </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/keepalived/notify.sh </span></span><br><span class="line"><span class="comment">#!/bin/bash </span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line">contact=<span class="string">&#x27;root@localhost&#x27;</span> </span><br><span class="line"><span class="function"><span class="title">Usage</span></span>()&#123; </span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;Usage:`basename <span class="variable">$0</span>` &#123;master|backup|fault&#125; VIP&quot;</span> </span><br><span class="line">&#125; </span><br><span class="line"><span class="function"><span class="title">Notify</span></span>()&#123; </span><br><span class="line">    subject=<span class="string">&quot;`hostname`&#x27;s state changed to <span class="variable">$1</span>&quot;</span> </span><br><span class="line">    mailbody=<span class="string">&quot;`date +%F`:`hostname`&#x27;s state change to <span class="variable">$1</span>,<span class="variable">$VIP</span> floating&quot;</span> </span><br><span class="line">    <span class="built_in">echo</span> <span class="variable">$mailbody</span> | mail -s <span class="string">&quot;<span class="variable">$subject</span>&quot;</span> <span class="variable">$contact</span> </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">[ <span class="variable">$#</span> -lt 2 ]&amp;&amp; Usage &amp;&amp; <span class="built_in">exit</span> </span><br><span class="line">VIP=<span class="variable">$2</span> </span><br><span class="line"><span class="keyword">case</span> <span class="variable">$1</span> <span class="keyword">in</span> </span><br><span class="line">    master) </span><br><span class="line">    Notify master;; </span><br><span class="line">    backup) </span><br><span class="line">    Notify backup;; </span><br><span class="line">    fault) </span><br><span class="line">    Notify fault;; </span><br><span class="line">    *) </span><br><span class="line">    Usage </span><br><span class="line">    <span class="built_in">exit</span> 1;; </span><br><span class="line"><span class="keyword">esac</span> </span><br><span class="line"> </span><br><span class="line">在实例中添加如下信息: </span><br><span class="line"> </span><br><span class="line">notify_master <span class="string">&quot;/etc/keepalived/notify.sh master 172.16.100.1&quot;</span> 当变成主节点应该执行这个脚本 </span><br><span class="line">notify_backup <span class="string">&quot;/etc/keepalived/notify.sh backup 172.16.100.1&quot;</span> </span><br><span class="line">当变成备节点应该执行的脚本 </span><br><span class="line">notify_backup <span class="string">&quot;/etc/keepalived/notify.sh fault 172.16.100.1&quot;</span> </span><br><span class="line">当主节点变不了，备节点也变不了，应该执行的脚本 </span><br><span class="line"> </span><br><span class="line">service keepalived restart </span><br><span class="line"> </span><br><span class="line">测试: </span><br><span class="line"><span class="built_in">touch</span> /etc/keepalived/down </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
-<p>视频最后有个更完善的脚本，我没有记． </p>
-<p>这个写的挺好:<br><a target="_blank" rel="noopener" href="http://zhangxugg-163-com.iteye.com/blog/1665419">http://zhangxugg-163-com.iteye.com/blog/1665419</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/09/30/41-04Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%8C%E5%8D%81%E4%BA%8C-Keepalived%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/15/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="page-number" href="/page/15/">15</a><span class="page-number current">16</span><a class="page-number" href="/page/17/">17</a><a class="page-number" href="/page/18/">18</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/17/">Next &amp;raquo;</a>
@@ -1709,7 +1696,7 @@ var _hmt = _hmt || [];
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2023 张宇
+    		&copy; 2024 张宇
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten

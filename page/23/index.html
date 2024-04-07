@@ -212,6 +212,111 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-19-02DNS服务相关概念详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/03/22/19-02DNS%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%E8%AF%A6%E8%A7%A3/">19_02DNS服务相关概念详解</a>
+    </h1>
+  
+
+        
+        <a href="/2015/03/22/19-02DNS%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%E8%AF%A6%E8%A7%A3/" class="archive-article-date">
+  	<time datetime="2015-03-22T14:51:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>DNS服务器类型：<br>    主DNS服务器：数据修改<br>    辅助DNS服务器：请求数据同步<br>    $TTL    86400;缓存时间<br>        serial number        ；版本号<br>        refresh            ；定义辅助DNS多久刷新一次主DNS版本号<br>        retry            ；如果没响应，就重试，应该小于刷新时间    <br>        expire            ；过期时间<br>        nagative answer TTL ；(缓存时间，如果没有设定$TTL值，这个值就可当作$TTL)<br>    缓存DNS服务器<br>        不提供权威答案，只提供缓存，节约带宽<br>    转发器<br>        不缓存，只提供转发功能，使用转发器可绕过从根服务器开始按照正常流程检索的正常过程。 </p>
+<p>如果主DNS服务器挂了，辅助DNS服务器就会在一定时间内进行多次查证主DNS服务器是否在线，如果没有收到任何回应，辅助DNS服务器就会自杀，而不是替代主DNS服务器！ </p>
+<p>数据库中，每一个条目称作一个资源记录(resource record ，RR)<br>资源记录格式RRT(Resource Record Type) </p>
+<p>资源记录类型：<br>SOA(Start of Authority):定义一个DNS区； </p>
+<p>    ZONE NAME    TTL        IN        SOA        FQDN        ADMINSTRATOR_MAILBOX(<br>                    serial number        ；版本号<br>                    refresh            ；定义辅助DNS多久刷新一次主DNS版本号<br>                    retry            ；如果没响应，就重试，应该小于刷新时间    <br>                    expire            ；过期时间<br>                    na  ttl)<br>注意:<br>    时间单位M（分钟）、H（小时）、D（天）、W（周），默认是秒；<br>    邮件格式：<a href="mailto:&#97;&#100;&#x6d;&#x69;&#110;&#64;&#x75;&#110;&#114;&#x61;&#x76;&#101;&#108;&#46;&#99;&#x6f;">&#97;&#100;&#x6d;&#x69;&#110;&#64;&#x75;&#110;&#114;&#x61;&#x76;&#101;&#108;&#46;&#99;&#x6f;</a>m—&gt;应该写成admin.unravel.com </p>
+<p>举例1: </p>
+<p>    unravel.com.        600        IN        SOA        ns1.unravel.com.        admin.unravel.com.(<br>                    20141112    ;(&lt;&#x3D;10)<br>                    1H<br>                    5M<br>                    1W    ;重试1周后依然不在线，则就挂了<br>                    1D    );否定TTL值 
+                     </p>
+<p>NS(name server):Domain NAME —&gt;FQDN（用来指定一个区的服务器，并将子域授权给其他机构）<br>    unravel.com.        600        IN        NS        ns.unravel.com.<br>    ns.unravel.com.        600        IN        A        1.1.1.2 </p>
+<p>MX(mail exchanger):ZONE NAME –&gt;FQDN（用来记录邮件交换记录）<br>    ZONE NAME    TTL        IN        MX    pri        VALUE<br>                    优先级：0~99，数字越小级别越高 </p>
+<p>举例2:<br>    unravel.com.    600        IN        MX     10        mail.unravel.com.<br>    mail.unravel.com.    600    IN        A            1.1.1.3 </p>
+<p>A(address):FQDN –&gt;IPv4 （提供域名到IPV4地址的映射）<br>AAAA:FQDN –&gt;IPv6     (提供域名到IPV6地址的映射)<br>PTR(pointer):ip –&gt;FQDN  (提供从IP地址到域名的反向映射)<br>CNAME(Canonical NAME正式名称)：FQDN—&gt;FQDN    （记录为一个域名分配别名）<br>    www2.unravel.com.        IN        CNAME        <a target="_blank" rel="noopener" href="http://www.unravel.com/">www.unravel.com</a> </p>
+<p>对于DNS，应该知道的概念:    域(Domain)  区域(Zone) </p>
+<p>建立两个区域文件： </p>
+<p>正向区域文件：<br>    unravel.com.        IN         SOA    ns1.unravel.com.<br>    <a target="_blank" rel="noopener" href="http://www.unravel.com/">www.unravel.com</a>.    IN        A       192.168.0.1<br>简写为：<br>    www            IN        A       192.168.0.1 </p>
+<p>反向区域文件：<br>0.168.192.in-addr.arpa.        IN         SOA </p>
+<p>1.0.168.192.in-addr.arpa.    IN        PTR        <a target="_blank" rel="noopener" href="http://www.unravel.com/">www.unravel.com</a>.    <br>简写为：    <br>1                IN        PTR        <a target="_blank" rel="noopener" href="http://www.unravel.com/">www.unravel.com</a>.<br>    <br>    <br>第一条必须为SOA；<br>MX记录只能定义在正向记录文件当中；<br>NS记录正向反向都可以记录；<br>A只能记录在正向；<br>PTR只能记录在反向； </p>
+<p>区域传送的类型：<br>    完全区域传送：axfr<br>    增量区域传送：ixfr </p>
+<p>区域类型：<br>    主区域：master<br>    从区域：slave<br>    提示区域：hint(定义根的位置)<br>    转发区域：forward </p>
+<p>网络地址<br>any     T_ANY<br>所有&#x2F;任何与指定域相关的信息<br>mx      T_MX<br>该域的邮件网关<br>ns      T_NS<br>域名服务器<br>soa     T_SOA<br>区域的授权记录<br>hinfo   T_HINFO<br>主机信息<br>axfr    T_AXFR<br>区域传输记录(必须是询问一台授权的服务器)<br>txt     T_TXT<br>任意的字符串信息<br>(参看RFC 1035以获得完整的列表.) </p>
+<p>query-class<br>是指在查询中请求的网络等级.如果省略,默认为 “in”(C_IN &#x3D; Internet . ) 以下的等级是可识别的:<br>in      C_IN<br>Internet等级的域<br>any     C_ANY<br>所有&#x2F;任何等级的信息</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/03/22/19-02DNS%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-37-01Linux集群系列之四-LVS-DR详解及配置过程" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1282,115 +1387,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-15-all-暂时不更新" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/15/15-all-%E6%9A%82%E6%97%B6%E4%B8%8D%E6%9B%B4%E6%96%B0/">15__all_暂时不更新</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/15/15-all-%E6%9A%82%E6%97%B6%E4%B8%8D%E6%9B%B4%E6%96%B0/" class="archive-article-date">
-  	<time datetime="2015-03-15T10:01:13.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-15</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>说明:15系列将暂时不会更新<br>缘由: </p>
-<ol>
-<li>使用编译好的内核，没有讲到怎样配置内核编译选项。 </li>
-<li>主要原因:太他妈难了，如果说嵌入式是要先掌握内核的编译，但是这个，是如何把系统给弄起来，快崩溃了，不如直接上手gentoo，<br>稍微简单点，还能亲自锻炼动手能力。<br>系统启动流程: <blockquote>
-<p>POST–&gt;BIOS(Boot Sequence)–&gt;Bootloader–&gt;Kernel(initrd,initramfs)–&gt;init(&#x2F;etc&#x2F;inittab)<br>&#x2F;etc&#x2F;inittab<br>设定默认运行级别<br>系统初始化(&#x2F;etc&#x2F;rc.d&#x2F;rc.sysinit)<br>运行执行级别的服务脚本<br>&#x2F;etc&#x2F;rc.d&#x2F;init.d&#x2F;<br>&#x2F;etc&#x2F;rc.d&#x2F;rc#.d<br>rc0.d–rc6.d<br>K*<br>S*<br>00-99:运行次序<br>启动虚拟终端<br>启动图形终端</p>
-</blockquote>
-</li>
-</ol>
-<p>&#x2F;etc&#x2F;rc.d&#x2F;rc.sysinit<br> 检测并以读写方式重新挂载根文件系统<br> 设定主机名<br> 检测并挂载&#x2F;etc&#x2F;fstab中的其他文件系统<br> 启动swap分区<br> 初始化外围硬件设备的驱动<br> 根据&#x2F;etc&#x2F;sysctl.conf设定内核参数<br> 激活udev和selinux<br> 清理过期锁和PID文件<br> 装载键映射 </p>
-<p>busybox:一个命令模拟上百个命令 </p>
-<p>mingetty: </p>
-<p>PAM:Plugable Authentication Module<br>&#x2F;etc&#x2F;pam.d&#x2F;* </p>
-<p>nis:<br> &#x2F;etc&#x2F;nsswitch.conf </p>
-<p>busybox:<br><a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/BusyBox">http://zh.wikipedia.org/wiki/BusyBox</a><br>例如Android&#x2F;树莓派就是基于Linux内核和busybox。 </p>
-<p>可以使用下面这样组合来跑起来一个系统:<br> kernel+initramfs(busybox)–&gt;rootfs(busybox) </p>
-<ol>
-<li><p>如何实现部分编译:<br>make dir&#x2F;<br>make driver&#x2F;net&#x2F; </p>
-</li>
-<li><p>只编译某一模块:<br>make driver&#x2F;net&#x2F;pcnet32.ko </p>
-</li>
-<li><p>将编译完成的结果防止别的目录中:<br>make O&#x3D;&#x2F;tmp&#x2F;kernel</p>
-</li>
-</ol>
-<p>如何编译安装busybox: </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">make menuconfig </span><br><span class="line">Busybox Setting--&gt;Build Options--&gt;Build BusyBox as static binrary(这个选上) </span><br><span class="line">make install </span><br><span class="line">安装好的在_install目录内。 </span><br><span class="line">cp _install /tmp/busybox </span><br><span class="line">cd /tmp/busybox </span><br><span class="line">mkdir dev proc etc sys lib/modules </span><br><span class="line">额。。。。。。。。。。。。。。。。。。 </span><br><span class="line">此处省略。。。。。。。。。。。。。。。。。。。。。。。 </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/15/15-all-%E6%9A%82%E6%97%B6%E4%B8%8D%E6%9B%B4%E6%96%B0/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/22/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/21/">21</a><a class="page-number" href="/page/22/">22</a><span class="page-number current">23</span><a class="page-number" href="/page/24/">24</a><a class="page-number" href="/page/25/">25</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/24/">Next &amp;raquo;</a>
@@ -1405,7 +1401,7 @@ var _hmt = _hmt || [];
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2023 张宇
+    		&copy; 2024 张宇
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten

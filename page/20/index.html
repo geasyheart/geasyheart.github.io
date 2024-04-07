@@ -212,6 +212,115 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-28-01Iptables系列之基础原理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/28/28-01Iptables%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9F%BA%E7%A1%80%E5%8E%9F%E7%90%86/">28_01Iptables系列之基础原理</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/28/28-01Iptables%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9F%BA%E7%A1%80%E5%8E%9F%E7%90%86/" class="archive-article-date">
+  	<time datetime="2015-04-28T06:31:54.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-28</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本文有参考《Linux网络安全技术与实现(第2版)》，更多内容，可直接参阅原书。 </p>
+<p>icmp:Internet Control Message Protocol </p>
+<p>第一次<br>第一次握手：建立连接时，客户端发送syn包（syn&#x3D;j）到服务器，并进入SYN_SENT状态，等待服务器确认；SYN：同步序列编号（Synchronize Sequence Numbers）。<br>第二次<br>第二次握手：服务器收到syn包，必须确认客户的SYN（ack&#x3D;j+1），同时自己也发送一个SYN包（syn&#x3D;k），即SYN+ACK包，此时服务器进入SYN_RECV状态；<br>第三次<br>第三次握手：客户端收到服务器的SYN+ACK包，向服务器发送确认包ACK(ack&#x3D;k+1），此包发送完毕，客户端和服务器进入ESTABLISHED（TCP连接成功）状态，完成三次握手。 </p>
+<p>（1）客户端A发送一个FIN，用来关闭客户A到服务器B的数据传送（报文段4）。<br>（2）服务器B收到这个FIN，它发回一个ACK，确认序号为收到的序号加1（报文段5）。和SYN一样，一个FIN将占用一个序号。<br>（3）服务器B关闭与客户端A的连接，发送一个FIN给客户端A（报文段6）。<br>（4）客户端A发回ACK报文确认，并将确认序号设置为收到序号加1（报文段7） </p>
+<p>Framework:<br>    默认规则:<br>        开放:堵<br>        关闭:通 </p>
+<p>    规则:匹配标准<br>        IP:SIP,DTP<br>        TCP:SPORT,DPORT<br>        UDP:SPORT,DPORT<br>        ICMP:icmp-type </p>
+<p>数据报文过滤:<br>    Linux2.0<br>        ipfw&#x2F;firewall<br>    Linux2.2<br>        ipchain&#x2F;firewall<br>    Linux2.4<br>        iptables&#x2F;netfilter </p>
+<p>iptables在用户空间写规则，对应的是内核空间的netfilter,所以生效的也是netfilter。 </p>
+<p>hook function:钩子函数<br>    prerouting<br>    input<br>    output<br>    forward<br>    postrouting </p>
+<p>        —&gt;filter机制的结构图&lt;—- </p>
+<p>数据包传入—&gt;路由表—&gt;FORWARD链—&gt;数据包传出<br>          |–&gt;INPUT链–&gt;本机进程–&gt;路由表–&gt;OUTPUT链–&gt;数据包传出 </p>
+<p>INPUT&#x2F;OUTPUT:数据包进入主机时，该数据包即由“数据包传入”所标识的位置进入，接着被送入路由表，然后根据路由表的内容决定数据包传输的路径，假设传给本机的进程，因此，该数据包将会<br>被送入INPUT链，此时若INPUT链内的规则不允许该数据包进入，那么则会抛弃掉，同理，OUTPUT规定本机是否允许数据的传出，由此可以看到:INPUT&#x2F;OUTPUT链机制是为了保护本机进程而设计的。<br>同时，这应该代表的是相同的一个接口。 </p>
+<p>FORWARD:在网关式防火墙中，防火墙部署在网关位置，当数据包要由另一个接口送出时，就会被送入FORWARD链，由此时FORWARD链内的规则决定是否允许数据包的命运~<br>规则链:<br>    PREROUTING<br>    INPUT<br>    OUTPUT<br>    FORWARD<br>    POSTROUTING </p>
+<p>filter(过滤):filter是netfilter最重要的机制，其任务是执行数据包的过滤操作，也就是起到防火墙的作用。<br>    INPUT<br>    OUTPUT<br>    FORWARD </p>
+<p>nat(地址转换):通俗讲，其功能就是IP分享器。<br>    PREROUTING<br>    POSTROUTING<br>    OUTPUT </p>
+<p>mangle(拆开&#x2F;修改&#x2F;封装):是一个很特殊的机制，可以通过mangle机制来修改经过防火墙内数据包的内容。<br>    PREROUTING<br>    INPUT<br>    FORWARD<br>    OUTPUT<br>    POSTROUTING </p>
+<p>raw():负责加快数据包穿过防火墙机制的速度，由此提高防火墙的性能。<br>    PREROUTING<br>    OUTPUT </p>
+<p>iptables:四个表五个链 </p>
+<p>能否使用自定义链?<br>    可以使用自定义链，但只在被调用时才能发挥作用，而且如果没有自定义链中的任何规则匹配，还应该有返回机制。 </p>
+<p>    用可以删除自定义的空链<br>    默认链无法删除 </p>
+<p>每个规则都有两个内置的计数器:<br>    一个用来被匹配的报文个数    (9K)<br>    一个被匹配的报文的体积大小之和(9K) </p>
+<p>规则:匹配标准，处理动作 </p>
+<p>    iptables -t TABLE  COMMAND CHAIN [NUM]- 操作方式 -j 处理办法<br>        -t:filter nat mangle raw,默认是filter表<br>        操作方式:    <br>            -L:将所在的表内容列出<br>            -A:在指定的链中添加新规则<br>            -F:将所选择的表内容清除掉<br>            -P:设置某个链的默认策略<br>           <br> <br>匹配标准:<br>    通用匹配<br>        -s&#x2F;–src     :源地址<br>        -d&#x2F;–dst     :目标地址<br>        -p             :协议{tcp|udp|icmp}<br>        -i INTERFACE :指定数据报文流入的接口<br>            可用于定义标准的链:PREROUTING,INPUT,FORWARD<br>        -o INTERFACE :指定数据报文流出的接口<br>            可用于定义标准的链:OUTPUT,POSTROUTING,FORWARD<br>    扩展匹配<br>        隐含扩展:不用特别指明由哪个模块进行的扩展，因为此时使用-p{tcp|udp|icmp}<br>        显式扩展:必须指明由哪个模块进行的扩展，在iptables中使用-m选项可完成此功能 </p>
+<p>-j TARGET:<br>    ACCEPT<br>    DROP<br>    REJECT<br>       <br>iptables -t filter -A INPUT -s 172.16.0.0&#x2F;16 -d 172.16.100.7 -j DROP </p>
+<p>    </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/28/28-01Iptables%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9F%BA%E7%A1%80%E5%8E%9F%E7%90%86/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-22-02基于OpenSSL的https服务配置" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1314,143 +1423,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-23-01PHP相关概念及配置" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/22/23-01PHP%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%E5%8F%8A%E9%85%8D%E7%BD%AE/">23_01PHP相关概念及配置</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/22/23-01PHP%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%E5%8F%8A%E9%85%8D%E7%BD%AE/" class="archive-article-date">
-  	<time datetime="2015-04-22T02:35:39.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="服务器端脚本管理器"><a href="#服务器端脚本管理器" class="headerlink" title="服务器端脚本管理器"></a>服务器端脚本管理器</h2><ol>
-<li>MIME(Multipurpose Internet Mail Extensions)<br>多用途互联网邮件扩展类型就是设定某种扩展名的文件用一种应用程序来打开的方式类型，<br>当该扩展名文件被访问的时候，浏览器会自动使用指定应用程序来打开。<br>多用于指定一些客户端自定义的文件名，以及一些媒体文件打开方式。 </li>
-<li>动态网站<br>客户端动态    服务器端动态<br>在windows平台下有Activex，可以在客户端编写动态程序； </li>
-<li>CGI（通用网关接口)<br>–&gt;可以认为它是webapp； </li>
-<li>编程语言<blockquote>
-<p>静态语言；编译型语言<br>    C , C++ ,JAVA<br>优点：性能好<br>    缺点：每次都需要编译；出现错误处理比较麻烦；开发周期长；维护成本大；<br>动态语言：解释性语言<br>    shell , perl , python<br>优点：便于维护；有众多模块可共享；开发周期短，成本低；<br>    缺点：性能差；<br>但是折中就是最好；如Facebook有工具可以把动态语言转换成静态语言；</p>
-</blockquote>
-</li>
-</ol>
-<h2 id="PHP-hypertext-preprocessor超文本预处理器"><a href="#PHP-hypertext-preprocessor超文本预处理器" class="headerlink" title="PHP:hypertext preprocessor超文本预处理器"></a>PHP:hypertext preprocessor超文本预处理器</h2><blockquote>
-<p>两个以色列程序员在1997年重新php的分析器，<br>于1999年发布zend engine 1.0 ，并发布php4.0####这句很重要 </p>
-</blockquote>
-<h2 id="php-zend-engine"><a href="#php-zend-engine" class="headerlink" title="php zend engine"></a>php zend engine</h2><blockquote>
-<p>zend engine的出现将php的代码处理过程分成了两个阶段，首先是分析php代码并且将其转换为zend opcode的二进制格式，并将其储存在内存中；第二阶段是使用zend engine去执行这些转换后的opcode；（opcode：操作码）<br>php source code –&gt;编译成二进制–&gt;执行二进制格式<br>但是这种二进制只能在zend engine中运行； </p>
-</blockquote>
-<h2 id="提供加速的原理及相关软件（称为php加速器）"><a href="#提供加速的原理及相关软件（称为php加速器）" class="headerlink" title="提供加速的原理及相关软件（称为php加速器）"></a>提供加速的原理及相关软件（称为php加速器）</h2><blockquote>
-<p>用户在访问同一个php源程序时，通过zend engine编译，但是这个编译只在同一个进程内访问快，<br>例如两个用户在访问同一个php页面时，并不会整体上提高运行速度，所以这个时候把编译后的opcode<br>放在一个缓存中，不同的进程在访问这个时，就不会重新编译，大大提高性能；<br>XCache 是一个开源的 opcode 缓存器&#x2F;优化器, 这意味着他能够提高您服务器上的 PHP 性能. 他通过把编译 PHP 后的数据缓冲到共享内存从而避免重复的编译过程, 能够直接使用缓冲区已编译的代码从而提高速度. 通常能够提高您的页面生成速率 2 到5 倍, 降低服务器负载. –&gt;摘自百度百科 
-  </p>
-</blockquote>
-<h2 id="而提供这种缓存功能的软件有"><a href="#而提供这种缓存功能的软件有" class="headerlink" title="而提供这种缓存功能的软件有"></a>而提供这种缓存功能的软件有</h2><blockquote>
-<p>APC<br>eAccelerator<br>Xcache  快速而且稳定的PHP opcode缓存，经过严格测试而且被大量用于生产环境。<br>Nusphere PhpExpress<br>Zend Optimizer 并非opcode加速器，而是为php5.2及以前的免费、闭源的php扩展；当然目前还在发展；使用的也不少； 
-  </p>
-</blockquote>
-<h2 id="PHP源码目录结构"><a href="#PHP源码目录结构" class="headerlink" title="PHP源码目录结构"></a>PHP源码目录结构</h2><blockquote>
-<ol>
-<li>build </li>
-<li>ext </li>
-<li>main </li>
-<li>Zend </li>
-<li>pear </li>
-<li>sapi </li>
-<li>TSRM </li>
-<li>tests </li>
-<li>win32 这个windows平台的</li>
-</ol>
-</blockquote>
-<h2 id="HTML"><a href="#HTML" class="headerlink" title="HTML"></a>HTML</h2><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">head</span>&gt;</span> </span><br><span class="line">        <span class="tag">&lt;<span class="name">title</span>&gt;</span><span class="tag">&lt;/<span class="name">title</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">head</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span> <span class="tag">&lt;/<span class="name">h1</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span> </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>例：如何在源代码中加入bash脚本：<br>在httpd.cnf中有ScriptAlias &#x2F;cgi-bin&#x2F; “&#x2F;usr&#x2F;local&#x2F;apache2&#x2F;cgi-bin&#x2F;“<br>然后到上面这个目录下，编写mytest.sh </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!bin/bash </span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="built_in">cat</span> &lt;&lt; <span class="string">EOF </span></span><br><span class="line"><span class="string">Content-Type: test/html </span></span><br><span class="line"><span class="string">&lt;pre&gt; </span></span><br><span class="line"><span class="string">$(/bin/date +%F) </span></span><br><span class="line"><span class="string">&lt;/pre&gt; </span></span><br><span class="line"><span class="string">EOF</span> </span><br></pre></td></tr></table></figure>
-<p>保存加可执行权限<br>然后在浏览器上访问ip&#x2F;cgi-bin&#x2F;mytest.sh ，即可看到时间<br>PHP可以成为嵌入式web开发语言 </p>
-<h2 id="软件架构模式"><a href="#软件架构模式" class="headerlink" title="软件架构模式"></a>软件架构模式</h2><blockquote>
-<p>（控制器Controller）- 负责转发请求，对请求进行处理。<br>（视图View） - 界面设计人员进行图形界面设计。<br>（模型Model） - 程序员编写程序应有的功能（实现算法等等）、数据库专家进行数据管理和数据库设计(可以实现具体的功能)。 </p>
-</blockquote>
-<h2 id="web如何和php交流"><a href="#web如何和php交流" class="headerlink" title="web如何和php交流"></a>web如何和php交流</h2><p>三种方式： </p>
-<ol>
-<li>CGI </li>
-<li>Module </li>
-<li>FastCGI这个最重要<br>如果通过CGI做Apache和php之间调用进行200个prefork下的进程访问200个php，就要消耗至少400个进程，消耗几个G的内存；<br>所以当大量用户访问的时候，CGI并不适合Apache和php之间调用；<br>所以把php做成一个apache的一个模块，当需要调用php的时候，只需要启用200个进程就可以；<br>但是这样apache就要同时处理静态和动态内容，对服务器要求高；<br>所以出现静态和动态相分离的：<br>出现php提供进程，当Apache提供请求时，php解释器创建进程完成响应；可以把php作为服务器，Apache作为前段客户端；<br>叫做FastCGI（这个相当重要）</li>
-</ol>
-<p> <br> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#yum install php (php-mbstring对于多字节支持的，这个会在编译时支持)php-mysql(自行选择) </span></span><br></pre></td></tr></table></figure><br>这种是以模块的方式存在 </p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line"><span class="title function_ invoke__">phpinfo</span>(); </span><br><span class="line"><span class="meta">?&gt;</span> </span><br></pre></td></tr></table></figure>
-<p>  </p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/22/23-01PHP%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%E5%8F%8A%E9%85%8D%E7%BD%AE/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/19/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/18/">18</a><a class="page-number" href="/page/19/">19</a><span class="page-number current">20</span><a class="page-number" href="/page/21/">21</a><a class="page-number" href="/page/22/">22</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/21/">Next &amp;raquo;</a>
@@ -1465,7 +1437,7 @@ var _hmt = _hmt || [];
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2023 张宇
+    		&copy; 2024 张宇
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten

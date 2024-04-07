@@ -1,3 +1,4 @@
+https://geasyheart.github.io/2024/04/07/LLM-RHLF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/
 https://geasyheart.github.io/2023/12/21/qwen1-8B%E8%AF%95%E7%8E%A9/
 https://geasyheart.github.io/2023/10/01/ChatGLM%E5%BE%AE%E8%B0%83%E8%AE%B0%E5%BD%95/
 https://geasyheart.github.io/2023/11/29/lora%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E7%8E%B0/

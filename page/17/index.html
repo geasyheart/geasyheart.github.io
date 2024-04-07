@@ -212,6 +212,109 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-41-04Linux集群系列之二十二-Keepalived详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/09/30/41-04Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%8C%E5%8D%81%E4%BA%8C-Keepalived%E8%AF%A6%E8%A7%A3/">41_04Linux集群系列之二十二--Keepalived详解</a>
+    </h1>
+  
+
+        
+        <a href="/2015/09/30/41-04Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%8C%E5%8D%81%E4%BA%8C-Keepalived%E8%AF%A6%E8%A7%A3/" class="archive-article-date">
+  	<time datetime="2015-09-30T03:43:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-30</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>我认为Keepalived主要实现的功能有： </p>
+<ol>
+<li>VIP漂移； </li>
+<li>自定义脚本，另外不停的检测脚本； </li>
+<li>当资源切换到其他主机时，资源应该做哪些服务；</li>
+</ol>
+<p>我对于前两条的认知在于：比如运行了MySQL服务，那么不停的检测MySQL服务，如果MySQL服务停止，那么VIP漂移；<br>而对于Keepalived+LVS这种模型，只需要指明Real server以及sorry server web服务即可，并不需要做这些，而如果Nginx作为Director的话，就需要这么做了；；； </p>
+<p>如何利用keepalived实现ipvs的高可用?<br>VIP:<br>172.16.100.1<br>RS:<br>172.16.100.11<br>172.16.100.12 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line">１．先搭建好DR模型的LVS集群 </span><br><span class="line">２．yum -y install ipvsadm keepalived </span><br><span class="line"><span class="built_in">cp</span> /etc/keepalived/keepalived.conf /root </span><br><span class="line">vim /etc/keepalived/keepalived.conf </span><br><span class="line"> </span><br><span class="line">global_defs &#123; </span><br><span class="line">   notification_email &#123;   万一出故障，应该发给谁 </span><br><span class="line">     root@localhost </span><br><span class="line">   &#125; </span><br><span class="line"> notification_email_from keepalived@localhost    是谁发的，但是由于是本地发的，并不会验证这个用户是否存在 </span><br><span class="line">   smtp_server 127.0.0.1 </span><br><span class="line">   smtp_connect_timeout 30 </span><br><span class="line">   router_id LVS_DEVEL </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">vrrp_instance VI_1 &#123;  定义虚拟路由 </span><br><span class="line">    state MASTER      定义为主节点 </span><br><span class="line">    interface eth0 </span><br><span class="line">    virtual_router_id 51 </span><br><span class="line">    priority 101　 </span><br><span class="line">    优先级减去出现故障后降低的优先级大小要小于备节点的大小才行,备节点的优先级要稍微小于这个值 </span><br><span class="line">    advert_int 1 </span><br><span class="line">    authentication &#123; </span><br><span class="line">        auth_type PASS </span><br><span class="line">        auth_pass Your_passwd    认证 </span><br><span class="line">    &#125; </span><br><span class="line">    virtual_ipaddress &#123; </span><br><span class="line">        172.16.100.1/16 dev eth0 label eth0:0 </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line">virtual_server 172.16.100.1 80 &#123; </span><br><span class="line">    delay_loop 6 </span><br><span class="line">    lb_algo rr　　　调度算法 </span><br><span class="line">    lb_kind DR　　LVS模型 </span><br><span class="line">    net_mask 255.255.0.0 </span><br><span class="line">    persistence_timeout 50   持久连接 </span><br><span class="line">    protocol TCP </span><br><span class="line"> </span><br><span class="line">real_server 172.16.100.11 80 &#123; </span><br><span class="line">        weight 1  定义权重 </span><br><span class="line">        HTTP_GET &#123; </span><br><span class="line">            url &#123;　　　定义url,可以定义多个，看man </span><br><span class="line">              path / </span><br><span class="line">              status_code 200 </span><br><span class="line">            &#125; </span><br><span class="line">            connect_timeout 3    定义连接时常 </span><br><span class="line">            nb_get_retry 3　　　重试次数 </span><br><span class="line">            delay_before_retry 3　延迟时间 </span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">real_server 172.16.100.12 80 &#123; </span><br><span class="line">        weight 1  定义权重 </span><br><span class="line">        HTTP_GET &#123; </span><br><span class="line">            url &#123;　　　定义url,可以定义多个，看man </span><br><span class="line">              path / </span><br><span class="line">              status_code 200 </span><br><span class="line">            &#125; </span><br><span class="line">            connect_timeout 3    定义连接时常 </span><br><span class="line">            nb_get_retry 3　　　重试次数 </span><br><span class="line">            delay_before_retry 3　延迟时间 </span><br><span class="line">        &#125; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#cp keepalived.conf node2:/etc/keepalived/ </span></span><br><span class="line">需要把 </span><br><span class="line">state MASTER 改为state BACKUP </span><br><span class="line">priority 100　　　　　　　这个值要小于主节点的优先级值，不过不要小太多，因为后面还有定义，可以是主:101,备:100 </span><br><span class="line"> </span><br><span class="line">＃<span class="keyword">for</span> I <span class="keyword">in</span> &#123;1..2&#125;;<span class="keyword">do</span> ssh root@node<span class="variable">$I</span> <span class="string">&#x27;serice keepalived start&#x27;</span>;<span class="keyword">done</span> </span><br><span class="line">＃<span class="built_in">tail</span> /var/log/message </span><br><span class="line"> </span><br><span class="line">测试，如果RS中的一台主机服务出现错误，例如模仿: </span><br><span class="line">[RS1]<span class="comment">#service httpd stop </span></span><br><span class="line">[VIP]<span class="comment">#ipvsadm -L -n </span></span><br><span class="line">可以看到RS1的条目被删除，并且会收到邮件 </span><br><span class="line">[RS1]<span class="comment">#service httpd start </span></span><br><span class="line">[VIP]<span class="comment">#ipvsadm -L -n </span></span><br><span class="line">可以看到RS1的条目重新加入; </span><br><span class="line"> </span><br><span class="line">１．如果所有的realserver都出现故障了怎么办? </span><br><span class="line"> </span><br><span class="line">DIP1:172.16.100.6 </span><br><span class="line">DIP2:172.16.100.7 </span><br><span class="line">yum -y install httpd 都做 </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Under maintainence......&quot;</span> &gt; /var/www/html/index.html </span><br><span class="line">service httpd start </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">vim /etc/keepalived/keepalived.conf </span><br><span class="line">在virtual_server下面添加sorry_server,例如: </span><br><span class="line">state MASTER </span><br><span class="line">priority 101 </span><br><span class="line">sorry_server 127.0.0.1 80 </span><br><span class="line"> </span><br><span class="line">dip2: </span><br><span class="line">scp dip1:/etc/keepalived/keepalived.conf /etc/keepalived/ </span><br><span class="line"> </span><br><span class="line">vim /etc/keepalived/keepalived.conf </span><br><span class="line">添加: </span><br><span class="line">state BACKUP </span><br><span class="line">priority 100 </span><br><span class="line">sorry_server 127.0.0.1 80 </span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> I <span class="keyword">in</span> &#123;1..2&#125;;<span class="keyword">do</span> ssh dip<span class="variable">$I</span> <span class="string">&#x27;service keepalived start &#x27;</span>;<span class="keyword">done</span> </span><br><span class="line"><span class="built_in">tail</span> /var/log/messages </span><br><span class="line"> </span><br><span class="line">测试:当两个realserver都down掉的时候? </span><br><span class="line"> </span><br><span class="line">rs1:service httpd stop </span><br><span class="line">rs2:service httpd stop </span><br><span class="line"> </span><br><span class="line">ipvsadm -L -n  可以看到两个节点都停止了； </span><br><span class="line">127.0.0.1上去了； </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+<p>２．自写检测脚本，完成维护模式切换? </p>
+<p>DIP: </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">在实例之外添加内容: </span><br><span class="line">vrrp_script chk_schedown &#123; </span><br><span class="line">    script <span class="string">&quot;killall -0 haproxy&quot;</span> </span><br><span class="line">    interval 2 </span><br><span class="line">        <span class="comment">#check every 2 seconds </span></span><br><span class="line">    weight -2  一旦检测失败，权重-2 </span><br><span class="line">        <span class="comment">#if failed,decrease 2 of the priority </span></span><br><span class="line">    fall 2    检测失败两次则失败 </span><br><span class="line">        <span class="comment">#require 2 failures for failures </span></span><br><span class="line">    rise 1 </span><br><span class="line">        <span class="comment">#require 1 successes for ok </span></span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">例: </span><br><span class="line"><span class="comment">#vim /etc/keepalived/keepalived.conf </span></span><br><span class="line">在实例之外添加内容(即另找一行添加): </span><br><span class="line">vrrp_script chk_schedown&#123; </span><br><span class="line">    script <span class="string">&quot;[ -e /etc/keepalived/down ] &amp;&amp; exit 1 || exit 0&quot;</span> </span><br><span class="line">     interval 2 </span><br><span class="line">     weight -2 </span><br><span class="line">     fall 2 </span><br><span class="line">     rise 1 </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">补充:这个脚本必须在vrrp_instance　VI_1的上面，配置文件可看总结(1)keepalived功能小测试 </span><br><span class="line"> </span><br><span class="line">上述脚本怎么执行，如何执行， </span><br><span class="line">在vrrp_instance VI_1 中定义，即: </span><br><span class="line">定义在实例之中,添加: </span><br><span class="line">track_script&#123; </span><br><span class="line">    chk_schedown </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="comment">#service keepalived restart </span></span><br><span class="line"> </span><br><span class="line">测试:100.6 </span><br><span class="line"><span class="comment">#touch  /etc/keepalived/down </span></span><br><span class="line"><span class="comment">#tail /var/log/messages </span></span><br><span class="line">会发现eth0:0不再有了，移到另外一个DIP主机上； </span><br></pre></td></tr></table></figure>
+<p>３．如何在vrrp事务发生时，发送警告邮件给指定的管理员? </p>
+<p>标题: vip added to HA1<br>正文:日期　时间，HA1 STATE from MASTER to BACKUP </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/keepalived/notify.sh </span></span><br><span class="line"><span class="comment">#!/bin/bash </span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line">contact=<span class="string">&#x27;root@localhost&#x27;</span> </span><br><span class="line"><span class="function"><span class="title">Usage</span></span>()&#123; </span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;Usage:`basename <span class="variable">$0</span>` &#123;master|backup|fault&#125; VIP&quot;</span> </span><br><span class="line">&#125; </span><br><span class="line"><span class="function"><span class="title">Notify</span></span>()&#123; </span><br><span class="line">    subject=<span class="string">&quot;`hostname`&#x27;s state changed to <span class="variable">$1</span>&quot;</span> </span><br><span class="line">    mailbody=<span class="string">&quot;`date +%F`:`hostname`&#x27;s state change to <span class="variable">$1</span>,<span class="variable">$VIP</span> floating&quot;</span> </span><br><span class="line">    <span class="built_in">echo</span> <span class="variable">$mailbody</span> | mail -s <span class="string">&quot;<span class="variable">$subject</span>&quot;</span> <span class="variable">$contact</span> </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">[ <span class="variable">$#</span> -lt 2 ]&amp;&amp; Usage &amp;&amp; <span class="built_in">exit</span> </span><br><span class="line">VIP=<span class="variable">$2</span> </span><br><span class="line"><span class="keyword">case</span> <span class="variable">$1</span> <span class="keyword">in</span> </span><br><span class="line">    master) </span><br><span class="line">    Notify master;; </span><br><span class="line">    backup) </span><br><span class="line">    Notify backup;; </span><br><span class="line">    fault) </span><br><span class="line">    Notify fault;; </span><br><span class="line">    *) </span><br><span class="line">    Usage </span><br><span class="line">    <span class="built_in">exit</span> 1;; </span><br><span class="line"><span class="keyword">esac</span> </span><br><span class="line"> </span><br><span class="line">在实例中添加如下信息: </span><br><span class="line"> </span><br><span class="line">notify_master <span class="string">&quot;/etc/keepalived/notify.sh master 172.16.100.1&quot;</span> 当变成主节点应该执行这个脚本 </span><br><span class="line">notify_backup <span class="string">&quot;/etc/keepalived/notify.sh backup 172.16.100.1&quot;</span> </span><br><span class="line">当变成备节点应该执行的脚本 </span><br><span class="line">notify_backup <span class="string">&quot;/etc/keepalived/notify.sh fault 172.16.100.1&quot;</span> </span><br><span class="line">当主节点变不了，备节点也变不了，应该执行的脚本 </span><br><span class="line"> </span><br><span class="line">service keepalived restart </span><br><span class="line"> </span><br><span class="line">测试: </span><br><span class="line"><span class="built_in">touch</span> /etc/keepalived/down </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+<p>视频最后有个更完善的脚本，我没有记． </p>
+<p>这个写的挺好:<br><a target="_blank" rel="noopener" href="http://zhangxugg-163-com.iteye.com/blog/1665419">http://zhangxugg-163-com.iteye.com/blog/1665419</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/09/30/41-04Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%8C%E5%8D%81%E4%BA%8C-Keepalived%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-41-03Linux集群系列之二十一-ISCSI、clvm和GFS2" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1124,119 +1227,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-39-01Linux集群系列之十一-高可用集群之heartbeat-v2-基于crm进行资源管理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/09/19/39-01Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E4%B8%80-%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4%E4%B9%8Bheartbeat-v2-%E5%9F%BA%E4%BA%8Ecrm%E8%BF%9B%E8%A1%8C%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86/">39_01Linux集群系列之十一--高可用集群之heartbeat_v2_基于crm进行资源管理</a>
-    </h1>
-  
-
-        
-        <a href="/2015/09/19/39-01Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E4%B8%80-%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4%E4%B9%8Bheartbeat-v2-%E5%9F%BA%E4%BA%8Ecrm%E8%BF%9B%E8%A1%8C%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86/" class="archive-article-date">
-  	<time datetime="2015-09-19T02:50:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-19</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>CIB: Cluster Information Base<br>    xml格式，为了能够简单使用CIB，提供了haresources2clib.py脚本 </p>
-<p>当在ha.cf中添加了crm  respawn选项的时候，默认的haresources配置信息就不会再被使用，但是可以执行<br>&#x2F;usr&#x2F;lib64&#x2F;heartbeat&#x2F;haresources2cib.py脚本使其保留在&#x2F;var&#x2F;lib&#x2F;heartbeat&#x2F;crm&#x2F;目录下； </p>
-<p>但是haresources2cli.py的执行需要依赖同目录下的ha_propagate脚本，执行这个脚本会自动进行同步到其他节点上； </p>
-<p>当VIP挂了，备用节点抢过来VIP上线，但是在路由器中保存的是原来VIP的mac地址，那么备用节点需要进行arp欺骗：<br>&#x2F;usr&#x2F;lib64&#x2F;heartbeat&#x2F;send_arp实现mac地址伪装，进行arp欺骗； </p>
-<p>换另一种方式: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">yum install pacemaker corosync </span><br><span class="line"><span class="comment">#vim /etc/ha.d/ha.cf </span></span><br><span class="line">mcast eth0 225.0.100.19 694 1 0 </span><br><span class="line">crm respawn    此时没有任何资源 </span><br><span class="line"><span class="built_in">ln</span> -s /usr/libexec/pacemaker/cib /usr/lib64/heartbeat/cib </span><br><span class="line"><span class="built_in">ln</span> -s /usr/libexec/pacemaker/stonith /usr/lib64/heartbeat/stonithd </span><br><span class="line"><span class="built_in">ln</span> -s /usr/libexec/pacemaker/attrd /usr/lib64/heartbeat/attrd </span><br><span class="line"><span class="built_in">ln</span> -s /usr/libexec/pacemaker/crmd /usr/lib64/heartbeat/crmd </span><br><span class="line"> </span><br><span class="line"><span class="comment">#/usr/lib64/heartbeat/ha_propagate   会自动进行同步 </span></span><br><span class="line">＃service heartbeat start </span><br><span class="line"><span class="comment">#ssh node2 &quot;service heartbeat start&quot; </span></span><br><span class="line"><span class="comment">#tail /var/log/message </span></span><br><span class="line">    可以看到详细信息 </span><br><span class="line">     </span><br><span class="line"><span class="comment">#netstat -ntlp | grep mgmtd </span></span><br><span class="line">    监听在5560端口 </span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>cibadmin<br>cibclient<br>crmmon:可用于监测这些节点状态，每15秒刷新一次<br>crmadmin<br>crm_resource:用来做资源配置<br>crm_verify:校验&#x2F;usr&#x2F;lib64&#x2F;heartbeat&#x2F;cib.xml文件是否有语法错误的；<br>crm_standby:指定让哪个节点转为备节点<br>crm_sh:crm的命令行工具<br>使用方法:     </p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt; <span class="comment">#crm_sh </span></span><br><span class="line">&gt; crm<span class="comment"># help </span></span><br><span class="line">&gt; Usage:crm (nodes|config|resources) </span><br><span class="line">&gt; crm<span class="comment">#nodes </span></span><br><span class="line">&gt; crm nodes<span class="comment"># help </span></span><br><span class="line">&gt;  Usage: nodes(status|list) </span><br><span class="line">&gt;  crm nodes<span class="comment">#list </span></span><br></pre></td></tr></table></figure>
-<p>如何使用GUI方式进行管理<br>１、tail &#x2F;etc&#x2F;passwd<br>默认生成hacluster用户，没有密码<br>#passwd hacluster ,密码随便 </p>
-<p>#tail &#x2F;var&#x2F;log&#x2F;message  查看谁是DC:假设是node2:192.168.1.103<br>    当然连接到hb_gui上也可以进行查看<br>#hb_gui &amp;<br>会出现:<br>Server(:port)  192.168.1.103<br>User Name: hacluster<br>Password: hacluster </p>
-<p>添加资源<br>Resources–&gt; + –&gt; native –&gt;Resource ID:webip–&gt;Type–&gt;IPaddr(2)–&gt; Parameters–&gt;ip 192.168.1.101–&gt;Add Parameters –&gt;nic eth0–&gt;cidr_netmask 24<br>最后Patameters类似:<br>Name        Value<br>ip         192.168.1.103<br>nic        eth0<br>cidr_netmask     16 </p>
-<p>点击webip–&gt;右键–&gt;start<br>如果出现错误，webip–&gt;右键–&gt;Migrate Resource–&gt;To node:node1.test.com<br>–&gt;Force:True<br>如果仍然错误，webip–&gt;右键–&gt;Clear Migrate Constraints即可； </p>
-<p>添加资源–&gt;httpd–&gt;这里使用LSB的httpd脚本–&gt;add即可； </p>
-<p>如果用到组:应该先添加组:<br> Resources– &gt;+–&gt;group–&gt;Resoure ID: webip–&gt;Type–&gt;IPaddr(2)–&gt; Parameters–&gt;ip 192.168.1.101–&gt;Add Parameters –&gt;nic eth0–&gt;cidr_netmask 24<br> 添加资源–&gt;group–&gt;httpd–&gt;这里使用LSB的httpd脚本–&gt;add即可； </p>
-<p>将node2.test.com running(dc)右键转为standby将会转移到node1.test.com,刷新网页，将会发生改变 </p>
-<p>添加nfs文件系统<br>先停下上面哪个组 </p>
-<p>#mount -t nfs 192.168.1.105:&#x2F;web&#x2F;htdocs &#x2F;var&#x2F;www&#x2F;html  <br>然后<br>add –&gt;native–&gt;Filesystem–&gt;Resource ID:webstore        device 192.168.1.105:&#x2F;web&#x2F;htdocs<br>                                      directory &#x2F;var&#x2F;www&#x2F;html<br>                                      fstype nfs </p>
-<p>应该注意，最后的Resources的排列顺序应该是webip–&gt;webstore–&gt;httpd，这个顺序和resources那种方式定义的顺序是一样的； </p>
-<p>如果出现错误，更多是状态信息导致的，可以重新添加；； </p>
-<p>通过资源约束使三个独立运行的节点联系到一起<br>１、定义资源约束<br>Colocations–&gt;OK–&gt;ID httpd_with_filesystem–&gt;from httpd –&gt;to webstore–&gt;Score  INFINITY(正无穷，永远在一起)–&gt;OK </p>
-<p>Colocations–&gt;OK–&gt;ID webstore_with_webip–&gt;from webstore –&gt;to webip–&gt;Score  INFINITY(正无穷，永远在一起)–&gt;OK<br>２、定义启动顺序<br>Orders–&gt;ID webstore_before_httpd–&gt;from httpd –&gt; To webstore<br>    配置好后可看Description<br>Orders–&gt;ID webip_before–&gt;from httpd –&gt; To webip </p>
-<p>设置粘性Default Resource Stickiness，可使默认DC转移到设置的主机上，只要大于0即可； </p>
-<p>如果想让某个资源运行到另外一个节点上，那么可以设定位置约束<br>Locations-&gt;add new items  item type :localtion –&gt;ID webip_on_node1 Resource:webip–&gt;OK<br>点击webip_on_node1–&gt;右面–Score : INFIINTY(设定为永远)<br>Add Expression –&gt;uname eq node1.test.com –Apply<br>会发现所有资源运行在node1.test.com上； </p>
-<p>练习说明: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">yum install pacemaker heartbeat </span><br><span class="line"><span class="comment">#vim /etc/ha.d/ha.cf </span></span><br><span class="line">mcast eth0 225.0.100.19 694 1 0 </span><br><span class="line">crm respawn    || pacemaker respawn </span><br><span class="line"><span class="comment">#service heartbeat start </span></span><br><span class="line">会报错，<span class="built_in">tail</span> /var/log/messages出现/usr/lib64/heart目录下的一些文件没有执行: </span><br><span class="line">这个是bug,做下面即可； </span><br><span class="line">＃<span class="built_in">ln</span> -s /usr/libexec/pacemaker/cib /usr/lib64/heartbeat/cib </span><br><span class="line">＃<span class="built_in">ln</span> -s /usr/libexec/pacemaker/stonith /usr/lib64/heartbeat/stonithd </span><br><span class="line">＃<span class="built_in">ln</span> -s /usr/libexec/pacemaker/attrd /usr/lib64/heartbeat/attrd </span><br><span class="line">＃<span class="built_in">ln</span> -s /usr/libexec/pacemaker/crmd /usr/lib64/heartbeat/crmd </span><br><span class="line">启动起来了，但是执行crm_mon又失败，没搜出来解决办法。。 </span><br><span class="line">[root@node2 ha.d]<span class="comment"># crm_mon -1 </span></span><br><span class="line">Could not establish cib_ro connection: Connection refused (111) </span><br><span class="line"> </span><br><span class="line">Connection to cluster failed: Transport endpoint is not connected </span><br></pre></td></tr></table></figure>
-<p>貌似在centos6.5+这个有BUG的…,所以以后做的时候，建议使用heartbeat自带的haresources进行管理；<br>我在看pacemaker的文档时，都不再涉及heartbeat+pacemaker这种方式，而是使用了corosync+pacemaker这种，所以，建议使用后者；； </p>
-<p>更详细可直接参考这篇文章:<br><a target="_blank" rel="noopener" href="http://www.linuxidc.com/Linux/2013-08/89167p3.htm">http://www.linuxidc.com/Linux/2013-08/89167p3.htm</a><br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/chinacloud/archive/2010/11/18/1881056.html">http://www.cnblogs.com/chinacloud/archive/2010/11/18/1881056.html</a><br><a target="_blank" rel="noopener" href="http://wolfword.blog.51cto.com/4892126/1210647">http://wolfword.blog.51cto.com/4892126/1210647</a><br><a target="_blank" rel="noopener" href="http://wenku.baidu.com/link?url=71Xs0ZrJ6HehYNlPRfDziVImX4JvP0hM30ZTM9LxBzU0fJw7nnWrqbNE8gaFInnL50byi7-oOX3tR5qNpqJQlYO3nP-5EffJn87tAuPVUSa">http://wenku.baidu.com/link?url=71Xs0ZrJ6HehYNlPRfDziVImX4JvP0hM30ZTM9LxBzU0fJw7nnWrqbNE8gaFInnL50byi7-oOX3tR5qNpqJQlYO3nP-5EffJn87tAuPVUSa</a><br><a target="_blank" rel="noopener" href="http://blog.csdn.net/flcandclf/article/details/14520501">http://blog.csdn.net/flcandclf/article/details/14520501</a><br><a target="_blank" rel="noopener" href="http://www.tuicool.com/articles/jM7jiu">http://www.tuicool.com/articles/jM7jiu</a><br><a target="_blank" rel="noopener" href="http://www.21ops.com/linux/15178.html">http://www.21ops.com/linux/15178.html</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/09/19/39-01Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E4%B8%80-%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4%E4%B9%8Bheartbeat-v2-%E5%9F%BA%E4%BA%8Ecrm%E8%BF%9B%E8%A1%8C%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/16/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="page-number current">17</span><a class="page-number" href="/page/18/">18</a><a class="page-number" href="/page/19/">19</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/18/">Next &amp;raquo;</a>
@@ -1251,7 +1241,7 @@ var _hmt = _hmt || [];
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2023 张宇
+    		&copy; 2024 张宇
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten

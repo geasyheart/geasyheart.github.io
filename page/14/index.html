@@ -212,6 +212,117 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-gitlab-ci安装配置" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/28/gitlab-ci%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE/">gitlab-ci安装配置</a>
+    </h1>
+  
+
+        
+        <a href="/2017/07/28/gitlab-ci%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE/" class="archive-article-date">
+  	<time datetime="2017-07-28T07:29:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-07-28</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>GitLab CI中文文档</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://doc.gitlab.cc/ce/ci/README.html</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Install-GitLab-Runner"><a href="#Install-GitLab-Runner" class="headerlink" title="Install GitLab Runner"></a>Install GitLab Runner</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://docs.gitlab.com/runner/install/</span><br></pre></td></tr></table></figure>
+
+<h3 id="下面这个地方只是为了防止无法打开上面的网页，如果可以直接打开，下面步骤可以略过"><a href="#下面这个地方只是为了防止无法打开上面的网页，如果可以直接打开，下面步骤可以略过" class="headerlink" title="下面这个地方只是为了防止无法打开上面的网页，如果可以直接打开，下面步骤可以略过"></a>下面这个地方只是为了防止无法打开上面的网页，如果可以直接打开，下面步骤可以略过</h3><p>For Debian&#x2F;Ubuntu</p>
+<ol>
+<li>如果想要使用Docker runner,首先要进行安装Docker，由于之前使用了阿里的Docker加速器，所以Docker安装可以略过，更多可以直接看阿里Docker</li>
+<li>安装Gitlab源</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">For Debian/Ubuntu</span></span><br><span class="line">curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-ci-multi-runner/script.deb.sh | sudo bash</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">For CentOS</span></span><br><span class="line">curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-ci-multi-runner/script.rpm.sh | sudo bash</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>Install gitlab-ci-multi-runner</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># For Debian/Ubuntu</span><br><span class="line">sudo apt-get install gitlab-ci-multi-runner</span><br><span class="line"></span><br><span class="line"># For CentOS</span><br><span class="line">sudo yum install gitlab-ci-multi-runner</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>Register the runner:</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">sudo gitlab-ci-multi-runner register</span><br><span class="line"></span><br><span class="line">Please enter the gitlab-ci coordinator URL (e.g. https://gitlab.com )</span><br><span class="line">https://gitlab.com</span><br><span class="line">Please enter the gitlab-ci token for this runner</span><br><span class="line">xxx</span><br><span class="line">Please enter the gitlab-ci description for this runner</span><br><span class="line">my-runner</span><br><span class="line">INFO[0034] fcf5c619 Registering runner... succeeded</span><br><span class="line">Please enter the executor: shell, docker, docker-ssh, ssh?</span><br><span class="line">docker</span><br><span class="line">Please enter the Docker image (eg. ruby:2.1):</span><br><span class="line">ruby:2.1</span><br><span class="line">INFO[0037] Runner registered successfully. Feel free to start it, but if it&#x27;s</span><br><span class="line">running already the config should be automatically reloaded!</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ol start="5">
+<li>update</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">For Debian/Ubuntu</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install gitlab-ci-multi-runner</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">For CentOS</span></span><br><span class="line">sudo yum update</span><br><span class="line">sudo yum install gitlab-ci-multi-runner</span><br></pre></td></tr></table></figure>
+
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">CI</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/CI//" class="article-tag-list-link color3">CI</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/07/28/gitlab-ci%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-关于tornado-rabbitmq" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1206,130 +1317,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-55-03-2-实验-Nagios的配置及邮件报警" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/02/05/55-03-2-%E5%AE%9E%E9%AA%8C-Nagios%E7%9A%84%E9%85%8D%E7%BD%AE%E5%8F%8A%E9%82%AE%E4%BB%B6%E6%8A%A5%E8%AD%A6/">55_03_2_实验:Nagios的配置及邮件报警</a>
-    </h1>
-  
-
-        
-        <a href="/2016/02/05/55-03-2-%E5%AE%9E%E9%AA%8C-Nagios%E7%9A%84%E9%85%8D%E7%BD%AE%E5%8F%8A%E9%82%AE%E4%BB%B6%E6%8A%A5%E8%AD%A6/" class="archive-article-date">
-  	<time datetime="2016-02-05T10:05:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-02-05</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <ul>
-<li>监控端：192.168.122.115</li>
-<li>被监控端：192.168.122.102</li>
-</ul>
-<h2 id="被监控端安装的软件包"><a href="#被监控端安装的软件包" class="headerlink" title="被监控端安装的软件包"></a>被监控端安装的软件包</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># yum -y install nrpe nagios-plugins-all nagios-plugins</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># egrep -v &quot;^$|#&quot; /etc/nagios/nrpe.cfg </span></span><br><span class="line"></span><br><span class="line">log_facility=daemon</span><br><span class="line">pid_file=/var/run/nrpe/nrpe.pid</span><br><span class="line">server_port=5666</span><br><span class="line">nrpe_user=nrpe</span><br><span class="line">nrpe_group=nrpe</span><br><span class="line">allowed_hosts=192.168.122.115</span><br><span class="line"> </span><br><span class="line">dont_blame_nrpe=0</span><br><span class="line">allow_bash_command_substitution=0</span><br><span class="line">debug=0</span><br><span class="line">command_timeout=60</span><br><span class="line">connection_timeout=300</span><br><span class="line"><span class="built_in">command</span>[check_users]=/usr/lib64/nagios/plugins/check_users -w 5 -c 10</span><br><span class="line"><span class="built_in">command</span>[check_load]=/usr/lib64/nagios/plugins/check_load -w 15,10,5 -c 30,25,20</span><br><span class="line"><span class="built_in">command</span>[check_vda]=/usr/lib64/nagios/plugins/check_disk -w 20% -c 10% -p /dev/vda</span><br><span class="line"><span class="built_in">command</span>[check_zombie_procs]=/usr/lib64/nagios/plugins/check_procs -w 5 -c 10 -s Z</span><br><span class="line"><span class="built_in">command</span>[check_total_procs]=/usr/lib64/nagios/plugins/check_procs -w 150 -c 200 </span><br><span class="line"><span class="built_in">command</span>[check_mysql_alive]=/usr/lib64/nagios/plugins/check_mysql -H localhost -uroot -peasyheart -P3306 </span><br><span class="line">include_dir=/etc/nrpe.d/</span><br><span class="line"></span><br><span class="line"><span class="comment"># chkconfig nrpe on &amp;&amp; service nrpe start</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="监控端"><a href="#监控端" class="headerlink" title="监控端"></a>监控端</h2><ul>
-<li>安装依赖包</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># yum -y install epel-release httpd gcc glibc glibc-common gd gd-devel php mysql mysql-server php-mysql mysql-devel php-snmp php-xml php-gd </span></span><br><span class="line"><span class="comment"># yum -y install nagios</span></span><br><span class="line"><span class="comment"># yum -y install nagios-plugins nagios-plugins-all nagios-plugins-mysql</span></span><br><span class="line"><span class="comment"># yum -y install nagios-plugins-nrpe  #用来以nrpe的方式进行监控，也就是在/usr/lib64/nagios/plugins/增加了check_nrpe命令;</span></span><br><span class="line"><span class="comment"># chkconfig nagios on</span></span><br><span class="line"><span class="comment"># chkconfig --list nagios</span></span><br><span class="line"><span class="comment"># cp /etc/nagios/passwd /etc/nagios/passwd.bak</span></span><br><span class="line"><span class="comment"># htpasswd -c /etc/nagios/passwd nagiosadmin</span></span><br><span class="line"><span class="comment"># service nagios start</span></span><br><span class="line"><span class="comment"># service httpd reload</span></span><br></pre></td></tr></table></figure>
-<p>这个时候可以登录web查看localhost可以正常运行了;</p>
-<ul>
-<li>执行如下命令，确保可以正常执行</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># /usr/lib64/nagios/plugins/check_nrpe -H 192.168.122.102</span></span><br><span class="line">NRPE v2.15</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>添加commands</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/nagios/objects/commands.cfg　　　　　　//添加</span></span><br><span class="line">define <span class="built_in">command</span>&#123;</span><br><span class="line">        command_name check_nrpe</span><br><span class="line">        command_line $USER1$/check_nrpe -H $HOSTADDRESS$ -c $ARG1$</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>node1</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cp /etc/nagios/objects/localhost.cfg /etc/nagios/objects/node1.cfg //关于命名，最好对应不同的hostname</span></span><br><span class="line"><span class="comment"># egrep -v &quot;^$|#&quot; /etc/nagios/objects/node1.cfg </span></span><br><span class="line">define host&#123;</span><br><span class="line">        use                     linux-server            ; Name of host template to use</span><br><span class="line">                    ; This host definition will inherit all variables that are defined</span><br><span class="line">                    ; <span class="keyword">in</span> (or inherited by) the linux-server host template definition.</span><br><span class="line">        host_name               node1</span><br><span class="line">        <span class="built_in">alias</span>                   My Linux Host</span><br><span class="line">        address                 192.168.122.102</span><br><span class="line">        &#125;</span><br><span class="line">define service&#123;</span><br><span class="line">        use                             generic-service         ; Name of service template to use</span><br><span class="line">        host_name                       node1</span><br><span class="line">        service_description             <span class="built_in">users</span></span><br><span class="line">    check_command            check_nrpe!check_users</span><br><span class="line">        &#125;</span><br><span class="line">define service&#123;</span><br><span class="line">        use                             generic-service         ; Name of service template to use</span><br><span class="line">        host_name                       node1</span><br><span class="line">        service_description             vda</span><br><span class="line">    check_command            check_nrpe!check_vda</span><br><span class="line">        &#125;</span><br><span class="line">define service&#123;</span><br><span class="line">        use                             generic-service         ; Name of service template to use</span><br><span class="line">        host_name                       node1</span><br><span class="line">        service_description             zombie_proc</span><br><span class="line">    check_command            check_nrpe!check_zombie_procs</span><br><span class="line">        &#125;</span><br><span class="line">define service&#123;</span><br><span class="line">        use                             generic-service         ; Name of service template to use</span><br><span class="line">        host_name                       node1</span><br><span class="line">        service_description             Total Processes</span><br><span class="line">    check_command            check_nrpe!check_total_procs</span><br><span class="line">        &#125;</span><br><span class="line">define service&#123;</span><br><span class="line">        use                             generic-service</span><br><span class="line">        host_name                       node1</span><br><span class="line">        service_description             MySQL Server</span><br><span class="line">        check_command                   check_nrpe!check_mysql_alive</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>启动这个配置文件</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/nagios/nagios.cfg</span></span><br><span class="line">cfg_file=/etc/nagios/objects/node1.cfg</span><br><span class="line"></span><br><span class="line"><span class="comment"># service nagios restart</span></span><br></pre></td></tr></table></figure>
-<p>有多少主机就这样定义即可；</p>
-<h2 id="关于收取邮件需要注意的地方"><a href="#关于收取邮件需要注意的地方" class="headerlink" title="关于收取邮件需要注意的地方"></a>关于收取邮件需要注意的地方</h2><ol>
-<li>hostname这个地方，另外就是上面提及到的自定义的host_name,一定要和主机的hostname一致;</li>
-<li>配置监控机邮件服务：</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim /etc/nagios/objects/contacts.cfg</span></span><br><span class="line"></span><br><span class="line">注意：由于本地没有nagiosadmin用户，所以是没有办法发送邮件的，这个时候：</span><br><span class="line"><span class="comment"># useradd -r -s /sbin/nologin nagiosadmin</span></span><br><span class="line"></span><br><span class="line">email那最好对应163邮箱;</span><br><span class="line"></span><br><span class="line"><span class="comment"># iptables -F</span></span><br><span class="line"><span class="comment"># service postfix restart</span></span><br><span class="line">即可；</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h2><blockquote>
-<p>-w 表示warning阀值<br>-c 表示critical阀值<br>应该根据实际定义这个值</p>
-</blockquote>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2016/02/05/55-03-2-%E5%AE%9E%E9%AA%8C-Nagios%E7%9A%84%E9%85%8D%E7%BD%AE%E5%8F%8A%E9%82%AE%E4%BB%B6%E6%8A%A5%E8%AD%A6/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/13/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><span class="page-number current">14</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/15/">Next &amp;raquo;</a>
@@ -1344,7 +1331,7 @@ var _hmt = _hmt || [];
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2023 张宇
+    		&copy; 2024 张宇
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten

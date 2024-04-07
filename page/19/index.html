@@ -212,6 +212,118 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-32-03MySQL系列之三MySQL数据库基础及编译安装" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/07/06/32-03MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%89MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85/">32_03MySQL系列之三MySQL数据库基础及编译安装</a>
+    </h1>
+  
+
+        
+        <a href="/2015/07/06/32-03MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%89MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85/" class="archive-article-date">
+  	<time datetime="2015-07-06T01:08:08.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-07-06</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>MySQL的优势: </p>
+<blockquote>
+<p>Speed<br>        完全多线程<br>        查询缓存<br>Reliability<br>Scalability(伸缩性)<br>Ease of use<br>Portability and Standards Compliance<br>Multiuser Support<br>Internarionalization<br>Wide,Application Support<br>Open Source </p>
+</blockquote>
+<ol>
+<li>mysql –help –verbose(可以用来查看支持的各项选项)</li>
+</ol>
+<p>指定安装文件的安装路径常用的选项:<br>-DCMAKE_INSTALL_PREFIX&#x3D;&#x2F;usr&#x2F;local&#x2F;mysql<br>-DMYSQL_DATADIR&#x3D;&#x2F;data&#x2F;mysql<br>-DSYSCONFDIR&#x3D;&#x2F;etc </p>
+<p>默认编译的存储引擎包含:csv,myisam,myisammrg和heap,若要安装其他存储引擎，可以使用类似如下编译选项:<br>-DWITH_INNOBASE_STORAGE_ENGINE&#x3D;1<br>-DWITH_ARCHIVE_STORAGE_ENGINE&#x3D;1<br>-DWITH_BLACKHOLE_STORAGE_ENGINE&#x3D;1<br>-DWITH_FEDERATED_STORAGE_ENGINE&#x3D;1 </p>
+<p>若要明确指定不编译某存储引擎，可以使用类似如下的选项:<br>-DWITHOUT_<ENGINE>_STORAGE_ENGINE&#x3D;1<br>比如:<br>-DWITHOUT_EXAMPLE_STORAGE_ENGINE&#x3D;1<br>-DWITHOUT_FEDERATED_STORAGE_ENGINE&#x3D;1<br>-DWITHOUT_PARTITION_STORAGE_ENGINE&#x3D;1 </p>
+<p>若要编译进其他功能，如SSL等，可使用类似如下选项来实现编译时使用某库或不使用某库:<br>-DWITH_READLINE&#x3D;1<br>-DWITH_SSL&#x3D;system<br>-DWITH_ZLIB&#x3D;system<br>-DWITH_LIBWRAP&#x3D;0 </p>
+<p>其他常用的选项:<br>-DMYSQL_TCP_PORT&#x3D;3306<br>-DMYSQL_UNIX_ADDR&#x3D;&#x2F;tmp&#x2F;mysql.sock<br>-DENABLED_LOCAL_INFILE&#x3D;1<br>-DEXTRA_CHARSETS&#x3D;all<br>-DDEFAULT_CHARSET&#x3D;utf8<br>-DWITH_DEBUG&#x3D;0<br>-DENABLE_PROFILING&#x3D;1        性能分析 </p>
+<p>如果想清理此前的编译所生成的文件，则需要使用如下命令:<br>make clean<br>rm CMakeCache.txt </p>
+<ol start="2">
+<li>编译安装</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#groupadd -r mysql </span></span><br><span class="line"><span class="comment">#useradd -g mysql -r -d /data/mydata mysql </span></span><br><span class="line"><span class="comment">#tar xf mysql-version.gz </span></span><br><span class="line"><span class="comment">#cd mysql-version </span></span><br><span class="line"><span class="comment">#cmake . -DCMAKE_INSTALL_PREFIX=/usr/local/mysql \ </span></span><br><span class="line">         -DMYSQL_DATADIR=/data/mydata \ </span><br><span class="line">         -DSYSCONFDIR=/etc \ </span><br><span class="line">         -DWITH_INNOBASE_STORAGE_ENGINE=1 \ </span><br><span class="line">         -DWITH_ARCHIVE_STORAGE_ENGINE=1 \ </span><br><span class="line">         -DWITH_BLACKHOLE_STORAGE_ENGINE=1 \ </span><br><span class="line">         -DWITH_READLINE=1 \ </span><br><span class="line">         -DWITH_SSL=system \ </span><br><span class="line">         -DWITH_ZLIB=system \ </span><br><span class="line">         -DWITH_LIBWRAP=0 \ </span><br><span class="line">         -DMYSQL_UNIX_ADDR=/tmp/mysql.sock \ </span><br><span class="line">         -DEFAULT_CHARSET=utf8 \ </span><br><span class="line">         -DEFAULT_COLLATION=utf8_general_ci </span><br><span class="line"><span class="comment">#make </span></span><br><span class="line"><span class="comment">#make install </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#chown -R :mysql /usr/local/mysql </span></span><br><span class="line"><span class="comment">#scripts/mysql_install_db --user=mysql --datadir=/data/mydata </span></span><br><span class="line"><span class="comment">#cp supports-files/my-large.cnf /etc/my.cnf </span></span><br><span class="line"><span class="comment">#cp supports-files/mysql.server /etc/init.d/mysqld </span></span><br><span class="line"><span class="comment">#chkconfig --add mysqld </span></span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>vim &#x2F;etc&#x2F;profile.d&#x2F;mysql.sh<br>export PATH&#x3D;$PATH:&#x2F;usr&#x2F;local&#x2F;mysql&#x2F;bin&#x2F;  保存退出，重新登录即可 </p>
+</blockquote>
+<p>mysql客户端工具:<br>    mysql<br>    mysqldump<br>    mysqladmin<br>    mysqlcheck<br>    mysqlimport </p>
+<p>mysql非客户端工具:<br>    myisacheck<br>    myisampack </p>
+<p>-u USERNAME<br>-p PASSWORD<br>-h<br>–protocol<br>    socket<br>    tcp<br>    pipe<br>    memory(后两者是windows) </p>
+<p>MYISAM:<br>    每个表三个文件:<br>        .frm:表结构<br>        .MYD:表数据<br>        .MYI:表索引<br>        <br>InnoDB:<br>    所有表共享一个表空间文件<br>        .frm:表结构<br>        .ibd:表空间(表数据和表索引)<br>    建议:每表一个独立的表空间文件    <br>    &gt;SHOW VARIABLES LIKE ‘%innodb’;<br>    #vim &#x2F;etc&#x2F;my.cnf<br>     innodb_file_per_table&#x3D;1<br>    说明，这个在centos6.5+上已经没有这个了； </p>
+<p>可在自己家目录创建一个 .my.cnf </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#vim ~/.my.cnf </span></span><br><span class="line">[client] </span><br><span class="line">user=<span class="string">&#x27;root&#x27;</span> </span><br><span class="line">host=<span class="string">&#x27;localhost&#x27;</span> </span><br><span class="line">password=<span class="string">&#x27;redhat&#x27;</span> </span><br><span class="line"><span class="comment">#chmod 700 ~/.my.cnf </span></span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="http://www.tianfeiyu.com/?p=635">http://www.tianfeiyu.com/?p=635</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/07/06/32-03MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%89MySQL%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E7%A1%80%E5%8F%8A%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-32-02MySQL系列之二关系型数据库基础理论" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1075,115 +1187,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-28-01Iptables系列之基础原理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/28/28-01Iptables%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9F%BA%E7%A1%80%E5%8E%9F%E7%90%86/">28_01Iptables系列之基础原理</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/28/28-01Iptables%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9F%BA%E7%A1%80%E5%8E%9F%E7%90%86/" class="archive-article-date">
-  	<time datetime="2015-04-28T06:31:54.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-28</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本文有参考《Linux网络安全技术与实现(第2版)》，更多内容，可直接参阅原书。 </p>
-<p>icmp:Internet Control Message Protocol </p>
-<p>第一次<br>第一次握手：建立连接时，客户端发送syn包（syn&#x3D;j）到服务器，并进入SYN_SENT状态，等待服务器确认；SYN：同步序列编号（Synchronize Sequence Numbers）。<br>第二次<br>第二次握手：服务器收到syn包，必须确认客户的SYN（ack&#x3D;j+1），同时自己也发送一个SYN包（syn&#x3D;k），即SYN+ACK包，此时服务器进入SYN_RECV状态；<br>第三次<br>第三次握手：客户端收到服务器的SYN+ACK包，向服务器发送确认包ACK(ack&#x3D;k+1），此包发送完毕，客户端和服务器进入ESTABLISHED（TCP连接成功）状态，完成三次握手。 </p>
-<p>（1）客户端A发送一个FIN，用来关闭客户A到服务器B的数据传送（报文段4）。<br>（2）服务器B收到这个FIN，它发回一个ACK，确认序号为收到的序号加1（报文段5）。和SYN一样，一个FIN将占用一个序号。<br>（3）服务器B关闭与客户端A的连接，发送一个FIN给客户端A（报文段6）。<br>（4）客户端A发回ACK报文确认，并将确认序号设置为收到序号加1（报文段7） </p>
-<p>Framework:<br>    默认规则:<br>        开放:堵<br>        关闭:通 </p>
-<p>    规则:匹配标准<br>        IP:SIP,DTP<br>        TCP:SPORT,DPORT<br>        UDP:SPORT,DPORT<br>        ICMP:icmp-type </p>
-<p>数据报文过滤:<br>    Linux2.0<br>        ipfw&#x2F;firewall<br>    Linux2.2<br>        ipchain&#x2F;firewall<br>    Linux2.4<br>        iptables&#x2F;netfilter </p>
-<p>iptables在用户空间写规则，对应的是内核空间的netfilter,所以生效的也是netfilter。 </p>
-<p>hook function:钩子函数<br>    prerouting<br>    input<br>    output<br>    forward<br>    postrouting </p>
-<p>        —&gt;filter机制的结构图&lt;—- </p>
-<p>数据包传入—&gt;路由表—&gt;FORWARD链—&gt;数据包传出<br>          |–&gt;INPUT链–&gt;本机进程–&gt;路由表–&gt;OUTPUT链–&gt;数据包传出 </p>
-<p>INPUT&#x2F;OUTPUT:数据包进入主机时，该数据包即由“数据包传入”所标识的位置进入，接着被送入路由表，然后根据路由表的内容决定数据包传输的路径，假设传给本机的进程，因此，该数据包将会<br>被送入INPUT链，此时若INPUT链内的规则不允许该数据包进入，那么则会抛弃掉，同理，OUTPUT规定本机是否允许数据的传出，由此可以看到:INPUT&#x2F;OUTPUT链机制是为了保护本机进程而设计的。<br>同时，这应该代表的是相同的一个接口。 </p>
-<p>FORWARD:在网关式防火墙中，防火墙部署在网关位置，当数据包要由另一个接口送出时，就会被送入FORWARD链，由此时FORWARD链内的规则决定是否允许数据包的命运~<br>规则链:<br>    PREROUTING<br>    INPUT<br>    OUTPUT<br>    FORWARD<br>    POSTROUTING </p>
-<p>filter(过滤):filter是netfilter最重要的机制，其任务是执行数据包的过滤操作，也就是起到防火墙的作用。<br>    INPUT<br>    OUTPUT<br>    FORWARD </p>
-<p>nat(地址转换):通俗讲，其功能就是IP分享器。<br>    PREROUTING<br>    POSTROUTING<br>    OUTPUT </p>
-<p>mangle(拆开&#x2F;修改&#x2F;封装):是一个很特殊的机制，可以通过mangle机制来修改经过防火墙内数据包的内容。<br>    PREROUTING<br>    INPUT<br>    FORWARD<br>    OUTPUT<br>    POSTROUTING </p>
-<p>raw():负责加快数据包穿过防火墙机制的速度，由此提高防火墙的性能。<br>    PREROUTING<br>    OUTPUT </p>
-<p>iptables:四个表五个链 </p>
-<p>能否使用自定义链?<br>    可以使用自定义链，但只在被调用时才能发挥作用，而且如果没有自定义链中的任何规则匹配，还应该有返回机制。 </p>
-<p>    用可以删除自定义的空链<br>    默认链无法删除 </p>
-<p>每个规则都有两个内置的计数器:<br>    一个用来被匹配的报文个数    (9K)<br>    一个被匹配的报文的体积大小之和(9K) </p>
-<p>规则:匹配标准，处理动作 </p>
-<p>    iptables -t TABLE  COMMAND CHAIN [NUM]- 操作方式 -j 处理办法<br>        -t:filter nat mangle raw,默认是filter表<br>        操作方式:    <br>            -L:将所在的表内容列出<br>            -A:在指定的链中添加新规则<br>            -F:将所选择的表内容清除掉<br>            -P:设置某个链的默认策略<br>           <br> <br>匹配标准:<br>    通用匹配<br>        -s&#x2F;–src     :源地址<br>        -d&#x2F;–dst     :目标地址<br>        -p             :协议{tcp|udp|icmp}<br>        -i INTERFACE :指定数据报文流入的接口<br>            可用于定义标准的链:PREROUTING,INPUT,FORWARD<br>        -o INTERFACE :指定数据报文流出的接口<br>            可用于定义标准的链:OUTPUT,POSTROUTING,FORWARD<br>    扩展匹配<br>        隐含扩展:不用特别指明由哪个模块进行的扩展，因为此时使用-p{tcp|udp|icmp}<br>        显式扩展:必须指明由哪个模块进行的扩展，在iptables中使用-m选项可完成此功能 </p>
-<p>-j TARGET:<br>    ACCEPT<br>    DROP<br>    REJECT<br>       <br>iptables -t filter -A INPUT -s 172.16.0.0&#x2F;16 -d 172.16.100.7 -j DROP </p>
-<p>    </p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/28/28-01Iptables%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9F%BA%E7%A1%80%E5%8E%9F%E7%90%86/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/18/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="page-number" href="/page/18/">18</a><span class="page-number current">19</span><a class="page-number" href="/page/20/">20</a><a class="page-number" href="/page/21/">21</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/20/">Next &amp;raquo;</a>
@@ -1198,7 +1201,7 @@ var _hmt = _hmt || [];
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2023 张宇
+    		&copy; 2024 张宇
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
