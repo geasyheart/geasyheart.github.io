@@ -212,6 +212,97 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-python-bdist-wheel" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/07/14/python-bdist-wheel/">python bdist_wheel</a>
+    </h1>
+  
+
+        
+        <a href="/2021/07/14/python-bdist-wheel/" class="archive-article-date">
+  	<time datetime="2021-07-14T09:45:31.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-14</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>利用cython进行编译成库.</p>
+<h3 id="1-setup-py"><a href="#1-setup-py" class="headerlink" title="1. setup.py"></a>1. setup.py</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf-8</span></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> sysconfig</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> setuptools <span class="keyword">import</span> setup, find_packages</span><br><span class="line"></span><br><span class="line"><span class="comment"># https://stackoverflow.com/questions/21594925/error-each-element-of-ext-modules-option-must-be-an-extension-instance-or-2-t</span></span><br><span class="line"><span class="comment"># 注意，这个顺序必须在这里，要比setup低.</span></span><br><span class="line"><span class="keyword">from</span> Cython.Build <span class="keyword">import</span> cythonize</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> setuptools.command.build_py <span class="keyword">import</span> build_py <span class="keyword">as</span> _build_py</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read</span>():</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;./requirements.txt&quot;</span>, <span class="string">&quot;r&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">return</span> f.readlines()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Notice1: your modules.</span></span><br><span class="line">packages = <span class="built_in">set</span>(find_packages()) | &#123;<span class="string">&#x27;your modules.&#x27;</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># Notice2: exclude files.</span></span><br><span class="line">EXCLUDE_FILES = [</span><br><span class="line">    <span class="comment"># &#x27;your package/ignore python files.&#x27;</span></span><br><span class="line">    <span class="string">&#x27;package/file1.py&#x27;</span></span><br><span class="line"></span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_ext_paths</span>(<span class="params">root_dir, exclude_files</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;get filepaths for compilation&quot;&quot;&quot;</span></span><br><span class="line">    paths = []</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> root, dirs, files <span class="keyword">in</span> os.walk(root_dir):</span><br><span class="line">        <span class="keyword">for</span> filename <span class="keyword">in</span> files:</span><br><span class="line">            <span class="keyword">if</span> os.path.splitext(filename)[<span class="number">1</span>] != <span class="string">&#x27;.py&#x27;</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line"></span><br><span class="line">            file_path = os.path.join(root, filename)</span><br><span class="line">            <span class="keyword">if</span> file_path <span class="keyword">in</span> exclude_files:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line"></span><br><span class="line">            paths.append(file_path)</span><br><span class="line">    <span class="keyword">return</span> paths</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># noinspection PyPep8Naming</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">build_py</span>(<span class="title class_ inherited__">_build_py</span>):</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">find_package_modules</span>(<span class="params">self, package, package_dir</span>):</span><br><span class="line">        ext_suffix = sysconfig.get_config_var(<span class="string">&#x27;EXT_SUFFIX&#x27;</span>)</span><br><span class="line">        modules = <span class="built_in">super</span>().find_package_modules(package, package_dir)</span><br><span class="line">        filtered_modules = []</span><br><span class="line">        <span class="keyword">for</span> (pkg, mod, filepath) <span class="keyword">in</span> modules:</span><br><span class="line">            <span class="keyword">if</span> os.path.exists(filepath.replace(<span class="string">&#x27;.py&#x27;</span>, ext_suffix)):</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            filtered_modules.append((pkg, mod, filepath,))</span><br><span class="line">        <span class="keyword">return</span> filtered_modules</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">setup(</span><br><span class="line">    name=<span class="string">&#x27;package name&#x27;</span>, <span class="comment"># Notice3</span></span><br><span class="line">    version=<span class="string">&#x27;0.3.0&#x27;</span>,</span><br><span class="line"></span><br><span class="line">    ext_modules=cythonize(</span><br><span class="line">        get_ext_paths(<span class="string">&#x27;project root path&#x27;</span>, EXCLUDE_FILES), <span class="comment"># Notice4</span></span><br><span class="line">        compiler_directives=&#123;<span class="string">&#x27;language_level&#x27;</span>: <span class="number">3.6</span>&#125;</span><br><span class="line">    ),</span><br><span class="line">    cmdclass=&#123;</span><br><span class="line">        <span class="string">&#x27;build_py&#x27;</span>: build_py</span><br><span class="line">    &#125;,</span><br><span class="line">    packages=packages,</span><br><span class="line">    include_package_data=<span class="literal">True</span>,</span><br><span class="line">    install_requires=read(),</span><br><span class="line">)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="2-build"><a href="#2-build" class="headerlink" title="2. build"></a>2. build</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">python setup.py build_ext --inplace</span><br><span class="line">python setup.py bdist_wheel</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-结论"><a href="#3-结论" class="headerlink" title="3. 结论"></a>3. 结论</h3><p>通过这种方式编译成一个库，正常情况下无法查看源码。<br>在开发过程中，IDE无法自动导入，就正常打包方便开发同学调试、使用，而在生产环境使用<code>2</code>方式进行编译成一个安装包，开发替换一下安装包路径即可。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/07/14/python-bdist-wheel/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-pytorch学习率调整" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -951,118 +1042,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2021/06/19/%E7%A0%94%E7%A9%B6torch0-4-1-rnn%E7%9A%84%E5%AE%9E%E7%8E%B0/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-简述条件随机场" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/06/18/%E7%AE%80%E8%BF%B0%E6%9D%A1%E4%BB%B6%E9%9A%8F%E6%9C%BA%E5%9C%BA/">简述条件随机场</a>
-    </h1>
-  
-
-        
-        <a href="/2020/06/18/%E7%AE%80%E8%BF%B0%E6%9D%A1%E4%BB%B6%E9%9A%8F%E6%9C%BA%E5%9C%BA/" class="archive-article-date">
-  	<time datetime="2020-06-18T12:13:25.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-18</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="1-什么是条件随机场"><a href="#1-什么是条件随机场" class="headerlink" title="1. 什么是条件随机场"></a>1. 什么是条件随机场</h2><p>条件随机场是一种给定输入随机变量x，求解条件概率p(y|x)的概率无向图模型。用于序列标注任务时，会特例化为线性链条件随机场。此时输入和输出序列为等长。</p>
-<h2 id="2-为什么需要条件随机场"><a href="#2-为什么需要条件随机场" class="headerlink" title="2. 为什么需要条件随机场"></a>2. 为什么需要条件随机场</h2><p>对于序列标注任务，此类任务有分词、词性标注等，本质是对每一个字（假设bert做特征提取）进行预测，然后接全连接层进行softmax激活，如下图所示：</p>
-<p><img src="https://kexue.fm/usr/uploads/2018/05/1423717593.png"></p>
-<p>以词性标注任务来讲，x表示观测序列，y表示预测序列，即词性分布。</p>
-<p>按照中文使用规律来讲，<code>动词后面接动词的可能性基本不存在</code>（或者对于分词任务来讲<code>蝴</code>后面基本就是<code>蝶</code>），而在上述模型中，观测序列没有考虑彼此之间的关联。<br>对于一个长度为n的句子，一共有m个词性，那么一共有<code>m * n</code>个可能性。</p>
-<p>crf引入了预测序列的关联，并以路径为单元，预测<code>m^n</code>个可能性中求最优的路径。</p>
-<h2 id="3-如何求解loss值"><a href="#3-如何求解loss值" class="headerlink" title="3. 如何求解loss值"></a>3. 如何求解loss值</h2><p>在计算下面条件概率时，引入了以下几个假设进行简化计算：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">P(y1,…,yn|x1,…,xn)=P(y1,…,yn|x),x=(x1,…,xn)</span><br></pre></td></tr></table></figure>
-
-<h3 id="计算简化"><a href="#计算简化" class="headerlink" title="计算简化"></a>计算简化</h3><ol>
-<li>假设该分布呈指数族分布</li>
-<li>输出之间是相邻位置关联的</li>
-<li>发射概率通过rnn进行获取</li>
-</ol>
-<p>对其进行-log，变成相加问题，求其最大似然估计。</p>
-<img src="/2020/06/18/%E7%AE%80%E8%BF%B0%E6%9D%A1%E4%BB%B6%E9%9A%8F%E6%9C%BA%E5%9C%BA/e4.png" class="" title="log相加模型">
-
-<p>其中：</p>
-<img src="/2020/06/18/%E7%AE%80%E8%BF%B0%E6%9D%A1%E4%BB%B6%E9%9A%8F%E6%9C%BA%E5%9C%BA/e5.png" class="">
-
-<p>这个函数前一部分表示rnn到输出（标签）的发射概率矩阵，后一部分表示相邻标签的状态转移概率矩阵。</p>
-<p>第一部分获取上述公式的计算结果，即分子项的计算结果，为目标的序列的打分结果。<a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/blob/1a6520d82112915a4e5fb6576341d00ba512f44e/python/crf/bilstm_crf.py#L171">计算函数</a></p>
-<p>第二部分是要求解分母项，需要在所有可能的路径上进行打分进行指数求和。<a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/blob/1a6520d82112915a4e5fb6576341d00ba512f44e/python/crf/bilstm_crf.py#L169">计算函数</a><br>因为只考虑临近项，那么就可以<code>递归的求出归一化因子</code>，使用<code>动态规划</code>的方式获取<code>所有路径的得分指数和</code>。</p>
-<h2 id="4-预测"><a href="#4-预测" class="headerlink" title="4. 预测"></a>4. 预测</h2><p>在计算好的状态转移矩阵和发射概率矩阵，使用viterbi算法获取序列的最优路径解。</p>
-<h2 id="5-有向无环图的求解（延展）"><a href="#5-有向无环图的求解（延展）" class="headerlink" title="5. 有向无环图的求解（延展）"></a>5. 有向无环图的求解（延展）</h2><p>viterbi算法不是为nlp所生的，求解最优路径也有其他的算法，比如<code>dijkstra</code>，<code>prim</code>等。但是本质区别在于viterbi是动态规划算法，后两者属于贪心算法，计算资源消耗更多。另外动态规划本质是空间换时间。</p>
-<p>关于viterbi动态规划求解，求解步骤如下：</p>
-<img src="/2020/06/18/%E7%AE%80%E8%BF%B0%E6%9D%A1%E4%BB%B6%E9%9A%8F%E6%9C%BA%E5%9C%BA/e8.png" class="">
-
-
-<p>从最左边开始，<br>A1,A2,A3都是起点,A1 -&gt; B1为1, A2 -&gt; B1为3,A3 -&gt; B1(我擦，漏了。。假设为4)，那么A1,A2,A3到B1的最短路径为1（即A1 -&gt; B1）。<br>同理得到B2的最短路径为2(即A1-&gt;B2),到B3的最短路径为1(A1-&gt;B3)。</p>
-<p>从B1,B2,B3到C1的最短路径为2(即B1 -&gt; C1)，到C2的最短路径为2,(B2 -&gt; C2),后续忽略。那么得到下张图:</p>
-<img src="/2020/06/18/%E7%AE%80%E8%BF%B0%E6%9D%A1%E4%BB%B6%E9%9A%8F%E6%9C%BA%E5%9C%BA/e9.png" class="">
-
-<p>可以看出，到C1最短路径为(A1 -&gt; B1 -&gt; C1)，到C2最短路径为(A1 -&gt; B2 -&gt; C2)。</p>
-<p>至此，求解过程完毕。</p>
-<h2 id="6-参考"><a href="#6-参考" class="headerlink" title="6. 参考"></a>6. 参考</h2><ol>
-<li><a target="_blank" rel="noopener" href="https://kexue.fm/archives/5542">https://kexue.fm/archives/5542</a></li>
-<li><a target="_blank" rel="noopener" href="http://fancyerii.github.io/books/sequential_labeling2/">http://fancyerii.github.io/books/sequential_labeling2/</a></li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/06/18/%E7%AE%80%E8%BF%B0%E6%9D%A1%E4%BB%B6%E9%9A%8F%E6%9C%BA%E5%9C%BA/">展开全文 >></a>
         </p>
       
 

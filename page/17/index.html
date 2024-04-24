@@ -212,6 +212,130 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-43-03配置Nginx作为webserver" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/09/30/43-03%E9%85%8D%E7%BD%AENginx%E4%BD%9C%E4%B8%BAwebserver/">43_03配置Nginx作为webserver</a>
+    </h1>
+  
+
+        
+        <a href="/2015/09/30/43-03%E9%85%8D%E7%BD%AENginx%E4%BD%9C%E4%B8%BAwebserver/" class="archive-article-date">
+  	<time datetime="2015-09-30T14:24:05.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-30</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Keepalived+nginx:实现高可用 </p>
+<p>Tengine:这是阿里利用Nginx再次修改发布的产品； </p>
+<p>varnish,squid<br>    nginx:cache(disk)<br>    httpd:cache(disk,memory) </p>
+<p>nginx支持和memcached服务的缓存加速功能；　 </p>
+<p>HTTP referer:支持反盗链 </p>
+<p>传统上基于进程或线程模型架构的web服务通过每进程或每线程处理并发连接请求，这势必会在网络和I&#x2F;O操作时产生阻塞，其另一个必然结果则是对内存或CPU的利用率低下，生成一个新的进程&#x2F;线程需要事先备好其运行时环境，这保罗为其分配堆内存和栈内存，以及为其创建新的执行上下文等，这些操作都需要占用CPU,而且过多的进程&#x2F;线程还会带来线程抖动或频繁的上下文切换，系统性能也会由此进一步下降； </p>
+<p>在设计的最初阶段，nginx的主要着眼点就是其高性能以及对物理计算资源的高密度利用，因此其采用了不同的架构模型。受启发于多种操作系统设计中基于“事件”的高级处理机制，nginx采用了模块化、事件驱动、异步、单线程及非阻塞的架构，并大量采用了多路复用及事件通知机制。在ngnix中，连接请求由为数不多的几个仅包含一个线程的进程worker以高效的回环(run-loop)机制进行处理，而每个worker可以并行处理数千个的并发连接及请求； </p>
+<p>如果负载以CPU密集型应用为主，如SSL或压缩应用，则worker数目应与CPU数相同，如果负载以IO密集型为主，如响应大量内容给客户端，则worker数应该为CPU个数的1.5倍或2倍； </p>
+<p>Ngnix会按需同时运行多个进程:一个主进程(master)和几个工作进程(worker)，配置了缓存时还会有缓存加载器进程(cache loader)和缓存管理器进程(cache manager)等，所有进程均是仅含有一个线程，并通过“共享内存”的机制实现进程间通信。主进程以root用户身份运行，而worker、cache loader和cache manager均应以非特权用户运行； </p>
+<p>主进程主要完成如下工作: </p>
+<ol>
+<li>读取并验证配置文件 </li>
+<li>创建、绑定及关闭套接字 </li>
+<li>启动、种植及维护worker进程的个数 </li>
+<li>无须终止服务而重新配置工作特性 </li>
+<li>控制非终端式程序升级，启用新的二进制程序并在需要时回滚至老版本 </li>
+<li>重新打开日志文件，实现日志滚动 </li>
+<li>编译嵌入式perl脚本</li>
+</ol>
+<p>worker进程主要完成的任务包括: </p>
+<ol>
+<li>接收、传入并处理来自客户端的连接 </li>
+<li>提供反向代理及过滤功能 </li>
+<li>nginx任何能完成的其他任务</li>
+</ol>
+<p>cache loader进程主要完成的任务包括: </p>
+<ol>
+<li>检查缓存存储中的缓存对象 </li>
+<li>使用缓存元数据建立内存数据库</li>
+</ol>
+<p>cache manager进程的主要任务:<br>１、缓存的失效及过期检验 </p>
+<p>Nginx的配置有着几个不同的上下文:main、http、server、upstream和location(还有实现右键服务反向代理的mail)。配置语法的格式和定义方式遵循所谓的C风格，因此支持嵌套，还有着逻辑清晰并易于创建、阅读和维护等优势；　 </p>
+<p>Nginx的代码是由一个核心和一系列的模块组成，核心主要用于提供web server的基本功能，以及web和mail反向代理的功能，还用于启用网络协议，创建必要的运行时环境以及确保不同的模块之间平滑的进行交互。不过，大多数协议相关的功能和某应用特有的功能都是由nginx的模块实现的，这些功能模块大致可分为事件模块、阶段性处理器、输出过滤器、变量处理器、协议、upstream和负载均衡几个类别，这些共同组成了nginx的http功能，时间模块主要用于提供OS独立的(不同的操作系统的时间机制有所不同)时间通知机制如kqueue或epoll等。协议模块则负责实现nginx通过http、tls&#x2F;ssl、smtp、pop3以及imap与对应的客户端建立会话。 </p>
+<p>在nginx内部，进程间的通信是通过模块的pipeline或chain实现的:换句话说，每一个功能或操作都由一个模块实现。例如:压缩、通过FastCGI或uwsgi协议与upstream服务器通信，以及与memcached建立会话等； </p>
+<p>sendfile:在内核直接完成文件封装发送给请求； </p>
+<h2 id="源码编译安装nginx"><a href="#源码编译安装nginx" class="headerlink" title="源码编译安装nginx"></a>源码编译安装nginx</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#yum groupinstall &quot;Development Tools&quot; &quot;Server Platform Libraries&quot; </span></span><br><span class="line"><span class="comment">#tar xf nginx-1.4.1.tar.gz </span></span><br><span class="line"><span class="comment">#groupadd -r -g 492 nginx </span></span><br><span class="line"><span class="comment">#useradd -r -g 492 -u 492 nginx </span></span><br><span class="line"> </span><br><span class="line">编译和安装 </span><br><span class="line">./configure \ </span><br><span class="line">--prefix=/usr \ </span><br><span class="line">--sbin-path=/usr/sbin/nginx \ </span><br><span class="line">--conf-path=/etc/nginx/nginx.conf \ </span><br><span class="line">--error-log-path=/var/log/nginx/error.log \ </span><br><span class="line">--http-log-path=/var/log/nginx/access.log \ </span><br><span class="line">--pid-path=/var/run/nginx/nginx.pid \ </span><br><span class="line">--lock-path=/var/lock/nginx.lock \ </span><br><span class="line">--user=nginx \ </span><br><span class="line">--group=nginx \ </span><br><span class="line">--with-http_ssl_module \ </span><br><span class="line">--with-http_flv_module \ </span><br><span class="line">--with-http_stub_status_module \ </span><br><span class="line">--with-http_gzip_static_module \ </span><br><span class="line">--http-client-body-temp-path=/var/tmp/nginx/client/ \ </span><br><span class="line">--http-proxy-temp-path=/var/tmp/nginx/proxy/ \ </span><br><span class="line">--http-fastcgi-temp-path=/var/tmp/nginx/fcgi/ \ </span><br><span class="line">--http-uwsgi-temp-path=/var/tmp/nginx/uwsgi \ </span><br><span class="line">--http-scgi-temp-path=/var/tmp/nginx/scgi \ </span><br><span class="line">--with-file-aio \ </span><br><span class="line">--with-http_image_filter_module \ </span><br><span class="line">--with-pcre\ </span><br><span class="line"> --with-http_mp4_module </span><br><span class="line"><span class="comment">#make &amp;&amp; make install </span></span><br><span class="line"> </span><br><span class="line">依赖包: </span><br><span class="line"><span class="comment">#yum install pcre-devel  openssl-devel gd-devel </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#chmod +x /etc/rc.d/init.d/nginx </span></span><br><span class="line"><span class="comment">#chkconfig --add nginx </span></span><br><span class="line"><span class="comment">#chkconfig nginx on </span></span><br><span class="line"><span class="comment">#service nginx start </span></span><br><span class="line"> </span><br><span class="line">如果出现: </span><br><span class="line">nginx: [emerg] <span class="built_in">mkdir</span>() <span class="string">&quot;/var/tmp/nginx/client/&quot;</span> failed (2: No such file or directory) </span><br><span class="line"><span class="comment">#mkdir -pv /var/tmp/nginx/client </span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">测试页位置: </span><br><span class="line"><span class="built_in">cd</span> /usr/html/ </span><br><span class="line"> </span><br><span class="line">配置文件: </span><br><span class="line"><span class="built_in">cd</span> /etc/nginx/ </span><br><span class="line"> </span><br><span class="line">vim nginx.conf </span><br><span class="line"> </span><br><span class="line">worker_processes  2;   这个最前面有指定 </span><br><span class="line">events&#123; </span><br><span class="line">    worker_connections 1024;     最多支持2*1024个请求；这个要注意!!! </span><br><span class="line">&#125; </span><br><span class="line">http&#123; </span><br><span class="line">    .......... </span><br><span class="line">&#125; </span><br><span class="line">server&#123;                     定义虚拟主机 </span><br><span class="line">    location /URI/ &#123; </span><br><span class="line">        root html; </span><br><span class="line">        index index.html index.htm; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">location [ = | ~ | ~* | ^~ ]uri &#123;...&#125; </span><br><span class="line"> location URI&#123;&#125;: </span><br><span class="line">     对当前路径及子路径下的所有对象都生效； </span><br><span class="line"> </span><br><span class="line"> location = URI&#123;&#125;: </span><br><span class="line">     精确匹配指定的路径，不包括子路径，因此，只对当前资源生效； </span><br><span class="line"> </span><br><span class="line"> location ~URI&#123;&#125;: </span><br><span class="line"> location ~* URI&#123;&#125;: </span><br><span class="line">     模式匹配URI,此处的URI可使用正则表达式，~区分字符大小写，~*不区分字符大小写； </span><br><span class="line"> </span><br><span class="line"> location ^~ URI&#123;&#125;: </span><br><span class="line">     不使用正则表达式 </span><br><span class="line"> </span><br><span class="line"> 优先级: </span><br><span class="line">     = &gt; ^~ &gt; ~|~* </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">例如: </span><br><span class="line">location /&#123; </span><br><span class="line">    root /web/htdocs; </span><br><span class="line">    index index.html index.htm; </span><br><span class="line">&#125; </span><br><span class="line">location /bbs/ &#123; </span><br><span class="line">    root  /web; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">/web/bbs </span><br><span class="line"> </span><br><span class="line">定义访问控制: </span><br><span class="line">①基于IP </span><br><span class="line">    location / &#123; </span><br><span class="line">        deny all; </span><br><span class="line">        allow 192.168.1.2; </span><br><span class="line">    &#125; </span><br><span class="line"> </span><br><span class="line">    location /bbs/ &#123; </span><br><span class="line">        deny 192.168.1.12; </span><br><span class="line">    &#125; </span><br><span class="line">②基于用户 </span><br><span class="line">    location / &#123; </span><br><span class="line">        auth_basic <span class="string">&quot;Restricted&quot;</span>; </span><br><span class="line">        auth_basic_user_file /etc/nginx/.users; </span><br><span class="line">    &#125; </span><br><span class="line">提供用户:htpasswd -c  -m /etc/nginx/.users tom </span><br><span class="line">第二次时不能使用　-c 选项； </span><br><span class="line"> </span><br><span class="line">autoindex:列出所有网页，默认没打开，建议不打开； </span><br><span class="line"> </span><br><span class="line">可以查看服务器的状态信息: </span><br><span class="line">location /status &#123; </span><br><span class="line">    stub_status on;　　　实际使用应该定义用户访问，如上； </span><br><span class="line">&#125; </span><br><span class="line">已经接受连接的个数，已经处理的连接的个数，已经处理的请求的个数 </span><br><span class="line">reading --nginx 正在读取其首部请求的个数； </span><br><span class="line">writing -- nginx 正在读取其主体的请求的个数、正处理着其请求内容的请求的个数或者正在向其客户发送响应的个数 </span><br><span class="line">waiting -- 长连接模式的保持的连接个数； </span><br><span class="line"> </span><br><span class="line">支持SSL </span><br><span class="line">ssl_certificate /etc/nginx/ssl/nginx.crt; </span><br><span class="line">ssl_certificate_key   /etc/nginxssl/nginx.key; </span><br><span class="line"> </span><br><span class="line">location / &#123; </span><br><span class="line">    root /web/ssl; </span><br><span class="line">    index index.html index.htm; </span><br><span class="line">&#125; </span><br><span class="line">创建CA: </span><br><span class="line"><span class="built_in">cd</span> /etc/pki/CA </span><br><span class="line">(<span class="built_in">umask</span> 077;openssl genrsa 2048 &gt; private/cakey.pem) </span><br><span class="line">openssl req -new -x509 -key private/cakey.pem -out cacert.pem </span><br><span class="line"><span class="built_in">touch</span> serial </span><br><span class="line"><span class="built_in">echo</span> 01 &gt; serial </span><br><span class="line"><span class="built_in">touch</span> index.txt </span><br><span class="line"> </span><br><span class="line"><span class="built_in">mkdir</span> /etc/nginx/ssl </span><br><span class="line"><span class="built_in">cd</span> /etc/nginx/ssl </span><br><span class="line">(<span class="built_in">umask</span> 077; openssl genrsa 1024 &gt; nginx.key) </span><br><span class="line">openssl req -new -key nginx.key -out nginx.csr </span><br><span class="line"> </span><br><span class="line">openssl ca -<span class="keyword">in</span> nginx.csr -days 3650 </span><br><span class="line"> </span><br><span class="line">这样就创建成功； </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">如何定义虚拟主机？ </span><br><span class="line"> </span><br><span class="line">server &#123; </span><br><span class="line">    listen 80; </span><br><span class="line">    server_name www.a.org; </span><br><span class="line">    location /&#123; </span><br><span class="line">        root /web/a.org </span><br><span class="line">        index index.html; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">如何实现LNMP: </span><br><span class="line">mysql要注意: </span><br><span class="line"><span class="comment">#vim /etc/ld.so.conf.d/mysql.conf </span></span><br><span class="line">/usr/local/mysql/lib </span><br><span class="line"><span class="comment">#ldconfig -v </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#ln -sv /usr/local/mysql/include /usr/include/mysql </span></span><br></pre></td></tr></table></figure>
+<h2 id="编译PHP"><a href="#编译PHP" class="headerlink" title="编译PHP"></a>编译PHP</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line">./configure --prefix=/usr/local/php\ </span><br><span class="line"> --with-openssl --with-mysql=/usr/local/mysql  \ </span><br><span class="line">  --enable-fpm --enable-sockets \ </span><br><span class="line">  --enable-sysvshm \ </span><br><span class="line">  --with-mysqli=/usr/local/mysql/bin/mysql_config \ </span><br><span class="line">  --enable-mbstring --with-freetype-dir\ </span><br><span class="line">   --with-jpeg-dir --with-png-dir --with-zlib \ </span><br><span class="line">   --with-libxml-dir \ </span><br><span class="line">   --enable-xml --with-mhash\ </span><br><span class="line"> --with-mcrypt \ </span><br><span class="line">  --with-config-file-scan-dir=/etc/php.d \ </span><br><span class="line">  --with-bz2 --with-config-file-path=/etc --with-curl </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">yum install libxml2-devel bzip2-devel libcurl-devel libmcrypt-devel epel--release </span><br><span class="line">如果不想麻烦，可以使用epel源试试； </span><br><span class="line">mcrypt源码编译的，可参考前面的php源码安装； </span><br><span class="line"> </span><br><span class="line">为php提供给配置文件: </span><br><span class="line"><span class="comment">#cp php.ini-production /etc/php.ini </span></span><br><span class="line"> </span><br><span class="line">为php-fpm提供Sysv init脚本，并将其添加至服务列表: </span><br><span class="line"><span class="comment">#cp sapi/fpm/init.d.php-fpm /etc/rc.d/init.t/php-fpm </span></span><br><span class="line"><span class="comment">#chmod +x /etc/rc.d/init.d/php-fpm </span></span><br><span class="line"><span class="comment">#chkconfig --add php-fpm </span></span><br><span class="line"><span class="comment">#chkconfig php-fpm on </span></span><br><span class="line"> </span><br><span class="line">为php-fpm提供配置文件: </span><br><span class="line"><span class="comment">#cp /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf </span></span><br><span class="line"> </span><br><span class="line">编辑php-fpm的配置文件: </span><br><span class="line"><span class="comment">#vim /usr/local/php/etc/php-fpm.conf </span></span><br><span class="line">配置fpm的相关选项为你所需要的值，并启用pid文件 </span><br><span class="line">pm.max_children=50 </span><br><span class="line">pm.start_servers=5 </span><br><span class="line">pm.min_spare_servers=2 </span><br><span class="line">pm.max_spare_servers=8 </span><br><span class="line">pid=/usr/local/php/var/run/php-fpm.pid </span><br><span class="line"> </span><br><span class="line">接下来启动php-fpm: </span><br><span class="line"><span class="comment">#service php-fpm start </span></span><br><span class="line"> </span><br><span class="line">接下来验证下: </span><br><span class="line"><span class="comment">#ps aux | grep php-fpm </span></span><br><span class="line"> </span><br><span class="line">整合nginx和php </span><br><span class="line">①编辑/etc/nginx/nginx.conf，启用如下选项: </span><br><span class="line">location ~ \.php<span class="variable">$&#123; </span></span><br><span class="line"><span class="variable">    root                html; </span></span><br><span class="line"><span class="variable">    fastcgi_pass     127.0.0.1:9000; </span></span><br><span class="line"><span class="variable">    fastcgi_index    index.php; </span></span><br><span class="line"><span class="variable">    fastcgi_param  SCRIPT_FILENAME /scripts$fastcgi_script_name; </span></span><br><span class="line"><span class="variable">    include              fastcgi_params;     </span></span><br><span class="line"><span class="variable">&#125;</span> </span><br><span class="line">②编辑/etc/nginx/fastcgi_params,将其内容改为如下内容: </span><br><span class="line">fastcgi_param      GATEWAY_INTERFACE   CGI/1.1; </span><br><span class="line">fastcgi_param      SERVER_SOFTWARE        nginx; </span><br><span class="line">fastcgi_param      QUERY_STRING               <span class="variable">$query_string</span>; </span><br><span class="line">fastcgi_param      REQUEST_METHOD         <span class="variable">$request_method</span>; </span><br><span class="line">fastcgi_param      CONTENT_TYPE               <span class="variable">$content_type</span>; </span><br><span class="line">fastcgi_param      CONTENT_LENGTH         <span class="variable">$content_length</span>; </span><br><span class="line">fastcgi_param      SCRIPT_FILENAME          $document_root<span class="variable">$fastcgi_script_name</span>; </span><br><span class="line">fastcgi_param      SCRIPT_NAME                 <span class="variable">$fastcgi_script_name</span>; </span><br><span class="line">fastcgi_param      REQUEST_URI                  <span class="variable">$request_uri</span>; </span><br><span class="line">fastcgi_param      DOCUMENT_URI            <span class="variable">$document_uri</span>; </span><br><span class="line">fastcgi_param      DOCUMENT_ROOT        <span class="variable">$document_root</span>; </span><br><span class="line">fastcgi_param      SERVER_PROTOCOL       <span class="variable">$server_protocol</span>; </span><br><span class="line">fastcgi_param      REMOTE_ADDR               <span class="variable">$remote_addr</span>; </span><br><span class="line">fastcgi_param      REMOTE_PORT                <span class="variable">$remote_port</span>; </span><br><span class="line">fastcgi_param      SERVER_ADDR                 <span class="variable">$server_addr</span>; </span><br><span class="line">fastcgi_param      SERVER_PORT                  <span class="variable">$server_port</span>; </span><br><span class="line">fastcgi_param      SERVER_NAME                <span class="variable">$server_name</span>; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">并在所支持的主页面格式中添加php格式的主页，类似如下: </span><br><span class="line">location / &#123; </span><br><span class="line">        root html; </span><br><span class="line">        index index.php index.html index.htm; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">而后重新载入nginx的配置文件: </span><br><span class="line">service nginx reload </span><br><span class="line"> </span><br><span class="line">③在/usr/html新建index.php的测试页面，测试php是否正常； </span><br><span class="line"><span class="built_in">cat</span> &gt; /usr/html/index.php&lt;&lt;<span class="string">EOF </span></span><br><span class="line"><span class="string">&lt;?php </span></span><br><span class="line"><span class="string">phpinfo(); </span></span><br><span class="line"><span class="string">?&gt; </span></span><br><span class="line"><span class="string">EOF</span> </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+<p>还有安装xcache;;;; </p>
+<p>安装xcache3.2.0,如果使用php-5.6.7会出现两者无法结合的现象，可以使用php-5.6.11版本，编译安装xcache后，一切不需要动，直接service php-fpm restart即可，<br>然后phpinfo测试下即可；；； </p>
+<p>nginx -t<br>service nginx testconfig   这两个可以检查配置文件是否正确；</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/09/30/43-03%E9%85%8D%E7%BD%AENginx%E4%BD%9C%E4%B8%BAwebserver/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-41-04Linux集群系列之二十二-Keepalived详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1106,98 +1230,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/09/20/39-02Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E4%BA%8C-%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4%E4%B9%8B%E5%9F%BA%E4%BA%8Eheartbeat%E5%92%8Cnfs%E7%9A%84%E9%AB%98%E5%8F%AF%E7%94%A8MySQL/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-24-04-3-实验L-A-M-P编译" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/09/20/24-04-3-%E5%AE%9E%E9%AA%8CL-A-M-P%E7%BC%96%E8%AF%91/">24_04_3_实验L-A-M-P编译</a>
-    </h1>
-  
-
-        
-        <a href="/2015/09/20/24-04-3-%E5%AE%9E%E9%AA%8CL-A-M-P%E7%BC%96%E8%AF%91/" class="archive-article-date">
-  	<time datetime="2015-09-20T02:16:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-20</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="基础"><a href="#基础" class="headerlink" title="基础"></a>基础</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">service iptables off </span><br><span class="line">setenforce 0 </span><br><span class="line">yum -y install epel-release </span><br></pre></td></tr></table></figure>
-
-<h2 id="httpd服务器：192-168-122-111"><a href="#httpd服务器：192-168-122-111" class="headerlink" title="httpd服务器：192.168.122.111"></a>httpd服务器：192.168.122.111</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">tar xvjf apr-1.5.1.tar.bz2                                     </span><br><span class="line">./configure --prefix=/usr/local/apr </span><br><span class="line">make &amp;&amp; make install                                 </span><br><span class="line">tar xvjf apr-util-1.5.4.tar.bz2     </span><br><span class="line">./configure --prefix=/usr/local/apr-util --with-apr=/usr/local/apr         </span><br><span class="line">make &amp;&amp; make install                                                     </span><br><span class="line">                                                                                                 </span><br><span class="line">yum install pcre-devel openssl-devel zlib-devel </span><br><span class="line">tar xvjf httpd-2.4.10.tar.bz2     </span><br><span class="line">./configure --prefix=/usr/local/apache \ </span><br><span class="line">     --sysconfdir=/etc/httpd \ </span><br><span class="line">     --enable-so \ </span><br><span class="line">     --enable-rewrite \ </span><br><span class="line">     --enable-ssl \ </span><br><span class="line">     --enable-cgi  \ </span><br><span class="line">     --enable-cgid \ </span><br><span class="line">    --enable-modules=most \ </span><br><span class="line">    --enable-deflate \ </span><br><span class="line">    --enable-mods-shared=most \ </span><br><span class="line">    --enable-mpms-shared=all \ </span><br><span class="line">    --with-mpm=event \ </span><br><span class="line">    --with-apr=/usr/local/apr \ </span><br><span class="line">    --with-apr-util=/usr/local/apr-util </span><br><span class="line"> make &amp;&amp; make install </span><br><span class="line">  </span><br></pre></td></tr></table></figure>
-<h2 id="php服务器：192-168-122-104"><a href="#php服务器：192-168-122-104" class="headerlink" title="php服务器：192.168.122.104"></a>php服务器：192.168.122.104</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">wget -c  http://cn2.php.net/distributions/php-5.6.12.tar.bz2 </span><br><span class="line"> </span><br><span class="line">./configure --prefix=/usr/local/php --with-config-file-path=/etc --with-openssl --enable-mbstring --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib  --with-libxml-dir  --enable-xml --enable-sockets --enable-fpm --with-mcrypt  --with-config-file-scan-dir=/etc/php.d --with-bz2  --enable-zip --with-mysql=mysqlnd --with-pdo-mysql=mysqlnd --with-mysqli=mysqlnd </span><br><span class="line"> </span><br><span class="line"> make &amp;&amp; make install </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cp</span> php.ini-production /etc/php.ini </span><br><span class="line"> <span class="built_in">cp</span> sapi/fpm/init.d.php-fpm /etc/rc.d/init.d/php-fpm </span><br><span class="line"><span class="built_in">chmod</span> +x /etc/rc.d/init.d/php-fpm </span><br><span class="line">chkconfig --add php-fpm </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cp</span> /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf </span><br><span class="line">编辑php-fpm的配置文件： </span><br><span class="line">vi /usr/local/php/etc/php-fpm.conf </span><br><span class="line">配置fpm的相关选项为你所需要的值，并启用pid文件： </span><br><span class="line">listen = 192.168.122.104:9000 </span><br><span class="line">pm.max_children = 50 </span><br><span class="line">pm.start_servers = 5 </span><br><span class="line">pm.min_space_servers = 2 </span><br><span class="line">pm.max_space_servers = 8 </span><br><span class="line">pid = /usr/local/php/var/run/php-fpm.pid </span><br><span class="line"> </span><br><span class="line">接下来就可以启动php-fpm了： </span><br><span class="line">service php-fpm start </span><br><span class="line"> </span><br><span class="line">tar xf xcache-3.2.0.tar.gz </span><br><span class="line"> <span class="built_in">cd</span> xcache-3.2.0 </span><br><span class="line"> yum -y install autoconf </span><br><span class="line">/usr/local/php/bin/phpize </span><br><span class="line">./configure --enable-xcache --with-php-config=/usr/local/php/bin/php-config </span><br><span class="line">make &amp;&amp; make install </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cp</span> xcache.ini /etc/php.d </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">3、启用httpd的相关模块 </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">vim /etc/httpd/httpd.conf </span><br><span class="line">LoadModule proxy_module modules/mod_proxy.so </span><br><span class="line">LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so </span><br><span class="line">在&lt;Directory <span class="string">&quot;/usr/local/apache/htdocs&quot;</span>&gt;外面写如下两行： </span><br><span class="line">ProxyRequests Off </span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ fcgi://192.168.122.104:9000/php/<span class="variable">$1</span> </span><br><span class="line"> </span><br><span class="line">php服务器： </span><br><span class="line"><span class="built_in">mkdir</span> /php </span><br><span class="line">vim /php/phpinfo.php </span><br><span class="line">vim /php/mysql.php </span><br><span class="line">进行测试；； </span><br><span class="line"> </span><br><span class="line">安装phpadmin </span><br><span class="line"><span class="built_in">cp</span> config.sample.inc.php config.inc.php </span><br><span class="line">编辑这个配置文件，修改这一项： </span><br><span class="line"><span class="variable">$cfg</span>[<span class="string">&#x27;Servers&#x27;</span>][<span class="variable">$i</span>][<span class="string">&#x27;host&#x27;</span>] = <span class="string">&#x27;192.168.236.104&#x27;</span>; </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
-<p>如果出现:<br>PEAR package PHP_Archive not installed: generated phar will require PHP’s phar extension be enabled. </p>
-<blockquote>
-<p>wget <a target="_blank" rel="noopener" href="http://pear.php.net/go-pear.phar">http://pear.php.net/go-pear.phar</a><br>&#x2F;usr&#x2F;local&#x2F;php&#x2F;bin&#x2F;php go-pear.phar</p>
-</blockquote>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/09/20/24-04-3-%E5%AE%9E%E9%AA%8CL-A-M-P%E7%BC%96%E8%AF%91/">展开全文 >></a>
         </p>
       
 

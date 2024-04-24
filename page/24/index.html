@@ -212,6 +212,112 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-14-04Linux内核编译及系统裁剪之一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/03/15/14-04Linux%E5%86%85%E6%A0%B8%E7%BC%96%E8%AF%91%E5%8F%8A%E7%B3%BB%E7%BB%9F%E8%A3%81%E5%89%AA%E4%B9%8B%E4%B8%80/">14_04Linux内核编译及系统裁剪之一</a>
+    </h1>
+  
+
+        
+        <a href="/2015/03/15/14-04Linux%E5%86%85%E6%A0%B8%E7%BC%96%E8%AF%91%E5%8F%8A%E7%B3%BB%E7%BB%9F%E8%A3%81%E5%89%AA%E4%B9%8B%E4%B8%80/" class="archive-article-date">
+  	<time datetime="2015-03-15T14:32:10.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-15</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Linux的组成:<br> 核心:&#x2F;boot&#x2F;vmlinuz-version<br> 内核模块(ko)<br>2.6.17–&gt;2.6.18-rc1–&gt;…–&gt;2.6.18-rc5–&gt;2.6.18<br>2.6.17–&gt;2.6.18.1–&gt;…–&gt;2.6.18.5–&gt;2.6.18<br>装载模块:<br> insmod<br> modprobe </p>
+<p>用户空间访问、监控内核的方式:<br>&#x2F;proc , &#x2F;sys </p>
+<p>伪文件系统:<br>&#x2F;proc:大部分内容是不可写的。而:<br>&#x2F;proc&#x2F;sys:此目录中的文件很多是可读写的<br>&#x2F;sys&#x2F;:某些文件可读写 </p>
+<p>设定内核参数值得方法:<br>echo VALUE &gt; &#x2F;proc&#x2F;sys&#x2F;TO&#x2F;SOMEFILE<br>sysctl -w (&#x2F;proc&#x2F;sys)PATH.SOMEFILE&#x3D;value<br> (&#x2F;proc&#x2F;sys(这个目可省略，因为这个命令就是对这个目录下的文件进行修改)) </p>
+<p>注意:<br> 立即生效，但不会永久生效。<br> 永久生效，但不能立即生效:&#x2F;etc&#x2F;sysctl.conf<br> sysctl -p : 使其立即生效<br> sysctl -a : 显示所有内核参数及其值 </p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#############立即生效，但不会永久生效################# </span></span><br><span class="line">例如: </span><br><span class="line"><span class="comment">#free -m  </span></span><br><span class="line"><span class="comment">#echo 1 &gt; /proc/sys/vm/drop_caches(方式一) </span></span><br><span class="line"><span class="comment">#free -m  </span></span><br><span class="line"><span class="comment">#sysctl -w vm.drop_caches=1(方式二) </span></span><br><span class="line">可以看到buffers和cached的值变小了。 </span><br><span class="line">(所以可通过修改某个文件的值以达到操作内核的目的。)  </span><br><span class="line"> </span><br><span class="line">例如: </span><br><span class="line"><span class="comment">#hostname </span></span><br><span class="line"><span class="comment">#echo &quot;geasyheart&quot; &gt; /proc/sys/kernel/hostname(方式一) </span></span><br><span class="line"><span class="comment">#hostname </span></span><br><span class="line"><span class="comment">#sysctl -w kernel.hostname=&quot;www.geasyheart&quot;(方式二) </span></span><br><span class="line"><span class="comment">#hostname </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">##############永久生效的设置########################## </span></span><br><span class="line">例如: </span><br><span class="line"><span class="comment">#vim /etc/sysctl.conf </span></span><br><span class="line">net.ipv4.ip_forward = 0  把其修改为1 </span><br><span class="line">net.ipv4.ip_forward = 1  保存退出 </span><br><span class="line"><span class="comment">#cat /proc/sys/net/ipv4/ip_forward </span></span><br><span class="line">0 </span><br><span class="line">没有立即生效，然后执行: </span><br><span class="line"><span class="comment">#sysctl -p  即可完成永久生效 </span></span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+<p>内核模块管理:<br> lsmod:列出当前系统上使用的模块 </p>
+<p> modprobe MOD_NAME：装载模块<br> modprobe -r MOD_NAME:卸载模块 </p>
+<p> modinfo MOD_NAME:查看模块的具体信息 </p>
+<p> insmod &#x2F;PATH&#x2F;TO&#x2F;MOD_FILE:必须指定模块路径<br> rmmod MOD_NAME </p>
+<p> depmod &#x2F;PATH&#x2F;TO&#x2F;MODULES_DIR(用的不多)<br>例如: </p>
+<blockquote>
+<p>modinfo ext4<br> 可以看到存放位置(filename)，授权协议(GPL)，描述(description)，所依赖的模块(depends)…<br> 例如ext4依赖mbcache,jbd2,<br>modinfo mbcache jbd2<br> 可以看到描述以及不依赖于其他的模块。。 </p>
+</blockquote>
+<p>内核中的功能除了核心功能之外，在编译时，大多数功能都有三种选择:<br> 1、不使用此功能<br> 2、编译成内核模块<br> 3、编译进内核 </p>
+<p>make gconfig:Gnome桌面环境使用，需要装Gnome开发库，Gnome Software Development<br>make Kconfig:KDE桌面环境使用，需要装KDE开发库 </p>
+<p>如何手动编译内核<br> 不要大幅度版本升级，可能会有不兼容的现象<br> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#yum groupinstall &quot;Development Tools&quot; </span></span><br><span class="line"><span class="comment">#tar xf linux-2.6.32.65.tar.xz -C /usr/src </span></span><br><span class="line"><span class="comment">#ln -sv linux-2.6.32.65 linux </span></span><br><span class="line"><span class="comment">#make menuconfig </span></span><br><span class="line"><span class="comment">#make  </span></span><br><span class="line"><span class="comment">#make modules_install </span></span><br><span class="line"><span class="comment">#make install </span></span><br></pre></td></tr></table></figure><br>(说明，在make menuconfig保存后，会在&#x2F;usr&#x2F;src&#x2F;linux生成一个.config文件，<br>在编译的时候就是基于.config进行编译的。所以为了编译少出错，可以参考<br>发行版商在编译的时候的编译选项，叫&#x2F;boot&#x2F;config-version，可以<br>cp &#x2F;boot&#x2F;config-version &#x2F;usr&#x2F;src&#x2F;linux&#x2F;.config,然后打开make menuconfig再进行选择，<br>就会大大减小出错的概率。) </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#cp /boot/config-version /usr/src/linux/.config </span></span><br><span class="line"><span class="comment">#make menuconfig </span></span><br><span class="line"><span class="comment">#make </span></span><br><span class="line"><span class="comment">#make modules_install </span></span><br><span class="line"><span class="comment">#make install </span></span><br></pre></td></tr></table></figure>
+<p>开机选择内核即可。 </p>
+<p>二次编译时清理,清理前，如果有需要，要备份配置文件.config:<br>make clean<br>make mrproper </p>
+<p>远程编译的时候建议使用screen命令，即使断开了，会在后台继续执行:<br>screen:<br> screen -ls:显示已经建立的屏幕<br> screen:直接打开一个新的屏幕<br> Ctrl +a,d:拆除屏幕<br> screen -r ID:还原回某屏幕 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br></pre></td><td class="code"><pre><span class="line">fdisk -l /dev/hda </span><br><span class="line"><span class="built_in">mkdir</span> /mnt/&#123;boot,sysroot&#125; </span><br><span class="line">mount /dev/hda1 /mnt/boot </span><br><span class="line">mount /dev/hda2 /mnt/sysroot </span><br><span class="line">grub-install --root-directory=/mnt /dev/sda  </span><br><span class="line"><span class="built_in">cp</span> /boot/vmlinuz-version /mnt/boot/vmlinuz </span><br><span class="line"><span class="comment">###mkinitrd(RHEL6:dracut) /boot/initrd-vmlinuz.img  </span></span><br><span class="line"><span class="comment">###file /boot/initrd-version.img </span></span><br><span class="line"><span class="built_in">cp</span> /boot/initrd-version.img /root </span><br><span class="line"><span class="comment">###mv initrd-version.img initrd-version.img.gz </span></span><br><span class="line"><span class="comment">###gzip -d initrd-version.img.gz </span></span><br><span class="line"><span class="comment">###file initrd-version.img </span></span><br><span class="line"><span class="comment">###mkdir test/ </span></span><br><span class="line"><span class="comment">###cd test/ </span></span><br><span class="line"><span class="comment">###cpio -id &lt;../initrd-version.img </span></span><br><span class="line"> </span><br><span class="line"><span class="built_in">mkdir</span> iso/ </span><br><span class="line"><span class="built_in">cd</span> iso/ </span><br><span class="line">zcat /boot/initrd-version.img | cpio -<span class="built_in">id</span>  </span><br><span class="line">vim init </span><br><span class="line">改这行为这样: </span><br><span class="line">mkrootdev -t ext4 -o defaults,ro /dev/hda2 </span><br><span class="line"> </span><br><span class="line"><span class="built_in">pwd</span> </span><br><span class="line">find . | cpio -H newc --quiet -o | gzip -9 &gt; /mnt/boot/initrd.gz </span><br><span class="line">vim /mnt/boot/grub.cfg </span><br><span class="line">default=0 </span><br><span class="line"><span class="built_in">timeout</span>=5 </span><br><span class="line">title Test linux </span><br><span class="line"> root(hd0,0) </span><br><span class="line"> kernel /vmlinuz </span><br><span class="line"> initrd /initrd.gz </span><br><span class="line">  </span><br><span class="line"><span class="built_in">cd</span> /mnt/sysroot </span><br><span class="line"><span class="built_in">mkdir</span> proc sys dev etc/rc.d lib sbin bin boot home var usr/&#123;bin/sbin&#125; root tmp  </span><br><span class="line">tree . </span><br><span class="line"><span class="built_in">cp</span> /sbin /mnt/sysroot/sbin </span><br><span class="line"><span class="built_in">cp</span> /bin/bash /mnt/sysroot/bin/ </span><br><span class="line">ldd /sbin/init </span><br><span class="line"><span class="built_in">cp</span> * /mnt/sysroot/lib/ </span><br><span class="line"><span class="built_in">chroot</span> /mnt/sysroot/ </span><br><span class="line"><span class="built_in">exit</span> </span><br><span class="line"><span class="built_in">sync</span> </span><br><span class="line"><span class="built_in">cd</span> /mnt/sysroot </span><br><span class="line">vim /etc/inittab </span><br><span class="line"> <span class="built_in">id</span>:3:initdefault: </span><br><span class="line"> si::sysinit:/etc/rc.d/rc.sysinit </span><br><span class="line">vim /etc/rc.d/sysinit </span><br><span class="line"> <span class="comment">#!/bin/bash </span></span><br><span class="line"> <span class="built_in">echo</span> -e <span class="string">&quot;\tWelcome to \033[32mtest\033[0mLinux.&quot;</span> </span><br><span class="line"><span class="built_in">chmod</span> +x /etc/rc.d/sysinit </span><br><span class="line"><span class="built_in">sync</span> </span><br><span class="line"> </span><br><span class="line">这个时候系统是只读的系统，不能写入任何内容至新/,因为/etc/sysinit并没有重新以可读写的状态 </span><br><span class="line">进行挂载，而如果使用mount -o remount,rw / ,会提示can`t create lock file /etc/mtab:Read-only file system (use -n flag to override) </span><br><span class="line"> </span><br><span class="line">补充: </span><br><span class="line"> (/etc/mtab:可参阅这篇文章: </span><br><span class="line"> http://blog.163.com/qimeizhen8808@126/blog/static/165119518201281892121501/) </span><br><span class="line">mount  </span><br><span class="line"> -n:挂载时不更新至/etc/mtab文件; </span><br><span class="line">然后，就会使用: </span><br><span class="line">mount -o -n remount,rw / </span><br><span class="line">但是: </span><br><span class="line">Warning:can`t open /etc/fstab:No such file or directory </span><br><span class="line">EXT3 FS on hda2,internal journal, </span><br><span class="line">不过，没影响^_^. </span><br><span class="line">可以自行创建/etc/fstab文件。 </span><br><span class="line"> </span><br><span class="line">关机:使用halt关机时会切换到runlevel 0，但是关不掉。 </span><br><span class="line">halt -p 没有关闭电源而使系统停机 </span><br><span class="line">但是仍然关不掉，这个时候可能执行<span class="built_in">exec</span> /sbin/halt -p ,(<span class="comment">#halt是在当前的bash中的执行的一个子进程，exec:当进程调用exec函数时，该进程完全由新程序代换) </span></span><br><span class="line">但是还是关不掉，因为它要切换到runlevel 0，但是没有/etc/rc.d/rc0.d/这个相应的文件，所以无法执行关机，所以这个地方说明，命令无法直接关机，而是切换到 </span><br><span class="line">runlevel 0上进行关机，那么，我就创建一个脚本， </span><br><span class="line">vim /etc/rc.d/rc.syshalt </span><br><span class="line"><span class="comment">#!/bin/bash </span></span><br><span class="line"><span class="built_in">sync</span> </span><br><span class="line"><span class="built_in">sleep</span> 3 </span><br><span class="line"><span class="built_in">sync</span> </span><br><span class="line"><span class="built_in">sleep</span> 3 </span><br><span class="line"><span class="built_in">exec</span> /sbin/halt -p  </span><br><span class="line"><span class="built_in">chmod</span> +x /etc/rc.d/rc.syshalt </span><br><span class="line">vim /etc/fstab添加: </span><br><span class="line">l0:0:<span class="built_in">wait</span>:/etc/rc.d/rc.syshalt </span><br><span class="line">就可以实现关机，不过也可以按照标准方式进行关机。 </span><br><span class="line">reboot: </span><br><span class="line">l6:6:<span class="built_in">wait</span>:/etc/rc.d/reboot6 </span><br><span class="line">同上；； </span><br><span class="line">以标准方式的话: </span><br><span class="line">l6:6:<span class="built_in">wait</span>:init 6 </span><br><span class="line"> </span><br><span class="line">  </span><br><span class="line">FILE=/usr/local/src </span><br><span class="line"><span class="variable">$&#123;FILE#*/&#125;</span>: usr/local/src </span><br><span class="line"><span class="variable">$&#123;FILE##*/&#125;</span>: src </span><br><span class="line"> </span><br><span class="line"><span class="variable">$&#123;FILE%/*&#125;</span>:/usr/local </span><br><span class="line"><span class="variable">$&#123;FILE%%/*&#125;</span>:  </span><br><span class="line"> </span><br><span class="line">vim bincopy.sh </span><br><span class="line"> <span class="comment">#!/bin/bash </span></span><br><span class="line"> <span class="comment"># </span></span><br><span class="line"> DEST=/mnt/sysroot </span><br><span class="line"> <span class="function"><span class="title">libcp</span></span>() &#123; </span><br><span class="line"> LIBPATH=<span class="variable">$&#123;1%/*&#125;</span> </span><br><span class="line"> [ ! -d $DEST<span class="variable">$LIBPATH</span>]&amp;&amp; <span class="built_in">mkdir</span> -p $DEST<span class="variable">$LIBPATH</span>  </span><br><span class="line"> [ ! -e $DEST<span class="variable">$&#123;1&#125;</span> ] &amp;&amp; <span class="built_in">cp</span> <span class="variable">$1</span> $DEST<span class="variable">$LIBPATH</span>  </span><br><span class="line"> <span class="built_in">cp</span> <span class="variable">$1</span> $DEST<span class="variable">$LIBPATH</span> </span><br><span class="line"> <span class="function"><span class="title">bincp</span></span>()&#123; </span><br><span class="line"> CMDPATH=<span class="variable">$&#123;1%/*&#125;</span> </span><br><span class="line"> [ ! -d $DEST<span class="variable">$CMDPATH</span> ] &amp;&amp; <span class="built_in">mkdir</span> -p $DEST<span class="variable">$CMDPATH</span> </span><br><span class="line"> [ ! -e <span class="variable">$D</span> <span class="variable">$&#123;1&#125;</span> ] &amp;&amp; <span class="built_in">cp</span> <span class="variable">$1</span> $DEST<span class="variable">$CMDPATH</span> </span><br><span class="line"> <span class="keyword">for</span> LIB <span class="keyword">in</span> `ldd <span class="variable">$1</span> | grep -o <span class="string">&quot;/.*lib\(64\)\(0,1\)/[^[:space:]]\&#123;1,\&#125;&quot;</span>` </span><br><span class="line"> libcp <span class="variable">$LIB</span> </span><br><span class="line"> <span class="keyword">done</span> </span><br><span class="line"> &#125; </span><br><span class="line"> <span class="built_in">read</span> -p <span class="string">&quot;Your command:&quot;</span> CMD </span><br><span class="line"> <span class="keyword">until</span> [ <span class="variable">$CMD</span> == <span class="string">&#x27;quit&#x27;</span> ];<span class="keyword">do</span> </span><br><span class="line"> ! <span class="built_in">which</span> <span class="variable">$CMD</span> &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;wrong command &quot;</span> &amp;&amp;<span class="built_in">read</span> -p <span class="string">&quot;Input again&quot;</span> CMD &amp;&amp; <span class="built_in">continue</span> </span><br><span class="line"> COMMAND = `<span class="built_in">which</span> <span class="variable">$CMD</span> | grep -v <span class="string">&quot;^alias&quot;</span> | grep -o <span class="string">&quot;[^[:space:]]\&#123;1,\&#125;&quot;</span>` </span><br><span class="line"> bincp <span class="variable">$COMMAND</span> </span><br><span class="line"> <span class="built_in">echo</span> <span class="string">&quot;copy <span class="variable">$COMMAND</span> finished&quot;</span> </span><br><span class="line"> <span class="built_in">read</span> -p <span class="string">&quot;Continue:&quot;</span> CMD </span><br><span class="line"> <span class="keyword">done</span> </span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">  </span><br></pre></td></tr></table></figure>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/03/15/14-04Linux%E5%86%85%E6%A0%B8%E7%BC%96%E8%AF%91%E5%8F%8A%E7%B3%BB%E7%BB%9F%E8%A3%81%E5%89%AA%E4%B9%8B%E4%B8%80/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-15-all-暂时不更新" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1202,97 +1308,6 @@ traceroute:
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/02/22/11-02Linux%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E4%B9%8B%E4%BA%8CIP%E6%8A%A5%E6%96%87/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-11-01linux网络配置之一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/22/11-01linux%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E4%B9%8B%E4%B8%80/">11_01linux网络配置之一</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/22/11-01linux%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E4%B9%8B%E4%B8%80/" class="archive-article-date">
-  	<time datetime="2015-02-22T15:12:02.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>协议:protocol </p>
-<p>网桥: </p>
-<p>网关:<br>实现不同网段的数据转发。 </p>
-<p>网路交换器:<br> <a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/%E7%B6%B2%E8%B7%AF%E4%BA%A4%E6%8F%9B%E5%99%A8">http://zh.wikipedia.org/wiki/%E7%B6%B2%E8%B7%AF%E4%BA%A4%E6%8F%9B%E5%99%A8</a><br>工作原理:<br> 交换机工作于OSI参考模型的第二层，即数据链路层。<br> 交换机内部的CPU会在每个端口成功连接时，通过将MAC地址和端口对应，形成一张MAC表。<br> 在今后的通讯中，发往该MAC地址的数据包将仅送往其对应的端口，而不是所有的端口。<br> 因此，交换机可用于划分数据链路层广播，即冲突域；但它不能划分网络层广播，即广播域。<br>分类:<br> 二层交换机:<br> 交换机被广泛应用于二层网络交换。中档的网管型交换机还具有VLAN划分、端口自动协商、MAC访问控制列表等功能，<br> 并提供命令行界面或图形界面控制台，供网络管理员调整参数<br> 通过MAC地址表示数据包。<br> 三层交换机:<br> 用于连接不同网段，并具有路由功能<br> 通过ip地址进行数据传送。<br> 四层交换机<br> 七层交换机 </p>
-<p>与HUB(集线器)的区别:<br>交换器与集线器不同之处是，集线器会将网络内某一用户发送之数据包传至所有已连接到集线器的电脑。<br>而交换器则只会将数据包发送到指定目的地的电脑（通过MAC表），相对上能减少数据碰撞及数据被窃听的机会。<br>交换器更能将同时传到的数据包分别处理，而集线器则不能。 </p>
-<p>最大的不同之处在于:集线器的每一个接口都处于相同的冲突域，而交换机的每个接口处于一个冲突域。<br>在性能方面尤为突出:例如在100Mb&#x2F;s的以太网络中有100个用户，使用集线器，每个用户只有1Mb&#x2F;s（100Mb&#x2F;s&#x2F;100），<br>因为Hub是共享式的网络；而使用交换机，每个接口有100Mb&#x2F;s，如果有100个接口，<br>总带宽为100*100Mb&#x2F;s（最终的带宽大小取决于输入接口的带宽；即如果输入端口只有1000M，则达到上限前，每个用户都能使用100M带宽，<br>但一旦所有用户的总需求超过1000M，用户将在相同优先级的原则下进行带宽分配），因为交换机是独立式的网络<br>物理地址(MAC地址) </p>
-<p>逻辑地址(IP地址) </p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/22/11-01linux%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E4%B9%8B%E4%B8%80/">展开全文 >></a>
         </p>
       
 

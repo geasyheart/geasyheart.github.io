@@ -7,16 +7,19 @@
   <meta name="baidu-site-verification" content="code-Wz3hIIlkFx" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://geasyheart.github.io">
-  <title>Archives | 博客</title>
+  <title>RHLF-DQN | 博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="张宇个人博客">
-<meta property="og:type" content="website">
-<meta property="og:title" content="博客">
-<meta property="og:url" content="https://geasyheart.github.io/archives/page/20/index.html">
+  <meta name="description" content="前言下面记录下DQN算法以及一些细节，注意哦，本博客更多目的在于当下记录，并非完整严谨的哦，也或许有理解错误。 关于DQN，看了下网上的介绍以及从Q-Learning到DQN解决state和action无法枚举完的情况。另外也强烈推荐下面链接：  知乎网友实现DQN：可直接按照这个跑通体验下效果。 PaddlePaddle&#x2F;PARL：这个是paddle出的RHLF库，并提供了相应的exa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RHLF-DQN">
+<meta property="og:url" content="https://geasyheart.github.io/2024/04/24/RHLF-DQN/index.html">
 <meta property="og:site_name" content="博客">
-<meta property="og:description" content="张宇个人博客">
+<meta property="og:description" content="前言下面记录下DQN算法以及一些细节，注意哦，本博客更多目的在于当下记录，并非完整严谨的哦，也或许有理解错误。 关于DQN，看了下网上的介绍以及从Q-Learning到DQN解决state和action无法枚举完的情况。另外也强烈推荐下面链接：  知乎网友实现DQN：可直接按照这个跑通体验下效果。 PaddlePaddle&#x2F;PARL：这个是paddle出的RHLF库，并提供了相应的exa">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-04-24T06:06:01.000Z">
+<meta property="article:modified_time" content="2024-04-24T07:11:02.994Z">
 <meta property="article:author" content="张宇">
+<meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="博客" type="application/atom+xml">
@@ -210,515 +213,214 @@ var _hmt = _hmt || [];
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-RHLF-DQN" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      RHLF-DQN
+    </h1>
+  
+
+        
+        <a href="/2024/04/24/RHLF-DQN/" class="archive-article-date">
+  	<time datetime="2024-04-24T06:06:01.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-04-24</time>
+</a>
+        
+      </header>
     
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>下面记录下DQN算法以及一些细节，注意哦，本博客更多目的在于当下记录，并非完整严谨的哦，也或许有理解错误。</p>
+<p>关于DQN，看了下网上的介绍以及从Q-Learning到DQN解决state和action无法枚举完的情况。另外也强烈推荐下面链接：</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/624217793">知乎网友实现DQN</a>：可直接按照这个跑通体验下效果。</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PARL/tree/develop">PaddlePaddle&#x2F;PARL</a>：这个是paddle出的RHLF库，并提供了相应的examples帮助入门和深入，并且环境也帮忙解决好了，如果debug能力比较强的话，建议直接看这个哦。</li>
+<li><a target="_blank" rel="noopener" href="https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html">PyTorch DQN实现</a>：这个是pytorch官方实现的DQN算法。</li>
+</ol>
+<h2 id="一些特别的点"><a href="#一些特别的点" class="headerlink" title="一些特别的点"></a>一些特别的点</h2><h3 id="1-俺是value-based的，所以不需要softmax"><a href="#1-俺是value-based的，所以不需要softmax" class="headerlink" title="1. 俺是value based的，所以不需要softmax"></a>1. 俺是value based的，所以不需要softmax</h3><p>看下面这个DQN网络，你觉得有问题么？</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">DQN</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, obs, action</span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        self.fc1 = nn.Linear(obs, <span class="number">64</span>)</span><br><span class="line">        self.fc2 = nn.Linear(<span class="number">64</span>, <span class="number">64</span>)</span><br><span class="line">        self.fc3 = nn.Linear(<span class="number">64</span>, action)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, obs</span>):</span><br><span class="line">        x = torch.relu(self.fc1(obs))</span><br><span class="line">        x = torch.relu(self.fc2(x))</span><br><span class="line">        x = torch.softmax(self.fc3(x))</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>啊啊啊，这里为什么要加softmax呢，是不是习惯了深度学习那套分类思想，再好好想想这里，是不是不应该加softmax。</p>
+<h3 id="2-eps是干嘛的，是否是必须的？"><a href="#2-eps是干嘛的，是否是必须的？" class="headerlink" title="2. eps是干嘛的，是否是必须的？"></a>2. eps是干嘛的，是否是必须的？</h3><p>仔细观察下面代码，eps是在做sample时起作用的，也就是<code>select_action</code>这里，可以看到，在每个epoch结束时，更新新的eps值，从最开始的1,到最后的eps_end&#x3D;0.1,它是一个比较平滑的曲线。</p>
+<p>从<code>select_action</code>可以观察到，action早期处于随机采样的状态，随着epoch的增加，action的决策更多过度到model决策。</p>
+<blockquote>
+<p>那这里是否是必须的呢？</p>
+</blockquote>
+<p>不，这里并不是必须的，因为完全可以在train之前加一个warmup步骤，让model一定程度上学会state到action这个变化。再到后面，就是正常训练流程，不需要sample这个过程了。</p>
+<blockquote>
+<p>那这里更多起到什么作用?</p>
+</blockquote>
+<p>我觉得有个点可以很好理解这里，即从完全小白到慢慢学习直至认知理解的过程。添加warmup，即先提前产生一批训练样本，而eps这里，即随着过程慢慢学习，是不是跟折扣因子的过程相似～</p>
+<h3 id="3-target-net是否是必须的？"><a href="#3-target-net是否是必须的？" class="headerlink" title="3. target_net是否是必须的？"></a>3. target_net是否是必须的？</h3><p>不，这里也并不是必须的。观察整个过程，policy_net要比target_net新一个epoch，而且他俩实际上是在干同一个事情，那么可以将target_net指向policy_net,可以发现epoch的增加，reward的值也是正常提升的。</p>
+<h3 id="4-reply-memory是干嘛的？"><a href="#4-reply-memory是干嘛的？" class="headerlink" title="4. reply memory是干嘛的？"></a>4. reply memory是干嘛的？</h3><p>reply memory可以说记录了整个state和action等的过程，当然有一个maxlen来限制其大小，过早的数据就不要了。</p>
+<p>不过需要指出的是，改动了上面这些点，虽然也可以收敛，但是可能会收敛变慢。</p>
+<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p>这里借鉴了<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/624217793">知乎网友实现DQN</a>。</p>
+<p>pygame&#x3D;&#x3D;2.1.0</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> gym</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch.optim <span class="keyword">as</span> optim</span><br><span class="line"><span class="keyword">from</span> torch.utils.tensorboard <span class="keyword">import</span> SummaryWriter</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> deque</span><br><span class="line"><span class="keyword">from</span> tqdm <span class="keyword">import</span> tqdm</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">DQN</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, state_dim, action_dim</span>):</span><br><span class="line">        <span class="built_in">super</span>(DQN, self).__init__()</span><br><span class="line">        self.fc1 = nn.Linear(state_dim, <span class="number">64</span>)</span><br><span class="line">        self.fc2 = nn.Linear(<span class="number">64</span>, <span class="number">64</span>)</span><br><span class="line">        self.fc3 = nn.Linear(<span class="number">64</span>, action_dim)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        x = torch.relu(self.fc1(x))</span><br><span class="line">        x = torch.relu(self.fc2(x))</span><br><span class="line">        x = self.fc3(x)</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Agent</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, state_dim, action_dim, memory_size=<span class="number">10000</span>, batch_size=<span class="number">64</span>, gamma=<span class="number">0.99</span>, lr=<span class="number">1e-4</span></span>):</span><br><span class="line">        self.device = torch.device(<span class="string">&quot;cuda&quot;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&quot;cpu&quot;</span>)</span><br><span class="line">        self.state_dim = state_dim</span><br><span class="line">        self.action_dim = action_dim</span><br><span class="line">        self.memory = deque(</span><br><span class="line">            maxlen=memory_size)  <span class="comment"># deque是一个双端队列，可以在队首或队尾插入或删除元素。在DQN算法中，我们使用deque实现经验池来存储之前的经验，因为它可以在队尾插入新的经验，并在队首删除最老的经验，从而保持经验池的大小不变。</span></span><br><span class="line">        self.batch_size = batch_size</span><br><span class="line">        self.gamma = gamma</span><br><span class="line">        self.lr = lr</span><br><span class="line">        self.policy_net = DQN(state_dim, action_dim).to(self.device)</span><br><span class="line">        self.target_net = DQN(state_dim, action_dim).to(self.device)</span><br><span class="line">        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.lr)</span><br><span class="line">        self.loss_fn = nn.MSELoss()</span><br><span class="line">        self.steps = <span class="number">0</span></span><br><span class="line">        self.writer = SummaryWriter()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">select_action</span>(<span class="params">self, state, eps</span>):</span><br><span class="line">        <span class="keyword">if</span> random.random() &lt; eps:</span><br><span class="line">            <span class="keyword">return</span> random.randint(<span class="number">0</span>, self.action_dim - <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            state = torch.FloatTensor(state).to(self.device)</span><br><span class="line">            <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">                action = self.policy_net(state).argmax().item()</span><br><span class="line">            <span class="keyword">return</span> action</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">store_transition</span>(<span class="params">self, state, action, reward, next_state, done</span>):</span><br><span class="line">        self.memory.append((state, action, reward, next_state, done))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">train</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(self.memory) &lt; self.batch_size:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        transitions = random.sample(self.memory, self.batch_size)</span><br><span class="line">        batch = <span class="built_in">list</span>(<span class="built_in">zip</span>(*transitions))</span><br><span class="line"></span><br><span class="line">        state_batch = torch.FloatTensor(batch[<span class="number">0</span>]).to(self.device)</span><br><span class="line">        action_batch = torch.LongTensor(batch[<span class="number">1</span>]).to(self.device)</span><br><span class="line">        reward_batch = torch.FloatTensor(batch[<span class="number">2</span>]).to(self.device)</span><br><span class="line">        next_state_batch = torch.FloatTensor(batch[<span class="number">3</span>]).to(self.device)</span><br><span class="line">        done_batch = torch.FloatTensor(batch[<span class="number">4</span>]).to(self.device)</span><br><span class="line"></span><br><span class="line">        q_values = self.policy_net(state_batch).gather(<span class="number">1</span>, action_batch.unsqueeze(<span class="number">1</span>)).squeeze(<span class="number">1</span>)</span><br><span class="line">        next_q_values = self.target_net(next_state_batch).<span class="built_in">max</span>(<span class="number">1</span>)[<span class="number">0</span>]</span><br><span class="line">        expected_q_values = reward_batch + self.gamma * next_q_values * (<span class="number">1</span> - done_batch)</span><br><span class="line"></span><br><span class="line">        loss = self.loss_fn(q_values, expected_q_values.detach())</span><br><span class="line"></span><br><span class="line">        self.optimizer.zero_grad()</span><br><span class="line">        loss.backward()</span><br><span class="line">        self.optimizer.step()</span><br><span class="line"></span><br><span class="line">        self.steps += <span class="number">1</span></span><br><span class="line">        self.writer.add_scalar(<span class="string">&quot;Loss&quot;</span>, loss.item(), self.steps)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update_target</span>(<span class="params">self</span>):</span><br><span class="line">        self.target_net.load_state_dict(self.policy_net.state_dict())</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">train_epoch</span>(<span class="params">env, eps</span>):</span><br><span class="line">    state = env.reset()</span><br><span class="line">    total_reward = <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        action = agent.select_action(state, eps)</span><br><span class="line"></span><br><span class="line">        next_state, reward, done, _ = env.step(action)</span><br><span class="line"></span><br><span class="line">        agent.store_transition(state, action, reward, next_state, done)</span><br><span class="line">        state = next_state</span><br><span class="line">        agent.train()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># env.render()</span></span><br><span class="line">        total_reward += reward</span><br><span class="line">        <span class="keyword">if</span> done:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">return</span> total_reward</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">train_dqn</span>(<span class="params">env, agent: Agent, eps_start=<span class="number">1</span>, eps_end=<span class="number">0.1</span>, eps_decay=<span class="number">0.995</span>, max_episodes=<span class="number">1000</span>, max_steps=<span class="number">1000</span></span>):</span><br><span class="line">    eps = eps_start</span><br><span class="line">    <span class="keyword">for</span> episode <span class="keyword">in</span> tqdm(<span class="built_in">range</span>(max_episodes)):</span><br><span class="line">        reward = train_epoch(env, eps)</span><br><span class="line">        agent.update_target()</span><br><span class="line">        eps = <span class="built_in">max</span>(eps * eps_decay, eps_end)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&#x27;<span class="subst">&#123;episode&#125;</span> --&gt; <span class="subst">&#123;reward&#125;</span>&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    env = gym.make(<span class="string">&quot;CartPole-v1&quot;</span>)</span><br><span class="line">    state_dim = env.observation_space.shape[<span class="number">0</span>]</span><br><span class="line">    action_dim = env.action_space.n</span><br><span class="line">    agent = Agent(state_dim, action_dim)</span><br><span class="line">    train_dqn(env, agent)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/assets/alipay.png">
+                      <span class="reward-type">支付宝</span>
+                    </div>
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2015" class="archive-year">2015</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/05/04/28-04iptables%E7%B3%BB%E5%88%97%E4%B9%8Bnat%E5%8F%8A%E5%85%B6%E8%BF%87%E6%BB%A4%E5%8A%9F%E8%83%BD/" class="archive-article-date">
-  	<time datetime="2015-05-04T04:41:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-05-04</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/05/04/28-04iptables%E7%B3%BB%E5%88%97%E4%B9%8Bnat%E5%8F%8A%E5%85%B6%E8%BF%87%E6%BB%A4%E5%8A%9F%E8%83%BD/">28_04iptables系列之nat及其过滤功能</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
+      
 
+      
 
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://geasyheart.github.io/2024/04/24/RHLF-DQN/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/04/28/28-01Iptables%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9F%BA%E7%A1%80%E5%8E%9F%E7%90%86/" class="archive-article-date">
-  	<time datetime="2015-04-28T06:31:54.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-28</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2024/04/07/LLM-RHLF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">LLM-RHLF工作原理一</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/04/28/28-01Iptables%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9F%BA%E7%A1%80%E5%8E%9F%E7%90%86/">28_01Iptables系列之基础原理</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E7%89%B9%E5%88%AB%E7%9A%84%E7%82%B9"><span class="toc-number">2.</span> <span class="toc-text">一些特别的点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%BF%BA%E6%98%AFvalue-based%E7%9A%84%EF%BC%8C%E6%89%80%E4%BB%A5%E4%B8%8D%E9%9C%80%E8%A6%81softmax"><span class="toc-number">2.1.</span> <span class="toc-text">1. 俺是value based的，所以不需要softmax</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-eps%E6%98%AF%E5%B9%B2%E5%98%9B%E7%9A%84%EF%BC%8C%E6%98%AF%E5%90%A6%E6%98%AF%E5%BF%85%E9%A1%BB%E7%9A%84%EF%BC%9F"><span class="toc-number">2.2.</span> <span class="toc-text">2. eps是干嘛的，是否是必须的？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-target-net%E6%98%AF%E5%90%A6%E6%98%AF%E5%BF%85%E9%A1%BB%E7%9A%84%EF%BC%9F"><span class="toc-number">2.3.</span> <span class="toc-text">3. target_net是否是必须的？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-reply-memory%E6%98%AF%E5%B9%B2%E5%98%9B%E7%9A%84%EF%BC%9F"><span class="toc-number">2.4.</span> <span class="toc-text">4. reply memory是干嘛的？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BA%90%E7%A0%81"><span class="toc-number">3.</span> <span class="toc-text">源码</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/04/23/22-02%E5%9F%BA%E4%BA%8EOpenSSL%E7%9A%84https%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE/" class="archive-article-date">
-  	<time datetime="2015-04-23T02:29:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-23</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/04/23/22-02%E5%9F%BA%E4%BA%8EOpenSSL%E7%9A%84https%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE/">22_02基于OpenSSL的https服务配置</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
+        
+    </div>
+</aside>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/04/22/24-04%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85LAMP%E4%B9%8B%E9%85%8D%E7%BD%AEhttpd%E4%BB%A5FastCGI%E6%96%B9%E5%BC%8F%E4%B8%8EPHP%E6%95%B4%E5%90%88/" class="archive-article-date">
-  	<time datetime="2015-04-22T03:16:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/04/22/24-04%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85LAMP%E4%B9%8B%E9%85%8D%E7%BD%AEhttpd%E4%BB%A5FastCGI%E6%96%B9%E5%BC%8F%E4%B8%8EPHP%E6%95%B4%E5%90%88/">24_04编译安装LAMP之配置httpd以FastCGI方式与PHP整合</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/04/22/24-03-2-%E5%AE%9E%E9%AA%8C-%E5%AE%8C%E6%88%90LAMP%E6%A8%A1%E5%9D%97%E5%8C%96%E6%90%AD%E5%BB%BA/" class="archive-article-date">
-  	<time datetime="2015-04-22T03:14:47.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/04/22/24-03-2-%E5%AE%9E%E9%AA%8C-%E5%AE%8C%E6%88%90LAMP%E6%A8%A1%E5%9D%97%E5%8C%96%E6%90%AD%E5%BB%BA/">24_03_2_实验:完成LAMP模块化搭建</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/04/22/24-02-2-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85PHP/" class="archive-article-date">
-  	<time datetime="2015-04-22T02:58:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/04/22/24-02-2-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85PHP/">24_02_2_编译安装PHP</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/04/22/24-02%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85%E4%B9%8BMySQL-%E9%80%9A%E7%94%A8%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%A0%BC%E5%BC%8F/" class="archive-article-date">
-  	<time datetime="2015-04-22T02:43:46.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/04/22/24-02%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85%E4%B9%8BMySQL-%E9%80%9A%E7%94%A8%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%A0%BC%E5%BC%8F/">24_02编译安装之MySQL_通用二进制格式_</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/04/22/24-01LAMP%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85%E4%B9%8Bhttpd/" class="archive-article-date">
-  	<time datetime="2015-04-22T02:42:44.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/04/22/24-01LAMP%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85%E4%B9%8Bhttpd/">24_01LAMP编译安装之httpd</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/04/22/23-04%E5%BB%BA%E7%AB%8BLAMP%E5%B9%B3%E5%8F%B0/" class="archive-article-date">
-  	<time datetime="2015-04-22T02:41:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/04/22/23-04%E5%BB%BA%E7%AB%8BLAMP%E5%B9%B3%E5%8F%B0/">23_04建立LAMP平台</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/04/22/23-03MySQL%E5%88%9D%E6%AD%A5%EF%BC%8C%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%8F%8ASQL%E8%AF%AD%E5%8F%A5/" class="archive-article-date">
-  	<time datetime="2015-04-22T02:38:42.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/04/22/23-03MySQL%E5%88%9D%E6%AD%A5%EF%BC%8C%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%8F%8ASQL%E8%AF%AD%E5%8F%A5/">23_03MySQL初步，数据类型及SQL语句</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
   
-    </div></section>
   
 
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/page/19/">&amp;laquo; Prev</a><a class="page-number" href="/archives/">1</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/18/">18</a><a class="page-number" href="/archives/page/19/">19</a><span class="page-number current">20</span><a class="page-number" href="/archives/page/21/">21</a><a class="page-number" href="/archives/page/22/">22</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/27/">27</a><a class="extend next" rel="next" href="/archives/page/21/">Next &amp;raquo;</a>
-    </nav>
+  
+
+  
+
   
 
 
@@ -742,8 +444,8 @@ var _hmt = _hmt || [];
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

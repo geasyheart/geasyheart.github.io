@@ -212,6 +212,183 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-句子成分与结构思考" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/05/23/%E5%8F%A5%E5%AD%90%E6%88%90%E5%88%86%E4%B8%8E%E7%BB%93%E6%9E%84%E6%80%9D%E8%80%83/">句子成分与结构思考</a>
+    </h1>
+  
+
+        
+        <a href="/2022/05/23/%E5%8F%A5%E5%AD%90%E6%88%90%E5%88%86%E4%B8%8E%E7%BB%93%E6%9E%84%E6%80%9D%E8%80%83/" class="archive-article-date">
+  	<time datetime="2022-05-23T02:09:01.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-05-23</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>最近在做句子结构分析的模型，具体样例如下图左图所示。</p>
+<p>因为之前看过constituency parser任务，故尝试将这棵树转成满足consituency parser满足的那种格式，转换后的样例如下图右图所示。</p>
+<table>
+<thead>
+<tr>
+<th><img src="/2022/05/23/%E5%8F%A5%E5%AD%90%E6%88%90%E5%88%86%E4%B8%8E%E7%BB%93%E6%9E%84%E6%80%9D%E8%80%83/1-comp.svg" class="" title="1-comp"></th>
+<th><img src="/2022/05/23/%E5%8F%A5%E5%AD%90%E6%88%90%E5%88%86%E4%B8%8E%E7%BB%93%E6%9E%84%E6%80%9D%E8%80%83/1-nltk.png" class="" title="1-png"></th>
+</tr>
+</thead>
+</table>
+<p>找个简单的例子如下所示。</p>
+<table>
+<thead>
+<tr>
+<th><img src="/2022/05/23/%E5%8F%A5%E5%AD%90%E6%88%90%E5%88%86%E4%B8%8E%E7%BB%93%E6%9E%84%E6%80%9D%E8%80%83/2-comp.svg" class="" title="2-comp"></th>
+<th><img src="/2022/05/23/%E5%8F%A5%E5%AD%90%E6%88%90%E5%88%86%E4%B8%8E%E7%BB%93%E6%9E%84%E6%80%9D%E8%80%83/2-nltk.png" class="" title="2-nltk"></th>
+</tr>
+</thead>
+</table>
+<blockquote>
+<p>所以隆重推荐这款转换工具，<a target="_blank" rel="noopener" href="https://pypi.org/project/constituency-tree-labeling-tool/">constituency-tree-labeling-tool</a>，目前这个工具已经在我司使用以及在hanlp和yuzhangcs&#x2F;parser中被提及。</p>
+</blockquote>
+<p>因为有这个工具的加持，我们就可以尝试使用consitutuency parser的方式来做这个任务。目前模型也已经被业务使用。</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>我发现在真实使用的时候，会将这棵树按照一层为单位进行拆开，即：</p>
+<ol>
+<li>不会管句子层与层之间的关系。</li>
+<li>复句会拆成子句。</li>
+<li>最终使用还是主谓宾、兼语、联谓等这些基本句型。</li>
+</ol>
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>基于上面的使用方式，可以进行以下方面的尝试：</p>
+<ol>
+<li>可以先将这棵树按照使用的方式进行拆开，拆成一句一句的进行训练，更符合真实使用场景。</li>
+<li>找一个比consituency parser更为简便的模型，并且提高其准确度。</li>
+<li>提升速度。因为每一句话都要跑，速度也是非常重要的一点。</li>
+</ol>
+<h2 id="实现方式"><a href="#实现方式" class="headerlink" title="实现方式"></a>实现方式</h2><p>句子：<code>[&#39;商务部&#39;, &#39;开展&#39;, &#39;首批步行街改造提升试点工作&#39;, &#39;。&#39;]</code>。</p>
+<h3 id="方式一：分层CRF"><a href="#方式一：分层CRF" class="headerlink" title="方式一：分层CRF"></a>方式一：分层CRF</h3><p>比如上面这句话，他首先构造一个9*9的临界矩阵（按照分词个数），因为这句话只能拆出来一个完整子句，故只有第一行有label，剩下的8行全是空的。</p>
+<p>即:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[[&#x27;B-主&#x27;, &#x27;B-谓&#x27;, &#x27;B-宾&#x27;, &#x27;I-宾&#x27;, &#x27;I-宾&#x27;, &#x27;I-宾&#x27;, &#x27;I-宾&#x27;, &#x27;I-宾&#x27;, &#x27;B-符号&#x27;],</span><br><span class="line"> [&#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;],</span><br><span class="line"> [&#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;],</span><br><span class="line"> [&#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;],</span><br><span class="line"> [&#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;],</span><br><span class="line"> [&#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;],</span><br><span class="line"> [&#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;],</span><br><span class="line"> [&#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;],</span><br><span class="line"> [&#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;]]</span><br></pre></td></tr></table></figure>
+
+<p>那这里变成了两个问题：</p>
+<ol>
+<li>预测层数。表示这句话可以拆出多少个完整子句。</li>
+<li>每层的crf预测。对每层的label使用CRF进行预测和解码。</li>
+</ol>
+<h4 id="一-层数预测"><a href="#一-层数预测" class="headerlink" title="一. 层数预测"></a>一. 层数预测</h4><p><a target="_blank" rel="noopener" href="https://github.com/geasyheart/args-level">args-level</a>。<br>输入一句话，预测有几个子句。</p>
+<h4 id="二-CRF预测"><a href="#二-CRF预测" class="headerlink" title="二. CRF预测"></a>二. CRF预测</h4><p><a target="_blank" rel="noopener" href="https://github.com/geasyheart/args-crf">args-crf</a>。</p>
+<p>这里就一个需要注意的地方，就是设置一个层数上限，比如10层。那么bert输出比如(32, 128, 768)，将其expand至(32, 10, 128, 768)，然后接一个<code>768 * 768</code>的linear，将bert的语义表示用这个linear对每一层重新获取对应的语义表示。</p>
+<h4 id="三-联合模型"><a href="#三-联合模型" class="headerlink" title="三. 联合模型"></a>三. 联合模型</h4><p><a target="_blank" rel="noopener" href="https://github.com/geasyheart/args-level-crf-parser">args-level-crf-parser</a>。<br>就是将上面两个模型集成到一个任务里，两个loss分配不同的weight。</p>
+<h4 id="四-过程总结与思考"><a href="#四-过程总结与思考" class="headerlink" title="四. 过程总结与思考"></a>四. 过程总结与思考</h4><p><strong>1.实验</strong></p>
+<p>训练层数预测模型时，发现在验证集上F1一直只到<code>0.7~0.8</code>之间，和我最初预想能达到0.95以上有很大的差距，虽然训练集上基本达到100%准确。</p>
+<p><strong>2.思考</strong></p>
+<p>后来我想了下，我觉得有两部分原因：</p>
+<ol>
+<li>样本层数分布不均匀，比如1层和2层的占据了绝大多数，6,7层的就很少了。</li>
+<li>对多分类模型抱有的期望过高。</li>
+</ol>
+<p>为什么我会有第二个见解？我在训练中途看了transformers库集成的多分类代码，发现和我的没什么区别，这让我很纠结，难道是梯度裁剪、dropout、optimizer各方面没有设置好？？还是模型我不应该用electra，以及不应该使用交叉熵作为损失函数，而是可以尝试下FocalLoss？</p>
+<p>结果在种种测试下，都没有达到一个有效的改善。</p>
+<p>后来我觉得可能就是我对这个任务的准确度抱有的期望过高，为什么呢？<br>因为从人角度来看，都未必能准确知道一个句子应该分成几个子句。</p>
+<p>最终结果是没有达到预期的，一开始我先写的联合模型，但是发现在验证集上的层数预测的f1最多到0.8，label预测准确率更低。</p>
+<p>后来我对这两个模型进行拆分成两个任务来训练，以为可以改进层数预测的结果，但是分开后在验证集上层数预测的F1仍旧只能到0.8左右～，所以联合模型没有大的问题。</p>
+<p>对于CRF预测，label有40个左右，加之label的数量分布严重不均衡，那么即使假设这个任务的f1可以达到0.8，那两个任务的最终结果也就在0.6以上。</p>
+<p>那么由此可证，这种方式可能走不通。</p>
+<h3 id="方式二：嵌套ner"><a href="#方式二：嵌套ner" class="headerlink" title="方式二：嵌套ner"></a>方式二：嵌套ner</h3><p><a target="_blank" rel="noopener" href="https://github.com/geasyheart/args0complement">args0complement</a>。（忽略名字啦，本想留给主语补齐的。。。）</p>
+<p>这种方式是使用嵌套ner的方式来表示这些数据。</p>
+<p>对于上面这句话，将其转成一个9*9临接矩阵(按照分词进行构成)。<br>那他将会落在位置(0, 0), (1, 1), (2, 7), (8, 8)上，并且其标签分别是：<code>主语</code>，<code>谓语</code>，<code>宾语</code>，<code>符号</code>。</p>
+<p>他将面临的最主要的问题：</p>
+<blockquote>
+<p>虽然位置和标签都可以表示了，但是其之间的关联关系并没有。</p>
+</blockquote>
+<p>那么训练时没有问题，但是在解码的时候就会出现多种组合，比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(1, 2, 3, 4)</span><br><span class="line">(1, 2, 3)</span><br><span class="line">(2, 3, 4)</span><br><span class="line">(1, 2)</span><br><span class="line">(2, 3)</span><br><span class="line">(3, 4)</span><br></pre></td></tr></table></figure>
+<p>为什么会有这么多种组合呢？<br>因为一棵树是由多层组成的，那么其相互之间是可以在不同层进行组合。</p>
+<p>转成一种方便理解的方式，即：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">主谓宾符号</span><br><span class="line">主谓宾</span><br><span class="line">谓宾符号</span><br><span class="line">主谓</span><br><span class="line">谓宾</span><br><span class="line">宾符号</span><br></pre></td></tr></table></figure>
+
+<p>那么难点就是从这一堆的路径里面选取合适的路径出来。</p>
+<p><strong>1.实验</strong></p>
+<p>首先我没想到模型结果会出乎意料好许多，不是从这个嵌套ner任务本身的准确率，而是从这一套的实现方式上，效果得到了一个很大的提升。<br>这个给了极大的信心去写后面多条路径解码的代码😅😅😅。</p>
+<p>做法上我是先按照<a target="_blank" rel="noopener" href="https://github.com/geasyheart/biaffine_dep">dependency-parser</a>的方式来做，分成两个loss，一个是arc loss，还有一个rel loss。其中arc loss表示在这个临接矩阵中存在对应关系，那么就用1表示，否则0，即位置。rel_loss表示label在这个临接矩阵中的位置以及对应的label。</p>
+<p>dependency-parser在位置解码的时候是以arc-loss为准，因为基本毫无疑问arc相对是更容易的，我也按照这个思路进行的，不过最终发现直接用rel loss就已经足够了。。</p>
+<table>
+<thead>
+<tr>
+<th><img src="/2022/05/23/%E5%8F%A5%E5%AD%90%E6%88%90%E5%88%86%E4%B8%8E%E7%BB%93%E6%9E%84%E6%80%9D%E8%80%83/2-1.png" class="" title="2-1"></th>
+<th><img src="/2022/05/23/%E5%8F%A5%E5%AD%90%E6%88%90%E5%88%86%E4%B8%8E%E7%BB%93%E6%9E%84%E6%80%9D%E8%80%83/2-2.png" class="" title="2-2"></th>
+</tr>
+</thead>
+</table>
+<p>从上图可以看到：</p>
+<ol>
+<li>整个收敛还是很快的。</li>
+<li>arc loss和rel loss后面基本持平了。</li>
+<li>右边那张图的F1的结果，是因为有些类别样本数量太低导致的，看下面某训练时刻的结果。</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">eval[2]: 109it [00:25,  4.25it/s]</span><br><span class="line">-------------------------arc score--------------------------</span><br><span class="line">0.994944815190855</span><br><span class="line">label      precision            recall               f1-score             support             </span><br><span class="line">0          0.9972400957814684   0.997613766384969    0.9974268960857379   1195608             </span><br><span class="line">1          0.8661066266191102   0.848271741128884    0.8570964146386773   21756               </span><br><span class="line">------------------------without_arc-------------------------</span><br><span class="line">label      precision            recall               f1-score             support             </span><br><span class="line">0          0.9973666429171141   0.9975368180875337   0.9974517232439305   1195608             </span><br><span class="line">1          0.8611636210880067   0.8251157174481787   0.8427543679342241   4969                </span><br><span class="line">2          0.8362629424512401   0.8392943450942484   0.8377759015800266   8276                </span><br><span class="line">3          0.8743008079552517   0.8869798234552333   0.8805946791862285   6344                </span><br><span class="line">4          0.8064516129032258   0.9090909090909091   0.8547008547008547   110                 </span><br><span class="line">5          0.8508771929824561   0.8818181818181818   0.8660714285714286   110                 </span><br><span class="line">6          0.6592920353982301   0.6208333333333333   0.6394849785407726   240                 </span><br><span class="line">7          0.7988338192419825   0.6157303370786517   0.6954314720812182   445                 </span><br><span class="line">8          0.5623100303951368   0.6006493506493507   0.5808477237048667   308                 </span><br><span class="line">9          0.5150375939849624   0.5732217573221757   0.5425742574257425   239                 </span><br><span class="line">10         0.5526315789473685   0.5472312703583062   0.5499181669394436   307                 </span><br><span class="line">11         0.4788732394366197   0.3953488372093023   0.43312101910828027  86                  </span><br><span class="line">12         0.46511627906976744  0.3333333333333333   0.3883495145631068   60                  </span><br><span class="line">13         0.0                  0.0                  0.0                  48                  </span><br><span class="line">14         0.8205128205128205   0.9411764705882353   0.8767123287671232   68                  </span><br><span class="line">15         0.7263157894736842   0.7040816326530612   0.7150259067357513   98                  </span><br><span class="line">16         0.66                 0.75                 0.702127659574468    44                  </span><br><span class="line">17         0.4                  0.5                  0.4444444444444445   4                   </span><br><span class="line">18         0.0                  0.0                  0.0                  0                   </span><br><span class="line">19         0.0                  0.0                  0.0                  0                   </span><br><span class="line">--------------------------with_arc--------------------------</span><br><span class="line">label      precision            recall               f1-score             support             </span><br><span class="line">0          0.9971531736346768   0.9978303925701401   0.9974916681577307   1195608             </span><br><span class="line">1          0.8706489041684572   0.8154558261219561   0.8421490179777616   4969                </span><br><span class="line">2          0.8455584224106155   0.8315611406476558   0.8385013706975327   8276                </span><br><span class="line">3          0.8876834716017868   0.8770491803278688   0.8823342848081193   6344                </span><br><span class="line">4          0.8571428571428571   0.8727272727272727   0.8648648648648648   110                 </span><br><span class="line">5          0.8703703703703703   0.8545454545454545   0.8623853211009175   110                 </span><br><span class="line">6          0.7                  0.5833333333333334   0.6363636363636365   240                 </span><br><span class="line">7          0.8438538205980066   0.5707865168539326   0.6809651474530831   445                 </span><br><span class="line">8          0.5700934579439252   0.5941558441558441   0.5818759936406994   308                 </span><br><span class="line">9          0.531496062992126    0.5648535564853556   0.5476673427991886   239                 </span><br><span class="line">10         0.5513698630136986   0.5244299674267101   0.5375626043405676   307                 </span><br><span class="line">11         0.5555555555555556   0.3488372093023256   0.4285714285714286   86                  </span><br><span class="line">12         0.4857142857142857   0.2833333333333333   0.35789473684210527  60                  </span><br><span class="line">13         0.0                  0.0                  0.0                  48                  </span><br><span class="line">14         0.84                 0.9264705882352942   0.881118881118881    68                  </span><br><span class="line">15         0.7674418604651163   0.673469387755102    0.7173913043478259   98                  </span><br><span class="line">16         0.6585365853658537   0.6136363636363636   0.6352941176470588   44                  </span><br><span class="line">17         0.3333333333333333   0.25                 0.28571428571428575  4                   </span><br><span class="line">18         0.0                  0.0                  0.0                  0                   </span><br><span class="line">19         0.0                  0.0                  0.0                  0 </span><br></pre></td></tr></table></figure>
+
+
+<h3 id="方式三：进阶的constituency-parser"><a href="#方式三：进阶的constituency-parser" class="headerlink" title="方式三：进阶的constituency parser"></a>方式三：进阶的constituency parser</h3><p>这地方有两个需要学习的：</p>
+<ol>
+<li>使用GNN的方式来做consitutnecy parser，看看这种方式的效果。</li>
+<li>改进constituency parser在将其构成临接矩阵的时候，去掉其上下之间的关联关系，减少预测数量，看看是否能提升其准确率。</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/05/23/%E5%8F%A5%E5%AD%90%E6%88%90%E5%88%86%E4%B8%8E%E7%BB%93%E6%9E%84%E6%80%9D%E8%80%83/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-获取全部路径以及最短路径" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1493,101 +1670,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2021/12/30/torch%E4%BD%BF%E7%94%A8tensorboard%E7%AE%80%E6%98%8E%E5%A4%87%E5%BF%98%E5%BD%95/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-预训练思考与基于预训练模型的应用例子" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/12/29/%E9%A2%84%E8%AE%AD%E7%BB%83%E6%80%9D%E8%80%83%E4%B8%8E%E5%9F%BA%E4%BA%8E%E9%A2%84%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%BA%94%E7%94%A8%E4%BE%8B%E5%AD%90/">预训练思考与基于预训练模型的应用例子</a>
-    </h1>
-  
-
-        
-        <a href="/2021/12/29/%E9%A2%84%E8%AE%AD%E7%BB%83%E6%80%9D%E8%80%83%E4%B8%8E%E5%9F%BA%E4%BA%8E%E9%A2%84%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%BA%94%E7%94%A8%E4%BE%8B%E5%AD%90/" class="archive-article-date">
-  	<time datetime="2021-12-29T08:23:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-29</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>本篇文章主要讲基于bert预训练模型的一些例子，希望可以从不同角度理解与应用基于bert的一些应用。</p>
-<p>nlp发展了这么多年，经历了规则，统计，模型等阶段，目前预训练模型基本算是一统天下了。</p>
-<p>大公司有更多资源，可以联合一些科研机构与组织搞一些事情，比如微软和nvidia利用更多的资源来探测模型的边界。<br>这个就很有意思，思考一个问题，什么叫意识？什么情况下产生了意识？</p>
-<p>什么是意识，这个可以尝试用两个词来理解，<code>计算</code>和<code>算计</code>。计算很好理解，比如计算机，计算器，本质来讲是人输入指令，获得一个预期结果，不会产生任何歧义。而算计呢，它是一个综合体，它的输出是多样的，有可能不可预知的。它具有自己的思考。</p>
-<p>那什么情况下产生了意识？这个问题就是这些大佬们所想要尝试认知的东西。比如人类有30亿碱基对，蚊子才几千万，单细胞生物可能更少可能就被认为不具备意识？如此看来的话，那我可以尝试扩充网络容量，更多的训练数据集，等到了某个程度下，突然机器就具备了某种智能。</p>
-<p>这是个有意思的研究！</p>
-<p>不过扯了这么多，小公司的话，更多是基于预训练模型的微调。</p>
-<p>为什么要基于预训练模型微调呢，严格意义来讲就是预训练模型已经学习到了语义，一个认知大脑。基于此，给定一个具体任务，来对其进行微调，使其具备更快的收敛能力和更好的泛化能力。</p>
-<p>所以掌握下还是很重要滴😂😂😂。</p>
-<p>下面介绍四个应用示例，每一种大致介绍下，更具体的实现可以自行实现。</p>
-<p>不过作者在这里使用了Trainer，这是transformers出的一套工具，可以让你更快的训练，但是封装太高，懒得折腾了，不如自己从头写😂😂😂。</p>
-<h2 id="命名实体任务"><a href="#命名实体任务" class="headerlink" title="命名实体任务"></a>命名实体任务</h2><p><a target="_blank" rel="noopener" href="https://github.com/HIT-SCIR/plm-nlp-code/blob/main/chp7/finetune_bert_ner.py">代码</a>.</p>
-<p>这个是个ner任务，不知道ner的自行百度，模型后面接了一个linear，如果想要更深入，可以看看crf。</p>
-<p>不过这个任务如果用于分词，词性标注还是很nice的。</p>
-<h2 id="句子对相似度"><a href="#句子对相似度" class="headerlink" title="句子对相似度"></a>句子对相似度</h2><p><a target="_blank" rel="noopener" href="https://github.com/HIT-SCIR/plm-nlp-code/blob/main/chp7/finetune_bert_spc.py">代码</a>.</p>
-<p>这个任务还是蛮有意思的，之前也有类似的比赛。比如<a target="_blank" rel="noopener" href="https://github.com/zzy99/epidemic-sentence-pair">天池 疫情相似句对判定大赛 线上第一名方案</a>。</p>
-<p>整体实现思路基本一致，不过作者加入了对抗训练这些东西，感兴趣可以看看。</p>
-<h2 id="句子分类"><a href="#句子分类" class="headerlink" title="句子分类"></a>句子分类</h2><p><a target="_blank" rel="noopener" href="https://github.com/HIT-SCIR/plm-nlp-code/blob/main/chp7/finetune_bert_ssc.py">代码</a>.</p>
-<p>这个就是多分类任务，也是比较常见的场景。</p>
-<h2 id="阅读理解"><a href="#阅读理解" class="headerlink" title="阅读理解"></a>阅读理解</h2><p><a target="_blank" rel="noopener" href="https://github.com/HIT-SCIR/plm-nlp-code/blob/main/chp7/finetune_bert_mrc.py">代码</a>.</p>
-<p>这个我没看😂😂😂。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>好吧，这本书快让我水了一波，感兴趣的需要基础的老铁们可以多翻翻。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">活到老学到老nlp</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/12/29/%E9%A2%84%E8%AE%AD%E7%BB%83%E6%80%9D%E8%80%83%E4%B8%8E%E5%9F%BA%E4%BA%8E%E9%A2%84%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%BA%94%E7%94%A8%E4%BE%8B%E5%AD%90/">展开全文 >></a>
         </p>
       
 

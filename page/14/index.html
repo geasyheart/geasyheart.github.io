@@ -212,6 +212,90 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-rabbitmq-server简单配置" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/28/rabbitmq-server%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/">rabbitmq-server简单配置</a>
+    </h1>
+  
+
+        
+        <a href="/2017/07/28/rabbitmq-server%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/" class="archive-article-date">
+  	<time datetime="2017-07-28T07:44:13.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-07-28</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">guest用户只能本地访问，所以：</span><br><span class="line"><span class="comment"># rabbitmqctl add_user zy 123456</span></span><br><span class="line"><span class="comment"># rabbitmqctl set_user_tags zy administrator</span></span><br><span class="line"><span class="comment"># rabbitmqctl set_permissions -p / zy &quot;.*&quot; &quot;.*&quot; &quot;.*&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">可以启动rabbitmq-server的监控，可以ip:15672访问</span><br><span class="line"><span class="comment"># rabbitmq-plugins enable rabbitmq_management</span></span><br><span class="line"><span class="comment"># systemctl restart rabbitmq-server</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/07/28/rabbitmq-server%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-gitlab-ci安装配置" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1189,105 +1273,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2016/03/04/33-01-2-MySQL%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-51-02-2-CentOS6-7-KVM设置成桥接" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/02/27/51-02-2-CentOS6-7-KVM%E8%AE%BE%E7%BD%AE%E6%88%90%E6%A1%A5%E6%8E%A5/">51-02-2-CentOS6.7-KVM设置成桥接</a>
-    </h1>
-  
-
-        
-        <a href="/2016/02/27/51-02-2-CentOS6-7-KVM%E8%AE%BE%E7%BD%AE%E6%88%90%E6%A1%A5%E6%8E%A5/" class="archive-article-date">
-  	<time datetime="2016-02-27T05:22:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-02-27</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">yum -y install qemu-kvm virt-manager libvirt </span><br><span class="line">service libvirtd start </span><br><span class="line"> </span><br><span class="line">chkconfig --list NetworkManager <span class="comment">#一定要启动，默认已经启动，验证一下 </span></span><br><span class="line">chkconfig network on </span><br><span class="line">service network start </span><br><span class="line">chkconfig --list network <span class="comment">#一定要启动，默认没有启动，验证一下 </span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cd</span> /etc/sysconfig/network-scripts </span><br><span class="line"><span class="built_in">cp</span> ifcfg-eth0 ifcfg-br0 </span><br></pre></td></tr></table></figure>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[x180@localhost network-scripts]$ <span class="built_in">cat</span> ifcfg-eth0 </span><br><span class="line">DEVICE=eth0 </span><br><span class="line">BOOTPROTO=none </span><br><span class="line">TYPE=Ethernet </span><br><span class="line">ONBOOT=<span class="built_in">yes</span> </span><br><span class="line">BRIDGE=br0 </span><br><span class="line">USERCTL=no </span><br><span class="line">IPV6INIT=no </span><br><span class="line">IPADDR=192.168.0.103 </span><br><span class="line">NETMASK=255.255.255.0 </span><br><span class="line">GATEWAY=192.168.0.1 </span><br></pre></td></tr></table></figure>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[x180@localhost network-scripts]$ <span class="built_in">cat</span> ifcfg-br0 </span><br><span class="line">DEVICE=br0 </span><br><span class="line">BOOTPROTO=static </span><br><span class="line">TYPE=Bridge </span><br><span class="line">ONBOOT=<span class="built_in">yes</span> </span><br><span class="line">IPADDR=192.168.0.103 </span><br><span class="line">NETMASK=255.255.255.0 </span><br><span class="line">GATEWAY=192.168.0.1 </span><br><span class="line">USERCTL=no </span><br><span class="line">PEERDNS=<span class="built_in">yes</span> </span><br><span class="line">IPV6INIT=no </span><br></pre></td></tr></table></figure>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service network restart </span><br></pre></td></tr></table></figure>
-<p>对于KVM中的虚拟主机，默认是不能ping通外网的，需要配置网卡，例如: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># cat /etc/sysconfig/network-scripts/ifcfg-eth0 </span></span><br><span class="line">DEVICE=eth0 </span><br><span class="line">BOOTPROTO=none </span><br><span class="line">NETMASK=255.255.255.0 </span><br><span class="line">TYPE=Ethernet </span><br><span class="line">HWADDR=52:54:00:eb:f2:e3 </span><br><span class="line">IPADDR=192.168.0.104 </span><br><span class="line">GATEWAY=192.168.0.1 </span><br><span class="line">IPV6INIT=no </span><br><span class="line">ONBOOT=<span class="built_in">yes</span> </span><br><span class="line">USERCTL=no </span><br><span class="line">DNS1=223.5.5.5 </span><br></pre></td></tr></table></figure>
-<p>ping <a target="_blank" rel="noopener" href="http://www.taobao.com进行验证;/">www.taobao.com进行验证；</a> </p>
-<p>如何让虚拟机跟随宿主主机开机自启动：<br>Boot Options –&gt; start virtual machine on host boot up </p>
-<p>然后通过vnc这个工具进行远程管理，目前我的方案就是这样； </p>
-<p>可能出现的问题： </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chkconfig NetworkManager off </span><br><span class="line">service NetworkManager stop </span><br></pre></td></tr></table></figure>
-<p>如果执行了上面两步，网卡不会启动br0 和 eth0 ，貌似centos6.7开始剥离network这个管理工具，默认没有开机自启动，而是NetworkManager，如果宿主主机重启后，也是会不启动这两个设备，因为配置文件这种方式只对network有用，所以完整的步骤是加上: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chkconfig network on </span><br><span class="line">service network start </span><br></pre></td></tr></table></figure>
-<p>即可； </p>
-<p>参考文档：<br><a target="_blank" rel="noopener" href="http://www.360doc.com/content/12/0507/14/9318309_209243400.shtml">http://www.360doc.com/content/12/0507/14/9318309_209243400.shtml</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2016/02/27/51-02-2-CentOS6-7-KVM%E8%AE%BE%E7%BD%AE%E6%88%90%E6%A1%A5%E6%8E%A5/">展开全文 >></a>
         </p>
       
 

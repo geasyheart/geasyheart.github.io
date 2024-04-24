@@ -212,6 +212,130 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-prompt系列-OpenPrompt入门一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/09/07/prompt%E7%B3%BB%E5%88%97-OpenPrompt%E5%85%A5%E9%97%A8%E4%B8%80/">prompt系列-OpenPrompt入门一</a>
+    </h1>
+  
+
+        
+        <a href="/2022/09/07/prompt%E7%B3%BB%E5%88%97-OpenPrompt%E5%85%A5%E9%97%A8%E4%B8%80/" class="archive-article-date">
+  	<time datetime="2022-09-07T05:57:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-09-07</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>此次开辟一个新的话题，叫做prompting learning。prompting learning常用于零样本、小样本领域，通过将下游训练数据转换成预训练模型任务，进行小样本微调或者零样本进行预测。</p>
+<p>之前在<a href="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/" title="UIE-事件提取">UIE-事件提取</a>中也有涉及prompt，但是UIE的做法是构造prompt输入，再和原句一起微调模型，完成提取任务。那这里我们来看看OpenPrompt是怎么做的。</p>
+<p>关于<a target="_blank" rel="noopener" href="https://github.com/thunlp/OpenPrompt">OpenPrompt</a>，此处不做过多介绍，请直接看官网。</p>
+<p>官方有张图阐述了OpenPrompt的架构，请看下图。<br><img src="https://camo.githubusercontent.com/d26f498b1bc63fe804fe21df9d1f91fa55673ee3c45242fd3f49439718376db7/68747470733a2f2f7a332e617831782e636f6d2f323032312f31312f30332f4941645433442e706e67" alt="arch"></p>
+<p>下面通过官方示例来说明它的工作原理。</p>
+<h2 id="主要模块介绍"><a href="#主要模块介绍" class="headerlink" title="主要模块介绍"></a>主要模块介绍</h2><h3 id="1-Template"><a href="#1-Template" class="headerlink" title="1. Template"></a>1. Template</h3><p>这个从网上一搜prompting learning，不可避免搜到template，这个是将下游训练数据通过template转换成符合预训练模型任务的训练数据，保持和预训练任务一致。</p>
+<h3 id="2-Verbalizer"><a href="#2-Verbalizer" class="headerlink" title="2. Verbalizer"></a>2. Verbalizer</h3><p>这个应该怎么翻译呢，姑且称为同义词吧。。。它的作用是从预训练模型vocab中获取符合label的词，比如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">        <span class="string">&quot;negative&quot;</span>: [<span class="string">&quot;bad&quot;</span>],</span><br><span class="line">        <span class="string">&quot;positive&quot;</span>: [<span class="string">&quot;good&quot;</span>, <span class="string">&quot;wonderful&quot;</span>, <span class="string">&quot;great&quot;</span>],</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此处先不展开介绍，后续会介绍它的作用和比较坑的地方。</p>
+<h3 id="3-PLM"><a href="#3-PLM" class="headerlink" title="3. PLM"></a>3. PLM</h3><p>这个就没什么可解释的了，就是预训练模型。</p>
+<h2 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h2><p>整体流程代码可见附录。</p>
+<h3 id="1-推理"><a href="#1-推理" class="headerlink" title="1. 推理"></a>1. 推理</h3><p>比如这个情感分类任务，经过Template转换后变成了如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Albert Einstein was one of the greatest intellects of his time. It was [MASK]</span><br><span class="line">The film was badly made. It was [MASK]</span><br></pre></td></tr></table></figure>
+
+<p>接着输入给bert模型，拿到mask位置的预测结果output，此时shape为(2, 28996)，表示batch_size为2,整个bert vocab size为28996。</p>
+<p>那如何将这个预测结果对应到<code>negative</code>或<code>positive</code>呢，这里就引出来Verbalizer了。</p>
+<p>将<code>[&#39;bad&#39;, &#39;good&#39;, &#39;wonderful&#39;, &#39;great&#39;]</code>转成tokenizer vocab的index，然后获取output所对应的index，比如下面伪代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">aggregate</span>(<span class="params">label_words_logits: torch.Tensor, label_words_mask: torch.Tensor</span>) -&gt; torch.Tensor:</span><br><span class="line">    <span class="string">r&quot;&quot;&quot;Use weight to aggregate the logits of label words.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        label_words_logits(:obj:`torch.Tensor`): The logits of the label words.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        :obj:`torch.Tensor`: The aggregated logits from the label words.</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    label_words_logits = (label_words_logits * label_words_mask).<span class="built_in">sum</span>(-<span class="number">1</span>) / label_words_mask.<span class="built_in">sum</span>(-<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> label_words_logits</span><br><span class="line"></span><br><span class="line">output = torch.rand(<span class="number">2</span>, <span class="number">28996</span>)</span><br><span class="line"><span class="comment"># [tokenizer.vocab.get(i) for i in [&#x27;bad&#x27;, &#x27;good&#x27;, &#x27;wonderful&#x27;, &#x27;great&#x27;]]</span></span><br><span class="line"><span class="comment"># [2213, 1363, 7310, 1632]</span></span><br><span class="line">verbalizer = torch.tensor([[<span class="number">2213</span>,    <span class="number">0</span>,    <span class="number">0</span>],</span><br><span class="line">                    [<span class="number">1363</span>, <span class="number">7310</span>, <span class="number">1632</span>]])</span><br><span class="line">mask = torch.tensor([[<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">                    [<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>]])</span><br><span class="line">logits = output[:, verbalizer]</span><br><span class="line"><span class="comment"># tensor([[[0.0508, 0.0000, 0.0000],</span></span><br><span class="line"><span class="comment">#          [0.1770, 0.9680, 0.0091]],</span></span><br><span class="line"><span class="comment">#         [[0.2045, 0.0000, 0.0000],</span></span><br><span class="line"><span class="comment">#          [0.9504, 0.2127, 0.1417]]])</span></span><br><span class="line"><span class="built_in">print</span>(aggreate(logits, mask))</span><br><span class="line"><span class="comment">#  negative， positive</span></span><br><span class="line"><span class="comment"># tensor([[0.0508, 0.3847],</span></span><br><span class="line"><span class="comment">#         [0.2045, 0.4349]])</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>样本</th>
+<th>bad</th>
+<th>good</th>
+<th>wonderful</th>
+<th>great</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>0.0508</td>
+<td>0.1770</td>
+<td>0.9680</td>
+<td>0.0091</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0.2045</td>
+<td>0.9504</td>
+<td>0.2127</td>
+<td>0.1417</td>
+</tr>
+</tbody></table>
+<p>通过aggreate就拿到最终对应negative和postive的logit了。</p>
+<h3 id="2-训练"><a href="#2-训练" class="headerlink" title="2. 训练"></a>2. 训练</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(aggreate(logits, mask))</span><br><span class="line"><span class="comment"># tensor([[0.0508, 0.3847],</span></span><br><span class="line"><span class="comment">#         [0.2045, 0.4349]])</span></span><br></pre></td></tr></table></figure>
+
+<p>拿到这个后，直接和label做交叉熵不就拿到loss啦～</p>
+<h3 id="3-Verbalizer缺点"><a href="#3-Verbalizer缺点" class="headerlink" title="3. Verbalizer缺点"></a>3. Verbalizer缺点</h3><p>可看到，<code>[&#39;bad&#39;, &#39;good&#39;, &#39;wonderful&#39;, &#39;great&#39;]</code>都是在bert vocab中存在的词，但是在中文里面是以字进行拆分的，那么不会存在<code>不好，精彩，漂亮，优秀...</code>这种词，即使是在WWM模型里面也不存在这些词，那么这个对中文构造这些verbalizer带来了不足。</p>
+<p>而这种方式被称为硬解码，后续再说。</p>
+<h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><h3 id="1-完整代码"><a href="#1-完整代码" class="headerlink" title="1. 完整代码"></a>1. 完整代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># step1:</span></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> openprompt.data_utils <span class="keyword">import</span> InputExample</span><br><span class="line"></span><br><span class="line">classes = [  <span class="comment"># There are two classes in Sentiment Analysis, one for negative and one for positive</span></span><br><span class="line">    <span class="string">&quot;negative&quot;</span>,</span><br><span class="line">    <span class="string">&quot;positive&quot;</span></span><br><span class="line">]</span><br><span class="line">dataset = [  <span class="comment"># For simplicity, there&#x27;s only two examples</span></span><br><span class="line">    <span class="comment"># text_a is the input text of the data, some other datasets may have multiple input sentences in one example.</span></span><br><span class="line">    InputExample(</span><br><span class="line">        guid=<span class="number">0</span>,</span><br><span class="line">        text_a=<span class="string">&quot;Albert Einstein was one of the greatest intellects of his time.&quot;</span>,</span><br><span class="line">    ),</span><br><span class="line">    InputExample(</span><br><span class="line">        guid=<span class="number">1</span>,</span><br><span class="line">        text_a=<span class="string">&quot;The film was badly made.&quot;</span>,</span><br><span class="line">    ),</span><br><span class="line">]</span><br><span class="line"><span class="comment"># step 2</span></span><br><span class="line"><span class="keyword">from</span> openprompt.plms <span class="keyword">import</span> load_plm</span><br><span class="line"></span><br><span class="line">plm, tokenizer, model_config, WrapperClass = load_plm(<span class="string">&quot;bert&quot;</span>, <span class="string">&quot;bert-base-cased&quot;</span>)</span><br><span class="line"><span class="comment"># step3</span></span><br><span class="line"><span class="keyword">from</span> openprompt.prompts <span class="keyword">import</span> ManualTemplate</span><br><span class="line"></span><br><span class="line">promptTemplate = ManualTemplate(</span><br><span class="line">    text=<span class="string">&#x27;&#123;&quot;placeholder&quot;:&quot;text_a&quot;&#125; It was &#123;&quot;mask&quot;&#125;&#x27;</span>,</span><br><span class="line">    tokenizer=tokenizer,</span><br><span class="line">)</span><br><span class="line"><span class="comment"># step4</span></span><br><span class="line"><span class="keyword">from</span> openprompt.prompts <span class="keyword">import</span> ManualVerbalizer</span><br><span class="line"></span><br><span class="line">promptVerbalizer = ManualVerbalizer(</span><br><span class="line">    classes=classes,</span><br><span class="line">    label_words=&#123;</span><br><span class="line">        <span class="string">&quot;negative&quot;</span>: [<span class="string">&quot;bad&quot;</span>],</span><br><span class="line">        <span class="string">&quot;positive&quot;</span>: [<span class="string">&quot;good&quot;</span>, <span class="string">&quot;wonderful&quot;</span>, <span class="string">&quot;great&quot;</span>],</span><br><span class="line">    &#125;,</span><br><span class="line">    tokenizer=tokenizer,</span><br><span class="line">)</span><br><span class="line"><span class="comment"># step 5</span></span><br><span class="line"><span class="keyword">from</span> openprompt <span class="keyword">import</span> PromptForClassification</span><br><span class="line"></span><br><span class="line">promptModel = PromptForClassification(</span><br><span class="line">    template=promptTemplate,</span><br><span class="line">    plm=plm,</span><br><span class="line">    verbalizer=promptVerbalizer,</span><br><span class="line">)</span><br><span class="line"><span class="comment"># step 6</span></span><br><span class="line"><span class="keyword">from</span> openprompt <span class="keyword">import</span> PromptDataLoader</span><br><span class="line"></span><br><span class="line">data_loader = PromptDataLoader(</span><br><span class="line">    dataset=dataset,</span><br><span class="line">    tokenizer=tokenizer,</span><br><span class="line">    template=promptTemplate,</span><br><span class="line">    tokenizer_wrapper_class=WrapperClass,</span><br><span class="line">)</span><br><span class="line"><span class="comment"># step 7</span></span><br><span class="line"><span class="comment"># making zero-shot inference using pretrained MLM with prompt</span></span><br><span class="line">promptModel.<span class="built_in">eval</span>()</span><br><span class="line"><span class="keyword">with</span> torch.no_grad():</span><br><span class="line">    <span class="keyword">for</span> batch <span class="keyword">in</span> data_loader:</span><br><span class="line">        logits = promptModel(batch)</span><br><span class="line">        preds = torch.argmax(logits, dim=-<span class="number">1</span>)</span><br><span class="line">        <span class="built_in">print</span>(classes[preds])</span><br><span class="line"><span class="comment"># predictions would be 1, 0 for classes &#x27;positive&#x27;, &#x27;negative&#x27;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/09/07/prompt%E7%B3%BB%E5%88%97-OpenPrompt%E5%85%A5%E9%97%A8%E4%B8%80/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-UIE-跨任务抽取" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1308,183 +1432,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2022/07/29/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E8%A7%A6%E5%8F%91%E8%AF%8D%E6%8F%90%E5%8F%96/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-句子成分与结构思考" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/05/23/%E5%8F%A5%E5%AD%90%E6%88%90%E5%88%86%E4%B8%8E%E7%BB%93%E6%9E%84%E6%80%9D%E8%80%83/">句子成分与结构思考</a>
-    </h1>
-  
-
-        
-        <a href="/2022/05/23/%E5%8F%A5%E5%AD%90%E6%88%90%E5%88%86%E4%B8%8E%E7%BB%93%E6%9E%84%E6%80%9D%E8%80%83/" class="archive-article-date">
-  	<time datetime="2022-05-23T02:09:01.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-05-23</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>最近在做句子结构分析的模型，具体样例如下图左图所示。</p>
-<p>因为之前看过constituency parser任务，故尝试将这棵树转成满足consituency parser满足的那种格式，转换后的样例如下图右图所示。</p>
-<table>
-<thead>
-<tr>
-<th><img src="/2022/05/23/%E5%8F%A5%E5%AD%90%E6%88%90%E5%88%86%E4%B8%8E%E7%BB%93%E6%9E%84%E6%80%9D%E8%80%83/1-comp.svg" class="" title="1-comp"></th>
-<th><img src="/2022/05/23/%E5%8F%A5%E5%AD%90%E6%88%90%E5%88%86%E4%B8%8E%E7%BB%93%E6%9E%84%E6%80%9D%E8%80%83/1-nltk.png" class="" title="1-png"></th>
-</tr>
-</thead>
-</table>
-<p>找个简单的例子如下所示。</p>
-<table>
-<thead>
-<tr>
-<th><img src="/2022/05/23/%E5%8F%A5%E5%AD%90%E6%88%90%E5%88%86%E4%B8%8E%E7%BB%93%E6%9E%84%E6%80%9D%E8%80%83/2-comp.svg" class="" title="2-comp"></th>
-<th><img src="/2022/05/23/%E5%8F%A5%E5%AD%90%E6%88%90%E5%88%86%E4%B8%8E%E7%BB%93%E6%9E%84%E6%80%9D%E8%80%83/2-nltk.png" class="" title="2-nltk"></th>
-</tr>
-</thead>
-</table>
-<blockquote>
-<p>所以隆重推荐这款转换工具，<a target="_blank" rel="noopener" href="https://pypi.org/project/constituency-tree-labeling-tool/">constituency-tree-labeling-tool</a>，目前这个工具已经在我司使用以及在hanlp和yuzhangcs&#x2F;parser中被提及。</p>
-</blockquote>
-<p>因为有这个工具的加持，我们就可以尝试使用consitutuency parser的方式来做这个任务。目前模型也已经被业务使用。</p>
-<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>我发现在真实使用的时候，会将这棵树按照一层为单位进行拆开，即：</p>
-<ol>
-<li>不会管句子层与层之间的关系。</li>
-<li>复句会拆成子句。</li>
-<li>最终使用还是主谓宾、兼语、联谓等这些基本句型。</li>
-</ol>
-<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>基于上面的使用方式，可以进行以下方面的尝试：</p>
-<ol>
-<li>可以先将这棵树按照使用的方式进行拆开，拆成一句一句的进行训练，更符合真实使用场景。</li>
-<li>找一个比consituency parser更为简便的模型，并且提高其准确度。</li>
-<li>提升速度。因为每一句话都要跑，速度也是非常重要的一点。</li>
-</ol>
-<h2 id="实现方式"><a href="#实现方式" class="headerlink" title="实现方式"></a>实现方式</h2><p>句子：<code>[&#39;商务部&#39;, &#39;开展&#39;, &#39;首批步行街改造提升试点工作&#39;, &#39;。&#39;]</code>。</p>
-<h3 id="方式一：分层CRF"><a href="#方式一：分层CRF" class="headerlink" title="方式一：分层CRF"></a>方式一：分层CRF</h3><p>比如上面这句话，他首先构造一个9*9的临界矩阵（按照分词个数），因为这句话只能拆出来一个完整子句，故只有第一行有label，剩下的8行全是空的。</p>
-<p>即:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[[&#x27;B-主&#x27;, &#x27;B-谓&#x27;, &#x27;B-宾&#x27;, &#x27;I-宾&#x27;, &#x27;I-宾&#x27;, &#x27;I-宾&#x27;, &#x27;I-宾&#x27;, &#x27;I-宾&#x27;, &#x27;B-符号&#x27;],</span><br><span class="line"> [&#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;],</span><br><span class="line"> [&#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;],</span><br><span class="line"> [&#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;],</span><br><span class="line"> [&#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;],</span><br><span class="line"> [&#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;],</span><br><span class="line"> [&#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;],</span><br><span class="line"> [&#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;],</span><br><span class="line"> [&#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;, &#x27;O&#x27;]]</span><br></pre></td></tr></table></figure>
-
-<p>那这里变成了两个问题：</p>
-<ol>
-<li>预测层数。表示这句话可以拆出多少个完整子句。</li>
-<li>每层的crf预测。对每层的label使用CRF进行预测和解码。</li>
-</ol>
-<h4 id="一-层数预测"><a href="#一-层数预测" class="headerlink" title="一. 层数预测"></a>一. 层数预测</h4><p><a target="_blank" rel="noopener" href="https://github.com/geasyheart/args-level">args-level</a>。<br>输入一句话，预测有几个子句。</p>
-<h4 id="二-CRF预测"><a href="#二-CRF预测" class="headerlink" title="二. CRF预测"></a>二. CRF预测</h4><p><a target="_blank" rel="noopener" href="https://github.com/geasyheart/args-crf">args-crf</a>。</p>
-<p>这里就一个需要注意的地方，就是设置一个层数上限，比如10层。那么bert输出比如(32, 128, 768)，将其expand至(32, 10, 128, 768)，然后接一个<code>768 * 768</code>的linear，将bert的语义表示用这个linear对每一层重新获取对应的语义表示。</p>
-<h4 id="三-联合模型"><a href="#三-联合模型" class="headerlink" title="三. 联合模型"></a>三. 联合模型</h4><p><a target="_blank" rel="noopener" href="https://github.com/geasyheart/args-level-crf-parser">args-level-crf-parser</a>。<br>就是将上面两个模型集成到一个任务里，两个loss分配不同的weight。</p>
-<h4 id="四-过程总结与思考"><a href="#四-过程总结与思考" class="headerlink" title="四. 过程总结与思考"></a>四. 过程总结与思考</h4><p><strong>1.实验</strong></p>
-<p>训练层数预测模型时，发现在验证集上F1一直只到<code>0.7~0.8</code>之间，和我最初预想能达到0.95以上有很大的差距，虽然训练集上基本达到100%准确。</p>
-<p><strong>2.思考</strong></p>
-<p>后来我想了下，我觉得有两部分原因：</p>
-<ol>
-<li>样本层数分布不均匀，比如1层和2层的占据了绝大多数，6,7层的就很少了。</li>
-<li>对多分类模型抱有的期望过高。</li>
-</ol>
-<p>为什么我会有第二个见解？我在训练中途看了transformers库集成的多分类代码，发现和我的没什么区别，这让我很纠结，难道是梯度裁剪、dropout、optimizer各方面没有设置好？？还是模型我不应该用electra，以及不应该使用交叉熵作为损失函数，而是可以尝试下FocalLoss？</p>
-<p>结果在种种测试下，都没有达到一个有效的改善。</p>
-<p>后来我觉得可能就是我对这个任务的准确度抱有的期望过高，为什么呢？<br>因为从人角度来看，都未必能准确知道一个句子应该分成几个子句。</p>
-<p>最终结果是没有达到预期的，一开始我先写的联合模型，但是发现在验证集上的层数预测的f1最多到0.8，label预测准确率更低。</p>
-<p>后来我对这两个模型进行拆分成两个任务来训练，以为可以改进层数预测的结果，但是分开后在验证集上层数预测的F1仍旧只能到0.8左右～，所以联合模型没有大的问题。</p>
-<p>对于CRF预测，label有40个左右，加之label的数量分布严重不均衡，那么即使假设这个任务的f1可以达到0.8，那两个任务的最终结果也就在0.6以上。</p>
-<p>那么由此可证，这种方式可能走不通。</p>
-<h3 id="方式二：嵌套ner"><a href="#方式二：嵌套ner" class="headerlink" title="方式二：嵌套ner"></a>方式二：嵌套ner</h3><p><a target="_blank" rel="noopener" href="https://github.com/geasyheart/args0complement">args0complement</a>。（忽略名字啦，本想留给主语补齐的。。。）</p>
-<p>这种方式是使用嵌套ner的方式来表示这些数据。</p>
-<p>对于上面这句话，将其转成一个9*9临接矩阵(按照分词进行构成)。<br>那他将会落在位置(0, 0), (1, 1), (2, 7), (8, 8)上，并且其标签分别是：<code>主语</code>，<code>谓语</code>，<code>宾语</code>，<code>符号</code>。</p>
-<p>他将面临的最主要的问题：</p>
-<blockquote>
-<p>虽然位置和标签都可以表示了，但是其之间的关联关系并没有。</p>
-</blockquote>
-<p>那么训练时没有问题，但是在解码的时候就会出现多种组合，比如：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(1, 2, 3, 4)</span><br><span class="line">(1, 2, 3)</span><br><span class="line">(2, 3, 4)</span><br><span class="line">(1, 2)</span><br><span class="line">(2, 3)</span><br><span class="line">(3, 4)</span><br></pre></td></tr></table></figure>
-<p>为什么会有这么多种组合呢？<br>因为一棵树是由多层组成的，那么其相互之间是可以在不同层进行组合。</p>
-<p>转成一种方便理解的方式，即：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">主谓宾符号</span><br><span class="line">主谓宾</span><br><span class="line">谓宾符号</span><br><span class="line">主谓</span><br><span class="line">谓宾</span><br><span class="line">宾符号</span><br></pre></td></tr></table></figure>
-
-<p>那么难点就是从这一堆的路径里面选取合适的路径出来。</p>
-<p><strong>1.实验</strong></p>
-<p>首先我没想到模型结果会出乎意料好许多，不是从这个嵌套ner任务本身的准确率，而是从这一套的实现方式上，效果得到了一个很大的提升。<br>这个给了极大的信心去写后面多条路径解码的代码😅😅😅。</p>
-<p>做法上我是先按照<a target="_blank" rel="noopener" href="https://github.com/geasyheart/biaffine_dep">dependency-parser</a>的方式来做，分成两个loss，一个是arc loss，还有一个rel loss。其中arc loss表示在这个临接矩阵中存在对应关系，那么就用1表示，否则0，即位置。rel_loss表示label在这个临接矩阵中的位置以及对应的label。</p>
-<p>dependency-parser在位置解码的时候是以arc-loss为准，因为基本毫无疑问arc相对是更容易的，我也按照这个思路进行的，不过最终发现直接用rel loss就已经足够了。。</p>
-<table>
-<thead>
-<tr>
-<th><img src="/2022/05/23/%E5%8F%A5%E5%AD%90%E6%88%90%E5%88%86%E4%B8%8E%E7%BB%93%E6%9E%84%E6%80%9D%E8%80%83/2-1.png" class="" title="2-1"></th>
-<th><img src="/2022/05/23/%E5%8F%A5%E5%AD%90%E6%88%90%E5%88%86%E4%B8%8E%E7%BB%93%E6%9E%84%E6%80%9D%E8%80%83/2-2.png" class="" title="2-2"></th>
-</tr>
-</thead>
-</table>
-<p>从上图可以看到：</p>
-<ol>
-<li>整个收敛还是很快的。</li>
-<li>arc loss和rel loss后面基本持平了。</li>
-<li>右边那张图的F1的结果，是因为有些类别样本数量太低导致的，看下面某训练时刻的结果。</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">eval[2]: 109it [00:25,  4.25it/s]</span><br><span class="line">-------------------------arc score--------------------------</span><br><span class="line">0.994944815190855</span><br><span class="line">label      precision            recall               f1-score             support             </span><br><span class="line">0          0.9972400957814684   0.997613766384969    0.9974268960857379   1195608             </span><br><span class="line">1          0.8661066266191102   0.848271741128884    0.8570964146386773   21756               </span><br><span class="line">------------------------without_arc-------------------------</span><br><span class="line">label      precision            recall               f1-score             support             </span><br><span class="line">0          0.9973666429171141   0.9975368180875337   0.9974517232439305   1195608             </span><br><span class="line">1          0.8611636210880067   0.8251157174481787   0.8427543679342241   4969                </span><br><span class="line">2          0.8362629424512401   0.8392943450942484   0.8377759015800266   8276                </span><br><span class="line">3          0.8743008079552517   0.8869798234552333   0.8805946791862285   6344                </span><br><span class="line">4          0.8064516129032258   0.9090909090909091   0.8547008547008547   110                 </span><br><span class="line">5          0.8508771929824561   0.8818181818181818   0.8660714285714286   110                 </span><br><span class="line">6          0.6592920353982301   0.6208333333333333   0.6394849785407726   240                 </span><br><span class="line">7          0.7988338192419825   0.6157303370786517   0.6954314720812182   445                 </span><br><span class="line">8          0.5623100303951368   0.6006493506493507   0.5808477237048667   308                 </span><br><span class="line">9          0.5150375939849624   0.5732217573221757   0.5425742574257425   239                 </span><br><span class="line">10         0.5526315789473685   0.5472312703583062   0.5499181669394436   307                 </span><br><span class="line">11         0.4788732394366197   0.3953488372093023   0.43312101910828027  86                  </span><br><span class="line">12         0.46511627906976744  0.3333333333333333   0.3883495145631068   60                  </span><br><span class="line">13         0.0                  0.0                  0.0                  48                  </span><br><span class="line">14         0.8205128205128205   0.9411764705882353   0.8767123287671232   68                  </span><br><span class="line">15         0.7263157894736842   0.7040816326530612   0.7150259067357513   98                  </span><br><span class="line">16         0.66                 0.75                 0.702127659574468    44                  </span><br><span class="line">17         0.4                  0.5                  0.4444444444444445   4                   </span><br><span class="line">18         0.0                  0.0                  0.0                  0                   </span><br><span class="line">19         0.0                  0.0                  0.0                  0                   </span><br><span class="line">--------------------------with_arc--------------------------</span><br><span class="line">label      precision            recall               f1-score             support             </span><br><span class="line">0          0.9971531736346768   0.9978303925701401   0.9974916681577307   1195608             </span><br><span class="line">1          0.8706489041684572   0.8154558261219561   0.8421490179777616   4969                </span><br><span class="line">2          0.8455584224106155   0.8315611406476558   0.8385013706975327   8276                </span><br><span class="line">3          0.8876834716017868   0.8770491803278688   0.8823342848081193   6344                </span><br><span class="line">4          0.8571428571428571   0.8727272727272727   0.8648648648648648   110                 </span><br><span class="line">5          0.8703703703703703   0.8545454545454545   0.8623853211009175   110                 </span><br><span class="line">6          0.7                  0.5833333333333334   0.6363636363636365   240                 </span><br><span class="line">7          0.8438538205980066   0.5707865168539326   0.6809651474530831   445                 </span><br><span class="line">8          0.5700934579439252   0.5941558441558441   0.5818759936406994   308                 </span><br><span class="line">9          0.531496062992126    0.5648535564853556   0.5476673427991886   239                 </span><br><span class="line">10         0.5513698630136986   0.5244299674267101   0.5375626043405676   307                 </span><br><span class="line">11         0.5555555555555556   0.3488372093023256   0.4285714285714286   86                  </span><br><span class="line">12         0.4857142857142857   0.2833333333333333   0.35789473684210527  60                  </span><br><span class="line">13         0.0                  0.0                  0.0                  48                  </span><br><span class="line">14         0.84                 0.9264705882352942   0.881118881118881    68                  </span><br><span class="line">15         0.7674418604651163   0.673469387755102    0.7173913043478259   98                  </span><br><span class="line">16         0.6585365853658537   0.6136363636363636   0.6352941176470588   44                  </span><br><span class="line">17         0.3333333333333333   0.25                 0.28571428571428575  4                   </span><br><span class="line">18         0.0                  0.0                  0.0                  0                   </span><br><span class="line">19         0.0                  0.0                  0.0                  0 </span><br></pre></td></tr></table></figure>
-
-
-<h3 id="方式三：进阶的constituency-parser"><a href="#方式三：进阶的constituency-parser" class="headerlink" title="方式三：进阶的constituency parser"></a>方式三：进阶的constituency parser</h3><p>这地方有两个需要学习的：</p>
-<ol>
-<li>使用GNN的方式来做consitutnecy parser，看看这种方式的效果。</li>
-<li>改进constituency parser在将其构成临接矩阵的时候，去掉其上下之间的关联关系，减少预测数量，看看是否能提升其准确率。</li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/05/23/%E5%8F%A5%E5%AD%90%E6%88%90%E5%88%86%E4%B8%8E%E7%BB%93%E6%9E%84%E6%80%9D%E8%80%83/">展开全文 >></a>
         </p>
       
 

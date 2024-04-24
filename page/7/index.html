@@ -212,6 +212,149 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-成分句法分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/10/15/%E6%88%90%E5%88%86%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/">成分句法分析</a>
+    </h1>
+  
+
+        
+        <a href="/2021/10/15/%E6%88%90%E5%88%86%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2021-10-15T15:30:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-15</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="package"><a href="#package" class="headerlink" title="package"></a>package</h2><p>写了一个成分分析树的标注包：<br><a target="_blank" rel="noopener" href="https://github.com/geasyheart/constituency-tree-labeling-tool">https://github.com/geasyheart/constituency-tree-labeling-tool</a><br>欢迎Star!!!</p>
+<blockquote>
+<p>本项目代码已privated，更多可直接参考<code>yzhangcs/parser</code>.</p>
+</blockquote>
+<h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>成分句法分析(Constituency Parser)是将一个句子转换成由短语组成的树，为啥子要这样呢，因为人理解一句话是从这句话里面更小的成分来的，直到最小的成分（词）。<br>其中叶子节点表示词组和对应的词性，非叶子节点表示的是对应关系，简单看下图:</p>
+<p>更多可以看宗成庆老师的《统计自然语言处理第二版》。</p>
+<h3 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h3><ul>
+<li><p>NLTK tree: </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">                      TOP                 </span><br><span class="line">                       |                   </span><br><span class="line">                     IP-HLN               </span><br><span class="line">                 ______|________________   </span><br><span class="line">              IP-TPC              |     | </span><br><span class="line">     ___________|______           |     |  </span><br><span class="line">    |                  VP         |     | </span><br><span class="line">    |            ______|_____     |     |  </span><br><span class="line">    |         PP-DIR         |    |     | </span><br><span class="line">    |       ____|______      |    |     |  </span><br><span class="line">NP-PN-SBJ  |           NP    VP NP-SBJ  VP</span><br><span class="line">    |      |           |     |    |     |  </span><br><span class="line">    NR     P           NN    VV   NN    VV</span><br><span class="line">    |      |           |     |    |     |  </span><br><span class="line">    广西     对           外     开放   成绩    斐然</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>自己写的:<br><img src="https://raw.githubusercontent.com/geasyheart/constituency-tree-labeling-tool/main/constituency_labeling/tests/examples/22.gv.svg" alt="图片"></p>
+</li>
+</ul>
+<p>反之通过小的成分慢慢递归到更高的层次（一句话），从而理解这句话的意思。</p>
+<p>更详细的解释：</p>
+<ol>
+<li>Dependency structure shows which words depend on (modify or are arguments of) which other words. </li>
+<li>A dependency parse connects words according to their relationships. Each vertex in the tree represents a word, child nodes are words that are dependent on the parent, and edges are labeled by the relationship.</li>
+<li>It is interested in the dependency relationships between words.</li>
+</ol>
+<h2 id="数据处理"><a href="#数据处理" class="headerlink" title="数据处理"></a>数据处理</h2><h3 id="1-left-binarized"><a href="#1-left-binarized" class="headerlink" title="1. left binarized"></a>1. left binarized</h3><p>要使用CKY算法，首先要将标注的数据集转成满足乔姆斯基范式的二叉树。作者这里将<code>original tree</code>通过<code>left binarized</code>将其转换成符合乔姆斯基范式的<code>CNF Tree</code>。</p>
+<p>当然，这里你也可以使用right binarized，只要能转回原来的tree就行。</p>
+<img src="/2021/10/15/%E6%88%90%E5%88%86%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/3.png" class="" title=".">
+
+<p><a target="_blank" rel="noopener" href="https://github.com/yzhangcs/parser/blob/4f34852d6aeac53d819b3ece11b2a3aee4822d74/supar/utils/transform.py#L424">实现代码</a></p>
+<h3 id="2-factorize"><a href="#2-factorize" class="headerlink" title="2. factorize"></a>2. factorize</h3><p>将<code>CNF Tree</code>分解成序列结构，具体<a target="_blank" rel="noopener" href="https://github.com/yzhangcs/parser/blob/4f34852d6aeac53d819b3ece11b2a3aee4822d74/supar/utils/transform.py#L479">实现代码</a>.</p>
+<p>原来刷算法时有将binary tree转换成序列结构，没想到这里就有一个～。</p>
+<p>随后将其赋值到一个上三角的临接矩阵，长度为<code>seq_len + 1</code>，<a target="_blank" rel="noopener" href="https://github.com/yzhangcs/parser/blob/4f34852d6aeac53d819b3ece11b2a3aee4822d74/supar/utils/transform.py#L777">具体代码</a>，需要预测的就是上三角。</p>
+<h2 id="模型"><a href="#模型" class="headerlink" title="模型"></a>模型</h2><p>我在其中加入了<code>tags_embedding</code>，即词性特征，在charts中[:, 0, 0]恒为-1,因为只需要预测上三角，所以tag[0] &#x3D; 0，后面使用mask将其忽略掉。</p>
+<p>整个任务的指标在开源数据集上提升至将近86%。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">  (encoder): TransformerEmbedding(hfl/chinese-electra-180g-small-discriminator, n_layers=4, n_out=256, stride=256, pooling=mean, pad_index=0, dropout=0.33, requires_grad=True)</span><br><span class="line">  (tags_embedding): Embedding(40, 64)</span><br><span class="line">  (span_mlp_l): MLP(n_in=320, n_out=500, dropout=0.33)</span><br><span class="line">  (span_mlp_r): MLP(n_in=320, n_out=500, dropout=0.33)</span><br><span class="line">  (label_mlp_l): MLP(n_in=320, n_out=100, dropout=0.33)</span><br><span class="line">  (label_mlp_r): MLP(n_in=320, n_out=100, dropout=0.33)</span><br><span class="line">  (span_attn): Biaffine(n_in=500, bias_x=True)</span><br><span class="line">  (label_attn): Biaffine(n_in=100, n_out=1222, bias_x=True, bias_y=True)</span><br><span class="line">  (crf): CRFConstituency()</span><br><span class="line">  (criterion): CrossEntropyLoss()</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>作者在这里使用了<code>Two Stage</code>的方式来预测最大概率上下文无关树。</p>
+<ol>
+<li><code>First Stage</code>预测<code>Span Scorer</code>，即句子级的全局TreeCRF损失，目的是最大化无标签树的条件概率。<br>TreeCRF使用inside算法获取关于句子W的概率P(W|G)。</li>
+<li><code>Two Stage</code>为labeling阶段，这里损失函数使用交叉熵。</li>
+</ol>
+<p>解码部分使用cky算法，来获取句子的最佳结构，然后使用<code>totree</code>将其还原成树结构。</p>
+<p>其解码过程可参考宗成庆老师的示例，其示例过程如下。</p>
+<blockquote>
+</blockquote>
+<img src="/2021/10/15/%E6%88%90%E5%88%86%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/11.png" class="" title="p1">
+<blockquote>
+</blockquote>
+<img src="/2021/10/15/%E6%88%90%E5%88%86%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/22.png" class="" title="p2">
+<blockquote>
+</blockquote>
+<img src="/2021/10/15/%E6%88%90%E5%88%86%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/33.png" class="" title="p3">
+<blockquote>
+</blockquote>
+<img src="/2021/10/15/%E6%88%90%E5%88%86%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/44.png" class="" title="p4">
+<blockquote>
+</blockquote>
+<img src="/2021/10/15/%E6%88%90%E5%88%86%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/55.png" class="" title="p5">
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>目前在这块的研究或者在工业界使用的没有像dependency parser那么成熟。<br>个人分析原因如下：</p>
+<ol>
+<li>这个任务偏<code>语言学化</code>。这个任务是完成从词到句子的整个构建过程，从而解决歧义等问题，但是目前的预训练模型一般涵盖了语义这方面信息。</li>
+<li>复杂度高。其中使用的<code>inside</code>和<code>cky</code>算法复杂度太高。另外一方面是tree的层次太复杂。不像dependency parser线性结构更为直接。</li>
+<li>任务难度高。 这个任务在宗成庆老师的书里历史悠久～。另外所涉及到的知识也多，比如PCFG，CKY，CNF。要理解这部分就已经非常困难。</li>
+</ol>
+<p>再往最近基本就没啥成果出来了。</p>
+<p>[扩展阅读]</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/133462196">https://zhuanlan.zhihu.com/p/133462196</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cs.cornell.edu/courses/cs5740/2017sp/lectures/13-parsing-const.pdf">https://www.cs.cornell.edu/courses/cs5740/2017sp/lectures/13-parsing-const.pdf</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/yzhangcs/master-thesis">中文版论文</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.ijcai.org/proceedings/2020/0560.pdf">Fast and Accurate Neural CRF Constituency Parsing</a></li>
+<li><a target="_blank" rel="noopener" href="http://hlt.suda.edu.cn/~yzhang/master-thesis/treecrf-ho-syn-parsing.pdf">yzhangcs毕业论文</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.nlpr.ia.ac.cn/cip/ZongPublications/2012/2012.10%20J.of%20Software%20ZGWang.pdf">基于高阶词汇依存的短语结构树重排序模型∗</a></li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/10/15/%E6%88%90%E5%88%86%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-依存句法分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1152,97 +1295,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2021/07/20/lstm%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-python-bdist-wheel" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/07/14/python-bdist-wheel/">python bdist_wheel</a>
-    </h1>
-  
-
-        
-        <a href="/2021/07/14/python-bdist-wheel/" class="archive-article-date">
-  	<time datetime="2021-07-14T09:45:31.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-14</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>利用cython进行编译成库.</p>
-<h3 id="1-setup-py"><a href="#1-setup-py" class="headerlink" title="1. setup.py"></a>1. setup.py</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf-8</span></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> sysconfig</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> setuptools <span class="keyword">import</span> setup, find_packages</span><br><span class="line"></span><br><span class="line"><span class="comment"># https://stackoverflow.com/questions/21594925/error-each-element-of-ext-modules-option-must-be-an-extension-instance-or-2-t</span></span><br><span class="line"><span class="comment"># 注意，这个顺序必须在这里，要比setup低.</span></span><br><span class="line"><span class="keyword">from</span> Cython.Build <span class="keyword">import</span> cythonize</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> setuptools.command.build_py <span class="keyword">import</span> build_py <span class="keyword">as</span> _build_py</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read</span>():</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;./requirements.txt&quot;</span>, <span class="string">&quot;r&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">return</span> f.readlines()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Notice1: your modules.</span></span><br><span class="line">packages = <span class="built_in">set</span>(find_packages()) | &#123;<span class="string">&#x27;your modules.&#x27;</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># Notice2: exclude files.</span></span><br><span class="line">EXCLUDE_FILES = [</span><br><span class="line">    <span class="comment"># &#x27;your package/ignore python files.&#x27;</span></span><br><span class="line">    <span class="string">&#x27;package/file1.py&#x27;</span></span><br><span class="line"></span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_ext_paths</span>(<span class="params">root_dir, exclude_files</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;get filepaths for compilation&quot;&quot;&quot;</span></span><br><span class="line">    paths = []</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> root, dirs, files <span class="keyword">in</span> os.walk(root_dir):</span><br><span class="line">        <span class="keyword">for</span> filename <span class="keyword">in</span> files:</span><br><span class="line">            <span class="keyword">if</span> os.path.splitext(filename)[<span class="number">1</span>] != <span class="string">&#x27;.py&#x27;</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line"></span><br><span class="line">            file_path = os.path.join(root, filename)</span><br><span class="line">            <span class="keyword">if</span> file_path <span class="keyword">in</span> exclude_files:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line"></span><br><span class="line">            paths.append(file_path)</span><br><span class="line">    <span class="keyword">return</span> paths</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># noinspection PyPep8Naming</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">build_py</span>(<span class="title class_ inherited__">_build_py</span>):</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">find_package_modules</span>(<span class="params">self, package, package_dir</span>):</span><br><span class="line">        ext_suffix = sysconfig.get_config_var(<span class="string">&#x27;EXT_SUFFIX&#x27;</span>)</span><br><span class="line">        modules = <span class="built_in">super</span>().find_package_modules(package, package_dir)</span><br><span class="line">        filtered_modules = []</span><br><span class="line">        <span class="keyword">for</span> (pkg, mod, filepath) <span class="keyword">in</span> modules:</span><br><span class="line">            <span class="keyword">if</span> os.path.exists(filepath.replace(<span class="string">&#x27;.py&#x27;</span>, ext_suffix)):</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            filtered_modules.append((pkg, mod, filepath,))</span><br><span class="line">        <span class="keyword">return</span> filtered_modules</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">setup(</span><br><span class="line">    name=<span class="string">&#x27;package name&#x27;</span>, <span class="comment"># Notice3</span></span><br><span class="line">    version=<span class="string">&#x27;0.3.0&#x27;</span>,</span><br><span class="line"></span><br><span class="line">    ext_modules=cythonize(</span><br><span class="line">        get_ext_paths(<span class="string">&#x27;project root path&#x27;</span>, EXCLUDE_FILES), <span class="comment"># Notice4</span></span><br><span class="line">        compiler_directives=&#123;<span class="string">&#x27;language_level&#x27;</span>: <span class="number">3.6</span>&#125;</span><br><span class="line">    ),</span><br><span class="line">    cmdclass=&#123;</span><br><span class="line">        <span class="string">&#x27;build_py&#x27;</span>: build_py</span><br><span class="line">    &#125;,</span><br><span class="line">    packages=packages,</span><br><span class="line">    include_package_data=<span class="literal">True</span>,</span><br><span class="line">    install_requires=read(),</span><br><span class="line">)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<h3 id="2-build"><a href="#2-build" class="headerlink" title="2. build"></a>2. build</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">python setup.py build_ext --inplace</span><br><span class="line">python setup.py bdist_wheel</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="3-结论"><a href="#3-结论" class="headerlink" title="3. 结论"></a>3. 结论</h3><p>通过这种方式编译成一个库，正常情况下无法查看源码。<br>在开发过程中，IDE无法自动导入，就正常打包方便开发同学调试、使用，而在生产环境使用<code>2</code>方式进行编译成一个安装包，开发替换一下安装包路径即可。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/07/14/python-bdist-wheel/">展开全文 >></a>
         </p>
       
 
