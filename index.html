@@ -252,7 +252,7 @@ var _hmt = _hmt || [];
 <blockquote>
 <p>那这里更多起到什么作用?</p>
 </blockquote>
-<p>我觉得有个点可以很好理解这里，即从完全小白到慢慢学习直至认知理解的过程。添加warmup，即先提前产生一批训练样本，而eps这里，即随着过程慢慢学习，是不是跟折扣因子的过程相似～</p>
+<p>我觉得有个点可以很好理解这里，即从完全小白到慢慢学习直至认知理解的过程。添加warmup，即先提前产生一批训练样本，而eps这里，即随着过程慢慢学习，不过相比warmup，可以更优采取权重随机采样方案，即<code>torch.multinomial(torch.softmax(self(obs), dim=-1), 1).item()</code>，它表现出来的特点是权重高的多次采样出现的频率也会更高，那么随着模型的优化，采样更优的可能性也会提升。</p>
 <h3 id="3-target-net是否是必须的？"><a href="#3-target-net是否是必须的？" class="headerlink" title="3. target_net是否是必须的？"></a>3. target_net是否是必须的？</h3><p>不，这里也并不是必须的。观察整个过程，policy_net要比target_net新一个epoch，而且他俩实际上是在干同一个事情，那么可以将target_net指向policy_net,可以发现epoch的增加，reward的值也是正常提升的。</p>
 <h3 id="4-reply-memory是干嘛的？"><a href="#4-reply-memory是干嘛的？" class="headerlink" title="4. reply memory是干嘛的？"></a>4. reply memory是干嘛的？</h3><p>reply memory可以说记录了整个state和action等的过程，当然有一个maxlen来限制其大小，过早的数据就不要了。</p>
 <p>不过需要指出的是，改动了上面这些点，虽然也可以收敛，但是可能会收敛变慢。</p>
