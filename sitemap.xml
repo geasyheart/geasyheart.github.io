@@ -2,7 +2,25 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://geasyheart.github.io/2024/04/26/RHLF-policy-gradient/</loc>
+    <loc>https://geasyheart.github.io/2024/04/26/RLHF-policy-gradient/</loc>
+    
+    <lastmod>2024-04-26</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://geasyheart.github.io/2024/04/24/RLHF-DQN/</loc>
+    
+    <lastmod>2024-04-26</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://geasyheart.github.io/2024/04/07/LLM-RLHF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/</loc>
     
     <lastmod>2024-04-26</lastmod>
     
@@ -86,24 +104,6 @@
     <loc>https://geasyheart.github.io/2021/12/24/%E9%9D%99%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8BFFNN%E8%AE%AD%E7%BB%83%E8%AF%8D%E5%90%91%E9%87%8F/</loc>
     
     <lastmod>2024-04-26</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://geasyheart.github.io/2024/04/24/RHLF-DQN/</loc>
-    
-    <lastmod>2024-04-25</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://geasyheart.github.io/2024/04/07/LLM-RHLF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/</loc>
-    
-    <lastmod>2024-04-17</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

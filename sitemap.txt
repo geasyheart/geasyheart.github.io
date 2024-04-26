@@ -1,4 +1,6 @@
-https://geasyheart.github.io/2024/04/26/RHLF-policy-gradient/
+https://geasyheart.github.io/2024/04/26/RLHF-policy-gradient/
+https://geasyheart.github.io/2024/04/24/RLHF-DQN/
+https://geasyheart.github.io/2024/04/07/LLM-RLHF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/
 https://geasyheart.github.io/2021/12/28/%E5%8A%A8%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8Belmo/
 https://geasyheart.github.io/2021/07/20/lstm%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B/
 https://geasyheart.github.io/2021/12/24/%E9%9D%99%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8Brnn%E8%AE%AD%E7%BB%83%E8%AF%8D%E5%90%91%E9%87%8F/
@@ -8,8 +10,6 @@ https://geasyheart.github.io/2021/12/28/%E9%9D%99%E6%80%81%E8%AF%8D%E5%90%91%E9%
 https://geasyheart.github.io/2021/12/22/%E9%9D%99%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8Bword2vec-skipgram/
 https://geasyheart.github.io/2021/12/24/%E9%9D%99%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8Bword2vec-cbow/
 https://geasyheart.github.io/2021/12/24/%E9%9D%99%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8BFFNN%E8%AE%AD%E7%BB%83%E8%AF%8D%E5%90%91%E9%87%8F/
-https://geasyheart.github.io/2024/04/24/RHLF-DQN/
-https://geasyheart.github.io/2024/04/07/LLM-RHLF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/
 https://geasyheart.github.io/2023/12/21/qwen1-8B%E8%AF%95%E7%8E%A9/
 https://geasyheart.github.io/2023/10/01/ChatGLM%E5%BE%AE%E8%B0%83%E8%AE%B0%E5%BD%95/
 https://geasyheart.github.io/2023/11/29/lora%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E7%8E%B0/
