@@ -83,8 +83,6 @@ var _hmt = _hmt || [];
 	        
 				<li><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
 	        
-				<li><a href="/tags/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81nlp">活到老学到老nlp</a></li>
-	        
 				<li><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
 	        
 				<li><a href="/tags/python/">python</a></li>
@@ -159,8 +157,6 @@ var _hmt = _hmt || [];
 			
 				
 			
-				
-			
 			
 			
 			<nav class="header-nav">
@@ -183,19 +179,17 @@ var _hmt = _hmt || [];
 				<ul style="width: 70%">
 				
 				
-					<li style="width: 14.285714285714286%"><a href="/">主页</a></li>
+					<li style="width: 16.666666666666668%"><a href="/">主页</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81nlp">活到老学到老nlp</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/python/">python</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/python/">python</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/linux/">linux</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/linux/">linux</a></li>
-		        
-					<li style="width: 14.285714285714286%"><a href="/tags/MySQL/">mysql</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/MySQL/">mysql</a></li>
 		        
 				</ul>
 			</nav>
@@ -211,6 +205,150 @@ var _hmt = _hmt || [];
           </div>
           <div id="js-content" class="content-ll">
             
+  
+    <article id="post-33-01-2-MySQL数据类型" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/03/04/33-01-2-MySQL%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/">33_01_2_MySQL数据类型</a>
+    </h1>
+  
+
+        
+        <a href="/2016/03/04/33-01-2-MySQL%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/" class="archive-article-date">
+  	<time datetime="2016-03-04T09:24:10.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-03-04</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>说明：没有特殊说明的话，<br>Mariadb的版本为: </p>
+<blockquote>
+<p>MariaDB [mydb]&gt; select version(); </p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">+------------------------------+ </span><br><span class="line">| version()                    | </span><br><span class="line">+------------------------------+ </span><br><span class="line">| 10.1.11-MariaDB-1~trusty-log | </span><br><span class="line">+------------------------------+ </span><br></pre></td></tr></table></figure>
+
+<p>MySQL的版本: </p>
+<blockquote>
+<p>mysql&gt; select version(); </p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">+------------+ </span><br><span class="line">| version()  | </span><br><span class="line">+------------+ </span><br><span class="line">| 5.6.29-log | </span><br><span class="line">+------------+ </span><br></pre></td></tr></table></figure>
+
+<p>数据类型:<br>    ISO SQL:2003 standard </p>
+<p>CHAR(N): 0 to 255<br>VARCHAR(N): 0 to 65535 </p>
+<p>char(N)一旦分配，就固定了; </p>
+<p>char(4)超过后怎么处理?<br>    sql_mode </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [mydb]<span class="operator">&gt;</span> <span class="keyword">SHOW</span> VARIABLES <span class="keyword">LIKE</span> <span class="string">&#x27;sql_mode&#x27;</span>; </span><br><span class="line"><span class="operator">+</span><span class="comment">---------------+--------------------------------------------+ </span></span><br><span class="line"><span class="operator">|</span> Variable_name <span class="operator">|</span> <span class="keyword">Value</span>                                      <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">---------------+--------------------------------------------+ </span></span><br><span class="line"><span class="operator">|</span> sql_mode      <span class="operator">|</span> NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">---------------+--------------------------------------------+ </span></span><br><span class="line"> </span><br><span class="line">MariaDB [mydb]<span class="operator">&gt;</span> <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t1( col1 <span class="type">char</span>(<span class="number">3</span>), col2 <span class="type">varchar</span>(<span class="number">3</span>)); </span><br><span class="line">MariaDB [mydb]<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> t1(col1,col2)<span class="keyword">values</span>(<span class="string">&#x27;abcd&#x27;</span>,<span class="string">&#x27;abcd&#x27;</span>); </span><br><span class="line">MariaDB [mydb]<span class="operator">&gt;</span> <span class="keyword">show</span> warnings; </span><br><span class="line"><span class="operator">+</span><span class="comment">---------+------+-------------------------------------------+ </span></span><br><span class="line"><span class="operator">|</span> Level   <span class="operator">|</span> Code <span class="operator">|</span> Message                                   <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">---------+------+-------------------------------------------+ </span></span><br><span class="line"><span class="operator">|</span> Warning <span class="operator">|</span> <span class="number">1265</span> <span class="operator">|</span> Data truncated <span class="keyword">for</span> <span class="keyword">column</span> <span class="string">&#x27;col1&#x27;</span> <span class="keyword">at</span> <span class="type">row</span> <span class="number">1</span> <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span> Warning <span class="operator">|</span> <span class="number">1265</span> <span class="operator">|</span> Data truncated <span class="keyword">for</span> <span class="keyword">column</span> <span class="string">&#x27;col2&#x27;</span> <span class="keyword">at</span> <span class="type">row</span> <span class="number">1</span> <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">---------+------+-------------------------------------------+ </span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">SELECT</span> @<span class="variable">@sql_mode</span>; </span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------------------------------+ </span></span><br><span class="line"><span class="operator">|</span> @<span class="variable">@sql_mode</span>                                 <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------------------------------+ </span></span><br><span class="line"><span class="operator">|</span> STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------------------------------+ </span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> t1(col1,col2)<span class="keyword">values</span>(<span class="string">&#x27;abcd&#x27;</span>,<span class="string">&#x27;abcd&#x27;</span>); </span><br><span class="line">ERROR <span class="number">1406</span> (<span class="number">22001</span>): Data too long <span class="keyword">for</span> <span class="keyword">column</span> <span class="string">&#x27;col1&#x27;</span> <span class="keyword">at</span> <span class="type">row</span> <span class="number">1</span> </span><br><span class="line">直接无法插入; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="type">varchar</span>(N)：N<span class="operator">+</span><span class="number">1</span>个字节 </span><br><span class="line"> </span><br><span class="line">MariaDB [mydb]<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> t1( col1 <span class="type">varchar</span>(<span class="number">65500</span>)); </span><br><span class="line">MariaDB [mydb]<span class="operator">&gt;</span> <span class="keyword">desc</span> t1; </span><br><span class="line"><span class="operator">+</span><span class="comment">-------+------------+------+-----+---------+-------+ </span></span><br><span class="line"><span class="operator">|</span> Field <span class="operator">|</span> Type       <span class="operator">|</span> <span class="keyword">Null</span> <span class="operator">|</span> Key <span class="operator">|</span> <span class="keyword">Default</span> <span class="operator">|</span> Extra <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">-------+------------+------+-----+---------+-------+ </span></span><br><span class="line"><span class="operator">|</span> col1  <span class="operator">|</span> mediumtext <span class="operator">|</span> YES  <span class="operator">|</span>     <span class="operator">|</span> <span class="keyword">NULL</span>    <span class="operator">|</span>       <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">-------+------------+------+-----+---------+-------+ </span></span><br><span class="line">MariaDB会将其自动转换为mediumtext类型; </span><br></pre></td></tr></table></figure>
+
+<p>对于MySQL来说：<br>ERROR 1074 (42000): Column length too big for column ‘col1’ (max &#x3D; 21845); use BLOB or TEXT instead </p>
+<p>binary类型:<br>    binary –&gt;和char相似，不过区别一个是以二进制的方式进行存储<br>    varbinary –&gt;varchar，这个和varchar相似; </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [test]<span class="operator">&gt;</span> <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t1( col1 <span class="type">binary</span>(<span class="number">4</span>)); </span><br><span class="line">MariaDB [test]<span class="operator">&gt;</span> <span class="keyword">INSERT</span> <span class="keyword">INTO</span> t1 <span class="keyword">VALUES</span>(<span class="string">&#x27;a&#x27;</span>); </span><br><span class="line">MariaDB [test]<span class="operator">&gt;</span> <span class="keyword">SELECT</span> col1<span class="operator">=</span><span class="string">&#x27;a\0\0\0&#x27;</span> <span class="keyword">FROM</span> t1; </span><br><span class="line"><span class="operator">+</span><span class="comment">----------------+ </span></span><br><span class="line"><span class="operator">|</span> col1<span class="operator">=</span><span class="string">&#x27;a\0\0\0&#x27;</span> <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">----------------+ </span></span><br><span class="line"><span class="operator">|</span>              <span class="number">1</span> <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">----------------+ </span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">SELECT</span> col1<span class="operator">=</span><span class="string">&#x27;a\0\0\0&#x27;</span> 表示由于<span class="type">binary</span>是定长，那么需要在后面补<span class="number">0</span>补成定义的长度，如果相等，那么则返回<span class="number">1</span>,如果不等，则返回<span class="number">0</span>; </span><br><span class="line"> </span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t1_bin( col1 <span class="type">binary</span>(<span class="number">5</span>)); </span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> col1<span class="operator">=</span><span class="string">&#x27;a\0\0\0\0&#x27;</span> <span class="keyword">from</span> t1_bin; </span><br><span class="line"><span class="operator">+</span><span class="comment">------------------+ </span></span><br><span class="line"><span class="operator">|</span> col1<span class="operator">=</span><span class="string">&#x27;a\0\0\0\0&#x27;</span> <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">------------------+ </span></span><br><span class="line"><span class="operator">|</span>                <span class="number">1</span> <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">------------------+ </span></span><br></pre></td></tr></table></figure>
+<p>BLOB类型和TEXT类型: </p>
+<blockquote>
+<p>TINYBLOB<br>BLOB<br>MEDIUMBLOB<br>LONGBLOB </p>
+</blockquote>
+<blockquote>
+<p>TINYTEXT<br>TEXT<br>MEDIUMTEXT<br>LONGTEXT </p>
+</blockquote>
+<p>ENUM类型:<br>在MariaDB中是非严格类型： </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [test]<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> enum_a( col1 enum(<span class="string">&#x27;a&#x27;</span>,<span class="string">&#x27;b&#x27;</span>,<span class="string">&#x27;c&#x27;</span>)); </span><br><span class="line">MariaDB [test]<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> enum_a <span class="keyword">values</span>(<span class="string">&#x27;d&#x27;</span>); </span><br><span class="line">MariaDB [test]<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> enum_a; </span><br></pre></td></tr></table></figure>
+<p>会显示为空，以及有警告;<br>而在MySQL中则会直接报错，无法进行插入; </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [test]<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> enum_a <span class="keyword">values</span>(<span class="string">&#x27;c&#x27;</span>); </span><br><span class="line">MariaDB [test]<span class="operator">&gt;</span> <span class="keyword">select</span> col1<span class="operator">+</span><span class="number">0</span> <span class="keyword">from</span> enum_a; </span><br><span class="line"><span class="operator">+</span><span class="comment">--------+ </span></span><br><span class="line"><span class="operator">|</span> col1<span class="operator">+</span><span class="number">0</span> <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">--------+ </span></span><br><span class="line"><span class="operator">|</span>      <span class="number">0</span> <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span>      <span class="number">3</span> <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">--------+ </span></span><br><span class="line"> </span><br><span class="line">列<span class="operator">+</span><span class="number">0</span>表示他在enum中的那个位置; </span><br><span class="line"> </span><br><span class="line"><span class="keyword">SET</span>类型：最大<span class="number">64</span>个； </span><br><span class="line">MariaDB [test]<span class="operator">&gt;</span> <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> set_t(col1 <span class="keyword">set</span>(<span class="string">&#x27;F&#x27;</span>,<span class="string">&#x27;M&#x27;</span>,<span class="string">&#x27;U&#x27;</span>)); </span><br><span class="line">MariaDB [test]<span class="operator">&gt;</span> <span class="keyword">INSERT</span> <span class="keyword">INTO</span> set_t <span class="keyword">VALUES</span>(<span class="string">&#x27;F&#x27;</span>); </span><br><span class="line">MariaDB [test]<span class="operator">&gt;</span> <span class="keyword">INSERT</span> <span class="keyword">INTO</span> set_t <span class="keyword">VALUES</span>(<span class="string">&#x27;F,U&#x27;</span>); </span><br><span class="line">MariaDB [test]<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> set_t; </span><br><span class="line"><span class="operator">+</span><span class="comment">------+ </span></span><br><span class="line"><span class="operator">|</span> col1 <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">------+ </span></span><br><span class="line"><span class="operator">|</span> F    <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span> F,U  <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">------+ </span></span><br></pre></td></tr></table></figure>
+<p>SET和ENUM类型的区别在于SET可以插入多个指定的值，而ENUM不能; </p>
+<p>日期时间类型: </p>
+<blockquote>
+<p>DATETIME: 8个字节 ‘1000-01-01 00:00:00’ to ‘9999-12-31 23-59:59’<br>DATE：3个字节 ‘1000-01-01’ to ‘9999-12-31’<br>TIME：3个字节 ‘-838:59:59’ to ‘838:89:89’<br>TIMESTAMP ‘1970-01-01 00:00:00’ to mid-year 2037<br>YEAR： 1901 to 2155(for YEAR(4)) 1970 to 2069 (for YEAR(2))<br> <br>TIMESTAMP主要应用于自动更新地方; </p>
+</blockquote>
+<p>例如记录最后登录时间: </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [mydb]<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> time_t1 ( </span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> id <span class="type">smallint</span>, </span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> col <span class="type">timestamp</span> <span class="keyword">default</span> <span class="built_in">current_timestamp</span> </span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">on</span> <span class="keyword">update</span> <span class="built_in">current_timestamp</span>); </span><br><span class="line"> </span><br><span class="line">MariaDB [mydb]<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> time_t1(id,col)<span class="keyword">values</span>(<span class="number">100</span>,Now()); </span><br><span class="line">MariaDB [mydb]<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> time_t1; </span><br><span class="line"><span class="operator">+</span><span class="comment">------+---------------------+ </span></span><br><span class="line"><span class="operator">|</span> id   <span class="operator">|</span> col                 <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">------+---------------------+ </span></span><br><span class="line"><span class="operator">|</span>  <span class="number">100</span> <span class="operator">|</span> <span class="number">2016</span><span class="number">-02</span><span class="number">-21</span> <span class="number">17</span>:<span class="number">35</span>:<span class="number">58</span> <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">------+---------------------+ </span></span><br><span class="line">MariaDB [mydb]<span class="operator">&gt;</span> <span class="keyword">update</span>  time_t1 <span class="keyword">set</span> id<span class="operator">=</span><span class="number">101</span> <span class="keyword">where</span> id<span class="operator">=</span><span class="number">100</span>; </span><br><span class="line">MariaDB [mydb]<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> time_t1; </span><br><span class="line"><span class="operator">+</span><span class="comment">------+---------------------+ </span></span><br><span class="line"><span class="operator">|</span> id   <span class="operator">|</span> col                 <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">------+---------------------+ </span></span><br><span class="line"><span class="operator">|</span>  <span class="number">101</span> <span class="operator">|</span> <span class="number">2016</span><span class="number">-02</span><span class="number">-21</span> <span class="number">17</span>:<span class="number">36</span>:<span class="number">36</span> <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">------+---------------------+ </span></span><br></pre></td></tr></table></figure>
+<p>会发现这个时间发生了改变；; </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">use test; </span><br><span class="line"> </span><br><span class="line">#时间 </span><br><span class="line"><span class="keyword">drop</span> <span class="keyword">table</span> if <span class="keyword">exists</span> date_t1; </span><br><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> date_t1 ( date_type datetime); </span><br><span class="line"> </span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> date_t1 <span class="keyword">values</span> (Now()); </span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> date_t1 <span class="keyword">values</span> (<span class="built_in">current_timestamp</span>()); </span><br><span class="line"> </span><br><span class="line">#日期 </span><br><span class="line"><span class="keyword">drop</span> <span class="keyword">table</span> if <span class="keyword">exists</span> date_t2; </span><br><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> date_t2 (date_type <span class="type">date</span>); </span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> date_t2 <span class="keyword">values</span> (<span class="built_in">current_date</span>()); </span><br><span class="line"> </span><br><span class="line">#当前时间 </span><br><span class="line"><span class="keyword">drop</span> <span class="keyword">table</span> if <span class="keyword">exists</span> date_t3; </span><br><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> date_t3 (date_type <span class="type">time</span>); </span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> date_t3 <span class="keyword">values</span> (<span class="built_in">current_time</span>()); </span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> date_t3 <span class="keyword">values</span> (<span class="built_in">current_timestamp</span>()); </span><br><span class="line"> </span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> date_t1; </span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> date_t2; </span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> date_t3; </span><br></pre></td></tr></table></figure>
+<p>载入系统时区至mysql timezone中: </p>
+<blockquote>
+<p>x180@x450vc:~$ mysql_tzinfo_to_sql &#x2F;usr&#x2F;share&#x2F;zoneinfo&#x2F; | mysql -uroot -p mysql </p>
+</blockquote>
+<p>会发现mysql.time_zone和mysql.time_zone_name会有内容了; </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> tz_t1( </span><br><span class="line">    login_d <span class="type">timestamp</span> <span class="keyword">default</span> <span class="built_in">current_timestamp</span> </span><br><span class="line">); </span><br><span class="line"> </span><br><span class="line"><span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;time_zone&#x27;</span>; </span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> tz_t1 <span class="keyword">values</span>(Now()); </span><br><span class="line"><span class="keyword">set</span> time_zone<span class="operator">=</span><span class="string">&#x27;America/Los_Angeles&#x27;</span>; </span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> tz_t1 <span class="keyword">values</span>(Now()); </span><br></pre></td></tr></table></figure>
+<p>关于concat的基本使用:<br>在col1列的所有字段增加一个-号，col2增加一个+号: </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> CONCAT(col1,<span class="string">&#x27;-&#x27;</span>),CONCAT(col2,<span class="string">&#x27;+&#x27;</span>) <span class="keyword">FROM</span> tb1; </span><br><span class="line"> </span><br><span class="line">MariaDB [mydb]<span class="operator">&gt;</span> <span class="keyword">select</span> concat(Site,<span class="string">&#x27;-&#x27;</span>),concat(<span class="keyword">User</span>,<span class="string">&#x27;+&#x27;</span>) <span class="keyword">FROM</span> passwd; </span><br><span class="line"><span class="operator">+</span><span class="comment">------------------+------------------+ </span></span><br><span class="line"><span class="operator">|</span> concat(Site,<span class="string">&#x27;-&#x27;</span>) <span class="operator">|</span> concat(<span class="keyword">User</span>,<span class="string">&#x27;+&#x27;</span>) <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">------------------+------------------+ </span></span><br><span class="line"><span class="operator">|</span> QQ<span class="operator">-</span>              <span class="operator">|</span> <span class="number">1103639070</span><span class="operator">+</span>      <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span> steam<span class="operator">-</span>           <span class="operator">|</span> Dragon<span class="operator">+</span>          <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span> steam<span class="operator">-</span>           <span class="operator">|</span> M_x180<span class="operator">+</span>          <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">------------------+------------------+ </span></span><br></pre></td></tr></table></figure>
+<h2 id="问题一"><a href="#问题一" class="headerlink" title="问题一"></a>问题一</h2><p>    关于全文索引的问题<br>MariaDB和MySQL的InnoDB存储引擎都支持全文索引，但是有条件： </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator">+</span><span class="comment">----+-----------------------------------------+ </span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> body                                    <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">----+-----------------------------------------+ </span></span><br><span class="line"><span class="operator">|</span>  <span class="number">1</span> <span class="operator">|</span> afadfdaghkk                             <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span>  <span class="number">2</span> <span class="operator">|</span> i am a good body                        <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span>  <span class="number">3</span> <span class="operator">|</span> i am a bad body                         <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span>  <span class="number">4</span> <span class="operator">|</span> wo cao,shen me qingkuang                <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span>  <span class="number">5</span> <span class="operator">|</span> wocao,shen me qingkuang                 <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span>  <span class="number">6</span> <span class="operator">|</span> 卧槽，什么情况                          <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span>  <span class="number">7</span> <span class="operator">|</span> 卧槽，什么情况啊                        <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span>  <span class="number">8</span> <span class="operator">|</span> 卧槽额，什么情况啊                      <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span>  <span class="number">9</span> <span class="operator">|</span> 卧槽，什么情况啊，这个                  <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span> <span class="number">10</span> <span class="operator">|</span> 卧槽 什么情况啊 这个                    <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span> <span class="number">11</span> <span class="operator">|</span> 卧槽额额，什么情况啊，这个              <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">----+-----------------------------------------+ </span></span><br><span class="line">MariaDB [test]<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> art <span class="keyword">where</span> <span class="keyword">match</span>(body) against(<span class="string">&#x27;卧槽额&#x27;</span>); </span><br><span class="line"><span class="operator">+</span><span class="comment">----+-----------------------------+ </span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> body                        <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">----+-----------------------------+ </span></span><br><span class="line"><span class="operator">|</span>  <span class="number">8</span> <span class="operator">|</span> 卧槽额，什么情况啊          <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">----+-----------------------------+ </span></span><br><span class="line">MariaDB [test]<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> art <span class="keyword">where</span> <span class="keyword">match</span>(body) against(<span class="string">&#x27;卧槽额额&#x27;</span>); </span><br><span class="line"><span class="operator">+</span><span class="comment">----+-----------------------------------------+ </span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> body                                    <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">----+-----------------------------------------+ </span></span><br><span class="line"><span class="operator">|</span> <span class="number">11</span> <span class="operator">|</span> 卧槽额额，什么情况啊，这个              <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">----+-----------------------------------------+ </span></span><br><span class="line">MariaDB [test]<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> art <span class="keyword">where</span> <span class="keyword">match</span>(body) against(<span class="string">&#x27;什么情况&#x27;</span>); </span><br><span class="line"><span class="operator">+</span><span class="comment">----+-----------------------+ </span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> body                  <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">----+-----------------------+ </span></span><br><span class="line"><span class="operator">|</span>  <span class="number">6</span> <span class="operator">|</span> 卧槽，什么情况        <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">----+-----------------------+ </span></span><br><span class="line">MariaDB [test]<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> art <span class="keyword">where</span> <span class="keyword">match</span>(body) against(<span class="string">&#x27;什么情况啊&#x27;</span>); </span><br><span class="line"><span class="operator">+</span><span class="comment">----+-----------------------------------------+ </span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> body                                    <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">----+-----------------------------------------+ </span></span><br><span class="line"><span class="operator">|</span>  <span class="number">7</span> <span class="operator">|</span> 卧槽，什么情况啊                        <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span>  <span class="number">8</span> <span class="operator">|</span> 卧槽额，什么情况啊                      <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span>  <span class="number">9</span> <span class="operator">|</span> 卧槽，什么情况啊，这个                  <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span> <span class="number">10</span> <span class="operator">|</span> 卧槽 什么情况啊 这个                    <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span> <span class="number">11</span> <span class="operator">|</span> 卧槽额额，什么情况啊，这个              <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">----+-----------------------------------------+ </span></span><br></pre></td></tr></table></figure>
+<p>(1)在插入数据的时候，如:iam 和 i am,是两个不同的存储，在匹配的时候，是以空格作为分割符进行匹配，如果想搜索am，只会出来 i am，而不会出来iam;<br>(2)支持中文全文索引，但是支持力度不好:<br>    如上：必须对中文进行精确查询，而且中文个数最好在3个以上；<br>        而且前提是必须有分隔符，没有分隔符将不会查出来； </p>
+<p>对于innodb 全文索引来讲，感觉不是那么的明显，另外在mysql 5.6版本，增加了Online DDL,可以在线DDL,这个对于<br>DBA来讲非常的好，但是目前对于Online DDL不是太了解，另外在并发量比较大的时候，增加fulltext是不允许写的，所以<br>建议在访问量小的时候进行修改； </p>
+<p>另外在alter table add fulltext的时候有一个警告:<br>17:19:16    alter table  full_t1 add fulltext(content)    0 row(s) affected, 1 warning(s): 124 InnoDB rebuilding table to add column FTS_DOC_ID Records: 0  Duplicates: 0  Warnings: 1    0.125 sec </p>
+<p>我在网上看到可以： </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">drop</span> <span class="keyword">table</span> if <span class="keyword">exists</span> full_t1; </span><br><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> full_t1 (FTS_DOC_ID <span class="type">int</span> <span class="keyword">primary</span> key auto_increment <span class="keyword">not</span> <span class="keyword">null</span>,content text)engine<span class="operator">=</span>innodb; </span><br><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span>  full_t1 <span class="keyword">add</span> fulltext(content); </span><br></pre></td></tr></table></figure>
+<p>但是这样不行，总之，对于Online DDL来讲，一定要在并发量小的情况下进行修改； </p>
+<blockquote>
+<p> 关于concat的问题<br> 关于blob和text的问题<br> TEXT与BLOB的主要差别就是BLOB保存二进制数据，TEXT保存字符数据<br> 关于timezone修改时区的问题</p>
+</blockquote>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2016/03/04/33-01-2-MySQL%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
   
     <article id="post-51-02-2-CentOS6-7-KVM设置成桥接" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
@@ -1153,101 +1291,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-46-02Tomcat系列之java初涉" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/10/29/46-02Tomcat%E7%B3%BB%E5%88%97%E4%B9%8Bjava%E5%88%9D%E6%B6%89/">46_02Tomcat系列之java初涉</a>
-    </h1>
-  
-
-        
-        <a href="/2015/10/29/46-02Tomcat%E7%B3%BB%E5%88%97%E4%B9%8Bjava%E5%88%9D%E6%B6%89/" class="archive-article-date">
-  	<time datetime="2015-10-29T14:24:04.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-29</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="安装jdk"><a href="#安装jdk" class="headerlink" title="安装jdk"></a>安装jdk</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#chmod +x jdk-6u45-linux-x64-rpm.bin </span></span><br><span class="line"><span class="comment">#./jdk-6u45-linux-x64-rpm.bin </span></span><br><span class="line"> </span><br><span class="line">生成的文件在:/usr/java/目录下； </span><br><span class="line"> </span><br><span class="line"><span class="comment">#vim /etc/profile.d/java.sh </span></span><br><span class="line"><span class="built_in">export</span> JAVA_HOME=/usr/java/jdk1.6.0_21 </span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:<span class="variable">$JAVA_HOME</span>/bin </span><br><span class="line"> </span><br><span class="line"><span class="comment">#java -version </span></span><br><span class="line"> </span><br><span class="line">查看java虚拟机的参数: </span><br><span class="line"><span class="comment">#java --XX:+PrintFlagsFinal </span></span><br><span class="line"> </span><br><span class="line">java配置参数： </span><br><span class="line"> </span><br><span class="line"><span class="comment">#java --XX:+&lt;option&gt;   :开启此参数指定的功能 </span></span><br><span class="line"><span class="comment">#java --XX:-&lt;option&gt;    :关闭功能 </span></span><br><span class="line"><span class="comment">#java --XX:&lt;option&gt;=&lt;value&gt;  :给option指定的选项赋值 </span></span><br><span class="line"> </span><br></pre></td></tr></table></figure>
-<p>-D<name>&#x3D;<value>:设定系统属性值 </p>
-<p>Sun JDK监控和故障处理工具： </p>
-<ul>
-<li>jps,JVM Process Status Tool：显示指定系统内所有的HotSpot虚拟机进程的列表信息 </li>
-<li>jstat,JVM Statistics Monitoring Tool：手机并显示HotSpot虚拟机各方面的运行数据 </li>
-<li>jinfo:显示正在运行的某HotSpot虚拟机配置信息 </li>
-<li>jmap:生成某HotSpot虚拟机的内存转存快照<br>可视化工具: </li>
-<li>jconsole：Java的监控与管理控制台 </li>
-<li>jvisualvm：可视化的VM</li>
-</ul>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/10/29/46-02Tomcat%E7%B3%BB%E5%88%97%E4%B9%8Bjava%E5%88%9D%E6%B6%89/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/14/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="page-number current">15</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/16/">Next &amp;raquo;</a>
@@ -1394,10 +1437,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">grpc</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">活到老学到老nlp</a>
               </li>
              
               <li class="article-tag-list-item">

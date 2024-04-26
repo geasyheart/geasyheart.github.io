@@ -83,8 +83,6 @@ var _hmt = _hmt || [];
 	        
 				<li><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
 	        
-				<li><a href="/tags/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81nlp">活到老学到老nlp</a></li>
-	        
 				<li><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
 	        
 				<li><a href="/tags/python/">python</a></li>
@@ -159,8 +157,6 @@ var _hmt = _hmt || [];
 			
 				
 			
-				
-			
 			
 			
 			<nav class="header-nav">
@@ -183,19 +179,17 @@ var _hmt = _hmt || [];
 				<ul style="width: 70%">
 				
 				
-					<li style="width: 14.285714285714286%"><a href="/">主页</a></li>
+					<li style="width: 16.666666666666668%"><a href="/">主页</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81nlp">活到老学到老nlp</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/python/">python</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/python/">python</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/linux/">linux</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/linux/">linux</a></li>
-		        
-					<li style="width: 14.285714285714286%"><a href="/tags/MySQL/">mysql</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/MySQL/">mysql</a></li>
 		        
 				</ul>
 			</nav>
@@ -211,6 +205,122 @@ var _hmt = _hmt || [];
           </div>
           <div id="js-content" class="content-ll">
             
+  
+    <article id="post-常用正则表达式" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2023/05/04/%E5%B8%B8%E7%94%A8%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">常用正则表达式</a>
+    </h1>
+  
+
+        
+        <a href="/2023/05/04/%E5%B8%B8%E7%94%A8%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" class="archive-article-date">
+  	<time datetime="2023-05-04T06:12:31.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-05-04</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="1-判断中文"><a href="#1-判断中文" class="headerlink" title="1. 判断中文"></a>1. 判断中文</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">is_chinese</span>(<span class="params">uchar</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;判断一个unicode是否是汉字&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;\u4e00&#x27;</span> &lt;= uchar &lt;= <span class="string">&#x27;\u9fa5&#x27;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">is_chinese_string</span>(<span class="params">string</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;判断是否全为汉字&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">all</span>(is_chinese(c) <span class="keyword">for</span> c <span class="keyword">in</span> string)</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="2-中英韩日字符"><a href="#2-中英韩日字符" class="headerlink" title="2. 中英韩日字符"></a>2. 中英韩日字符</h3><table>
+<thead>
+<tr>
+<th>函数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>\u4e00-\u9fa5</td>
+<td>汉字的unicode范围</td>
+</tr>
+<tr>
+<td>\u0030-\u0039</td>
+<td>数字的unicode范围</td>
+</tr>
+<tr>
+<td>\u0041-\u005a</td>
+<td>大写字母unicode范围</td>
+</tr>
+<tr>
+<td>\u0061-\u007a</td>
+<td>小写字母unicode范围</td>
+</tr>
+<tr>
+<td>\uAC00-\uD7AF</td>
+<td>韩文的unicode范围</td>
+</tr>
+<tr>
+<td>\u3040-\u31FF</td>
+<td>日文的unicode范围</td>
+</tr>
+</tbody></table>
+<h3 id="3-过滤掉非中、英、数字字符"><a href="#3-过滤掉非中、英、数字字符" class="headerlink" title="3. 过滤掉非中、英、数字字符"></a>3. 过滤掉非中、英、数字字符</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">clean</span>(<span class="params">x: <span class="built_in">str</span></span>):</span><br><span class="line">    str_text = re.sub(<span class="string">u&quot;([^\u4e00-\u9fa5\u0030-\u0039\u0041-\u005a\u0061-\u007a])&quot;</span>, <span class="string">&quot;&quot;</span>, x)</span><br><span class="line">    <span class="keyword">return</span> str_text</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="4-正向反向提取"><a href="#4-正向反向提取" class="headerlink" title="4. 正向反向提取"></a>4. 正向反向提取</h3><p>这个在<a target="_blank" rel="noopener" href="https://github.com/LianjiaTech/BELLE/blob/e14c0939b2dec18df9034eb3dc8340b8d5525bf8/1.5M/generate_instruction.py#L75">BELLE项目提取chatGPT生成的数据</a>里面有涉及到。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">intruction_pattern = re.<span class="built_in">compile</span>(<span class="string">r&quot;(?&lt;=(?:&quot;</span> + <span class="string">&#x27;|&#x27;</span>.join([<span class="string">&#x27;指令:&#x27;</span>, <span class="string">&#x27;指令：&#x27;</span>]) + <span class="string">&quot;))[\s\S]*?(?=&quot;</span> + <span class="string">&#x27;|&#x27;</span>.join([<span class="string">&#x27;输入:&#x27;</span>, <span class="string">&#x27;输入：&#x27;</span>]) + <span class="string">&quot;)&quot;</span>)</span><br><span class="line">input_pattern = re.<span class="built_in">compile</span>(<span class="string">r&quot;(?&lt;=(?:&quot;</span> + <span class="string">&#x27;|&#x27;</span>.join([<span class="string">&#x27;输入:&#x27;</span>, <span class="string">&#x27;输入：&#x27;</span>]) + <span class="string">&quot;))[\s\S]*?(?=&quot;</span> + <span class="string">&#x27;|&#x27;</span>.join([<span class="string">&#x27;输出:&#x27;</span>, <span class="string">&#x27;输出：&#x27;</span>]) + <span class="string">&quot;)&quot;</span>)</span><br><span class="line">output_pattern = re.<span class="built_in">compile</span>(<span class="string">r&quot;(?&lt;=(?:&quot;</span> + <span class="string">&#x27;|&#x27;</span>.join([<span class="string">&#x27;输出:&#x27;</span>, <span class="string">&#x27;输出：&#x27;</span>]) + <span class="string">&quot;))[\s\S]*?(?=$)&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-or-match"><a href="#5-or-match" class="headerlink" title="5. or_match"></a>5. or_match</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">re_escape_word</span>(<span class="params">word: <span class="built_in">str</span></span>):</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(word) &gt; <span class="number">1</span>:</span><br><span class="line">        <span class="comment"># 每个字中间都添加空格</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">r&quot;\s&#123;0,&#125;&quot;</span>.join(<span class="built_in">list</span>(word))</span><br><span class="line">    <span class="keyword">return</span> re.escape(word)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">re_escape_words</span>(<span class="params">words: Iterable[<span class="built_in">str</span>]</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="string">r&quot;|&quot;</span>.join([re_escape_word(word) <span class="keyword">for</span> word <span class="keyword">in</span> words])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">or_match</span>(<span class="params">tokens: Iterable[<span class="built_in">str</span>]</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="string">r&quot;(?:&quot;</span> + re_escape_words(tokens) + <span class="string">&quot;)&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">or_match_with_name</span>(<span class="params">tokens: Iterable[<span class="built_in">str</span>]</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="string">r&#x27;(?P&lt;or_match_with_name&gt;(&#x27;</span> + re_escape_words(tokens) + <span class="string">r&#x27;))&#x27;</span></span><br></pre></td></tr></table></figure>
+<h3 id="资源"><a href="#资源" class="headerlink" title="资源"></a>资源</h3><p><a target="_blank" rel="noopener" href="https://tool.oschina.net/uploads/apidocs/jquery/regexp.html">正则表达式</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2023/05/04/%E5%B8%B8%E7%94%A8%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
   
     <article id="post-BELLE-使用chatGPT生成训练数据" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
@@ -1205,91 +1315,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-单塔文本匹配" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/09/28/%E5%8D%95%E5%A1%94%E6%96%87%E6%9C%AC%E5%8C%B9%E9%85%8D/">单塔文本匹配</a>
-    </h1>
-  
-
-        
-        <a href="/2022/09/28/%E5%8D%95%E5%A1%94%E6%96%87%E6%9C%AC%E5%8C%B9%E9%85%8D/" class="archive-article-date">
-  	<time datetime="2022-09-28T05:55:25.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-09-28</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>文本匹配是研究两段文本之间的关系。</p>
-<p>此处介绍两种，分别是point-wise和pair-wise语义匹配模型。</p>
-<p>point-wise是ptm+二分类，判断句子相似度。<br>pair-wise是ptm+score，判断两个句子相似度得分，可用于排序。最近实现了一个，可参考<a target="_blank" rel="noopener" href="https://github.com/geasyheart/pairwise-match">pairwise-match</a>。</p>
-<p>粗排方面有sentence transformer以及SimBERT，再比如DSSM。</p>
-<p>这些先记下，等后面有时间了再实现总结。</p>
-<h3 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h3><p>关于双塔模型中的sentence transformer，网络结构如下：<br><img src="https://ai-studio-static-online.cdn.bcebos.com/103998703e134a7184883511a538620e16fed045e2614dcc8afacec446600438" alt="sentence transformer stru"></p>
-<p>其中pooling为比如Sentence的维度为<code>(1,7,768)</code>，那么就对<code>7</code>那一维做mean操作。</p>
-<p>由于共用同一个pretrained model，将向量提前保存到数据库。当用户搜索query时，只需计算query的sequence_output特征与保存在数据库中的title sequence_output特征，通过一个简单的mean_pooling和全连接层进行二分类即可。从而大幅提升预测效率，同时也保障了模型性能。</p>
-<h3 id="资源"><a href="#资源" class="headerlink" title="资源"></a>资源</h3><ol>
-<li><a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/tree/develop/examples/text_matching">PaddleNLP text_matching</a></li>
-<li><a target="_blank" rel="noopener" href="https://kexue.fm/archives/7427">鱼与熊掌兼得：融合检索和生成的SimBERT模型</a></li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/09/28/%E5%8D%95%E5%A1%94%E6%96%87%E6%9C%AC%E5%8C%B9%E9%85%8D/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/3/">Next &amp;raquo;</a>
@@ -1436,10 +1461,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">grpc</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">活到老学到老nlp</a>
               </li>
              
               <li class="article-tag-list-item">

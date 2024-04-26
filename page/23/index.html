@@ -83,8 +83,6 @@ var _hmt = _hmt || [];
 	        
 				<li><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
 	        
-				<li><a href="/tags/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81nlp">活到老学到老nlp</a></li>
-	        
 				<li><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
 	        
 				<li><a href="/tags/python/">python</a></li>
@@ -159,8 +157,6 @@ var _hmt = _hmt || [];
 			
 				
 			
-				
-			
 			
 			
 			<nav class="header-nav">
@@ -183,19 +179,17 @@ var _hmt = _hmt || [];
 				<ul style="width: 70%">
 				
 				
-					<li style="width: 14.285714285714286%"><a href="/">主页</a></li>
+					<li style="width: 16.666666666666668%"><a href="/">主页</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81nlp">活到老学到老nlp</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/python/">python</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/python/">python</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/linux/">linux</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/linux/">linux</a></li>
-		        
-					<li style="width: 14.285714285714286%"><a href="/tags/MySQL/">mysql</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/MySQL/">mysql</a></li>
 		        
 				</ul>
 			</nav>
@@ -211,6 +205,157 @@ var _hmt = _hmt || [];
           </div>
           <div id="js-content" class="content-ll">
             
+  
+    <article id="post-17-02Linux系统故障排除方法" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/03/25/17-02Linux%E7%B3%BB%E7%BB%9F%E6%95%85%E9%9A%9C%E6%8E%92%E9%99%A4%E6%96%B9%E6%B3%95/">17_02Linux系统故障排除方法</a>
+    </h1>
+  
+
+        
+        <a href="/2015/03/25/17-02Linux%E7%B3%BB%E7%BB%9F%E6%95%85%E9%9A%9C%E6%8E%92%E9%99%A4%E6%96%B9%E6%B3%95/" class="archive-article-date">
+  	<time datetime="2015-03-25T01:23:19.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-25</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>常见的系统故障排除: </p>
+<ol>
+<li>确定问题的故障特征 </li>
+<li>重现故障 </li>
+<li>使用工具收集进一步信息 </li>
+<li>排除不可能的原因 </li>
+<li>定位故障 <blockquote>
+<p>    从简单的问题入手<br>    一次尝试一种方式 </p>
+</blockquote>
+</li>
+<li>备份原文件 </li>
+<li>尽可能借助工具</li>
+</ol>
+<p>可能会出现的故障: </p>
+<ol>
+<li>管理员密码忘记 </li>
+<li>系统无法正常启动 <blockquote>
+<p> grub损坏(MBR损坏，grub配置文件丢失，stage2损坏)<br> 系统初始化故障(某文件系统无法正常挂载，驱动不兼容)<br> emergency(会略过sysinit脚本)<br> 服务故障<br> 用户无法正常登录系统（帐号密码不对&#x2F;bash程序故障） </p>
+</blockquote>
+</li>
+<li>命令无法运行（查看PATH是否正确） </li>
+<li>编译过程无法继续(开发环境缺少基本组件)</li>
+</ol>
+<p>系统故障模拟: </p>
+<blockquote>
+<p>这个地方，可参考14_02文档 </p>
+</blockquote>
+<h2 id="MBR损坏"><a href="#MBR损坏" class="headerlink" title="MBR损坏"></a>MBR损坏</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#dd if=/dev/sda of=/root/mbr.backup count=1 bs=512 </span><br><span class="line">#dd if=/dev/zero of=/dev/sda count=1 bs=(&lt;446) </span><br><span class="line">#sync </span><br><span class="line">#reboot </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>解决方式:</p>
+<ol>
+<li>借助其他主机修复 </li>
+<li>使用紧急救援模式 </li>
+<li> 挂载光盘</li>
+</ol>
+<p>示例: </p>
+<blockquote>
+<p>boot:linux rescue<br>&#x2F;mnt&#x2F;sysimage </p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#chroot /mnt/sysimage </span><br><span class="line">#grub </span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>grub&gt;find (hd0,0)&#x2F; tab补全<br>grub&gt;root (hd0,0)<br>grub&gt;setup (hd0)<br>grub&gt;reboot </p>
+</blockquote>
+<h2 id="GRUB配置文件丢失"><a href="#GRUB配置文件丢失" class="headerlink" title="GRUB配置文件丢失"></a>GRUB配置文件丢失</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">grub&gt;root （hd0,0） </span><br><span class="line">grub&gt;kernel /vmlinuz ro root=/dev/mapper/** root=/dev/sdaX </span><br><span class="line">grub&gt;initrd /initrd**** </span><br><span class="line">grub&gt;boot </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>然后重建grub配置文件 </p>
+<h2 id="系统初始化故障"><a href="#系统初始化故障" class="headerlink" title="系统初始化故障"></a>系统初始化故障</h2><p>kernel panic: </p>
+<p>把默认级别设定为0或6<br>进入单用户运行级别，然后修改回来 </p>
+<p>&#x2F;etc&#x2F;rc.d&#x2F;rc3.d删除掉了<br>进入单用户模式，修复目录系统 </p>
+<p>服务故障 </p>
+<p>sendmail,配置文件时间戳检查无法通过<br>进入单用户模式，不让其启动<br>或者红帽启动时一直按I键，交互模式选择禁止此服务 </p>
+<h2 id="etc-rc-d-rc-local脚本语法错误"><a href="#etc-rc-d-rc-local脚本语法错误" class="headerlink" title="&#x2F;etc&#x2F;rc.d&#x2F;rc.local脚本语法错误"></a>&#x2F;etc&#x2F;rc.d&#x2F;rc.local脚本语法错误</h2><p>&#x2F;bin&#x2F;bash删除 </p>
+<p>挂载光盘安装: </p>
+<ol>
+<li>挂载光盘，linux rescue 进入紧急救援模式，重新安装&#x2F;bin&#x2F;bash </li>
+<li>如果从光盘进行安装&#x2F;bin&#x2F;bash,则光盘挂载后，哪一个设备执行光盘，正常来讲是&#x2F;dev&#x2F;sdc </li>
+<li>mount &#x2F;dev&#x2F;sdc &#x2F;media </li>
+<li>rpm -ivh –replacepkgs –root &#x2F;mnt&#x2F;sysimage bash-VERSION.rpm</li>
+</ol>
+<p>从网络中安装: </p>
+<p>命令无法正常执行:<br>例如写成:export PATH&#x3D;&#x2F;data&#x2F;bin,就会导致错误<br>退出当前登录，令起终端重新登录<br>如果配置文件修改，则千万不要退出， </p>
+<p>&#x2F;etc&#x2F;profile </p>
+<p>编译环境无法通过 </p>
+<p>看错误 and google<br>git，avn </p>
+<p>这个地方只是给个基本的介绍，后续服务中出现错误，会详细介绍How to slove </p>
+<p>mknod</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/03/25/17-02Linux%E7%B3%BB%E7%BB%9F%E6%95%85%E9%9A%9C%E6%8E%92%E9%99%A4%E6%96%B9%E6%B3%95/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
   
     <article id="post-17-01RHEL系统安装及kickstart" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
@@ -1257,164 +1402,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-16-01bash脚本编程之十四信号捕捉及系统管理之任务计划" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/15/16-01bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%8D%81%E5%9B%9B%E4%BF%A1%E5%8F%B7%E6%8D%95%E6%8D%89%E5%8F%8A%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E4%B9%8B%E4%BB%BB%E5%8A%A1%E8%AE%A1%E5%88%92/">16_01bash脚本编程之十四信号捕捉及系统管理之任务计划</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/15/16-01bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%8D%81%E5%9B%9B%E4%BF%A1%E5%8F%B7%E6%8D%95%E6%8D%89%E5%8F%8A%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E4%B9%8B%E4%BB%BB%E5%8A%A1%E8%AE%A1%E5%88%92/" class="archive-article-date">
-  	<time datetime="2015-03-15T14:44:12.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-15</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>补充:<br>交叉编译:<br>make ARCH&#x3D; </p>
-<p>${parameter:-word}:如果parameter为空或者未定义，则变量展开为word,否则，展开为parameter的值<br>${parameter:+word}:如果parameter为空或者未定义，不做任何操作，否则，则展开word的值<br>${parameter:&#x3D;word}:如果parameter为空或者未定义，则变量展开为word，并将展开后的值赋给parameter<br>${parameter:offset:length}:取子串，从offset处的后一个字符开始，取length长的子串<br>例如:变量A未做任何赋值 </p>
-<blockquote>
-<p>echo ${A:-30} 30 echo $A <br>echo ${A:+30}    echo $A<br>echo ${A:&#x3D;30} 30 echo $A 30<br>A&#x3D;”hello”<br>echo ${A:2:3} llo </p>
-</blockquote>
-<p>读取配置文件: </p>
-<blockquote>
-<p>#vim a.conf<br>TEST&#x3D;”5”<br>#vim a.sh<br>. &#x2F;root&#x2F;a.conf<br>[ -n “TEST” ] &amp;&amp; echo $TEST </p>
-</blockquote>
-<blockquote>
-<p>#vim a.conf<br>TEST&#x3D;<br>#vim a.sh<br>. &#x2F;root&#x2F;a.conf<br>TEST&#x3D;${TEST:-info}<br>[ -n “TEST” ] &amp;&amp; echo “$TEST”<br>如果TEST为空，则输出info，否则显示TEST的值。 </p>
-</blockquote>
-<p>变量的作用域: </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">a=1 </span><br><span class="line">test() &#123; </span><br><span class="line"> a=$&#123;3+4&#125; </span><br><span class="line">&#125; </span><br><span class="line">test </span><br><span class="line">for I in `seq $a 10`;do </span><br><span class="line"> echo $I </span><br><span class="line">done </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>执行结果是 7 8 9 10<br>所以需要局部变量:<br>local VAR_NAME&#x3D; </p>
-<p>mktemp命令:创建临时文件或者目录<br>mktemp: </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#mktemp /tmp/file.XX </span><br></pre></td></tr></table></figure>
-
-<p> 这个命令不管执行多少次，XX值不会一样<br> -d:创建临时目录 </p>
-<p>信号: </p>
-<blockquote>
-<p>kill -l:显示所有<br>kill -SIGNAL PID<br>1:HUP<br>2:INT<br>9:KILL<br>15:TERM </p>
-</blockquote>
-<p>脚本中，能实现信号捕捉，但9和15无法捕捉 </p>
-<blockquote>
-<p>Ctrl+c:是2信号<br>Ctrl+z:是18信号<br>trap命令:<br> trap ’COMMAND‘ 信号列表 </p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line"># </span><br><span class="line">trap &#x27;echo &quot;You go...&quot;&#x27; INT </span><br><span class="line">while :;do </span><br><span class="line"> date </span><br><span class="line"> sleep 2 </span><br><span class="line">done</span><br></pre></td></tr></table></figure>
-
-
-<p>如果不加trap那行，使用Ctrl+c可以终止掉，但是trap捕捉2号信号，则表示<br>如果使用Ctrl+c终止时，trap捕捉到2号信号，就会显示You go…并且会照常运行，<br>不会被终止掉。<br>(所以，trap在于你要捕捉的信号，可以使用kill -l显示你想要捕捉的信号) </p>
-<p>ping可以捕捉到Ctrl+c，则不会接受这个信号，如: </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line"># </span><br><span class="line">NET=192.168.1 </span><br><span class="line">FILE=`mktemp /tmp/file.XXXX` </span><br><span class="line">clearup() &#123; </span><br><span class="line">echo &quot;quiting...&quot; </span><br><span class="line">rm -rf　$FILE </span><br><span class="line">exit 1 </span><br><span class="line">&#125; </span><br><span class="line">trap &#x27;clearup&#x27; INT </span><br><span class="line"> </span><br><span class="line">for I in `seq 1 254`;do </span><br><span class="line"> if ping -c 1 -W 1 $NET.$I &amp;&gt;/dev/null;then </span><br><span class="line"> echo &quot;$NET.$I is up.&quot; | tee &gt;&gt; $FILE </span><br><span class="line"> else </span><br><span class="line"> echo &quot;$NET.$I is down&quot; </span><br><span class="line"> fi </span><br><span class="line">done </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
-
-<p>任务计划: </p>
-<ol>
-<li><p>在未来的某个时间点执行一次某任务: </p>
-<blockquote>
-<p>at<br>batch<br>#at 时间<br>at&gt;command1<br>at&gt;command2<br>at&gt;Ctrl+d即可<br>指定时间:<br>绝对时间: DD.MM.YY MM.DD.YY  10:20(未来的时间，如果今天已过，则明天)<br>相对时间: now+#<br>单位:minutes,hours,days,weeks<br>模糊时间:noon，midnight，teatime<br>命令的执行结果，将以邮件的形式发送给安排任务的用户。<br>at -l:<br>可以显示自己的作业<br>at -d AT_JOB_ID:<br>可以删除作业<br>&#x2F;etc&#x2F;at.deny:只有文件中的用户不能使用<br>&#x2F;etc&#x2F;at.allow:只有这个文件中的用户可使用at<br>如果两个文件都存在，只是读取at.allow…. </p>
-<p>batch:自动选择系统较空闲的时候执行任务，不需要执行时间(当然没必要)<br>其他一样。 </p>
-</blockquote>
-</li>
-<li><p>周期性的执行某任务 </p>
-<blockquote>
-<p>cron:自身就是一个不间断运行的任务<br>anacron:cron的补充，能够实现让cron因为各种原因在过去的时间该执行而未执行的任务在恢复正常<br>执行一次。<br>service crond status<br>service anacron status<br>cron:<br>系统cron任务<br>&#x2F;etc&#x2F;crontab<br>分钟 小时 天 月 周 用户 任务<br>vim &#x2F;etc&#x2F;crontab可查看系统上怎么定义的。<br>用户cron任务<br>&#x2F;var&#x2F;spool&#x2F;cron&#x2F;USERNAME<br>分钟 小时 天 月 周 任务 </p>
-<p>时间的有效值:<br>分钟:0-59<br>小时:0-23<br>天:1-31<br>月:1-12<br>周:0-7,0和7都表示周日 </p>
-<p>时间通配表示:<br>*:敌营的所有有效取值<br>3 * * * *</p>
-</blockquote>
-</li>
-</ol>
-<blockquote>
-<p>3 * * * 7<br>13 12 * * *<br>一般说:天和周不要同时使用<br>,:离散时间点<br>10,40 * * * * 每小时10分和40分执行一次<br>-:连续时间点<br>10 02 * * 1-5 周一到周五02:10连续执行<br>&#x2F;:对应取值范围内每多久一次<br>*&#x2F;3 * * * *    每三分钟一次 </p>
-</blockquote>
-<blockquote>
-<p>执行结果将以邮件形式发送给管理员 </p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">练习:每两小时执行一次 </span><br><span class="line"> 01 */2 * * * /bin/cat /etc/fstab &gt; /dev/null (01-59自定义) </span><br></pre></td></tr></table></figure>
-
-<p>!!!!!!!!!!!!cron的环境变量:(这个需要多加注意)!!!!!!!!!!!!!!<br> cron执行所有命令都去PATH环境变量指定的路径下去找<br> 如用户没登陆，怎么找PATH环境变量<br> 所以，需要写绝对路径..(也可写脚本时写上环境变量)<br> PATH&#x3D;&#x2F;sbin:&#x2F;bin:&#x2F;usr&#x2F;sbin:&#x2F;usr&#x2F;bin<br> 可看&#x2F;etc&#x2F;crontab怎么写的。。。。。。。。 </p>
-<p>&#x2F;etc&#x2F;cron.daily  </p>
-<p>用户任务的管理:<br>crontab  </p>
-<blockquote>
-<p>-l:列出当前用户的所有cron任务<br>-e:编辑<br>-r:移除所有任务<br>-u USERNAME:管理其他用户的cron任务<br>crontab -u user1 -e 编辑任务即可。。<br>将会保存到&#x2F;var&#x2F;spool&#x2F;crom&#x2F;user1的计划任务中。。。 </p>
-</blockquote>
-<blockquote>
-<p>crontab -e <br>*&#x2F;3 * * * * &#x2F;bin&#x2F;echo “how are you”<br>保存退出即可。。  </p>
-<p>anacrontab:<br>cat &#x2F;etc&#x2F;anacrontab可以看看怎样定义的。。。<br>1 65 cron.daily run-parts &#x2F;etc&#x2F;cron.daily<br>如果1天没执行，则在开机后第65分钟开始执行<br>7 70 cron.weekly run-parts &#x2F;etc&#x2F;cron.weekly<br>如果7天没执行，则在开机第70分钟执行<br>30 75 cron.monthly run-parts &#x2F;etc&#x2F;cron.monthly<br>如果30天没执行，则在开机第75分钟开始执行 </p>
-<p>所以只能执行到每天任务 </p>
-</blockquote>
-<p>练习:配置本机每隔两天在凌晨3点20备份一次&#x2F;etc目录，备份文件存放至&#x2F;backup&#x2F;etc目录，文件名类似:etc-2012-06-20.tar.bz2  </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir /backup &amp;&amp; tar cfj etc-`date +%F`.tar.bz2 /etc/* </span><br></pre></td></tr></table></figure>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/15/16-01bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%8D%81%E5%9B%9B%E4%BF%A1%E5%8F%B7%E6%8D%95%E6%8D%89%E5%8F%8A%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E4%B9%8B%E4%BB%BB%E5%8A%A1%E8%AE%A1%E5%88%92/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/22/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/21/">21</a><a class="page-number" href="/page/22/">22</a><span class="page-number current">23</span><a class="page-number" href="/page/24/">24</a><a class="page-number" href="/page/25/">25</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/24/">Next &amp;raquo;</a>
@@ -1561,10 +1548,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">grpc</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">活到老学到老nlp</a>
               </li>
              
               <li class="article-tag-list-item">

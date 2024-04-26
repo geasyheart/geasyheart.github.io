@@ -83,8 +83,6 @@ var _hmt = _hmt || [];
 	        
 				<li><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
 	        
-				<li><a href="/tags/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81nlp">活到老学到老nlp</a></li>
-	        
 				<li><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
 	        
 				<li><a href="/tags/python/">python</a></li>
@@ -159,8 +157,6 @@ var _hmt = _hmt || [];
 			
 				
 			
-				
-			
 			
 			
 			<nav class="header-nav">
@@ -183,19 +179,17 @@ var _hmt = _hmt || [];
 				<ul style="width: 70%">
 				
 				
-					<li style="width: 14.285714285714286%"><a href="/">主页</a></li>
+					<li style="width: 16.666666666666668%"><a href="/">主页</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81nlp">活到老学到老nlp</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/python/">python</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/python/">python</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/linux/">linux</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/linux/">linux</a></li>
-		        
-					<li style="width: 14.285714285714286%"><a href="/tags/MySQL/">mysql</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/MySQL/">mysql</a></li>
 		        
 				</ul>
 			</nav>
@@ -211,6 +205,98 @@ var _hmt = _hmt || [];
           </div>
           <div id="js-content" class="content-ll">
             
+  
+    <article id="post-11-02Linux网络配置之二IP报文" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/22/11-02Linux%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E4%B9%8B%E4%BA%8CIP%E6%8A%A5%E6%96%87/">11_02Linux网络配置之二IP报文</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/22/11-02Linux%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E4%B9%8B%E4%BA%8CIP%E6%8A%A5%E6%96%87/" class="archive-article-date">
+  	<time datetime="2015-02-22T15:13:03.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>网桥就是交换机<br>关于网际协议(IP):<br><a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/%E7%BD%91%E9%99%85%E5%8D%8F%E8%AE%AE">http://zh.wikipedia.org/wiki/%E7%BD%91%E9%99%85%E5%8D%8F%E8%AE%AE</a><br>IP封装:<br> 无须与先前未曾通信过的目的主机预先建立好一条特定的”通道”，<br>由于互联网协议提供的是一种”不可靠”的传出机制，所以这个意味着”我能帮你传过去，但是我不能保证传输的可靠性”.<br>而TCP协议(传输控制协议)则保证了传输的可靠性。 </p>
+<p>IP提供的服务:<br>IPv4使用地址解析协议（ARP），而IPv6采用邻居发现协议（NDP）。 </p>
+<p>IP寻址和路由:<br>IP协议最为复杂的方面可能就是寻址和路由了。<br>寻址就是如何将IP地址分配给各个终端节点，以及如何划分和组合子网。<br>所有网络端点都需要路由，尤其是网际之间的路由器。<br>路由器通常用内部网关协议（Interior Gateway Protocols，IGPs）和<br>外部网关协议（External Gateway Protocols，EGPs）决定怎样发送IP数据包。 </p>
+<p>路由:<a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/%E8%B7%AF%E7%94%B1">http://zh.wikipedia.org/wiki/%E8%B7%AF%E7%94%B1</a> </p>
+<p>路由（routing）就是通过互联的网络把信息从源地址传输到目的地址的活动。<br>路由发生在OSI网络参考模型中的第三层即网络层。 </p>
+<p>路由引导分组转送，经过一些中间的节点后，到它们最后的目的地。作成硬件的话，则称为路由器。<br>路由通常根据路由表——一个储存到各个目的地的最佳路径的表——来引导分组转送。<br>因此为了有效率的转送分组，建立储存在路由器内存内的路由表是非常重要的。 </p>
+<p>路由器:<a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/%E8%B7%AF%E7%94%B1%E5%99%A8">http://zh.wikipedia.org/wiki/%E8%B7%AF%E7%94%B1%E5%99%A8</a><br>路由器指链接两个以上个别网络的设备。 </p>
+<p>路由器与交换器的差别:<br>路由器是属于OSI第三层的产品，交换器是OSI第二层的产品。<br>第二层的产品功能在于，将网络上各个电脑的MAC地址记在MAC地址表中，<br>当局域网中的电脑要经过交换器去交换传递数据时，就查询交换器上的MAC地址表中的信息，<br>将数据包发送给指定的电脑，而不会像第一层的产品（如集线器）每台在网络中的电脑都发送。<br>而路由器除了有交换器的功能外，更拥有路由表作为发送数据包时的依据，在有多种选择的路径中选择最佳的路径。<br>此外，并可以连接两个以上不同网段的网络，而交换器只能连接两个。并具有IP分享的功能，<br>如：区分哪些数据包是要发送至[ [PUTO CHINOo .. oo。路由表存储了去往某一网络的最佳路径，<br>该路径的“路由度量值”以及下一跳路由器。参考条目路由获得这个过程的详细描述。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/22/11-02Linux%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E4%B9%8B%E4%BA%8CIP%E6%8A%A5%E6%96%87/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
   
     <article id="post-11-01linux网络配置之一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
@@ -1137,123 +1223,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-08-03磁盘及文件系统管理详解之一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/14/08-03%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%B8%80/">08_03磁盘及文件系统管理详解之一</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/14/08-03%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%B8%80/" class="archive-article-date">
-  	<time datetime="2015-02-13T16:16:53.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-14</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>MBR：Master Boot Record<br>446bytes:<br> BootLoader  程序<br>64bytes:<br> 16bytes:标识一个分区<br> 2bytes：Magic Number<br> 标记MBR是否有效 </p>
-<p>按柱面进行分区<br>性能：<br>平均寻道速度(5400，7500 RPM)<br>   (SICI(10K,15K RPM)) </p>
-<p>文件系统 :<br> matadata(类似于索引)<br> 数据<br> 可以把其理解图书馆中的书籍管理与图书存放；； </p>
-<p>inode + 块存储  <br>一般删除只是把inode给删掉了，而存储在硬盘中的数据并没有删除， </p>
-<p>硬链接 </p>
-<blockquote>
-<p> #echo “This  is a test!” &gt;ln_test.txt<br> #ln ln_test.txt ln_test1.txt<br> stat ln_test.txt<br> stat ln_test1.txt<br> 可以看到属性都相同 </p>
-</blockquote>
-<ol>
-<li>只能对文件创建，不能应用于目录； </li>
-<li>不能跨文件系统 </li>
-<li>创建硬链接会增加文件被链接的次数 <blockquote>
-<p> ln -s ln_test.txt ln_test2.txt<br> stat ln_test2.txt<br> 可以看到属性有变化，并且inode也变化了。 </p>
-</blockquote>
-</li>
-<li>可应用与目录 </li>
-<li>可以跨文件系统 </li>
-<li>不会增加被链接文件的链接次数 </li>
-<li>其大小为指定的路劲所包含的字符个数；</li>
-</ol>
-<p> <br> <br> du: </p>
-<blockquote>
-<p> 显示文件所占用的磁盘空间大小<br> du -h显示目录下所有文件所占用的磁盘空间大小<br> du -sh &#x2F;usr 显示&#x2F;usr所占用的磁盘空间大小<br> <br> <br> <br>df -h ：显示当前系统的磁盘使用情况 
-  
-  
-  </p>
-</blockquote>
-<p>  
-  
-  
-  
-  
- </p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/14/08-03%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%B8%80/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/24/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/23/">23</a><a class="page-number" href="/page/24/">24</a><span class="page-number current">25</span><a class="page-number" href="/page/26/">26</a><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/26/">Next &amp;raquo;</a>
@@ -1400,10 +1369,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">grpc</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">活到老学到老nlp</a>
               </li>
              
               <li class="article-tag-list-item">

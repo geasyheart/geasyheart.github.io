@@ -83,8 +83,6 @@ var _hmt = _hmt || [];
 	        
 				<li><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
 	        
-				<li><a href="/tags/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81nlp">活到老学到老nlp</a></li>
-	        
 				<li><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
 	        
 				<li><a href="/tags/python/">python</a></li>
@@ -159,8 +157,6 @@ var _hmt = _hmt || [];
 			
 				
 			
-				
-			
 			
 			
 			<nav class="header-nav">
@@ -183,19 +179,17 @@ var _hmt = _hmt || [];
 				<ul style="width: 70%">
 				
 				
-					<li style="width: 14.285714285714286%"><a href="/">主页</a></li>
+					<li style="width: 16.666666666666668%"><a href="/">主页</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81nlp">活到老学到老nlp</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/python/">python</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/python/">python</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/linux/">linux</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/linux/">linux</a></li>
-		        
-					<li style="width: 14.285714285714286%"><a href="/tags/MySQL/">mysql</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/MySQL/">mysql</a></li>
 		        
 				</ul>
 			</nav>
@@ -211,6 +205,91 @@ var _hmt = _hmt || [];
           </div>
           <div id="js-content" class="content-ll">
             
+  
+    <article id="post-单塔文本匹配" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/09/28/%E5%8D%95%E5%A1%94%E6%96%87%E6%9C%AC%E5%8C%B9%E9%85%8D/">单塔文本匹配</a>
+    </h1>
+  
+
+        
+        <a href="/2022/09/28/%E5%8D%95%E5%A1%94%E6%96%87%E6%9C%AC%E5%8C%B9%E9%85%8D/" class="archive-article-date">
+  	<time datetime="2022-09-28T05:55:25.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-09-28</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>文本匹配是研究两段文本之间的关系。</p>
+<p>此处介绍两种，分别是point-wise和pair-wise语义匹配模型。</p>
+<p>point-wise是ptm+二分类，判断句子相似度。<br>pair-wise是ptm+score，判断两个句子相似度得分，可用于排序。最近实现了一个，可参考<a target="_blank" rel="noopener" href="https://github.com/geasyheart/pairwise-match">pairwise-match</a>。</p>
+<p>粗排方面有sentence transformer以及SimBERT，再比如DSSM。</p>
+<p>这些先记下，等后面有时间了再实现总结。</p>
+<h3 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h3><p>关于双塔模型中的sentence transformer，网络结构如下：<br><img src="https://ai-studio-static-online.cdn.bcebos.com/103998703e134a7184883511a538620e16fed045e2614dcc8afacec446600438" alt="sentence transformer stru"></p>
+<p>其中pooling为比如Sentence的维度为<code>(1,7,768)</code>，那么就对<code>7</code>那一维做mean操作。</p>
+<p>由于共用同一个pretrained model，将向量提前保存到数据库。当用户搜索query时，只需计算query的sequence_output特征与保存在数据库中的title sequence_output特征，通过一个简单的mean_pooling和全连接层进行二分类即可。从而大幅提升预测效率，同时也保障了模型性能。</p>
+<h3 id="资源"><a href="#资源" class="headerlink" title="资源"></a>资源</h3><ol>
+<li><a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/tree/develop/examples/text_matching">PaddleNLP text_matching</a></li>
+<li><a target="_blank" rel="noopener" href="https://kexue.fm/archives/7427">鱼与熊掌兼得：融合检索和生成的SimBERT模型</a></li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/09/28/%E5%8D%95%E5%A1%94%E6%96%87%E6%9C%AC%E5%8C%B9%E9%85%8D/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
   
     <article id="post-prompt系列-OpenPrompt入门一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
@@ -1344,123 +1423,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-讯飞2020年事件提取比赛第一名-触发词提取" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/07/29/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E8%A7%A6%E5%8F%91%E8%AF%8D%E6%8F%90%E5%8F%96/">讯飞2020年事件提取比赛第一名-触发词提取</a>
-    </h1>
-  
-
-        
-        <a href="/2022/07/29/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E8%A7%A6%E5%8F%91%E8%AF%8D%E6%8F%90%E5%8F%96/" class="archive-article-date">
-  	<time datetime="2022-07-29T06:46:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-29</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>讯飞之前发布了一个<a target="_blank" rel="noopener" href="http://challenge.xfyun.cn/topic/info?type=hotspot">事件抽取挑战赛</a>，这个比赛分成两个任务：</p>
-<p>1、任务一：事件触发词及论元抽取<br>2、任务二：事件属性抽取</p>
-<p>搜了下github，发现<a target="_blank" rel="noopener" href="https://github.com/WuHuRestaurant/xf_event_extraction2020Top1">第一名的解决方案</a>。</p>
-<p>看readme介绍主要思路，作者将任务分割为<code>触发词抽取，论元抽取，属性抽取</code>。</p>
-<p>那本篇即讲述触发词(trigger提取器)的实现方式。</p>
-<h3 id="1-跑通代码"><a href="#1-跑通代码" class="headerlink" title="1. 跑通代码"></a>1. 跑通代码</h3><p>修改train.py，增加下面这些：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">args = TrainArgs().get_parser()</span><br><span class="line">args.gpu_ids = <span class="string">&#x27;0&#x27;</span></span><br><span class="line">args.mode = <span class="string">&quot;train&quot;</span></span><br><span class="line">args.raw_data_dir = <span class="string">&#x27;./data/final/raw_data&#x27;</span></span><br><span class="line">args.mid_data_dir = <span class="string">&#x27;./data/final/mid_data&#x27;</span></span><br><span class="line">args.aux_data_dir = <span class="string">&quot;./data/final/preliminary_clean&quot;</span></span><br><span class="line">args.bert_dir = <span class="string">&#x27;/home/yuzhang/PycharmProjects/xf_event_extraction2020Top1/bert/torch_roberta_wwm&#x27;</span></span><br><span class="line">args.output_dir = <span class="string">&#x27;./out&#x27;</span></span><br><span class="line">args.bert_type = <span class="string">&#x27;roberta_wwm&#x27;</span></span><br><span class="line">args.task_type = <span class="string">&#x27;trigger&#x27;</span></span><br><span class="line">args.max_seq_len = <span class="number">320</span></span><br><span class="line">args.train_epochs = <span class="number">6</span></span><br><span class="line">args.train_batch_size = <span class="number">16</span></span><br><span class="line">args.lr = <span class="number">2e-5</span></span><br><span class="line">args.other_lr = <span class="number">2e-4</span></span><br><span class="line">args.attack_train = <span class="string">&quot;pgd&quot;</span></span><br><span class="line">args.swa_start = <span class="number">4</span></span><br><span class="line">args.eval_model = <span class="literal">True</span></span><br><span class="line">args.enhance_data = <span class="literal">True</span></span><br><span class="line">args.use_trigger_distance = <span class="literal">True</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="2-模型结构"><a href="#2-模型结构" class="headerlink" title="2. 模型结构"></a>2. 模型结构</h3><img src="/2022/07/29/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E8%A7%A6%E5%8F%91%E8%AF%8D%E6%8F%90%E5%8F%96/trigger.png" class="" title="模型结构">
-
-<h3 id="3-数据处理"><a href="#3-数据处理" class="headerlink" title="3. 数据处理"></a>3. 数据处理</h3><p>主要代码看<a target="_blank" rel="noopener" href="https://github.com/WuHuRestaurant/xf_event_extraction2020Top1/blob/156b2fd429c3a752134b4050f97db7a06ea38c24/src_final/preprocess/processor.py#L316">这里</a>。</p>
-<ol>
-<li>将raw_text分成token，空格之类的作者换成了<code>[BLANK]</code>，没有tokenize的换成了<code>[INV]</code>。虽然他这种做法我勉强能接受，但是还是理解不了。。。因为tokenizer该做的都做了，做这一步不就多此一举么。。。（除非有其他理由）</li>
-<li>核心的地方在于label的构造方式。举个例子：</li>
-</ol>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">raw_text = <span class="string">&quot;学校公布成绩。&quot;</span></span><br><span class="line">trigger_word = <span class="string">&quot;公布&quot;</span></span><br><span class="line">tokens = [<span class="string">&#x27;学&#x27;</span>, <span class="string">&#x27;校&#x27;</span>, <span class="string">&#x27;公&#x27;</span>, <span class="string">&#x27;布&#x27;</span>, <span class="string">&#x27;成&#x27;</span>, <span class="string">&#x27;绩&#x27;</span>, <span class="string">&#x27;。&#x27;</span>]</span><br><span class="line">labels = [</span><br><span class="line">    [<span class="number">0</span>, <span class="number">0</span>], </span><br><span class="line">    [<span class="number">0</span>, <span class="number">0</span>], </span><br><span class="line">    [<span class="number">1</span>, <span class="number">0</span>], </span><br><span class="line">    [<span class="number">0</span>, <span class="number">1</span>], </span><br><span class="line">    [<span class="number">0</span>, <span class="number">0</span>], </span><br><span class="line">    [<span class="number">0</span>, <span class="number">0</span>], </span><br><span class="line">    [<span class="number">0</span>, <span class="number">0</span>]</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
-
-<p>看到有意思的地方了么，以char level进行分割raw_text，然后找到<code>公布</code>对应的start_index和end_index置为1。</p>
-<h3 id="4-模型结构"><a href="#4-模型结构" class="headerlink" title="4.模型结构"></a>4.模型结构</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">TriggerExtractor(</span><br><span class="line">  (bert_module): BertModel()</span><br><span class="line">  (dropout_layer): Dropout(p=0.1, inplace=False)</span><br><span class="line">  (mid_linear): Sequential(</span><br><span class="line">    (0): Linear(in_features=768, out_features=128, bias=True)</span><br><span class="line">    (1): ReLU()</span><br><span class="line">    (2): Dropout(p=0.1, inplace=False)</span><br><span class="line">  )</span><br><span class="line">  (classifier): Linear(in_features=128, out_features=2, bias=True)</span><br><span class="line">  (activation): Sigmoid()</span><br><span class="line">  (criterion): BCELoss()</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<h3 id="5-训练"><a href="#5-训练" class="headerlink" title="5. 训练"></a>5. 训练</h3><p>输入input_ids, attention_mask, token_type_ids获取bert output，然后mid_linear，最后classifier，shape变成比如<code>32,128,2</code>，核心地方在计算了loss和解码部分。</p>
-<p>举个例子计算loss：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn</span><br><span class="line"></span><br><span class="line"><span class="comment"># shape = (3,5,2)</span></span><br><span class="line">target = torch.tensor([</span><br><span class="line">    [</span><br><span class="line">        [<span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">        [<span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">        [<span class="number">1</span>, <span class="number">0</span>],</span><br><span class="line">        [<span class="number">0</span>, <span class="number">1</span>],</span><br><span class="line">        [<span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">    ],</span><br><span class="line">    [</span><br><span class="line">        [<span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">        [<span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">        [<span class="number">1</span>, <span class="number">0</span>],</span><br><span class="line">        [<span class="number">0</span>, <span class="number">1</span>],</span><br><span class="line">        [<span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">    ],</span><br><span class="line">    [</span><br><span class="line">        [<span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">        [<span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">        [<span class="number">1</span>, <span class="number">0</span>],</span><br><span class="line">        [<span class="number">0</span>, <span class="number">1</span>],</span><br><span class="line">        [<span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">    ],</span><br><span class="line">], dtype=torch.float32)</span><br><span class="line">pred = torch.randn(target.shape)</span><br><span class="line"></span><br><span class="line">pred = nn.Sigmoid()(pred)</span><br><span class="line"></span><br><span class="line">loss = nn.BCELoss()</span><br><span class="line"><span class="built_in">print</span>(loss(pred, target))</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="6-解码"><a href="#6-解码" class="headerlink" title="6. 解码"></a>6. 解码</h3><p><a target="_blank" rel="noopener" href="https://github.com/WuHuRestaurant/xf_event_extraction2020Top1/blob/156b2fd429c3a752134b4050f97db7a06ea38c24/src_final/utils/evaluator.py#L37">代码</a>。</p>
-<h3 id="7-总结"><a href="#7-总结" class="headerlink" title="7. 总结"></a>7. 总结</h3><h4 id="1-作者为什么没有使用bert-crf？"><a href="#1-作者为什么没有使用bert-crf？" class="headerlink" title="1. 作者为什么没有使用bert+crf？"></a>1. 作者为什么没有使用bert+crf？</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">缺点：存在5%的句子会出现解码为空的现象，导致误差传播极大；</span><br></pre></td></tr></table></figure>
-<p>这个在作者的ppt里面提到了。</p>
-<h4 id="2-优点"><a href="#2-优点" class="headerlink" title="2. 优点"></a>2. 优点</h4><p>作者舍弃CRF结构，采用<code>指针式解码</code>的方案。这个地方是我觉得最有意思的地方。</p>
-<p>我为什么任务这个地方是优点呢，初看网络结构，我以为的网络结构类似下面这样：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">                bert</span><br><span class="line">--------|-------------------|----</span><br><span class="line">        |                   |  </span><br><span class="line"> start_index_layer  end_index_layer</span><br><span class="line">        |                   |</span><br><span class="line">        ----------|-----------</span><br><span class="line">                  |</span><br><span class="line">                解  码</span><br></pre></td></tr></table></figure>
-
-<p>也就是说bert后面有两个linear，一个是start_index的，一个是end_index的，然后分别预测开始和结束index。</p>
-<p>但是这么做有几个坏处：<br>1、start_index和end_index没有任何交互<br>2、解码的时候，会解码出很多的结果</p>
-<p>那作者的优势就很明显了，start_index和end_index用一个linear表示。</p>
-<p>但是即使这样，都绕不开一个地方，就是解码出<code>多个结果</code>和<code>长度</code>的问题。</p>
-<h4 id="3-缺点"><a href="#3-缺点" class="headerlink" title="3. 缺点"></a>3. 缺点</h4><p>解码的长度是不确定的，只要start_logits &gt; 0.5,end_logits&gt;0.5，就认为是合理的。那么这两者之间组合，就会有许多的结果。这个是绕不开的。</p>
-<p>作者这里做了一个限制，看代码：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">candidate_entities = []</span><br><span class="line"></span><br><span class="line">start_ids = np.argwhere(logits[:, <span class="number">0</span>] &gt; start_threshold)[:, <span class="number">0</span>]</span><br><span class="line">end_ids = np.argwhere(logits[:, <span class="number">1</span>] &gt; end_threshold)[:, <span class="number">0</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 选最短的</span></span><br><span class="line"><span class="keyword">for</span> _start <span class="keyword">in</span> start_ids:</span><br><span class="line">    <span class="keyword">for</span> _end <span class="keyword">in</span> end_ids:</span><br><span class="line">        <span class="comment"># 限定 trigger 长度不能超过 3</span></span><br><span class="line">        <span class="keyword">if</span> _end &gt;= _start <span class="keyword">and</span> _end - _start &lt;= <span class="number">2</span>:</span><br><span class="line">            <span class="comment"># (start, end, start_logits + end_logits)</span></span><br><span class="line">            candidate_entities.append((raw_text[_start: _end + <span class="number">1</span>], _start, logits[_start][<span class="number">0</span>] + logits[_end][<span class="number">1</span>]))</span><br><span class="line">            <span class="keyword">break</span></span><br></pre></td></tr></table></figure>
-
-<p>即限制了<code>触发词</code>的<code>长度</code>。</p>
-<p>第二，在这个比赛里，绝大多数的样本的触发词就为1个。</p>
-<p>如果解码为空的话，作者采用start_logits和end_logits最大的作为输出。<a target="_blank" rel="noopener" href="https://github.com/WuHuRestaurant/xf_event_extraction2020Top1/blob/156b2fd429c3a752134b4050f97db7a06ea38c24/src_final/utils/evaluator.py#L53">代码</a>。</p>
-<h3 id="8-思考"><a href="#8-思考" class="headerlink" title="8. 思考"></a>8. 思考</h3><p>本质来讲，我没太看得出来和crf相对比的优劣。作者也没有公开每个任务分别的score。<br>但是从模型结构上来讲，这种方式有个好处，就是可以<code>解决嵌套</code>的问题。第二就是速度的好处。</p>
-<h3 id="备注"><a href="#备注" class="headerlink" title="备注"></a>备注</h3><h4 id="1-忽略的点"><a href="#1-忽略的点" class="headerlink" title="1. 忽略的点"></a>1. 忽略的点</h4><p>1、没有考虑数据增强<br>2、没有use_distant_trigger，即将构造的trigger输入ebedding作为extra feature(即将句子中所有可能的触发词都列出来然后输入到embeddings和bert output concat到一起)。</p>
-<h4 id="2-使用roberta-www-ext"><a href="#2-使用roberta-www-ext" class="headerlink" title="2. 使用roberta-www-ext"></a>2. 使用roberta-www-ext</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tokenizer = BertTokenizer.from_pretrained(bert_dir)</span><br><span class="line">bert = BertModel.from_pretrained(bert_dir)</span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/07/29/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E8%A7%A6%E5%8F%91%E8%AF%8D%E6%8F%90%E5%8F%96/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/2/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/4/">Next &amp;raquo;</a>
@@ -1607,10 +1569,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">grpc</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">活到老学到老nlp</a>
               </li>
              
               <li class="article-tag-list-item">

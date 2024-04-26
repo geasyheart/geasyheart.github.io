@@ -83,8 +83,6 @@ var _hmt = _hmt || [];
 	        
 				<li><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
 	        
-				<li><a href="/tags/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81nlp">活到老学到老nlp</a></li>
-	        
 				<li><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
 	        
 				<li><a href="/tags/python/">python</a></li>
@@ -159,8 +157,6 @@ var _hmt = _hmt || [];
 			
 				
 			
-				
-			
 			
 			
 			<nav class="header-nav">
@@ -183,19 +179,17 @@ var _hmt = _hmt || [];
 				<ul style="width: 70%">
 				
 				
-					<li style="width: 14.285714285714286%"><a href="/">主页</a></li>
+					<li style="width: 16.666666666666668%"><a href="/">主页</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81nlp">活到老学到老nlp</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/python/">python</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/python/">python</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/linux/">linux</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/linux/">linux</a></li>
-		        
-					<li style="width: 14.285714285714286%"><a href="/tags/MySQL/">mysql</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/MySQL/">mysql</a></li>
 		        
 				</ul>
 			</nav>
@@ -211,6 +205,120 @@ var _hmt = _hmt || [];
           </div>
           <div id="js-content" class="content-ll">
             
+  
+    <article id="post-05-04bash脚本编程之三-条件判断及算数运算" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/09/05-04bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E4%B8%89-%E6%9D%A1%E4%BB%B6%E5%88%A4%E6%96%AD%E5%8F%8A%E7%AE%97%E6%95%B0%E8%BF%90%E7%AE%97/">05_04bash脚本编程之三-条件判断及算数运算</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/09/05-04bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E4%B8%89-%E6%9D%A1%E4%BB%B6%E5%88%A4%E6%96%AD%E5%8F%8A%E7%AE%97%E6%95%B0%E8%BF%90%E7%AE%97/" class="archive-article-date">
+  	<time datetime="2015-02-08T16:42:03.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-09</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>算数运算： </p>
+<ol>
+<li>let算数运算表达式 <blockquote>
+<p>A&#x3D;3<br>B&#x3D;4<br>let C&#x3D;$A+$B </p>
+</blockquote>
+</li>
+<li>$[算数运算表达式] <blockquote>
+<p>C&#x3D;$[$A+$B] </p>
+</blockquote>
+</li>
+<li>$((算数运算表达式）） <blockquote>
+<p>C&#x3D;$(($A+$B)) </p>
+</blockquote>
+</li>
+<li>expr 算数运算表达式(表达式中各操作数及运算符之间要有空格，而且要使用命令引用) <blockquote>
+<p>C&#x3D;<code>expr $A + $B</code>(注意格式)</p>
+</blockquote>
+</li>
+</ol>
+<p>  </p>
+<p>练习：<br> 判断当前系统上是否有用户的默认shell为bash<br> 如果有，就显示有多少这类用户，否则，就显示没有这类用户 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">RETVAL=`grep <span class="string">&quot;bash$&quot;</span> /etc/passwd &amp;&gt;/dev/null | <span class="built_in">wc</span> -l | <span class="built_in">cut</span> -d<span class="string">&#x27; &#x27;</span> -f1` </span><br><span class="line">USER=`grep <span class="string">&quot;bash$&quot;</span> /etc/passwd | <span class="built_in">cut</span> -d: -f1` </span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$RETVAL</span> -eq 0 ];<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;None&quot;</span> </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;The Below users is using bash:<span class="variable">$USER</span> ,Total:$ </span></span><br><span class="line"><span class="string">RETVAL&quot;</span> </span><br></pre></td></tr></table></figure>
+<p> 给定一个文件，比如&#x2F;etc&#x2F;inittab<br> 判定这个文件中是否有空白行<br> 如果有，则显示其空白行数，否则，显示没有空白行 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">NUM=`grep <span class="string">&quot;^#&quot;</span> /etc/inittab | <span class="built_in">wc</span> -l ` </span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$NUM</span> -eq 0 ];<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;No empty lines.&quot;</span> </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;<span class="variable">$&#123;NUM&#125;</span>lines&quot;</span> </span><br><span class="line"><span class="keyword">fi</span> </span><br></pre></td></tr></table></figure>
+<p> 给定一个用户，判断其UID和GID是否相等<br> 如果一样，显示此用户为“good boy” 否则“bad boy” </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">USER=root </span><br><span class="line">UID1=`grep <span class="variable">$USER</span> /etc/passwd &amp;&gt;/dev/null| <span class="built_in">cut</span> -d: -f3` or UID1=`<span class="built_in">id</span> -u <span class="variable">$USER</span>` </span><br><span class="line">GID1=`grep <span class="variable">$USER</span> /etc/passwd &amp;&gt;/dev/null| <span class="built_in">cut</span> -d: -f4` or GID1=`<span class="built_in">id</span> -g <span class="variable">$USER</span>` </span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$UID1</span> -eq <span class="variable">$GID1</span> ];<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Good Boy&quot;</span> </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Bad Boy&quot;</span> </span><br></pre></td></tr></table></figure>
+<p> 给定一个用户，获取其密码警告期限<br> 而后判断用户最近一次修改密码的时间距今天是否已经小于警告期限；<br> 如果小于，则显示“Warning”，否则“OK” </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">Now=`<span class="built_in">date</span> +%s` </span><br><span class="line">Nowdays=$[<span class="variable">$Now</span>/86400] </span><br><span class="line">last_time=`<span class="built_in">cat</span> /etc/shadow | grep root | <span class="built_in">cut</span> -d: -f3` </span><br><span class="line">max_time=`<span class="built_in">cat</span> /etc/shadow | grep root | <span class="built_in">cut</span> -d: -f5` </span><br><span class="line">use_time=$[<span class="variable">$Nowdays</span>-<span class="variable">$last_time</span>] </span><br><span class="line">remain_time=$[<span class="variable">$max_time</span>-<span class="variable">$use_time</span>] </span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$remain_time</span> -lt 7 ];<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;wrong&quot;</span> </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;OK&quot;</span> </span><br><span class="line"><span class="keyword">fi</span> </span><br></pre></td></tr></table></figure>
+<p> 判定命令历史中历史命令的总条目是否大于1000，如果大于，显示”Some command will gone”;否则显示”OK” </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">NUM=`<span class="built_in">wc</span> -l /root/.bash_history | <span class="built_in">cut</span> -d: -f1` </span><br><span class="line"><span class="keyword">if</span> [ SNUM -gt 1000 ];<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Some command will gone&quot;</span> </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line">eho <span class="string">&quot;OK&quot;</span> </span><br><span class="line"><span class="keyword">fi</span> </span><br></pre></td></tr></table></figure>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/09/05-04bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E4%B8%89-%E6%9D%A1%E4%BB%B6%E5%88%A4%E6%96%AD%E5%8F%8A%E7%AE%97%E6%95%B0%E8%BF%90%E7%AE%97/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
   
     <article id="post-05-03bash脚本编程之二条件判断" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
@@ -771,10 +879,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">grpc</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">活到老学到老nlp</a>
               </li>
              
               <li class="article-tag-list-item">

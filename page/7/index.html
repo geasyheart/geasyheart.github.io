@@ -83,8 +83,6 @@ var _hmt = _hmt || [];
 	        
 				<li><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
 	        
-				<li><a href="/tags/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81nlp">活到老学到老nlp</a></li>
-	        
 				<li><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
 	        
 				<li><a href="/tags/python/">python</a></li>
@@ -159,8 +157,6 @@ var _hmt = _hmt || [];
 			
 				
 			
-				
-			
 			
 			
 			<nav class="header-nav">
@@ -183,19 +179,17 @@ var _hmt = _hmt || [];
 				<ul style="width: 70%">
 				
 				
-					<li style="width: 14.285714285714286%"><a href="/">主页</a></li>
+					<li style="width: 16.666666666666668%"><a href="/">主页</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/%E7%AE%97%E6%B3%95">算法</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81nlp">活到老学到老nlp</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/">小桥流水人家</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/python/">python</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/python/">python</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/linux/">linux</a></li>
 		        
-					<li style="width: 14.285714285714286%"><a href="/tags/linux/">linux</a></li>
-		        
-					<li style="width: 14.285714285714286%"><a href="/tags/MySQL/">mysql</a></li>
+					<li style="width: 16.666666666666668%"><a href="/tags/MySQL/">mysql</a></li>
 		        
 				</ul>
 			</nav>
@@ -211,6 +205,99 @@ var _hmt = _hmt || [];
           </div>
           <div id="js-content" class="content-ll">
             
+  
+    <article id="post-biaffine分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/10/16/biaffine%E5%88%86%E6%9E%90/">biaffine分析</a>
+    </h1>
+  
+
+        
+        <a href="/2021/10/16/biaffine%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2021-10-16T15:45:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-16</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>下面改动这个代码，方便理解和实验</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Biaffine</span>(torch.nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, n_in=<span class="number">768</span>, n_out=<span class="number">2</span>, bias_x=<span class="literal">True</span>, bias_y=<span class="literal">True</span></span>):</span><br><span class="line">        <span class="built_in">super</span>(Biaffine, self).__init__()</span><br><span class="line">        self.n_in = n_in</span><br><span class="line">        self.n_out = n_out</span><br><span class="line">        self.bias_x = bias_x</span><br><span class="line">        self.bias_y = bias_y</span><br><span class="line"></span><br><span class="line">        self.weight = nn.Parameter(torch.Tensor(n_out, n_in + bias_x, n_in + bias_y))</span><br><span class="line">        self.reset_parameters()</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">reset_parameters</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="comment"># 改动这里</span></span><br><span class="line">        nn.init.ones_(self.weight)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x, y</span>):</span><br><span class="line">        <span class="keyword">if</span> self.bias_x:</span><br><span class="line">            x = torch.cat((x, torch.ones_like(x[..., :<span class="number">1</span>])), -<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">if</span> self.bias_y:</span><br><span class="line">            y = torch.cat((y, torch.ones_like(y[..., :<span class="number">1</span>])), -<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        b = x.shape[<span class="number">0</span>] </span><br><span class="line">        o = self.weight.shape[<span class="number">0</span>] </span><br><span class="line"></span><br><span class="line">        x = x.unsqueeze(<span class="number">1</span>).expand(-<span class="number">1</span>, o, -<span class="number">1</span>, -<span class="number">1</span>)  </span><br><span class="line">        weight = self.weight.unsqueeze(<span class="number">0</span>).expand(b, -<span class="number">1</span>, -<span class="number">1</span>, -<span class="number">1</span>) </span><br><span class="line">        y = y.unsqueeze(<span class="number">1</span>).expand(-<span class="number">1</span>, o, -<span class="number">1</span>, -<span class="number">1</span>)  </span><br><span class="line"></span><br><span class="line">        s = torch.matmul(torch.matmul(x, weight), y.permute((<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">2</span>)))</span><br><span class="line">        <span class="keyword">if</span> s.shape[<span class="number">1</span>] == <span class="number">1</span>:</span><br><span class="line">            s = s.squeeze(dim=<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> s  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 1 表示分类个数，下面改成2也是在此处哦</span></span><br><span class="line">model = Biaffine(<span class="number">3</span>, <span class="number">1</span>, bias_x=<span class="literal">False</span>, bias_y=<span class="literal">False</span>)</span><br><span class="line">x = torch.arange(<span class="number">12</span>, dtype=torch.<span class="built_in">float</span>).reshape(<span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">y = torch.arange(<span class="number">12</span>, dtype=torch.<span class="built_in">float</span>).reshape(<span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">result = model(x, y)</span><br><span class="line"><span class="built_in">print</span>(result)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>分析:</p>
+<h3 id="1-x-shape"><a href="#1-x-shape" class="headerlink" title="1. x.shape"></a>1. x.shape</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">x</span><br><span class="line">Out[<span class="number">56</span>]: </span><br><span class="line">tensor([[[ <span class="number">0.</span>,  <span class="number">1.</span>,  <span class="number">2.</span>],</span><br><span class="line">         [ <span class="number">3.</span>,  <span class="number">4.</span>,  <span class="number">5.</span>]],</span><br><span class="line">        [[ <span class="number">6.</span>,  <span class="number">7.</span>,  <span class="number">8.</span>],</span><br><span class="line">         [ <span class="number">9.</span>, <span class="number">10.</span>, <span class="number">11.</span>]]])</span><br><span class="line"></span><br><span class="line">表示的是sequence_length为<span class="number">2</span>, 那么[<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>]表示第一个字,[<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>]表示第二个字.</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-x和weight点积"><a href="#2-x和weight点积" class="headerlink" title="2. x和weight点积"></a>2. x和weight点积</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## 中间过程忽略</span></span><br><span class="line"></span><br><span class="line">torch.matmul(x, weight)</span><br><span class="line">Out[<span class="number">2</span>]: </span><br><span class="line">tensor([[[[ <span class="number">3.</span>,  <span class="number">3.</span>,  <span class="number">3.</span>],</span><br><span class="line">          [<span class="number">12.</span>, <span class="number">12.</span>, <span class="number">12.</span>]]],</span><br><span class="line">        [[[<span class="number">21.</span>, <span class="number">21.</span>, <span class="number">21.</span>],</span><br><span class="line">          [<span class="number">30.</span>, <span class="number">30.</span>, <span class="number">30.</span>]]]], grad_fn=&lt;UnsafeViewBackward&gt;)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-怎么来的呢"><a href="#3-怎么来的呢" class="headerlink" title="3. 怎么来的呢"></a>3. 怎么来的呢</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="number">0</span> * <span class="number">1</span> + <span class="number">1</span> * <span class="number">1</span> + <span class="number">2</span> * <span class="number">1</span> = <span class="number">3</span></span><br><span class="line"><span class="number">3</span> * <span class="number">1</span> + <span class="number">4</span> * <span class="number">1</span> + <span class="number">5</span> * <span class="number">1</span> = <span class="number">12</span></span><br><span class="line"></span><br><span class="line"><span class="number">6</span> * <span class="number">1</span> + <span class="number">7</span> * <span class="number">1</span> + <span class="number">8</span> * <span class="number">1</span> = <span class="number">21</span></span><br><span class="line"><span class="number">9</span> * <span class="number">1</span> + <span class="number">10</span> * <span class="number">1</span> + <span class="number">11</span> * <span class="number">1</span> = <span class="number">30</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-y-permute-0-1-3-2"><a href="#4-y-permute-0-1-3-2" class="headerlink" title="4.  y.permute((0, 1, 3, 2))"></a>4.  y.permute((0, 1, 3, 2))</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">y.permute((<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">2</span>))</span><br><span class="line"></span><br><span class="line">Out[<span class="number">3</span>]: </span><br><span class="line">tensor([[[[ <span class="number">0.</span>,  <span class="number">3.</span>],</span><br><span class="line">          [ <span class="number">1.</span>,  <span class="number">4.</span>],</span><br><span class="line">          [ <span class="number">2.</span>,  <span class="number">5.</span>]]],</span><br><span class="line">        [[[ <span class="number">6.</span>,  <span class="number">9.</span>],</span><br><span class="line">          [ <span class="number">7.</span>, <span class="number">10.</span>],</span><br><span class="line">          [ <span class="number">8.</span>, <span class="number">11.</span>]]]])</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-torch-matmul-torch-matmul-x-weight-y-permute-0-1-3-2"><a href="#5-torch-matmul-torch-matmul-x-weight-y-permute-0-1-3-2" class="headerlink" title="5. torch.matmul(torch.matmul(x, weight), y.permute((0, 1, 3, 2)))"></a>5. torch.matmul(torch.matmul(x, weight), y.permute((0, 1, 3, 2)))</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">torch.matmul(torch.matmul(x, weight), y.permute((<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">2</span>)))</span><br><span class="line">Out[<span class="number">4</span>]: </span><br><span class="line">tensor([[[[  <span class="number">9.</span>,  <span class="number">36.</span>],</span><br><span class="line">          [ <span class="number">36.</span>, <span class="number">144.</span>]]],</span><br><span class="line">        [[[<span class="number">441.</span>, <span class="number">630.</span>],</span><br><span class="line">          [<span class="number">630.</span>, <span class="number">900.</span>]]]], grad_fn=&lt;UnsafeViewBackward&gt;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#  怎么来的呢</span></span><br><span class="line"></span><br><span class="line"><span class="number">3</span> * <span class="number">0</span> + <span class="number">3</span> * <span class="number">1</span> + <span class="number">3</span> * <span class="number">2</span> = <span class="number">9</span></span><br><span class="line"><span class="number">3</span> * (<span class="number">3</span> + <span class="number">4</span> + <span class="number">5</span>) = <span class="number">36</span></span><br><span class="line"><span class="number">12</span> * (<span class="number">0</span> + <span class="number">1</span> + <span class="number">2</span>) = <span class="number">36</span></span><br><span class="line"><span class="number">12</span> * (<span class="number">3</span> + <span class="number">4</span> + <span class="number">5</span>) = <span class="number">144</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 发现了没，sequence_length那一维（即每个字）都和其他的字进行点积，并乘以权重，从而获取最终的output。</span></span><br><span class="line"><span class="comment"># 是不是瞬间发现厉害的地方。。。。。</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="final-扩展"><a href="#final-扩展" class="headerlink" title="final. 扩展"></a>final. 扩展</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 扩展，如果out为2的话</span></span><br><span class="line"></span><br><span class="line">s</span><br><span class="line">Out[<span class="number">2</span>]: </span><br><span class="line">tensor([[[[  <span class="number">9.</span>,  <span class="number">36.</span>],    // 分类<span class="number">1</span></span><br><span class="line">          [ <span class="number">36.</span>, <span class="number">144.</span>]],</span><br><span class="line"></span><br><span class="line">         [[  <span class="number">9.</span>,  <span class="number">36.</span>],    // 分类<span class="number">2</span></span><br><span class="line">          [ <span class="number">36.</span>, <span class="number">144.</span>]]],</span><br><span class="line"></span><br><span class="line">        [[[<span class="number">441.</span>, <span class="number">630.</span>],</span><br><span class="line">          [<span class="number">630.</span>, <span class="number">900.</span>]],</span><br><span class="line">         [[<span class="number">441.</span>, <span class="number">630.</span>],</span><br><span class="line">          [<span class="number">630.</span>, <span class="number">900.</span>]]]], grad_fn=&lt;UnsafeViewBackward&gt;)</span><br><span class="line"></span><br><span class="line">// 即表示多分类情况下每个分类的输出，通过反向更新weight</span><br><span class="line">// 是不是get到重点了。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/10/16/biaffine%E5%88%86%E6%9E%90/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
   
     <article id="post-成分句法分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
@@ -1180,150 +1267,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-lstm使用示例" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/07/20/lstm%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B/">lstm使用示例</a>
-    </h1>
-  
-
-        
-        <a href="/2021/07/20/lstm%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B/" class="archive-article-date">
-  	<time datetime="2021-07-20T07:40:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-20</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>注意，本文代码来自于<a target="_blank" rel="noopener" href="https://github.com/HIT-SCIR/plm-nlp-code">plm-nlp-code</a>。</p>
-<p>学习任何模型都需要一个简单可行的例子进行说明，我会基于<code>plm-nlp-code</code>的代码进行说明lstm在<code>序列标注</code>和<code>句子极性二分类</code>两个例子的应用。</p>
-<h2 id="序列标注"><a href="#序列标注" class="headerlink" title="序列标注"></a>序列标注</h2><p>参考文件<a target="_blank" rel="noopener" href="https://github.com/HIT-SCIR/plm-nlp-code/blob/main/chp4/lstm_postag.py">lstm_postag.py</a>.</p>
-<h3 id="1-加载数据"><a href="#1-加载数据" class="headerlink" title="1. 加载数据"></a>1. 加载数据</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#加载数据</span></span><br><span class="line">train_data, test_data, vocab, pos_vocab = load_treebank()</span><br></pre></td></tr></table></figure>
-
-<p>其中load_treebank代码：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">load_treebank</span>():</span><br><span class="line">    <span class="comment"># 需要翻墙下载，可以自行设置代码</span></span><br><span class="line">    nltk.set_proxy(<span class="string">&#x27;http://192.168.0.28:1080&#x27;</span>)</span><br><span class="line">    <span class="comment"># 如果没有的话那么则会下载，否则忽略</span></span><br><span class="line">    nltk.download(<span class="string">&#x27;treebank&#x27;</span>)</span><br><span class="line">    <span class="keyword">from</span> nltk.corpus <span class="keyword">import</span> treebank</span><br><span class="line"></span><br><span class="line">    sents, postags = <span class="built_in">zip</span>(*(<span class="built_in">zip</span>(*sent) <span class="keyword">for</span> sent <span class="keyword">in</span> treebank.tagged_sents()))</span><br><span class="line"></span><br><span class="line">    vocab = Vocab.build(sents, reserved_tokens=[<span class="string">&quot;&lt;pad&gt;&quot;</span>])</span><br><span class="line"></span><br><span class="line">    tag_vocab = Vocab.build(postags)</span><br><span class="line"></span><br><span class="line">    train_data = [(vocab.convert_tokens_to_ids(sentence), tag_vocab.convert_tokens_to_ids(tags)) <span class="keyword">for</span> sentence, tags <span class="keyword">in</span> <span class="built_in">zip</span>(sents[:<span class="number">3000</span>], postags[:<span class="number">3000</span>])]</span><br><span class="line">    test_data = [(vocab.convert_tokens_to_ids(sentence), tag_vocab.convert_tokens_to_ids(tags)) <span class="keyword">for</span> sentence, tags <span class="keyword">in</span> <span class="built_in">zip</span>(sents[<span class="number">3000</span>:], postags[<span class="number">3000</span>:])]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> train_data, test_data, vocab, tag_vocab</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>加载后可以看到，<code>train_data</code>和<code>test_data</code>都是list，其中每一个sample都是tuple,分别是input和target。如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>train_data[<span class="number">0</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>Out[<span class="number">1</span>]: </span><br><span class="line">([<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">4</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>, <span class="number">18</span>],</span><br><span class="line"> [<span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">2</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">8</span>, <span class="number">5</span>, <span class="number">9</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">11</span>])</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-数据处理"><a href="#2-数据处理" class="headerlink" title="2. 数据处理"></a>2. 数据处理</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># 这个函数就是将其变成等长，填充使用&lt;pad&gt;，至于是0还是1还是其他值并不重要，因为还有mask~</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">collate_fn</span>(<span class="params">examples</span>):</span><br><span class="line">    lengths = torch.tensor([<span class="built_in">len</span>(ex[<span class="number">0</span>]) <span class="keyword">for</span> ex <span class="keyword">in</span> examples])</span><br><span class="line">    inputs = [torch.tensor(ex[<span class="number">0</span>]) <span class="keyword">for</span> ex <span class="keyword">in</span> examples]</span><br><span class="line">    targets = [torch.tensor(ex[<span class="number">1</span>]) <span class="keyword">for</span> ex <span class="keyword">in</span> examples]</span><br><span class="line">    inputs = pad_sequence(inputs, batch_first=<span class="literal">True</span>, padding_value=vocab[<span class="string">&quot;&lt;pad&gt;&quot;</span>])</span><br><span class="line">    targets = pad_sequence(targets, batch_first=<span class="literal">True</span>, padding_value=vocab[<span class="string">&quot;&lt;pad&gt;&quot;</span>])</span><br><span class="line">    <span class="keyword">return</span> inputs, lengths, targets, inputs != vocab[<span class="string">&quot;&lt;pad&gt;&quot;</span>]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="3-模型部分"><a href="#3-模型部分" class="headerlink" title="3. 模型部分"></a>3. 模型部分</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">LSTM</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, vocab_size, embedding_dim, hidden_dim, num_class</span>):</span><br><span class="line">        <span class="built_in">super</span>(LSTM, self).__init__()</span><br><span class="line">        self.embeddings = nn.Embedding(vocab_size, embedding_dim)</span><br><span class="line">        self.lstm = nn.LSTM(embedding_dim, hidden_dim, batch_first=<span class="literal">True</span>)</span><br><span class="line">        self.output = nn.Linear(hidden_dim, num_class)</span><br><span class="line">        init_weights(self)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, inputs, lengths</span>):</span><br><span class="line">        embeddings = self.embeddings(inputs)</span><br><span class="line">        x_pack = pack_padded_sequence(embeddings, lengths, batch_first=<span class="literal">True</span>, enforce_sorted=<span class="literal">False</span>)</span><br><span class="line">        hidden, (hn, cn) = self.lstm(x_pack)</span><br><span class="line">        hidden, _ = pad_packed_sequence(hidden, batch_first=<span class="literal">True</span>)</span><br><span class="line">        outputs = self.output(hidden)</span><br><span class="line">        log_probs = F.log_softmax(outputs, dim=-<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> log_probs</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>其中有几个地方可能需要注意的：</p>
-<ul>
-<li>pack_padded_sequence和pad_packed_sequence<br>因为lstm为rnn模型，样本输入不一定是等长的，那么torch提供了这两个函数进行统一处理，length告诉lstm，等超过length时这个样本后面pad进来的就不再计算了。</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> torch.nn.utils.rnn <span class="keyword">import</span> pack_padded_sequence, pad_packed_sequence</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>seq = torch.tensor([[<span class="number">1</span>,<span class="number">2</span>,<span class="number">0</span>], [<span class="number">3</span>,<span class="number">0</span>,<span class="number">0</span>], [<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>]])</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>lens = [<span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>packed = pack_padded_sequence(seq, lens, batch_first=<span class="literal">True</span>, enforce_sorted=<span class="literal">False</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>packed</span><br><span class="line">PackedSequence(data=tensor([<span class="number">4</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">2</span>, <span class="number">6</span>]), batch_sizes=tensor([<span class="number">3</span>, <span class="number">2</span>, <span class="number">1</span>]),</span><br><span class="line">                sorted_indices=tensor([<span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>]), unsorted_indices=tensor([<span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>]))</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>seq_unpacked, lens_unpacked = pad_packed_sequence(packed, batch_first=<span class="literal">True</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>seq_unpacked</span><br><span class="line">tensor([[<span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>],</span><br><span class="line">        [<span class="number">3</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">        [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]])</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>lens_unpacked</span><br><span class="line">tensor([<span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>])</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>lstm输出</li>
-</ul>
-<p>hidden, (hn, cn)分别表示每个timestep的输出,最后一个时刻的每层输出,cn表示保存c的值。</p>
-<p>所以可以看到，序列标注会用到每个timestep的输出来表示每个token。</p>
-<ul>
-<li>F.log_softmax和损失函数计算</li>
-</ul>
-<p>如果看源码较多的情况下，你会发现log_softmax或者softmax会和CrossEntropyLoss出现在一起，这里很简单理解，因为CrossEntropyLoss由两个函数组成，log_softmax和NLLLoss，log_softmax或者softmax是做归一化，由分数转成概率，log_softmax是平滑。NLLLoss负责取target index对应的logits score，然后除以总分。目的使之最大。</p>
-<h3 id="3-训练"><a href="#3-训练" class="headerlink" title="3. 训练"></a>3. 训练</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#训练过程</span></span><br><span class="line">nll_loss = nn.NLLLoss()</span><br><span class="line">optimizer = optim.Adam(model.parameters(), lr=<span class="number">0.001</span>) <span class="comment">#使用Adam优化器</span></span><br><span class="line"></span><br><span class="line">model.train()</span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epoch):</span><br><span class="line">    total_loss = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> batch <span class="keyword">in</span> tqdm(train_data_loader, desc=<span class="string">f&quot;Training Epoch <span class="subst">&#123;epoch&#125;</span>&quot;</span>):</span><br><span class="line">        inputs, lengths, targets, mask = [x.to(device) <span class="keyword">for</span> x <span class="keyword">in</span> batch]</span><br><span class="line">        lengths = lengths.cpu()</span><br><span class="line">        log_probs = model(inputs, lengths)</span><br><span class="line">        loss = nll_loss(log_probs[mask], targets[mask])</span><br><span class="line">        optimizer.zero_grad()</span><br><span class="line">        loss.backward()</span><br><span class="line">        optimizer.step()</span><br><span class="line">        total_loss += loss.item()</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Loss: <span class="subst">&#123;total_loss:<span class="number">.2</span>f&#125;</span>&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>这部分没啥好说的了，<code>log_probs</code>为三维矩阵，比如<code>torch.Size([32, 58, 47])</code>,表示batch_size&#x3D;32,seq_length&#x3D;58,一共47个tags。</p>
-<p>推理部分就是argmax取其最大的tag index，可以看：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">acc = <span class="number">0</span></span><br><span class="line">total = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> batch <span class="keyword">in</span> tqdm(test_data_loader, desc=<span class="string">f&quot;Testing&quot;</span>):</span><br><span class="line">    inputs, lengths, targets, mask = [x.to(device) <span class="keyword">for</span> x <span class="keyword">in</span> batch]</span><br><span class="line">    <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">        output = model(inputs, lengths)</span><br><span class="line">        acc += (output.argmax(dim=-<span class="number">1</span>) == targets)[mask].<span class="built_in">sum</span>().item()</span><br><span class="line">        total += mask.<span class="built_in">sum</span>().item()</span><br></pre></td></tr></table></figure>
-
-<h3 id="句子极性二分类"><a href="#句子极性二分类" class="headerlink" title="句子极性二分类"></a>句子极性二分类</h3><p>参考文件<a target="_blank" rel="noopener" href="https://github.com/HIT-SCIR/plm-nlp-code/blob/main/chp4/lstm_sent_polarity.py">lstm_sent_polarity.py</a>。</p>
-<p>这个名字自己起的，任务目标具体就是对输入句子做二分类。</p>
-<h3 id="1-加载数据-1"><a href="#1-加载数据-1" class="headerlink" title="1. 加载数据"></a>1. 加载数据</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">load_sentence_polarity</span>():</span><br><span class="line">    nltk.set_proxy(<span class="string">&#x27;http://192.168.0.28:1080&#x27;</span>)</span><br><span class="line">    nltk.download(<span class="string">&#x27;sentence_polarity&#x27;</span>)</span><br><span class="line">    <span class="keyword">from</span> nltk.corpus <span class="keyword">import</span> sentence_polarity</span><br><span class="line"></span><br><span class="line">    vocab = Vocab.build(sentence_polarity.sents())</span><br><span class="line"></span><br><span class="line">    train_data = [(vocab.convert_tokens_to_ids(sentence), <span class="number">0</span>)</span><br><span class="line">                  <span class="keyword">for</span> sentence <span class="keyword">in</span> sentence_polarity.sents(categories=<span class="string">&#x27;pos&#x27;</span>)[:<span class="number">4000</span>]] \</span><br><span class="line">        + [(vocab.convert_tokens_to_ids(sentence), <span class="number">1</span>)</span><br><span class="line">            <span class="keyword">for</span> sentence <span class="keyword">in</span> sentence_polarity.sents(categories=<span class="string">&#x27;neg&#x27;</span>)[:<span class="number">4000</span>]]</span><br><span class="line"></span><br><span class="line">    test_data = [(vocab.convert_tokens_to_ids(sentence), <span class="number">0</span>)</span><br><span class="line">                 <span class="keyword">for</span> sentence <span class="keyword">in</span> sentence_polarity.sents(categories=<span class="string">&#x27;pos&#x27;</span>)[<span class="number">4000</span>:]] \</span><br><span class="line">        + [(vocab.convert_tokens_to_ids(sentence), <span class="number">1</span>)</span><br><span class="line">            <span class="keyword">for</span> sentence <span class="keyword">in</span> sentence_polarity.sents(categories=<span class="string">&#x27;neg&#x27;</span>)[<span class="number">4000</span>:]]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> train_data, test_data, vocab</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>关于数据格式:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">train_data[<span class="number">321</span>]</span><br><span class="line">Out[<span class="number">2</span>]: ([<span class="number">6</span>, <span class="number">6</span>, <span class="number">6</span>, <span class="number">4489</span>, <span class="number">1337</span>, <span class="number">15065</span>, <span class="number">3252</span>, <span class="number">6</span>], <span class="number">0</span>)</span><br><span class="line"><span class="comment"># 前面部分表示句子的每个token，后面表示label。</span></span><br></pre></td></tr></table></figure>
-<p>label一共有两个，0和1,所以为二分类。</p>
-<h3 id="2-有趣的点"><a href="#2-有趣的点" class="headerlink" title="2. 有趣的点"></a>2. 有趣的点</h3><p>整个训练过程貌似和上例没什么不同，但是可以举几个比较有意思的地方。</p>
-<ul>
-<li>关于二分类使用CrossEntropyLoss还是BCELoss</li>
-</ul>
-<p>这两者本质是一样的，BCELoss就是CrossEntropyLoss的特例。你可以看<a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/blob/m2/python/forward_examples/loss.py">loss.py</a>。</p>
-<p>BCEWithLogitsLoss和BCELoss的区别就是一个需要用sigmoid一个不需要。</p>
-<p>你可以尝试改动这个代码，将作者使用到的log_softmax和NLLLoss改成使用sigmoid和BCELoss。</p>
-<ul>
-<li>lstm中hn的输出</li>
-</ul>
-<p>既然hn表示timestep的最后一个时刻的输出，那么我们也有理由相信，最后一个时刻的feature可以代表整个句子的feature。</p>
-<p>那么就需要关注下hn的输出具体是什么样子了。</p>
-<p>源码输出example比如:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hn.shape</span><br><span class="line">Out[<span class="number">2</span>]: torch.Size([<span class="number">1</span>, <span class="number">32</span>, <span class="number">256</span>])</span><br></pre></td></tr></table></figure>
-
-<p>其中1是因为num_layers为1，又不是双向lstm，所以为1。</p>
-<p>而如果改成双向lstm，<code>bidirectional=True</code>，那么，</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hn.shape</span><br><span class="line">Out[<span class="number">2</span>]: torch.Size([<span class="number">2</span>, <span class="number">32</span>, <span class="number">256</span>])</span><br></pre></td></tr></table></figure>
-
-<p>如果num_layers为3,那么：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hn.shape</span><br><span class="line">Out[<span class="number">2</span>]: torch.Size([<span class="number">6</span>, <span class="number">32</span>, <span class="number">256</span>])</span><br></pre></td></tr></table></figure>
-
-<p>到这里我们就要理解下他输出的含义了？</p>
-<p>他表示一共有6个层，即3个双向lstm，而双向的实现，就是正向计算一次，反向再计算一次，即[::-1]，那么一共6层。</p>
-<p>整个模型更改如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">LSTM</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, vocab_size, embedding_dim, hidden_dim, num_class</span>):</span><br><span class="line">        <span class="built_in">super</span>(LSTM, self).__init__()</span><br><span class="line">        self.embeddings = nn.Embedding(vocab_size, embedding_dim)</span><br><span class="line">        self.lstm = nn.LSTM(embedding_dim, hidden_dim, batch_first=<span class="literal">True</span>, bidirectional=<span class="literal">True</span>, num_layers=<span class="number">3</span>)</span><br><span class="line">        self.output = nn.Linear(hidden_dim * <span class="number">6</span>, num_class)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, inputs, lengths</span>):</span><br><span class="line">        embeddings = self.embeddings(inputs)</span><br><span class="line">        x_pack = pack_padded_sequence(embeddings, lengths, batch_first=<span class="literal">True</span>, enforce_sorted=<span class="literal">False</span>)</span><br><span class="line">        hidden, (hn, cn) = self.lstm(x_pack)</span><br><span class="line">        outputs = self.output(hn.permute(<span class="number">1</span>,<span class="number">0</span>,<span class="number">2</span>).reshape(-<span class="number">1</span>, <span class="number">6</span> * <span class="number">256</span>))</span><br><span class="line">        log_probs = F.log_softmax(outputs, dim=-<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> log_probs</span><br></pre></td></tr></table></figure>
-
-
-
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">活到老学到老nlp</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/07/20/lstm%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/6/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/8/">Next &amp;raquo;</a>
@@ -1470,10 +1413,6 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">grpc</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">活到老学到老nlp</a>
               </li>
              
               <li class="article-tag-list-item">
