@@ -16,11 +16,14 @@
 <meta property="og:site_name" content="博客">
 <meta property="og:description" content="前言大模型最近很是火啊，媒体铺天盖地的宣传，候选者简历中写LLM微调等等。本文希望以huggingface trl&#x2F;RLHF notebooks讲到的几个例子作为入口，介绍下RLHF在整个训练工作中的位置以及起到的作用，方便理解与后续应用。 代码分析在huggingface trl&#x2F;RLHF notebooks这个文件夹下，一共有三个例子：  gpt2-sentiment.ip">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://geasyheart.github.io/2024/04/07/LLM-RLHF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/1.png">
+<meta property="og:image" content="https://geasyheart.github.io/2024/04/07/LLM-RLHF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/2.png">
 <meta property="article:published_time" content="2024-04-07T07:41:51.000Z">
 <meta property="article:modified_time" content="2024-04-26T09:18:48.208Z">
 <meta property="article:author" content="张宇">
 <meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://geasyheart.github.io/2024/04/07/LLM-RLHF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/1.png">
   
     <link rel="alternative" href="/atom.xml" title="博客" type="application/atom+xml">
   
@@ -238,7 +241,7 @@ var _hmt = _hmt || [];
 <h3 id="一、gpt2-sentiment-ipynb"><a href="#一、gpt2-sentiment-ipynb" class="headerlink" title="一、gpt2-sentiment.ipynb"></a>一、gpt2-sentiment.ipynb</h3><blockquote>
 <p>目的：这个文件实现的是如何利用RLHF学会生成正向评论。</p>
 </blockquote>
-
+<img src="/2024/04/07/LLM-RLHF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/1.png" class="" title="流程图">
 
 
 <h4 id="1-Load-IMDB-dataset"><a href="#1-Load-IMDB-dataset" class="headerlink" title="1. Load IMDB dataset"></a>1. Load IMDB dataset</h4><p>数据集默认有两个字段，<code>text</code> 和<code>label</code>，即用户对一部电影的评论和这条评论的情感倾向（正向、负向）。</p>
@@ -256,7 +259,7 @@ var _hmt = _hmt || [];
 <h3 id="二、gpt2-sentiment-control-ipynb"><a href="#二、gpt2-sentiment-control-ipynb" class="headerlink" title="二、gpt2-sentiment-control.ipynb"></a>二、gpt2-sentiment-control.ipynb</h3><blockquote>
 <p>目的：通过添加prompt来控制生成评论的情感。</p>
 </blockquote>
-
+<img src="/2024/04/07/LLM-RLHF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/2.png" class="" title="流程图">
 
 <p>这里的prompt有三类：positive、negative、neutral。由于neutral是reward model本身能力所不具备的，看到这里也可以跳过。</p>
 <p>其构造示例如下：</p>

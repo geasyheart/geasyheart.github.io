@@ -297,9 +297,9 @@ var _hmt = _hmt || [];
 <li>xtrabackup的”流“及”备份压缩“功能</li>
 </ul>
 <p>xtrabackup对备份的数据文件支持”流“功能，即可以将备份的数据通过STDOUT传输给ｔａｒ程序进行归档，而不是默认的直接保存至某备份目录中。要使用此功能，仅需要使用－－stream选项即可。如:<br>    #innobackupex –stream&#x3D;tar &#x2F;backup | gzip &gt; &#x2F;backup&#x2F;<code>date+%F-%H-%M-%S</code>.tar.gz </p>
-<p>甚至也可以使用类似如下命令将数据备份至其他服务器:<br>    #innobackupex –stream&#x3D;tar &#x2F;backup | ssh <a href="mailto:&#117;&#115;&#101;&#x72;&#64;&#119;&#x77;&#x77;&#x2e;&#x74;&#x65;&#115;&#116;&#46;&#x63;&#x6f;&#x6d;">&#117;&#115;&#101;&#x72;&#64;&#119;&#x77;&#x77;&#x2e;&#x74;&#x65;&#115;&#116;&#46;&#x63;&#x6f;&#x6d;</a> “cat - &gt; &#x2F;backups&#x2F;<code>date+%F-%H-%M-%S</code>.tar” </p>
+<p>甚至也可以使用类似如下命令将数据备份至其他服务器:<br>    #innobackupex –stream&#x3D;tar &#x2F;backup | ssh <a href="mailto:&#117;&#x73;&#x65;&#x72;&#x40;&#119;&#119;&#119;&#x2e;&#116;&#x65;&#x73;&#x74;&#x2e;&#x63;&#111;&#109;">&#117;&#x73;&#x65;&#x72;&#x40;&#119;&#119;&#119;&#x2e;&#116;&#x65;&#x73;&#x74;&#x2e;&#x63;&#111;&#109;</a> “cat - &gt; &#x2F;backups&#x2F;<code>date+%F-%H-%M-%S</code>.tar” </p>
 <p>此外，在执行贝蒂备份时，还可以使用–parallel选项对多个文件进行并行复制。此选项用于执行在复制时启动的线程数目。当然，在实际进行备份时要利用此功能的便利性，也需要启用innodb_file_per_table选项或共享的表空间通过innodb_data_file_path选项存储在多个ibdata文件中。对某一个数据库的多个文件的复制无法利用到此功能，其简单使用方法如下:<br>    #innobackupex –parallel &#x2F;path&#x2F;to&#x2F;backup </p>
-<p>同时，innobackupex备份的数据文件也可以存储至远程主机，这可以使用–remote-host选项来实现:<br>    #innobackupex --remote-host&#x3D;<a href="mailto:&#x72;&#111;&#x6f;&#116;&#x40;&#119;&#119;&#x77;&#46;&#116;&#101;&#x73;&#x74;&#x2e;&#x63;&#111;&#x6d;">&#x72;&#111;&#x6f;&#116;&#x40;&#119;&#119;&#x77;&#46;&#116;&#101;&#x73;&#x74;&#x2e;&#x63;&#111;&#x6d;</a> &#x2F;PATH&#x2F;IN&#x2F;REMOTE&#x2F;HOST&#x2F;TO&#x2F;BACKUP </p>
+<p>同时，innobackupex备份的数据文件也可以存储至远程主机，这可以使用–remote-host选项来实现:<br>    #innobackupex --remote-host&#x3D;<a href="mailto:&#x72;&#111;&#111;&#x74;&#64;&#119;&#119;&#x77;&#46;&#116;&#x65;&#115;&#x74;&#x2e;&#99;&#111;&#109;">&#x72;&#111;&#111;&#x74;&#64;&#119;&#119;&#x77;&#46;&#116;&#x65;&#115;&#x74;&#x2e;&#99;&#111;&#109;</a> &#x2F;PATH&#x2F;IN&#x2F;REMOTE&#x2F;HOST&#x2F;TO&#x2F;BACKUP </p>
 <ul>
 <li>导入或导出单张表</li>
 </ul>

@@ -436,7 +436,7 @@ var _hmt = _hmt || [];
 <h3 id="一、gpt2-sentiment-ipynb"><a href="#一、gpt2-sentiment-ipynb" class="headerlink" title="一、gpt2-sentiment.ipynb"></a>一、gpt2-sentiment.ipynb</h3><blockquote>
 <p>目的：这个文件实现的是如何利用RLHF学会生成正向评论。</p>
 </blockquote>
-
+<img src="/2024/04/07/LLM-RLHF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/1.png" class="" title="流程图">
 
 
 <h4 id="1-Load-IMDB-dataset"><a href="#1-Load-IMDB-dataset" class="headerlink" title="1. Load IMDB dataset"></a>1. Load IMDB dataset</h4><p>数据集默认有两个字段，<code>text</code> 和<code>label</code>，即用户对一部电影的评论和这条评论的情感倾向（正向、负向）。</p>
@@ -454,7 +454,7 @@ var _hmt = _hmt || [];
 <h3 id="二、gpt2-sentiment-control-ipynb"><a href="#二、gpt2-sentiment-control-ipynb" class="headerlink" title="二、gpt2-sentiment-control.ipynb"></a>二、gpt2-sentiment-control.ipynb</h3><blockquote>
 <p>目的：通过添加prompt来控制生成评论的情感。</p>
 </blockquote>
-
+<img src="/2024/04/07/LLM-RLHF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/2.png" class="" title="流程图">
 
 <p>这里的prompt有三类：positive、negative、neutral。由于neutral是reward model本身能力所不具备的，看到这里也可以跳过。</p>
 <p>其构造示例如下：</p>
