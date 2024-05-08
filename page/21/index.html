@@ -206,6 +206,251 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-24-01LAMP编译安装之httpd" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/22/24-01LAMP%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85%E4%B9%8Bhttpd/">24_01LAMP编译安装之httpd</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/22/24-01LAMP%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85%E4%B9%8Bhttpd/" class="archive-article-date">
+  	<time datetime="2015-04-22T02:42:44.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="编译安装LAMP之httpd以及调优"><a href="#编译安装LAMP之httpd以及调优" class="headerlink" title="编译安装LAMP之httpd以及调优"></a>编译安装LAMP之httpd以及调优</h2><p>安装顺序： </p>
+<blockquote>
+<p>httpd —&gt;MYSQL—–&gt;php—–&gt;Xcache<br> <br>httpd:<br>    apr: Apache Portable Runtime  <br>    apr是一个可移植运行库，通俗的说是一个虚拟机，只要安装上对应不同操作系统的apr，就能够使用httpd；<br>    在linux系统中，默认安装了apr，但是有可能会遇到apr版本过低，以至于不能够使用最新版本的httpd；<br>    所以可以下载手动编译安装apr，以支持最新的httpd；<br>    <br>    <br>                 <br>                                                             <br>httpd编译几大部分    最详细：：<a target="_blank" rel="noopener" href="http://httpd.apache.org/docs/2.4/programs/configure.html">http://httpd.apache.org/docs/2.4/programs/configure.html</a><br> <br>#optionalfeatures     
+  </p>
+</blockquote>
+<ol>
+<li>Multi-Processing Modules</li>
+</ol>
+<p>                                <br>#        <br>—-&gt;DSO<br>#    通俗的讲就是提供了模块化的方式以便使用什么模块；<br>#（at this point, you can specify which features you want included in Apache by enabling and disabling modules.  <br>#Apache comes with a wide range of modules included by default.             <br>#They will be compiled as shared objects (DSOs) which can be loaded or unloaded at runtime.        <br> <br><a target="_blank" rel="noopener" href="http://httpd.apache.org/docs/2.4/install.html">http://httpd.apache.org/docs/2.4/install.html</a>                                                                                <br><a target="_blank" rel="noopener" href="http://shineforever.blog.51cto.com/1429204/301247">http://shineforever.blog.51cto.com/1429204/301247</a>    <br> <br> <br>if MPMs are built as DSO modules:    <br>例：    <br>–enable-mpms-shared&#x3D;all 这个使用所有    <br>–enable-mpms-shared&#x3D;’prefork worker’    <br>–with-mpm&#x3D;event    <br>这个会默认使用event模块；编译好后 httpd -l 查看；<br> <br>static:<br>就是直接静态编译进系统，不能增减；<br>–enable-modules  一般这个是–enable-modules&#x3D;most 表明启动很多常用模块，下如同；                                                                <br>–enable-mods-shared 这个是以DSO编译启用 ; –enable-mods-shared&#x3D;most<br>–enable-mods-static这个是以static编译加入;<br>                                                                                                 <br>2. Third-party modules                <br>–with-module&#x3D;module-type:module-file[, module-type:module-file<br> <br>Note<br>If you want to build a DSO module instead of a statically linked use (apxs).configure searches automatically for an installed zlib library ,if your source configuration requires one (e.g., when mod_deflate is enabled).<br>You can set the directory path to the compression library instead.            <br> <br>3. specific packages                                 </p>
+<blockquote>
+<p>–with-apr&#x3D;DIR|FILE        <br>–with-apr-util&#x3D;DIR|FILE    <br>–with-ssl&#x3D;DIR        <br>–with-z&#x3D;DIR<br> <br>为了确保开发环境已经装好<br>    <br>    yum grouplist ;            列出当前系统已经安装的软件包组、可安装的软件包组;    (说明：yum list是可安装的软件包)         </p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#yum groupinstall &quot;Development tools&quot;    确保开发工具包安装；             </span></span><br><span class="line">                                                                                              </span><br><span class="line"><span class="comment">#yum groupinstall &quot;Development Libraries&quot;    开发库的安装；这个我在试验时也可以不安装； </span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>apr–&gt;apr-util–&gt;httpd<br>(在这说句，如果你是直接拷贝这些源码包，如果时间来自未来，所以用hwclock -s 更新到现在时间)                               </p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">    ./configure --<span class="built_in">help</span> | less 查看帮助信息 </span><br><span class="line">  </span><br><span class="line">    <span class="comment">#tar xvjf apr-1.5.1.tar.bz2                                     </span></span><br><span class="line">    <span class="comment">#./configure --prefix=/usr/local/apr </span></span><br><span class="line">    <span class="comment">#make &amp;&amp; make install                                   </span></span><br><span class="line">                                                                                                  </span><br><span class="line">                                                                                                          </span><br><span class="line">    <span class="comment">#tar xvjf apr-util-1.5.4.tar.bz2     </span></span><br><span class="line">    <span class="comment">#./configure --prefix=/usr/local/apr-util --with-apr=/usr/local/apr         </span></span><br><span class="line">    <span class="comment">#make &amp;&amp; make install                                                     </span></span><br><span class="line">                                                                                                  </span><br><span class="line">    <span class="comment">#yum install pcre-devel </span></span><br><span class="line">    <span class="comment">#tar xvjf httpd-2.4.10.tar.bz2     </span></span><br><span class="line">    <span class="comment">#./configure --prefix=/usr/local/apache --sysconfdir=/etc/httpd         </span></span><br><span class="line">     --enable-so --enable-rewrite --enable-ssl --enable-cgi --enable-cgid </span><br><span class="line">    --enable-modules=most     --enable-deflate </span><br><span class="line">    --enable-mods-shared=most --enable-mpms-shared=all --with-mpm=event(默认) </span><br><span class="line">    --with-apr=/usr/local/apr --with-apr-util=/usr/local/apr-util </span><br><span class="line">      </span><br><span class="line">configure: error: mod_ssl has been requested but can not be built due to prerequisite failures </span><br><span class="line">     <span class="comment">#yum install openssl-devel </span></span><br><span class="line">  </span><br><span class="line">configure:error:mod_deflate has been requested but can not be build due to prerequisite failures </span><br><span class="line">    <span class="comment">#yum install zlib-devel </span></span><br><span class="line">  </span><br><span class="line">   <span class="comment"># make &amp;&amp; make install </span></span><br><span class="line"><span class="built_in">cp</span> /etc/httpd/httpd.conf /etc/httpd/httpd.conf.bak </span><br></pre></td></tr></table></figure>
+<h1 id="vi-etc-httpd-httpd-conf"><a href="#vi-etc-httpd-httpd-conf" class="headerlink" title="vi &#x2F;etc&#x2F;httpd&#x2F;httpd.conf"></a>vi &#x2F;etc&#x2F;httpd&#x2F;httpd.conf</h1><p> 添加PidFile &#x3D; “&#x2F;var&#x2F;run&#x2F;httpd.pid”<br>    （說明，我在实验时可以不添加这一行）<br>#########################################################################<br>添加虚拟主机可以在&#x2F;etc&#x2F;httpd&#x2F;extra&#x2F;下创建；<br>然后在&#x2F;etc&#x2F;httpd&#x2F;httpd.conf中把VirtualHost给启用； 
+  </p>
+<ol>
+<li>找到DocumentRoot禁止掉; </li>
+<li>重新编写一个要么把Include &#x2F;etc&#x2F;httpd&#x2F;extra&#x2F;httpd-vhosts.conf启用(说明，默认情况下没有启动extra&#x2F;目录) </li>
+<li>&lt;VirtualHost 172.17.14.58:80&gt;<br>    ServerName <a target="_blank" rel="noopener" href="http://www.test.com/">www.test.com</a><br>    DocumentRoot “&#x2F;www&#x2F;test.com”<br>    ErrorLog “logs&#x2F;test.com-error_log”<br>    CustomLog “logs&#x2F;test.com-access_log” commom<br>    &lt;Directory “&#x2F;www&#x2F;test.com”&gt;<br>        Require all granted<br>    </Directory> </VirtualHost> 
+这是最基本的写法，一定要注意。 
+着重声明:2.2版本和2.4版本在定义访问控制的时候不一样了: 
+原来: 
+    Order allow,deny 
+现在: 
+    Require all granted</li>
+</ol>
+<p> <br> <br>vim &#x2F;etc&#x2F;profile.d&#x2F;httpd.sh<br>export PATH&#x3D;$PATH:&#x2F;usr&#x2F;local&#x2F;apache&#x2F;bin<br>重新登录即可。<br> <br>如果想把event改为prefork.<br>注释掉:<br>#LoadModule mpm_event_module modules&#x2F;mod_mpm_event.so<br>添加:<br>LoadModule mpm_prefork_module modules&#x2F;mod_mpm_prefork.so<br>重启:<br>应该用下面命令来查看当前系统使用的模块。。<br>httpd -M<br> <br>httpd 2.4新特性: </p>
+<ol>
+<li>MPM可于运行时装载:<br>    –enable-mpms-shared&#x3D;all –with-mpm&#x3D;event </li>
+<li>支持event MPM </li>
+<li>异步读写 </li>
+<li>在每个模块及每个目录上指定日志级别 </li>
+<li>每请求配置:<If><ElseIf><Else>; </li>
+<li>增强表达式分析器 </li>
+<li>毫秒级的Keepalive Timeout </li>
+<li>基于域名的虚拟主机不再需要NameVirtualHost指令；！！！！！！！ </li>
+<li>降低了内存占用 </li>
+<li>支持在配置文件中使用自定义变量</li>
+</ol>
+<p>  
+  
+  </p>
+<h2 id="各选项介绍"><a href="#各选项介绍" class="headerlink" title="各选项介绍"></a>各选项介绍</h2><blockquote>
+<p>–prefix&#x3D;&#x2F;usr&#x2F;local&#x2F;apache 安装路径                                                                                            <br>–sysconfdir&#x3D;&#x2F;etc&#x2F;httpd24 配置文件路径<br>–enable-so 允许运行时加载DSO模块                                                                        <br>–enable-ssl 如果不加载将无法使用使用https                                                        <br>–enable-cgi 允许使用cgi脚本    <br>–enable-cgid允许线程执行cgi脚本                                                                                                                                                 <br>–enable-rewrite 支持URL重写机制                                                                                       <br>–with-zlib 支持网络通用压缩库                                                            <br>–with-pcre 支持pcre   用pcre来解决C语言中使用正则表达式的问题                                <br>–with-apr&#x3D;&#x2F;usr&#x2F;local&#x2F;apr 指定apr的安装路径                                                                                                                                     <br>–with-apr-util&#x3D;&#x2F;usr&#x2F;local&#x2F;apr-util&#x2F; 指定apr-util的安装路径                                                                                                                          <br>–enable-modules&#x3D;most 启用大多数常用的模块                                                                                                                                     <br>–enable-mpms-shared&#x3D;all 启用MPM所有支持的模式                                                                                                                                     <br>–with-mpm&#x3D;event 默认使用enevt模式                                                    <br>##优化<br> <br><a target="_blank" rel="noopener" href="http://www.jincon.com/archives/243/">http://www.jincon.com/archives/243/</a></p>
+</blockquote>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/22/24-01LAMP%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85%E4%B9%8Bhttpd/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-23-04建立LAMP平台" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/22/23-04%E5%BB%BA%E7%AB%8BLAMP%E5%B9%B3%E5%8F%B0/">23_04建立LAMP平台</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/22/23-04%E5%BB%BA%E7%AB%8BLAMP%E5%B9%B3%E5%8F%B0/" class="archive-article-date">
+  	<time datetime="2015-04-22T02:41:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="图形化客户端管理工具"><a href="#图形化客户端管理工具" class="headerlink" title="图形化客户端管理工具"></a>图形化客户端管理工具</h2><ol>
+<li>phpmyadmin </li>
+<li>Workbench </li>
+<li>MYSQL Front </li>
+<li>navicat for mysql&#x2F;mysql</li>
+</ol>
+<blockquote>
+<p>yum install php-mysql<br>php和mysql<br>php连接mysql并获取数据测试：<br>编辑主页: </p>
+</blockquote>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line">    <span class="variable">$conn</span>=<span class="title function_ invoke__">mysql_connect</span>(<span class="string">&#x27;localhost&#x27;</span>,<span class="string">&#x27;root&#x27;</span>,<span class="string">&#x27;password&#x27;</span>); </span><br><span class="line">    <span class="keyword">if</span>(<span class="variable">$conn</span>) </span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;success&quot;</span>; </span><br><span class="line">    <span class="keyword">else</span> </span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;failure&quot;</span>; </span><br><span class="line"><span class="meta">?&gt;</span> </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ul>
+<li>论坛</li>
+</ul>
+<ul>
+<li>discuz </li>
+<li>phpwind </li>
+<li>phpbb</li>
+</ul>
+<ul>
+<li>CMS</li>
+</ul>
+<ul>
+<li>drupal </li>
+<li>joomla</li>
+</ul>
+<p>   <br>wordpress ： 个人博客系统<br>phpmyadmin    php-mcrypt<br>放在网页目录下:<br>#mv phpmyadmin-version-language pma<br><a target="_blank" rel="noopener" href="http://www.unravel.com/pma">www.unravel.com/pma</a> </p>
+<p>discuz:<br>GBK<br>upload目录: </p>
+<p>mv upload&#x2F;* &#x2F;www&#x2F;b.net<br>vim &#x2F;etc&#x2F;httpd&#x2F;httpd.conf<br>把这行注释掉，如果乱码:<br>#AddDefaultCharset UTF-8<br>把权限改一下:</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/22/23-04%E5%BB%BA%E7%AB%8BLAMP%E5%B9%B3%E5%8F%B0/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-23-03MySQL初步，数据类型及SQL语句" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1268,206 +1513,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/04/05/14-01-2-grub2%E5%BC%95%E5%AF%BC%E4%BF%AE%E5%A4%8D/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-38-04-2-实验利用haresources进行资源管理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/04/38-04-2-%E5%AE%9E%E9%AA%8C%E5%88%A9%E7%94%A8haresources%E8%BF%9B%E8%A1%8C%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86/">38_04_2_实验利用haresources进行资源管理</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/04/38-04-2-%E5%AE%9E%E9%AA%8C%E5%88%A9%E7%94%A8haresources%E8%BF%9B%E8%A1%8C%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86/" class="archive-article-date">
-  	<time datetime="2015-04-04T10:19:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-04</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>cat &gt;&gt;实验说明:&lt;&lt;EOF<br>web服务器:<br>192.168.122.162    node1.test.com<br>192.168.122.244    node2.test.com<br>nfs服务器:<br>192.168.122.27        nfs.test.com<br>EOF </p>
-<p>#①提供主机名 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">hostname <span class="string">&quot;node1.test.com&quot;</span> </span><br><span class="line">vim /etc/sysconfig/network </span><br><span class="line">HOSTNAME=node1.test.com </span><br><span class="line"> </span><br><span class="line">hostname <span class="string">&quot;node2.test.com&quot;</span> </span><br><span class="line">vim /etc/sysconfig/network </span><br><span class="line">HOSTNAME=node2.test.com </span><br><span class="line"> </span><br><span class="line">hostname <span class="string">&quot;nfs.test.com&quot;</span> </span><br><span class="line">vim /etc/sysconfig/network </span><br><span class="line">HOSTNAME=nfs.test.com </span><br></pre></td></tr></table></figure>
-<p>#②web服务器能够基于公钥登陆 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa  -f ~/.ssh/id_rsa -P <span class="string">&#x27;&#x27;</span> </span><br><span class="line">ssh-copy-id -i ~/.ssh/id_rsa.pub root@192.168.122.244 </span><br><span class="line"> </span><br><span class="line">ssh-keygen -t rsa  -f ~/.ssh/id_rsa -P <span class="string">&#x27;&#x27;</span> </span><br><span class="line">ssh-copy-id -i ~/.ssh/id_rsa.pub root@192.168.122.162 </span><br></pre></td></tr></table></figure>
-<p>#③提供hosts文件 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> &gt;&gt;/etc/hosts&lt;&lt;<span class="string">EOF </span></span><br><span class="line"><span class="string">192.168.122.162    node1.test.com </span></span><br><span class="line"><span class="string">192.168.122.244    node2.test.com </span></span><br><span class="line"><span class="string">EOF</span> </span><br><span class="line">scp /etc/hosts node2:/etc/ </span><br></pre></td></tr></table></figure>
-<p>#④时间同步 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ntpdate ntp.api.bz </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;*/5     *       *       *       *       ntpdate ntp.api.bz &amp;&gt;/dev/null&quot;</span> &gt;&gt; /etc/crontab </span><br></pre></td></tr></table></figure>
-<p>#⑤利用epel源，安装heartbeat </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">yum -y install epel-release </span><br><span class="line">yum -y install heartbeat &amp;&amp; chkconfig heartbeat on </span><br><span class="line">yum -y install httpd &amp;&amp; chkconfig httpd off </span><br></pre></td></tr></table></figure>
-<p>#⑥提供配置文件 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> -p /usr/share/doc/heartbeat-3.0.4/&#123;authkeys,ha.cf,haresources&#125; /etc/ha.d </span><br><span class="line"><span class="built_in">cd</span> /etc/ha.d/ </span><br><span class="line"><span class="built_in">chmod</span> 600 authkeys </span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/random count=1 bs=512 | <span class="built_in">md5sum</span> </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cat</span> &gt;&gt;authkeys&lt;&lt;<span class="string">EOF </span></span><br><span class="line"><span class="string">auth1 </span></span><br><span class="line"><span class="string">1 md5 05d7ca80f950d1a7b41322bd39220d2a </span></span><br><span class="line"><span class="string">EOF</span> </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cat</span> &gt;&gt;ha.cf&lt;&lt;<span class="string">EOF </span></span><br><span class="line"><span class="string">logfacility    local0 </span></span><br><span class="line"><span class="string">keepalive 2 </span></span><br><span class="line"><span class="string">deadtime 30 </span></span><br><span class="line"><span class="string">warntime 10 </span></span><br><span class="line"><span class="string">initdead 120 </span></span><br><span class="line"><span class="string">udpport    694 </span></span><br><span class="line"><span class="string">mcast eth1 225.0.0.1 694 1 0 </span></span><br><span class="line"><span class="string">auto_failback on </span></span><br><span class="line"><span class="string">node    node1.test.com </span></span><br><span class="line"><span class="string">node    node2.test.com </span></span><br><span class="line"><span class="string">ping 192.168.122.1 </span></span><br><span class="line"><span class="string">deadping 30 </span></span><br><span class="line"><span class="string">compression    bz2 </span></span><br><span class="line"><span class="string">compression_threshold 2 </span></span><br><span class="line"><span class="string">EOF</span> </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cat</span> &gt;&gt;haresources&lt;&lt;<span class="string">EOF </span></span><br><span class="line"><span class="string">node1.test.com IPaddr::192.168.122.100/24/eth1 httpd </span></span><br><span class="line"><span class="string">EOF</span> </span><br><span class="line"> </span><br><span class="line">scp  /etc/ha.d/&#123;ha.cf,authkeys,haresources&#125; node2:/etc/ha.d/ </span><br><span class="line"> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;node1.test.com&quot;</span> &gt; /var/www/html/index.html </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;node2.test.com&quot;</span> &gt; /var/www/html/index.html </span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> &#123;1..2&#125;;<span class="keyword">do</span> ssh node<span class="variable">$x</span> <span class="string">&#x27;service heartbeat start&#x27;</span> start;<span class="keyword">done</span> </span><br><span class="line"> </span><br><span class="line"><span class="comment">#进行访问测试，然后转到/usr/share/heartbeat-3.0.4 &amp;&amp; ./hb_standby 将自己转移为备节点，那么另外一个将成为主节点； </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#提供nfs服务器文件共享: </span></span><br><span class="line">yum -y install nfs-utils rpcbind </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&lt;h1&gt;success&lt;/h1&gt;&quot;</span> &gt; /web/htdocs/index.html </span><br><span class="line">service nfs start </span><br><span class="line">service rpcbind start </span><br><span class="line">showmount -e 192.168.122.27 </span><br><span class="line"> </span><br><span class="line">mount -t nfs 192.168.122.27:/web/htdocs /mnt </span><br><span class="line">umount /mnt      <span class="comment">#heartbeat会进行自动挂载，但是要注意:nfs服务不能关掉，否则资源不会被访问到； </span></span><br><span class="line"> </span><br><span class="line"><span class="built_in">cat</span> &gt;&gt;haresources&lt;&lt;<span class="string">EOF </span></span><br><span class="line"><span class="string">node1.test.com IPaddr::192.168.122.100/24/eth1 Filesystem::172.16.100.27:/web/htdocs::/var/www/html::nfs httpd </span></span><br><span class="line"><span class="string">EOF</span> </span><br><span class="line"> </span><br><span class="line">scp haresources node2:/etc/ha.d/ </span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> &#123;1..2&#125;;<span class="keyword">do</span> ssh node<span class="variable">$x</span> <span class="string">&#x27;service heartbeat start&#x27;</span> start;<span class="keyword">done</span> </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#启动heartbeat会出现，稍微等一会，就会发现资源能够正常工作了，如果不行，那么service heartbeat restart即可；下面是首次启动时的输出样例； </span><br><span class="line">#Starting High-Availability services: INFO:  Resource is stoppedDone. </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">#如果开启了iptables服务器： </span><br><span class="line">#iptables -A INPUT -p udp -dport 694 -j ACCEPT </span><br><span class="line">#iptables -A OUTPUT -p udp --sport 694 -j ACCEPT </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
-<p>因为我的网卡是eth1,所以全文的网络接口指向的是eth1;;;</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/04/38-04-2-%E5%AE%9E%E9%AA%8C%E5%88%A9%E7%94%A8haresources%E8%BF%9B%E8%A1%8C%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-38-03Linux集群系列之九-高可用集群原理详解之多节点集群" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/03/38-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B9%9D-%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E5%A4%9A%E8%8A%82%E7%82%B9%E9%9B%86%E7%BE%A4/">38_03Linux集群系列之九--高可用集群原理详解之多节点集群</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/03/38-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B9%9D-%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E5%A4%9A%E8%8A%82%E7%82%B9%E9%9B%86%E7%BE%A4/" class="archive-article-date">
-  	<time datetime="2015-04-03T10:19:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-03</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>quorum:法定票数<br>默认都为１票 </p>
-<p>failover domain(故障转移域) </p>
-<p>Messaging Layer:<br>HeartBeat v1<br>HeartBeat v2<br>HeartBeat v3<br>        UDP:694<br>HeartBeat v3<br>    heartbeat,pacemaker,cluster-glue </p>
-<p>corosync+pacemaker<br>cman<br>keepalived:由于使用的是VRRP(虚拟路由冗余协议)，所以更适合于做双主模型；<br>ultramonky </p>
-<p>CRM:<br>在heartbeat v1.x版本中，默认的是haresource，在heartbeat v2.x版本中，增加了crm资源管理器，crm管理方式有两个，一种是基于命令行的crmsh,另一个是基于图形界面的hb_gui;<br>pacemaker(heartbeat v3或corosync)<br>rgmanager(cman) </p>
-<p>Resource type:<br>    Primitive<br>    clone<br>    group<br>    master&#x2F;slave:drbd </p>
-<p>RA Type:<br>    Legacy heartbeat v1 RA<br>    Linux Standard Base<br>    OCF(Open Cluster Framework)<br>        pacemaker<br>        linbit(drbd)<br>    STONITH </p>
-<p>STONITH设备:<br>1、Power Distribution Units(PDU)带网线的 </p>
-<p>2、Uninterruptible Power Supplies(UPS) </p>
-<p>3、Blade Power Control Devices(刀片服务器电源控制器) </p>
-<p>4、Lights-out Devices </p>
-<p>5、Testing Devices<br>    meatware:手动STONITH设备 </p>
-<p>STONITH的实现:<br>stonithd </p>
-<p>STONITH plug-ins </p>
-<p>Pacemaker 提供了多种用户管理接口，分别如下：<br>(1).基于命令的管理方式<br>crmsh<br>pcs<br>(2).基于图形界面的管理方式<br>pygui<br>hawk<br>LCMC<br>pcs </p>
-<p><a target="_blank" rel="noopener" href="http://www.linuxidc.com/Linux/2013-08/88521.htm">http://www.linuxidc.com/Linux/2013-08/88521.htm</a><br><a target="_blank" rel="noopener" href="http://blog.csdn.net/sdd00001/article/details/21464713">http://blog.csdn.net/sdd00001/article/details/21464713</a><br>HA集群之CoroSync+Pacemaker浅析和实现<br><a target="_blank" rel="noopener" href="http://www.it165.net/admin/html/201405/3066.html">http://www.it165.net/admin/html/201405/3066.html</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/03/38-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B9%9D-%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E5%A4%9A%E8%8A%82%E7%82%B9%E9%9B%86%E7%BE%A4/">展开全文 >></a>
         </p>
       
 

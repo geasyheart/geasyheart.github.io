@@ -206,6 +206,247 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-42-03-2-实验-MySQL基于GTID的多线程复制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/10/02/42-03-2-%E5%AE%9E%E9%AA%8C-MySQL%E5%9F%BA%E4%BA%8EGTID%E7%9A%84%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%A4%8D%E5%88%B6/">42_03_2_实验:MySQL基于GTID的多线程复制</a>
+    </h1>
+  
+
+        
+        <a href="/2015/10/02/42-03-2-%E5%AE%9E%E9%AA%8C-MySQL%E5%9F%BA%E4%BA%8EGTID%E7%9A%84%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%A4%8D%E5%88%B6/" class="archive-article-date">
+  	<time datetime="2015-10-02T08:44:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-02</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="主MySQL的配置文件"><a href="#主MySQL的配置文件" class="headerlink" title="主MySQL的配置文件"></a>主MySQL的配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">[root@node1 ~]<span class="comment"># egrep -v &#x27;^$|#&#x27; /etc/my.cnf </span></span><br><span class="line">[mysqld] </span><br><span class="line">datadir = /mydata/data </span><br><span class="line">binlog_format=ROW </span><br><span class="line">port = 3306 </span><br><span class="line">server_id = 10 </span><br><span class="line">socket = /tmp/mysql.sock </span><br><span class="line">innodb_file_per_table = ON </span><br><span class="line">character_set_server = utf8 </span><br><span class="line">rpl_semi_sync_master_enabled = ON </span><br><span class="line">log_bin = master_bin </span><br><span class="line">log_bin_index = master_bin.index </span><br><span class="line">ssl-ca=/usr/local/mysql/ssl/cacert.pem </span><br><span class="line">ssl-cert=/usr/local/mysql/ssl/master.crt </span><br><span class="line">ssl-key=/usr/local/mysql/ssl/master.key </span><br><span class="line">log-slave-updates=<span class="literal">true</span> </span><br><span class="line">gtid-mode=on </span><br><span class="line">enforce-gtid-consistency=<span class="literal">true</span> </span><br><span class="line">master-info-repository=TABLE    </span><br><span class="line">sync-master-info=1 </span><br><span class="line">slave-parallel-workers=2 </span><br><span class="line">binlog-checksum=CRC32 </span><br><span class="line">master-verify-checksum=1 </span><br><span class="line">slave-sql-verify-checksum=1 </span><br><span class="line">binlog-rows-query-log-events=1 </span><br><span class="line">report-port=3306 </span><br><span class="line">report-host=192.168.122.220 </span><br><span class="line">sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES </span><br></pre></td></tr></table></figure>
+<h2 id="从MySQL的配置文件"><a href="#从MySQL的配置文件" class="headerlink" title="从MySQL的配置文件"></a>从MySQL的配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">[root@node2 ~]<span class="comment"># egrep -v &#x27;^$|#&#x27; /etc/my.cnf </span></span><br><span class="line">[mysqld] </span><br><span class="line">datadir = /mydata/data </span><br><span class="line">port = 3306 </span><br><span class="line">server_id = 11 </span><br><span class="line">socket = /tmp/mysql.sock </span><br><span class="line">innodb_file_per_table = ON </span><br><span class="line">character_set_server = utf8 </span><br><span class="line">relay_log = relay_log </span><br><span class="line">relay_log_index = relay_log.index </span><br><span class="line">rpl_semi_sync_slave_enabled = ON </span><br><span class="line">ssl_ca = /usr/local/mysql/ssl/cacert.pem </span><br><span class="line">ssl_cert = /usr/local/mysql/ssl/slave.crt </span><br><span class="line">ssl_key = /usr/local/mysql/ssl/slave.key </span><br><span class="line">binlog-format=ROW </span><br><span class="line">log-slave-updates=<span class="literal">true</span> </span><br><span class="line">gtid-mode=on </span><br><span class="line">enforce-gtid-consistency=<span class="literal">true</span> </span><br><span class="line">master-info-repository=TABLE </span><br><span class="line">relay-log-info-repository=TABLE </span><br><span class="line">sync-master-info=1 </span><br><span class="line">slave-parallel-workers=2 </span><br><span class="line">binlog-checksum=CRC32 </span><br><span class="line">master-verify-checksum=1 </span><br><span class="line">slave-sql-verify-checksum=1 </span><br><span class="line">binlog-rows-query-log-events=1 </span><br><span class="line">report-port=3306 </span><br><span class="line">log-bin=mysql-bin.log </span><br><span class="line">report-host=192.168.122.14 </span><br><span class="line">sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES </span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> REPLICATION SLAVE <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;repluser&#x27;</span>@<span class="string">&#x27;192.168.122.%&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;replpass&#x27;</span>; </span><br><span class="line">mysql<span class="operator">&gt;</span>FLUSH PRIVILEGES; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">mysql<span class="operator">&gt;</span> change master <span class="keyword">to</span> master_host<span class="operator">=</span><span class="string">&#x27;192.168.122.120&#x27;</span>, </span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> master_user<span class="operator">=</span><span class="string">&#x27;repluser&#x27;</span>, </span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> master_password<span class="operator">=</span><span class="string">&#x27;replpass&#x27;</span>, </span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> master_auto_position<span class="operator">=</span><span class="number">1</span>; </span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected, <span class="number">2</span> warnings (<span class="number">0.30</span> sec) </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">start</span> slave; </span><br></pre></td></tr></table></figure>
+<p>如果遇到mysql -urepluser -h 192.168.122.220 -p </p>
+<p>出现失败 <a href="mailto:&#x72;&#101;&#x70;&#108;&#117;&#115;&#101;&#x72;&#x40;&#110;&#x6f;&#100;&#x65;&#x31;&#x2e;&#x74;&#x65;&#x73;&#x74;&#x2e;&#x63;&#x6f;&#109;">&#x72;&#101;&#x70;&#108;&#117;&#115;&#101;&#x72;&#x40;&#110;&#x6f;&#100;&#x65;&#x31;&#x2e;&#x74;&#x65;&#x73;&#x74;&#x2e;&#x63;&#x6f;&#109;</a>    说明出现了域名解析，那么，<br>skip_name_reslove&#x3D;ON即可；；； </p>
+<ol start="2">
+<li>设置半同步</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">#<span class="keyword">On</span> Master </span><br><span class="line">mysql<span class="operator">&gt;</span>INSTALL PLUGIN rpl_semi_sync_master SONAME <span class="string">&#x27;semisync_master.so&#x27;</span>; </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">SHOW</span> <span class="keyword">GLOBAL</span> VARIABLES <span class="keyword">LIKE</span> <span class="string">&#x27;%rpl%&#x27;</span>; </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> rpl_semi_sync_master_enabled <span class="operator">=</span> <span class="number">1</span>; </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> rpl_semi_sync_master_timeout <span class="operator">=</span> <span class="number">1000</span>;   <span class="number">1000</span>ms </span><br><span class="line"> </span><br><span class="line">#<span class="keyword">On</span> Slave </span><br><span class="line">mysql<span class="operator">&gt;</span>INSTALL PLUGIN rpl_semi_sync_slave SONAME <span class="string">&#x27;semisync_slave.so&#x27;</span>; </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">SET</span> <span class="keyword">GLOBAL</span> rpl_semi_sync_slave_enabled <span class="operator">=</span> <span class="number">1</span>;　 </span><br><span class="line">mysql<span class="operator">&gt;</span>STOP SLAVE IO_THREAD; <span class="keyword">START</span> SLAVE IO_THREAD; </span><br><span class="line"> </span><br><span class="line">在Master和Slave的my.cnf中编辑: </span><br><span class="line"> </span><br><span class="line">#<span class="keyword">On</span> Master </span><br><span class="line">[mysqld] </span><br><span class="line">rpl_semi_sync_master_enabled<span class="operator">=</span><span class="number">1</span> </span><br><span class="line">rpl_semi_sync_master_timeout<span class="operator">=</span><span class="number">1000</span>     #<span class="number">1</span> <span class="keyword">second</span> </span><br><span class="line"> </span><br><span class="line">#<span class="keyword">On</span> Slave </span><br><span class="line">[mysqld] </span><br><span class="line">rpl_semi_sync_slave_enabled <span class="operator">=</span><span class="number">1</span></span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/10/02/42-03-2-%E5%AE%9E%E9%AA%8C-MySQL%E5%9F%BA%E4%BA%8EGTID%E7%9A%84%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%A4%8D%E5%88%B6/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-42-03MySQL主从复制-MySQL5" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/10/02/42-03MySQL%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6-MySQL5/">42_03MySQL主从复制--MySQL5</a>
+    </h1>
+  
+
+        
+        <a href="/2015/10/02/42-03MySQL%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6-MySQL5/" class="archive-article-date">
+  	<time datetime="2015-10-02T08:43:52.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-02</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="数据库的复制过滤功能"><a href="#数据库的复制过滤功能" class="headerlink" title="数据库的复制过滤功能"></a>数据库的复制过滤功能</h2><p>Master:<br>show global variables like “binlog_do_db”;<br>仅将指定数据库的相关修改操作记入二进制日志；<br>show global variables like “binlog_ignore_db”; </p>
+<p>Slave:<br>replicate-do-db &#x3D;<br>replicate-do-table &#x3D;<br>replicate-ignore-db &#x3D;<br>replicate-ignore-table &#x3D;<br>replicate-wild-do-table &#x3D;<br>replicate-wild-ignore-table &#x3D; </p>
+<p>关于replicate-wild-do-table可能带来的问题：<br><a target="_blank" rel="noopener" href="http://dinglin.iteye.com/blog/1207776">http://dinglin.iteye.com/blog/1207776</a> </p>
+<p>在进行过滤的时候，应该在Slave上进行定义过滤规则!!<br>由于这些变量是只读的，所以show没法看到； </p>
+<p>例如:<br>#vim &#x2F;etc&#x2F;my.cnf<br>replicate-do-db &#x3D; discuz<br>#service mysqld restart<br>mysql&gt;show slave status\G<br>可以看到只复制主服务器discuz这个数据库； </p>
+<h2 id="基于GTID实现多线程的复制"><a href="#基于GTID实现多线程的复制" class="headerlink" title="基于GTID实现多线程的复制"></a>基于GTID实现多线程的复制</h2><p>GTID(Global Transaction Identifiers)<br>GTID:由服务器的UUID并结合事务ID标识出来的唯一身份符； </p>
+<p>多线程复制: </p>
+<ul>
+<li>多线程对单个数据库操作有可能带来数据紊乱，所以每个数据库仅能使用一个线程； </li>
+<li>对于一个数据库，多线程没有意义；</li>
+</ul>
+<p>从服务器使用:<br>    slave-parallel-workers&#x3D;#(线程数目最好和数据库数目相同)<br>        ０：表示禁用 </p>
+<p>提供的工具: </p>
+<ul>
+<li>mysqlrelplcate<blockquote>
+<p>实现快速启动从服务器，能够快速检查已经保存的GTIDs,然后从那些没有执行的GTIDs事务中进行备份； </p>
+</blockquote>
+</li>
+<li>mysqlrplcheck<blockquote>
+<p>检查复制环境是否满足的工具 </p>
+</blockquote>
+</li>
+<li>mysqlrplshow<blockquote>
+<p>发现并显示复制的拓扑图<br>并显示主机名和端口号 </p>
+</blockquote>
+</li>
+<li>mysqlfailover<blockquote>
+<p>master故障后，快速使slave提升为master; </p>
+</blockquote>
+</li>
+<li>mysqlrpladmin<blockquote>
+<p>管理工具</p>
+</blockquote>
+</li>
+</ul>
+<p>MySQL5.6引入的GTID(Global Transaction IDs)使得其复制功能的配置、监控及管理变得更加易于实现，且更加健壮； </p>
+<p>要在MySQL5.6中使用复制功能，其服务配置段[mysqld]中至少应该定义如下选项: </p>
+<p>binlog-format:二进制日志的格式，有row,statement和mixed几种类型:<br>    需要注意的是，当设置隔离级别为READ-COMMITTED必须设置二进制日志格式为ROW,现在MySQL官方认为statement这个已经不再适合继续使用；但mixed类型在默认的事务隔离级别下，可能会导致主从数据不一致；<br>    <br>log-slave-updates、gitd-mode、enforce-gtid-consistency、report-port和report-host：用于启动GTID及满足附属的其他需求； </p>
+<blockquote>
+<p>master-info-repository和reply-log-info-repository:启用此两项，可用于实现在崩溃时保证二进制及从服务器安全的功能；<br>sync-master-info:启用之后可保证无信息丢失；<br>slave-paralles-workers:设定从服务器的SQL线程数，0表示关闭多线程复制功能；<br>binlog-checksum、master-verity-checksum和slave-verity-checksum：启用复制相关的所有校验功能；<br>binlog-rows-query-log-events:启用之后可用于在二进制日志记录事件相关的信息，可降低故障排除的复杂度；<br>log-bin:启用二进制日志，这是保证复制功能的基本前提；<br>server-id:同一个复制拓扑中的所有服务器的ID号必须唯一； </p>
+</blockquote>
+<p>report-host: </p>
+<blockquote>
+<p>The host name or IP address of the slave to be reported to the master during slave registration,This value appears in the output of SHOW SLAVE HOSTS on the master server. </p>
+</blockquote>
+<p>report-port: </p>
+<blockquote>
+<p>The TCP&#x2F;IP port number for connecting to the slave,to be reported to the master during slave registration. </p>
+</blockquote>
+<p>master-info-repository: </p>
+<blockquote>
+<p>The setting of this variable determines whether the slave logs master status and connection information to a FILE(master.info),or to a TABLE(mysql.slave_master_info) </p>
+</blockquote>
+<p>relay-log-info-repository: </p>
+<blockquote>
+<p>This option causes the server to log its relay log info to a file or a table. </p>
+</blockquote>
+<p>log_slave_updates: </p>
+<blockquote>
+<p>Whether updates received by a slave server from a master server should be logged to the slave’s own binary log ,binary logging must be enabled on the slave for this variable to have any effect; </p>
+</blockquote>
+<blockquote>
+<p>enforce_gtid_consistency:强制GTID的一致性 </p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line">一、简单主从模式配置步骤 </span><br><span class="line"> </span><br><span class="line">172.16.100.106 master.test.com </span><br><span class="line">172.16.100.107 slave.test.com </span><br><span class="line"> </span><br><span class="line">１、配置主从节点的服务配置文件 </span><br><span class="line"> </span><br><span class="line">1.1、配置master节点: </span><br><span class="line">[mysqld] </span><br><span class="line">binlog_format=ROW </span><br><span class="line">log-bin=master-bin.log </span><br><span class="line">log-slave-updates=<span class="literal">true</span> </span><br><span class="line">gtid-mode=on </span><br><span class="line">enforce-gtid-consistency=<span class="literal">true</span> </span><br><span class="line">master-info-repository=TABLE                   //原来master.info这个文件以表的形式存在 </span><br><span class="line">relay-log-info-repository=TABLE </span><br><span class="line">sync-master-info=1 </span><br><span class="line">slave-parallel-workers=2 </span><br><span class="line">binlog-checksum=CRC32 </span><br><span class="line">master-verify-checksum=1 </span><br><span class="line">slave-sql-verify-checksum=1 </span><br><span class="line">binlog-rows-query-log_events=1 </span><br><span class="line">server-id=1 </span><br><span class="line">report-port=3306 </span><br><span class="line">port=3306 </span><br><span class="line">datadir=/mydata/data </span><br><span class="line">socket=/tmp/mysql.sock </span><br><span class="line">report-host=master.test.com </span><br><span class="line">    由于要进行解析，所以本地应该有hosts文件，但是为了更便捷，可以改为 </span><br><span class="line">    report-host=172.16.100.106(主) </span><br><span class="line"> </span><br><span class="line">show  global variables like <span class="string">&quot;%gtid%&quot;</span>; </span><br><span class="line">show master status; </span><br><span class="line">show global variables like <span class="string">&#x27;%uuid%&#x27;</span>; </span><br><span class="line"> </span><br><span class="line">uuid+事务日志号就是GTID号； </span><br><span class="line"> </span><br><span class="line">1.2、配置slave节点: </span><br><span class="line">[mysqld] </span><br><span class="line">binlog-format=ROW </span><br><span class="line">log-slave-updates=<span class="literal">true</span> </span><br><span class="line">gtid-mode=on </span><br><span class="line">enforce-gtid-consistency=<span class="literal">true</span> </span><br><span class="line">master-info-repository=TABLE </span><br><span class="line">relay-log-info-repository=TABLE </span><br><span class="line">sync-master-info=1 </span><br><span class="line">slave-parallel-workers=2 </span><br><span class="line">binlog-checksum=CRC32 </span><br><span class="line">master-verify-checksum=1 </span><br><span class="line">slave-sql-verify-checksum=1 </span><br><span class="line">binlog-rows-query-log_events=1 </span><br><span class="line">server-id=11 </span><br><span class="line">report-port=3306 </span><br><span class="line">port=3306 </span><br><span class="line">log-bin=mysql-bin.log </span><br><span class="line">datadir=/mydata/data </span><br><span class="line">socket=/tmp/mysql.sock </span><br><span class="line">report-host=slave.test.com </span><br><span class="line">    一、由于要进行解析，所以本地应该有hosts文件，但是为了更便捷，可以改为 </span><br><span class="line">    report-host=172.16.100.10７(从) </span><br><span class="line">    二、如果想做成高可用，可以启用log-bin=master-bin </span><br><span class="line"> </span><br><span class="line">２、创建复制用户 </span><br><span class="line">mysql&gt;GRANT REPLICATION SLAVE ON *.* TO <span class="string">&#x27;repluser&#x27;</span>@<span class="string">&#x27;172.16100.7&#x27;</span> IDENTIFIED BY <span class="string">&#x27;replpass&#x27;</span>; </span><br><span class="line">mysql&gt;FLUSH PRIVILEGES; </span><br><span class="line">说明:172.16.100.7是从节点服务器；如果想一次性授权更多的节点，可以自行根据修改； </span><br><span class="line"> </span><br><span class="line">３、为备节点提供初始数据集 </span><br><span class="line"> </span><br><span class="line">锁定主表。备份主节点上的数据，将其还原至从节点，如果没有启用GTID,在备份时需要在master上使用show master status命令查看二进制日志文件名称及事件位置，以便后面启动slave节点时使用。 </span><br><span class="line"> </span><br><span class="line">４、启动从节点的复制线程 </span><br><span class="line"> </span><br><span class="line">如果启用了GTID功能，则使用如下命令: </span><br><span class="line">mysql&gt;CHANGE MASTER TO MASTER_HOST=<span class="string">&#x27;172.16.100.106&#x27;</span>,MASTER_USER=<span class="string">&#x27;repluser&#x27;</span>,MASTER_PASSWORD=<span class="string">&#x27;replpass&#x27;</span>,MASTER_AUTO_POSITION=1; </span><br><span class="line"> </span><br><span class="line">没启用GTID,则需要使用如下命令： </span><br><span class="line">slave&gt;CHANGE MASTER TO MASTER_HOST=<span class="string">&#x27;172.16.100.6&#x27;</span>, </span><br><span class="line">-&gt;MASTER_USER=<span class="string">&#x27;repluser&#x27;</span>, </span><br><span class="line">-&gt;MASTER_PASSWORD=<span class="string">&#x27;replpass&#x27;</span>, </span><br><span class="line">-&gt;MASTER_LOG_FILE=<span class="string">&#x27;master-bin.000003&#x27;</span>, </span><br><span class="line">-&gt;MASTER_LOG_POS=1174; </span><br><span class="line"> </span><br><span class="line">5、START SLAVE; </span><br><span class="line"> </span><br><span class="line">6、查看 </span><br><span class="line">show slave hosts;(主服务器上查看) </span><br><span class="line"> </span><br><span class="line">二、半同步复制 </span><br><span class="line">与5.5基本一样，可参考前面的。另外如果实施的时候，建议两者都看下，以防忘记； </span><br><span class="line">已经在5.6上实验，可看42_03(2)实验：MySQL基于GTID的多线程复制； </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">Bootstrap mode disables GTIDs. Bootstrap mode should only be used by mysql_install_db <span class="built_in">which</span> initializes the MySQL data directory and creates system tables. </span><br><span class="line"> </span><br><span class="line">disable-gtid-unsafe-statements = 0 </span><br></pre></td></tr></table></figure>
+ <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">[mysqld] </span><br><span class="line"> </span><br><span class="line"> datadir = /mydata/data </span><br><span class="line"> server_id = 10 </span><br><span class="line">log_bin = master-bin </span><br><span class="line">log_bin_index = master-bin.index </span><br><span class="line">innodb_file_per_table = ON </span><br><span class="line">sync_binlog = 1 </span><br><span class="line">binlog-format=ROW </span><br><span class="line">log-slave-updates=true </span><br><span class="line">gtid-mode=on </span><br><span class="line">enforce-gtid-consistency=true </span><br><span class="line">master-info-repository=TABLE </span><br><span class="line">relay-log-info-repository=TABLE </span><br><span class="line">sync-master-info=1 </span><br><span class="line">slave-parallel-workers=2 </span><br><span class="line">binlog-checksum=CRC32 </span><br><span class="line">master-verify-checksum=1 </span><br><span class="line">slave-sql-verify-checksum=1 </span><br><span class="line">binlog-rows-query-log_events=1 </span><br><span class="line">report-port=3306 </span><br><span class="line">port=3306 </span><br><span class="line">socket=/tmp/mysql.sock </span><br><span class="line">report-host=192.168.1.110 </span><br><span class="line"> </span><br><span class="line">sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/10/02/42-03MySQL%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6-MySQL5/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-42-02-2-MySQL基于SSL进行主从复制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1007,208 +1248,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/09/26/40-04Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E5%85%AB-RHCS%E9%9B%86%E7%BE%A4%E9%85%8D%E7%BD%AE/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-40-03Linux集群系列之十七-RHCS架构解析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/09/26/40-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E4%B8%83-RHCS%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/">40_03Linux集群系列之十七--RHCS架构解析</a>
-    </h1>
-  
-
-        
-        <a href="/2015/09/26/40-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E4%B8%83-RHCS%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2015-09-26T06:52:39.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-26</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>RHCS(Red Hat Cluster Suite): </p>
-<blockquote>
-<p>    LVS<br>    HA<br>    GFS2　(Global File System,早期RH4&#x2F;5有GFS)<br>    cLVM   (Cluster Logical Volume Manager)<br>RHCS提供了完整的集群资源套件，例如上面的负载均衡，高可用，集群文件系统，集群逻辑卷管理器； </p>
-</blockquote>
-<p>在RH4,5两个版本中，信息层和管理层和资源代理的实现组件如下:<br>RHCS: </p>
-<blockquote>
-<p>    ML:cman (cluster manager)<br>    CRM: rgmanager (resource group manager)<br>    RA:<br>        １、internal<br>        ２、script: LSB </p>
-</blockquote>
-<p>在RH4上Messaging Layer是cman,但是由于cman在整个信息层的功能没有openais的强大，所以在RH5上cman作为openais的一个插件工作，而这个插件的主要作用在于提供了quorum(因为当时并没有很好的关于投票系统的解决方案)但是配置文件并不依赖于openais,而是由cman自己提供，在&#x2F;etc&#x2F;cluster&#x2F;cluster.conf,所以说在RH5上openais提供了信息层的监控，但是仍由cman进行管理。 </p>
-<p>在RH6上提供了完整的corosync信息层管理工具，可以不再使用cman这个插件，如果使用cman，它的配置文件仍是&#x2F;etc&#x2F;cluster&#x2F;cluster.conf；<br>然而在资源管理层虽然使用了pacemaker,但是仍由rgmanager管理，这个和信息层一样，即虽然使用了corosync和pacemaker,但是仍由cman和rgmanager控制； </p>
-<p>在corosync2.3.0版本后，提供了一个更加优秀的投票系统，这个叫做votequorum，所以在这个版本中的cman将会退出这个江湖； </p>
-<p>gfs2:Global File System(集群文件系统):最好16个节点<br>ocfs2:Oracle Cluster File System(没有gfs2好)<br>DLM:Distributed Lock Manager(分布式锁管理器)<br>gfs:Google file system(分布式文件系统)<br>所以在搜索gfs的时候要注意；<br>为了能够扩展容量，所以提供了类似LVM的集群逻辑卷；<br>cLVM:借助于HA的功能，将某个节点对LVM操作通知给其他节点；<br>CCS(Cluster Configuration System):各个节点配置资源的通知，更新；<br>Failover domain:服务故障转移域:表示节点出问题了应该往哪节点转移以及是否应该重启服务；<br>    如果一个服务停止了，是转移到另外一个节点上，还是应该重启服务，所以可以定义优先级； </p>
-<p>LVM–&gt;cLVM:<br>#vim &#x2F;etc&#x2F;lvm&#x2F;lvm.conf<br>locking_type &#x3D;1 基于文件的锁<br>把其改为3就可改为集群的了；<br>然后启动cLVM服务即可； </p>
-<p>    <br>LVS:piranha(GUI工具) </p>
-<p>软件、系统安装:<br>cobbler(类似于PXE的自动安装)<br>puppet(配置文件管理、软件分发)<br>luci&#x2F;ricci(集群管理)<br>fabric(命令分发工具，比for ;do ssh ; done这个方式高的多) </p>
-<p>RHCS配置:<br>system-config-cluster </p>
-<p>详细部分可以查看:<br><a target="_blank" rel="noopener" href="http://blog.chinaunix.net/uid-26931379-id-3558604.html">http://blog.chinaunix.net/uid-26931379-id-3558604.html</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/09/26/40-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E4%B8%83-RHCS%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-40-02-2-MySQL-DRBD" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/09/22/40-02-2-MySQL-DRBD/">40_02_2_MySQL+DRBD</a>
-    </h1>
-  
-
-        
-        <a href="/2015/09/22/40-02-2-MySQL-DRBD/" class="archive-article-date">
-  	<time datetime="2015-09-22T02:17:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <ul>
-<li>两个节点都要做．．．．</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">＃fdisk /dev/sdb     分了500M大小，同步速度一取决于DRBD配置文件中的rate定义，在drbd84版本中就不存在这个选项了． </span><br><span class="line">＃partprobe /dev/sdb </span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>epel</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">＃rpm -Uvh http://www.elrepo.org/elrepo-release-6-6.el6.elrepo.noarch.rpm </span><br><span class="line">＃yum install -y drbd83 kmod-drbd83 </span><br><span class="line">＃yum install -y epel-release    corosync pacemaker  　这个是因为后面安装crm时需要pash,需要这个源； </span><br><span class="line">＃elinks http://download.opensuse.org/repositories/network:/ha-clustering:/Stable/CentOS_CentOS-6/x86_64/　　下载crmsh,如果用pcs,就没必要了。 </span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>global-common</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line">配置/etc/drbd.d/global-common.conf </span><br><span class="line">global &#123; </span><br><span class="line">    usage-count no; </span><br><span class="line">    <span class="comment">#minor-count dialog-refresh disable-ip-verification </span></span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">common&#123; </span><br><span class="line">    protocol C;　　 </span><br><span class="line"> </span><br><span class="line">    handlers&#123; </span><br><span class="line">        pri-on-incon-degr <span class="string">&quot;/usr/lib/drbd/notify-pri-on-incon-degr.sh; /usr/lib/drbd/notify-emergency-reboot.sh; echo b &gt; /proc/sysrq-trigger ; reboot -f&quot;</span>; </span><br><span class="line">        pri-lost-after-sb <span class="string">&quot;/usr/lib/drbd/notify-pri-lost-after-sb.sh; /usr/lib/drbd/notify-emergency-reboot.sh ; echo b &gt; /proc/sysrq-trigger ;reboot -f&quot;</span>; </span><br><span class="line">        local-io-error <span class="string">&quot;/usr/lib/drbd/notify-io-error.sh; /usr/lib/drbd/notify-io-emergency-shutdown.sh; echo 0 &gt; /proc/sysrq-trigger ; halt -f&quot;</span>; </span><br><span class="line">        <span class="comment">#fence-peer &quot;/usr/lib/drbd/crm-fence-peer.sh&quot;; </span></span><br><span class="line">        <span class="comment">#split-brain &quot;/usr/lib/drbd/notify-split-brain.sh reboot&quot;; </span></span><br><span class="line">        <span class="comment">#out-of-sync &quot;/usr/lib/drbd/notify-out-of-sync.sh root&quot;; </span></span><br><span class="line">        <span class="comment">#before-resync-target &quot;/usr/lib/drbd/snapshot-resync-target-lvm.sh -p 15 -- -c 16K&quot;; </span></span><br><span class="line">        <span class="comment">#after-resync-target /usr/lib/drbd/unsnapshot-resync-target-lvm.sh; </span></span><br><span class="line">        &#125; </span><br><span class="line">    startup&#123; </span><br><span class="line">        <span class="comment">#wfc-timeout 120; </span></span><br><span class="line">        <span class="comment">#degr-wfc-timeout 120; </span></span><br><span class="line">    &#125; </span><br><span class="line">    disk&#123; </span><br><span class="line">        on-io-error detach;　　 </span><br><span class="line">            <span class="comment">#fencing resource-only; </span></span><br><span class="line">    &#125; </span><br><span class="line">    net&#123; </span><br><span class="line">        cram-hmac-alg <span class="string">&quot;sha1&quot;</span>; </span><br><span class="line">        shared-secret <span class="string">&quot;mydrbdlab&quot;</span>;   </span><br><span class="line">    &#125; </span><br><span class="line">    syncer&#123; </span><br><span class="line">        rate 1000M; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="comment">#vim /etc/drbd.d/web.res </span></span><br><span class="line">resource web&#123; </span><br><span class="line">    on node1.test.com&#123; </span><br><span class="line">        device /dev/drbd0; </span><br><span class="line">        disk /dev/sdb1; </span><br><span class="line">        address 192.168.1.110:7789; </span><br><span class="line">        meta-disk internal; </span><br><span class="line">    &#125; </span><br><span class="line">    on node2.test.com&#123; </span><br><span class="line">        device /dev/drbd0; </span><br><span class="line">        disk /dev/sdb1; </span><br><span class="line">        address 192.168.1.111:7789; </span><br><span class="line">        meta-disk internal; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"><span class="comment">#scp -r  /etc/drbd.d/* node2:/etc/drbd.d/ </span></span><br><span class="line"><span class="comment">#drbdadm create-md web    两个节点都要做 </span></span><br><span class="line"><span class="comment">#modprobe drbd　　　　　如果有需要，反正我没用到这步 </span></span><br><span class="line"><span class="comment">#service drbd start　　&amp;&amp;  ssh node2 &#x27;service drbd start&#x27; </span></span><br><span class="line"> </span><br><span class="line">查看启动状态: </span><br><span class="line"><span class="comment">#cat /proc/drbd　&amp;&amp; drbd-overview       一定要看到Secondary/Secondary  有可能出现的错误是split-brain; </span></span><br><span class="line">[root@node1 ~]<span class="comment"># drbdadm -- --overwrite-data-of-peer primary web </span></span><br><span class="line">说明:一旦变主节点后，<span class="built_in">cat</span> /proc/drbd会发现进行数据更新，一定要更新完，否则会出错!! </span><br><span class="line">[root@node1 ~]<span class="comment"># mkfs.ext4 /dev/drbd0 </span></span><br><span class="line">[root@node1 ~]<span class="comment"># mount /dev/drbd0 /mysqldata/ </span></span><br><span class="line">[root@node1 ~]<span class="comment"># tar xf mysql-5.6.24-linux-glibc2.5-x86_64.tar.gz  -C /usr/local/ </span></span><br><span class="line">[root@node1 ~]<span class="comment"># ln -sv /usr/local &amp;&amp; ln -sv mysql-5.6.24-linux-glibc2.5-x86_64/ mysql </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># groupadd -g 3306 mysql </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># useradd -u 3306 -g mysql mysql </span></span><br><span class="line">[root@node1 ~]<span class="comment"># scripts/mysql_install_db --user=mysql --datadir=/mysqldata/ </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># cp support-files/my-default.cnf /etc/my.cnf </span></span><br><span class="line">[root@node1 mysql]<span class="comment">#修改datadir=/mysqldata </span></span><br><span class="line"> </span><br><span class="line">[root@node1 mysql]<span class="comment">#cp support-files/mysql.server /etc/init.d/mysqld </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># chown -R root.mysql /usr/local/mysql/* </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># chown -R mysql.mysql /mysqldata/ </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># service mysqld start                              插入数据，进行后续验证。 </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># service mysqld stop </span></span><br><span class="line">[root@node1 mysql]<span class="comment">#chkconfig --add mysqld </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># chkconfig mysqld off </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># umount /mysqldata/ </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># drbdadm secondary web </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># scp /etc/init.d/mysqld root@node2:/etc/init.d/mysqld </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># scp /etc/my.cnf node2:/etc/ </span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">[root@node2 <span class="built_in">local</span>]<span class="comment"># ln -sv mysql-5.6.24-linux-glibc2.5-x86_64/ mysql </span></span><br><span class="line">[root@node2 mysql]<span class="comment"># drbdadm primary web </span></span><br><span class="line">[root@node2 mysql]<span class="comment"># drbd-overview </span></span><br><span class="line">[root@node2 mysql]<span class="comment">#mkdir /mysqldata &amp;&amp;  mount /dev/drbd0 /mysqldata/ </span></span><br><span class="line">[root@node2 mysqldata]<span class="comment"># groupadd -g 3306 mysql </span></span><br><span class="line">[root@node2 mysqldata]<span class="comment"># useradd -u 3306 -g mysql mysql </span></span><br><span class="line">[root@node2 mysqldata]<span class="comment"># service mysqld start </span></span><br><span class="line">[root@node2 mysqldata]<span class="comment"># /usr/local/mysql/bin/mysql 　　　　进行数据验证，插入数据。 </span></span><br><span class="line">[root@node2 mysqldata]<span class="comment"># chown root.mysql /usr/local/mysql/* </span></span><br><span class="line">[root@node2 mysqldata]<span class="comment"># service mysqld stop </span></span><br><span class="line">[root@node2 mysqldata]<span class="comment"># chkconfig　--add mysqld </span></span><br><span class="line">[root@node2 mysqldata]<span class="comment"># chkconfig mysqld off </span></span><br><span class="line">[root@node2 / ]<span class="comment"># umount /mysqldata/ </span></span><br><span class="line">[root@node2 /]<span class="comment"># drbd-overview </span></span><br><span class="line">[root@node2 /]<span class="comment"># drbdadm secondary web </span></span><br><span class="line">[root@node2 /]<span class="comment"># drbd-overview </span></span><br><span class="line">说明，这个时候可以再次进行主从切换，查看node2上插入的数据是否可以在node1上看到，如果成功，表明DRBD配置成功。 </span><br><span class="line"><span class="comment">#sevice drbd stop  &amp;&amp; ssh node2 &quot;sevice drbd stop&quot; </span></span><br><span class="line"><span class="comment">#chkconfig drbd off &amp;&amp; ssh node2 &quot;chkconfig drbd off&quot; </span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>配置corosync</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br></pre></td><td class="code"><pre><span class="line">[root@node1 mysql]<span class="comment"># cd /etc/crosync </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># cp corosync.conf.example corosync.conf </span></span><br><span class="line"> </span><br><span class="line">编辑corosync.conf,添加如下内容: </span><br><span class="line">service&#123; </span><br><span class="line">    ver: 0 </span><br><span class="line">    name:pacemaker </span><br><span class="line">&#125; </span><br><span class="line">aisexec&#123; </span><br><span class="line">    user:root </span><br><span class="line">    group:root </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">最后的配置文件: </span><br><span class="line"><span class="comment"># Please read the corosync.conf.5 manual page </span></span><br><span class="line">compatibility: whitetank </span><br><span class="line">totem &#123; </span><br><span class="line">    version: 2   配置文件的版本号，不要动 </span><br><span class="line">    secauth: on　安全的认证机制，默认关闭 </span><br><span class="line">    threads: 2    使用多少个线程进行加密和组播通信的； </span><br><span class="line">    interface &#123; </span><br><span class="line">        ringnumber: 0　　环数 </span><br><span class="line">        bindnetaddr: 172.16.0.0　在哪个网络内进行组播 </span><br><span class="line">        mcastaddr: 226.99.6.17　　组播地址,只要不是224网段即可 </span><br><span class="line">        mcastport: 5405    　　组播端口,heartbeat是694 </span><br><span class="line">        ttl: 1 </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line">logging &#123;     </span><br><span class="line">    fileline: off    表示各行日志文件是否需要打印分割线 </span><br><span class="line">    to_stderr: no    是否发送标准错误信息到前端，不要打开，否则跑前端 </span><br><span class="line">    to_logfile: <span class="built_in">yes</span>　发往哪，下面定义，关闭的话发往syslog; </span><br><span class="line">    logfile: /var/log/cluster/corosync.log  这个目录默认不存在，所以应该创建 </span><br><span class="line">    to_syslog: no    既然上面定义了发往logfile，这个关闭即可，默认打开的；　 </span><br><span class="line">    debug: off    如果系统出现错误，可以打开进行排除 </span><br><span class="line">    timestamp: on　是否记录时间戳，既然要进行获取时间，就要通过系统调用，然后获取时间给每行日志加时间戳， </span><br><span class="line">            意味着更多的系统调用和IO操作，默认打开，看需要； </span><br><span class="line">    logger_subsys &#123; </span><br><span class="line">        subsys: AMF　如果没装openAIS,可以不用打开 </span><br><span class="line">        debug: off </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line">service&#123; </span><br><span class="line">    ver: 0 </span><br><span class="line">    name:pacemaker </span><br><span class="line">    <span class="comment">#use_mgmtd: yes </span></span><br><span class="line">&#125; </span><br><span class="line">如果没装openAIS,这项可以不用添加，当然加上也可以； </span><br><span class="line">aisexec&#123; </span><br><span class="line">    user:root </span><br><span class="line">    group:root </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">生成节点间通信时用到的认证秘钥文件: </span><br><span class="line">[root@node1 mysql]<span class="comment">##corosync-keygen </span></span><br><span class="line"> </span><br><span class="line">将corosync.conf和authkey复制到node2: </span><br><span class="line">[root@node1 corosync.d]<span class="comment">#scp -p corosync.conf authkey node2:/etc/corosync </span></span><br><span class="line">[root@node1 corosync.d]<span class="comment">#service corosync start &amp;&amp; ssh node2 &quot;service corosync start&quot; </span></span><br><span class="line"> </span><br><span class="line">[root@node1 corosync.d]<span class="comment">#crm configure    当然，这个这里给出了配置步骤，当然也可直接剪切下面的，需要说明的是，不论如何，都要有资源约束关系。 </span></span><br><span class="line">1)property stonith-enabled=<span class="literal">false</span> </span><br><span class="line">2)property no-quorum-policy=ignore </span><br><span class="line">3)resource-stickiness=100 </span><br><span class="line">crm(live)configure<span class="comment"># primitive mystore ocf:linbit:drbd params drbd_resource=&quot;web&quot; op monitor role=&quot;Master&quot; interval=10s timeout=20s op monitor role=&quot;Slave&quot; interval=20s timeout=20s op start timeout=240s op stop timeout=100s </span></span><br><span class="line">crm(live)configure<span class="comment">#verify </span></span><br><span class="line">crm(live)configure<span class="comment"># ms ms_mystor mystore meta clone-max=&quot;2&quot; clone-node-max=&quot;1&quot; master-max=&quot;1&quot; master-node-max=&quot;1&quot;  notify=&quot;true&quot; </span></span><br><span class="line">crm(live)configure<span class="comment">#verify </span></span><br><span class="line">crm(live)configure<span class="comment">#commit </span></span><br><span class="line">crm(live)configure<span class="comment"># primitive webfs ocf:heartbeat:Filesystem params device=/dev/drbd0 directory=/mysqldata fstype=ext4 op start timeout=60 op stop timeout=60 </span></span><br><span class="line">crm(live)configure<span class="comment"># colocation webfs_with_ms_mystor inf: webfs ms_mystor:Master </span></span><br><span class="line">crm(live)configure<span class="comment"># order webfs_after_ms_mystor inf: ms_mystor:promote webfs:start </span></span><br><span class="line"> </span><br><span class="line">crm(live)configure<span class="comment"># primitive mysqld lsb:mysqld </span></span><br><span class="line">crm(live)configure<span class="comment"># colocation mysqld_with_webfs inf: mysqld webfs </span></span><br><span class="line">crm(live)configure<span class="comment"># order mysqld_after_webfs mandatory: webfs mysqld </span></span><br><span class="line">crm(live)configure<span class="comment">#verify </span></span><br><span class="line">crm(live)configure<span class="comment">#commit </span></span><br><span class="line"> </span><br><span class="line">crm(live)configure<span class="comment">#primitive myip ocf:heartbeat:IPaddr params ip=192.168.1.120 (nic=eth0 cidr_netmask=255.255.255.0)我在这一步时，老是出错，把括号内的去掉，然后verify和commit下，看是否正常，如果正常，那就继续，当然可以先加上括号内的．． </span></span><br><span class="line">crm(live)configure<span class="comment">#colocation myip_with_ms_mystor inf:  myip ms_mystor:Master </span></span><br><span class="line">crm(live)configure<span class="comment">#verify </span></span><br><span class="line">crm(live)configure<span class="comment">#commit </span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">在测试时，可用这个命令将主节点变为备节点: </span><br><span class="line"><span class="comment">#crm node standby </span></span><br><span class="line">然后,资源会跑到另外一个节点上，然后让节点再上线: </span><br><span class="line"><span class="comment">#crm node online </span></span><br><span class="line">在另外一个节点上登录数据库，发现在上一个节点上创建的资源是否有，如果有，则表明同步成功，如果没有： </span><br><span class="line"><span class="comment">#drbd-overview </span></span><br><span class="line">如果显示 -bash:/sbin/drbd-overview:No such file or directory </span><br><span class="line">在另外一个节点上，发现正常: </span><br><span class="line"><span class="comment">#cat /proc/drbd </span></span><br><span class="line">那么不要着急，敲　/cat/proc/drbd,因为slave节点不会对drbd-overview显示!! </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">需要说明的是:我在这里配置时使用的是LCMC直观查看，但是有一点，当我把配置文件提交时，node2的状态是standby,也就是没有上线， </span><br><span class="line">我不知道是因为什么原因导致的，但是必要做的两步: </span><br><span class="line">[root@node2 mysqldata]<span class="comment"># cat /proc/drbd    查看状态是Primary/Secondary,如果不是， </span></span><br><span class="line">[root@node2 mysqldata]<span class="comment"># crm  node online   如果状态变成Primary/Secondary了，那么则成功。。。 </span></span><br><span class="line"> </span><br><span class="line">配置文件: </span><br><span class="line">node node1.test.com \ </span><br><span class="line">        attributes standby=off </span><br><span class="line">node node2.test.com \ </span><br><span class="line">        attributes standby=on </span><br><span class="line">primitive myip IPaddr \ </span><br><span class="line">        params ip=192.168.1.120 </span><br><span class="line">primitive mysqld lsb:mysqld </span><br><span class="line">primitive mystore ocf:linbit:drbd \ </span><br><span class="line">        params drbd_resource=web \ </span><br><span class="line">        op monitor role=Master interval=10s <span class="built_in">timeout</span>=20s \ </span><br><span class="line">        op monitor role=Slave interval=20s <span class="built_in">timeout</span>=20s \ </span><br><span class="line">        op start <span class="built_in">timeout</span>=240s interval=0 \ </span><br><span class="line">        op stop <span class="built_in">timeout</span>=100s interval=0 </span><br><span class="line">primitive webfs Filesystem \ </span><br><span class="line">        params device=<span class="string">&quot;/dev/drbd0&quot;</span> directory=<span class="string">&quot;/mysqldata&quot;</span> fstype=ext4 \ </span><br><span class="line">        op start <span class="built_in">timeout</span>=60 interval=0 \ </span><br><span class="line">        op stop <span class="built_in">timeout</span>=60 interval=0 </span><br><span class="line">ms ms_mystor mystore \ </span><br><span class="line">        meta clone-max=2 clone-node-max=1 master-max=1 master-node-max=1 notify=<span class="literal">true</span> </span><br><span class="line">colocation myip_with_ms_mystor inf: myip ms_mystor:Master </span><br><span class="line">colocation mysqld_with_webfs inf: mysqld webfs </span><br><span class="line">colocation webfs_with_ms_mystor inf: webfs ms_mystor:Master </span><br><span class="line">order mysqld_after_webfs Mandatory: webfs mysqld </span><br><span class="line">order webfs_after_ms_mystor inf: ms_mystor:promote webfs:start </span><br><span class="line">property cib-bootstrap-options: \ </span><br><span class="line">        expected-quorum-votes=2 \ </span><br><span class="line">        stonith-enabled=<span class="literal">false</span> \ </span><br><span class="line">        dc-version=1.1.11-97629de \ </span><br><span class="line">        no-quorum-policy=ignore \ </span><br><span class="line">        cluster-infrastructure=<span class="string">&quot;classic openais (with plugin)&quot;</span> \ </span><br><span class="line">        last-lrm-refresh=1437553803 </span><br><span class="line">rsc_defaults rsc-options: </span><br><span class="line"><span class="comment">#vim:set syntax=pcmk </span></span><br><span class="line">~</span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/09/22/40-02-2-MySQL-DRBD/">展开全文 >></a>
         </p>
       
 

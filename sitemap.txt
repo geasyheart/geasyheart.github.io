@@ -1,3 +1,5 @@
+https://geasyheart.github.io/2024/05/08/DPO/
+https://geasyheart.github.io/2024/05/07/RLHF-Actor-Critic/
 https://geasyheart.github.io/2024/04/26/RLHF-policy-gradient/
 https://geasyheart.github.io/2024/04/24/RLHF-DQN/
 https://geasyheart.github.io/2024/04/07/LLM-RLHF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/

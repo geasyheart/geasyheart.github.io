@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://geasyheart.github.io/2024/05/08/DPO/</loc>
+    <lastmod>2024-05-08</lastmod>
+  </url>
+  <url>
+    <loc>https://geasyheart.github.io/2024/05/07/RLHF-Actor-Critic/</loc>
+    <lastmod>2024-05-07</lastmod>
+  </url>
+  <url>
     <loc>https://geasyheart.github.io/2024/04/26/RLHF-policy-gradient/</loc>
     <lastmod>2024-04-26</lastmod>
   </url>

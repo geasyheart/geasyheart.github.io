@@ -206,6 +206,203 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-09-01磁盘及文件系统管理详解之三" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/15/09-01%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%B8%89/">09_01磁盘及文件系统管理详解之三</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/15/09-01%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%B8%89/" class="archive-article-date">
+  	<time datetime="2015-02-14T16:28:55.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-15</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>用户模式:用户空间<br>内核模式: </p>
+<p>文件系统是内核的功能<br>由于VFS的存在，使linux支持多种文件系统 </p>
+<p>磁盘一部分存元数据，(matadata):inode;另外存放数据. </p>
+<p>块的大小(block size):<br> 1KB 2KB 4KB   2^n次方大小 </p>
+<p>inode的大小还要由块的大小来决定  </p>
+<p>软链接一般不会需要block<br>设备文件不会用到block </p>
+<p>bitmap:查找数据的一种重要方式<br> inode bitmap<br> block bitmap </p>
+<p>ext2 和 ext3的最大区别是:<br> ext3是日志文件系统(journal file system) </p>
+<p>Super block： 可以使用dumpe2fs -h进行查看<br>它是硬盘分区开头——开头的第一个byte是byte 0，<br>从 byte 1024开始往后的一部分数据。<br>由于 block size最小是 1024 bytes，所以super block可能是在block 1中（此时block 的大小正好是 1024 bytes），<br>也可能是在block 0中。 超级块中的数据其实就是文件卷的控制信息部分，<br>也可以说它是卷资源表，有关文件卷的大部分信息都保存在这里。<br>例如：硬盘分区中每个block的大小、硬盘分区上一共有多少个<br>block group、以及每个block group中有多少个inode。<br>摘自:<br><a target="_blank" rel="noopener" href="http://baike.baidu.com/link?url=vkyx7jTxTT5yBt_I29X13auWsh9vRO8dD2LRf4-VYSJEpJhy-Z035-awqti-5udLRTB9m8Bd3a8Wk5-4n2Fc9q">http://baike.baidu.com/link?url=vkyx7jTxTT5yBt_I29X13auWsh9vRO8dD2LRf4-VYSJEpJhy-Z035-awqti-5udLRTB9m8Bd3a8Wk5-4n2Fc9q</a> 
+ </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/15/09-01%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%B8%89/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-08-04磁盘及文件系统管理详解之二" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/15/08-04%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%BA%8C/">08_04磁盘及文件系统管理详解之二</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/15/08-04%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%BA%8C/" class="archive-article-date">
+  	<time datetime="2015-02-14T16:28:54.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-15</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>设备文件: 都在&#x2F;dev目录下，用于设备的访问入口的；<br> 对于设备的访问入口这句话的理解: </p>
+<blockquote>
+<p>tty<br> &#x2F;dev&#x2F;tty1<br> 换一个:<br>tty<br> &#x2F;dev&#x2F;tty2<br> tty1下：<br>echo “hello” &gt;&gt; &#x2F;dev&#x2F;tty2<br> tty2下：<br> 就会显示#hello </p>
+</blockquote>
+<p> b:(block)按块为单位，随机访问的设备<br> c:(character)按字符为单位，线性设备<br> b:硬盘<br> c:键盘<br> ls -l &#x2F;dev<br> crw-rw—-,1 root root 7, 1 Feb ….<br> 7：是主设备号(用于标识设备的类型)<br> 1：次设备号(用于标识同一种类型中不同设备) </p>
+<p>设备文件的创建:<br>mknod <br> -m 模型(MODE)<br> mknod &#x2F;dev&#x2F;mydev  b 66 0 块设备 主设备号 此设备号 </p>
+<p>硬盘设备的设备文件名:<br> IDE,ATA:hd开头<br> SATA:sd开头<br> SCSI:sd开头<br> USB:sd开头<br> 使用a,b,c…进行区分同一种类型的不同设备<br> IDE：<br> 第一个IDE口:主&#x2F;从<br> &#x2F;dev&#x2F;hda &#x2F;dev&#x2F;hdb<br> 第二个IDE口：主&#x2F;从<br> &#x2F;dev&#x2F;hdc &#x2F;dev&#x2F;hdd </p>
+<p> sda,sdb,sdc… </p>
+<p>查看硬盘信息:<br> fdisk -l  </p>
+<p>低级格式化：格式化磁道<br>高级格式化：创建文件系统， mkfs </p>
+<p>VFS：<br>例如mkdir的原作者想要创建mkdir命令，但是为了能够在不同的文件系统上<br>创建目录，就需要根据不同的文件系统的接口写代码以支持不同的我呢见系统，<br>这样做就会使开发难度增加，所以，为了能够简化这种开发难度，linux上有个<br>VFS(virtual filesystem)来统一出来不同文件系统的接口，只需要根据这个接口，<br>就可以简单实现不同文件系统的操作。。 </p>
+<blockquote>
+<p>FAT32(linux下叫vfat)<br>NTFS<br>ISO9660<br>CIFS(windows下)<br>NFS（linux下）<br>ext2<br>ext3<br>ext4<br>xfs<br>reiserfs<br>jfs(日志文件系统IBM)<br>ocfs2<br>gfs2 </p>
+</blockquote>
+<p>每一个分区都可以使用不同的文件系统，最终归于根目录下； </p>
+<p>fdisk  </p>
+<blockquote>
+<p>p:显示<br>n:创建新分区<br>d:删除<br>w:保存退出<br>t:分区类型<br>q:不保存退出<br>l:显示所支持的所有类型<br>partprobe:redhat5用，redhat6使用其他的，不过也可以用<br>通知内核重读硬盘分区表<br>这个会在分区完会自动提示这个命令，那个暂时忘了，到时补充。</p>
+</blockquote>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/15/08-04%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%BA%8C/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-08-03磁盘及文件系统管理详解之一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1020,228 +1217,6 @@ else
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/02/10/06-03bash%E7%BC%96%E7%A8%8B%E4%B9%8B%E4%BA%94-%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%B5%8B%E8%AF%95%E5%8F%8Afor%E8%AF%AD%E5%8F%A5/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-06-02sed命令" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/09/06-02sed%E5%91%BD%E4%BB%A4/">06_02sed命令</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/09/06-02sed%E5%91%BD%E4%BB%A4/" class="archive-article-date">
-  	<time datetime="2015-02-09T15:19:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-09</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>grep&#x2F;sed&#x2F;awk </p>
-<p>sed(流编辑器)： </p>
-<blockquote>
-<p>stream edittor<br>行编辑器 vim：全屏编辑器<br>逐行处理<br>sed：模式空间<br>默认情况下不编辑原文件，仅对模式空间中的数据做处理，<br>而后，处理结束后，将模式空间打印到屏幕上；<br>sed [options]”AddressCommand“ file…<br>-n:静默模式，不再默认显示模式空间中的内容<br>-i：直接修改原文件<br>-e：SCRIPT -e SCRIPT：可以同时-e ‘AddressCommand’ -e ‘AddressCommand’<br>-f: &#x2F;PATH&#x2F;TO&#x2F;SED_SCRIPT<br>sed -f &#x2F;path&#x2F;to&#x2F;script file (就是拿路径下的脚本对file进行操作)<br>-r：表示使用扩展正则表达式<br>或者：<br> sed ‘AddressCommand’ file…(两者的区别，在于需不需要转义)<br>Address: </p>
-</blockquote>
-<ol>
-<li>StartLine,EndLine<br> 比如1，100 </li>
-<li>&#x2F;RegExp&#x2F;<br> &#x2F;^root&#x2F; </li>
-<li>&#x2F;pattern1&#x2F;,&#x2F;pattern2&#x2F;<br> 第一次被pattern匹配到的行开始，至第一次被pattern2匹配到的行结束， </li>
-<li>LineNumber<br> 指定的行 </li>
-<li>StartLine，+N<br> 从startline开始，向后的N行</li>
-</ol>
-<p>Command：<br> d:删除符合条件的行；<br> (比如删除&#x2F;etc&#x2F;fstab的前两行 sed “1,2d” &#x2F;etc&#x2F;fstab)<br> (比如删除第3行至最后一行，sed ‘3,$d’ &#x2F;etc&#x2F;fstab，，(补充，换成“”就会出错))<br> （比如包含dev的行都给删除掉，sed ‘&#x2F;dev&#x2F;d’ &#x2F;etc&#x2F;fstab）<br> (比如删除从第1行往后两行，sed ‘1,+2d’ &#x2F;etc&#x2F;fstab)<br> (比如删除含有&#x2F;dev的行， sed ‘&#x2F;dev/&#x2F;d’ &#x2F;etc&#x2F;fstab)<br> (比如删除含有&#x2F;dev&#x2F;的行，sed ‘&#x2F;/dev/&#x2F;d’ &#x2F;etc&#x2F;fstab(补充，如这两个，要进行转义))<br> p:显示符合条件的行<br> (比如显示文件中(a.txt只有a,b,c,d)中的a， sed ‘&#x2F;a&#x2F;p’ a.txt,会把符合条件的显示两遍，<br> 而不符合的，也会显示出来，这个就叫做在模式空间中符合条件的打印出来，但同时也会把原文件打印出来，<br> 而删除会在模式空间中把文件中符合条件的删除后进行显示，所以不会有这种情况，所以，为了只显示符合条件<br> 的内容，使用-n选项，即上面说的静默模式)<br> a \string：在指定的行后面追加新行，内容为”string”<br> (比如最前面是&#x2F;的前面添加# hello world以及换行添加hello Easy,sed ‘&#x2F;^/&#x2F;a # hello world \n hello Easy ‘ &#x2F;etc&#x2F;fstab)<br> i \string:在指定的行前面添加新行，内容为string<br> r filename:将指定的文件的内容添加至符合条件的行处 <br> (比如，将&#x2F;etc&#x2F;login.defs文件内容添加至&#x2F;etc&#x2F;fstab的第2行处，sed ‘2r &#x2F;etc&#x2F;login.defs’ &#x2F;etc&#x2F;fstab)<br> （比如，添加到最后，sed ‘$r &#x2F;etc&#x2F;login.defs’ &#x2F;etc&#x2F;fstab）<br> w filename:将指定范围内的内容另存至指定的文件中；<br> (比如，将&#x2F;etc&#x2F;fstab 中含有oot行存至&#x2F;tmp&#x2F;oot.txt,,sed ‘&#x2F;oot&#x2F;w &#x2F;tmp&#x2F;oot.txt’ &#x2F;etc&#x2F;fstab)<br> s &#x2F;pattern&#x2F;string&#x2F;:查找并替换每一行中第一次被模式匹配到的串<br> (查找&#x2F;etc&#x2F;fstab中含有oot的字符换为OOT，，sed ‘s&#x2F;oot&#x2F;OOT’ &#x2F;etc&#x2F;fstab)<br> 如果每一行中所有含有oot的都替换，可以加<br> 修饰符：<br> g(全局替换) sed ‘s&#x2F;oot&#x2F;OOT&#x2F;g’ &#x2F;etc&#x2F;fstab<br> i(忽略大小写)<br> (比如要替换文件中凡是含有l..e的字符替换成l..er,(如like要替换成liker) sed ‘s&#x2F;l..e&#x2F;&amp;r&#x2F;g’ &#x2F;etc&#x2F;fstab)<br> (比如要替换所有l..e的字符替换成L..e(like换成Like) sed ‘s&#x2F;l(..e)\L\1&#x2F;g’ &#x2F;etc&#x2F;fstab)(后项引用) </p>
-<p>练习： </p>
-<ol>
-<li>删除&#x2F;etc&#x2F;grub.conf文件中行首的空白符 </li>
-<li>替换&#x2F;etc&#x2F;inittab文件中”id：3：initdefault：“一行中的数字5 </li>
-<li>删除&#x2F;etc&#x2F;inittab文件中的空白行 </li>
-<li>删除&#x2F;etc&#x2F;inittab文件中开头的#号 </li>
-<li>取出一个文件路径的目录名称</li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/09/06-02sed%E5%91%BD%E4%BB%A4/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-06-01bash脚本编程之四-整数测试及特殊变量" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/09/06-01bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%9B%9B-%E6%95%B4%E6%95%B0%E6%B5%8B%E8%AF%95%E5%8F%8A%E7%89%B9%E6%AE%8A%E5%8F%98%E9%87%8F/">06_01bash脚本编程之四-整数测试及特殊变量</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/09/06-01bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%9B%9B-%E6%95%B4%E6%95%B0%E6%B5%8B%E8%AF%95%E5%8F%8A%E7%89%B9%E6%AE%8A%E5%8F%98%E9%87%8F/" class="archive-article-date">
-  	<time datetime="2015-02-09T15:18:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-09</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>文件测试： </p>
-<blockquote>
-<p>-e file :测试文件是否存在<br>-f file ：测试文件是否为普通文件<br>-d file:测试指定路径是否为目录<br>-r file:测试当前指定文件是否具有读取权限<br>-w :测试当前指定文件是否具有写权限<br>-x :测试当前指定文件是否具有执行权限 </p>
-</blockquote>
-<p>定义脚本退出状态码<br> exit命令: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ! grep user1 /etc/passwd &amp;&gt;/dev/null ; <span class="keyword">then</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;No such user&quot;</span> </span><br><span class="line"><span class="built_in">exit</span> 1 </span><br><span class="line"><span class="keyword">fi</span> </span><br><span class="line">[ -e /etc/inittab ] </span><br><span class="line">[ -x /etc/rc.d/rc.sysinit ] </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">FILE=/etc/inittab </span><br><span class="line"><span class="keyword">if</span> [ ! -e <span class="variable">$FILE</span> ] ; <span class="keyword">then</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;No such file&quot;</span> </span><br><span class="line"><span class="built_in">exit</span> 8 </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line">LINES=`grep <span class="string">&quot;^<span class="variable">$S</span>` <span class="variable">$FILE</span> | wc -l | cut -d&#x27; &#x27; -f1` </span></span><br><span class="line"><span class="string">echo <span class="variable">$LINES</span> </span></span><br><span class="line"><span class="string">fi </span></span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>bash -n file.sh:用来测试脚本是否有错误<br>bash -x file.sh:单步执行脚本(用来查看bash是怎么执行这个脚本的，可用于查错) </p>
-</blockquote>
-<p>练习：<br> 给定一个文件；<br> 如果是一个普通文件，就显示之；<br> 如果是一个目录，亦显示之；<br> 否则，此为无法识别此文件 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">FILE=/etc/passwd </span><br><span class="line"><span class="keyword">if</span> [ !　-e <span class="variable">$FILE</span> ];<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;No such file.&quot;</span> </span><br><span class="line"><span class="keyword">elif</span> [ -f <span class="variable">$FILE</span> ];<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Common file.&quot;</span> </span><br><span class="line"><span class="keyword">elif</span> [ -d <span class="variable">$FILE</span> ];<span class="keyword">then</span>  </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Directory&quot;</span> </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Can&#x27;t use.&quot;</span> </span><br><span class="line"><span class="keyword">fi</span> </span><br></pre></td></tr></table></figure>
-<p>或者: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> [ ! -e <span class="variable">$FILE</span> ];<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;NO such file.&quot;</span> </span><br><span class="line"><span class="built_in">exit</span> 6 </span><br><span class="line"><span class="keyword">if</span> ..照抄 </span><br></pre></td></tr></table></figure>
-<p>位置变量: </p>
-<blockquote>
-<p>.&#x2F;filetest.sh &#x2F;etc&#x2F;passwd &#x2F;etc&#x2F;login.defs<br>$1:&#x2F;etc&#x2F;inittab<br>$2:&#x2F;etc&#x2F;passwd<br> such as: </p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$#</span> 参数的个数 </span><br><span class="line"><span class="built_in">echo</span> $* 参数列表 </span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$@</span> 参数列表 详细参考05_02 </span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$#</span> -lt 1 ];<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Usage:./filetest.sh ARG1[ARG2]&quot;</span> </span><br><span class="line"><span class="keyword">elif</span> [ -e <span class="variable">$1</span> ];<span class="keyword">then</span>  </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;OK&quot;</span> </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;NO&quot;</span> </span><br></pre></td></tr></table></figure>
-
-<p>练习： </p>
-<ol>
-<li>使用一个变量保存一个用户名； </li>
-<li>删除此变量中的用户，且一并删除其家目录 </li>
-<li>显示”此用户删除完成”的信息；</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">USER=user1 </span><br><span class="line">USERID=`<span class="built_in">id</span> <span class="variable">$USER</span> &amp;&gt; /dev/null` </span><br><span class="line"><span class="keyword">if</span> [ ! $? -eq 0 ];<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;No such user&quot;</span> </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line">userdel -r <span class="variable">$USER</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;deleted&quot;</span> </span><br></pre></td></tr></table></figure>
-
-<ol>
-<li>给脚本传递两个参数 </li>
-<li>显示此两者之和，之积；</li>
-</ol>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash shift1.sh    关于shift,参考05_02 </span></span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$#</span> -ne 2 ];<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Usage:./shift1.sh ARG1 ARG2 &quot;</span> </span><br><span class="line"><span class="keyword">else</span>  </span><br><span class="line">a=<span class="variable">$1</span> </span><br><span class="line"><span class="built_in">shift</span> </span><br><span class="line">b=<span class="variable">$1</span> </span><br><span class="line"><span class="built_in">sum</span>=<span class="variable">$a</span>+<span class="variable">$b</span> </span><br><span class="line">mul=<span class="variable">$a</span>*<span class="variable">$b</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;$[<span class="variable">$sum</span>]&quot;</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;$[<span class="variable">$mul</span>]&quot;</span></span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/09/06-01bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%9B%9B-%E6%95%B4%E6%95%B0%E6%B5%8B%E8%AF%95%E5%8F%8A%E7%89%B9%E6%AE%8A%E5%8F%98%E9%87%8F/">展开全文 >></a>
         </p>
       
 

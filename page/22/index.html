@@ -206,6 +206,206 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-38-04-2-实验利用haresources进行资源管理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/04/38-04-2-%E5%AE%9E%E9%AA%8C%E5%88%A9%E7%94%A8haresources%E8%BF%9B%E8%A1%8C%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86/">38_04_2_实验利用haresources进行资源管理</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/04/38-04-2-%E5%AE%9E%E9%AA%8C%E5%88%A9%E7%94%A8haresources%E8%BF%9B%E8%A1%8C%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86/" class="archive-article-date">
+  	<time datetime="2015-04-04T10:19:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-04</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>cat &gt;&gt;实验说明:&lt;&lt;EOF<br>web服务器:<br>192.168.122.162    node1.test.com<br>192.168.122.244    node2.test.com<br>nfs服务器:<br>192.168.122.27        nfs.test.com<br>EOF </p>
+<p>#①提供主机名 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">hostname <span class="string">&quot;node1.test.com&quot;</span> </span><br><span class="line">vim /etc/sysconfig/network </span><br><span class="line">HOSTNAME=node1.test.com </span><br><span class="line"> </span><br><span class="line">hostname <span class="string">&quot;node2.test.com&quot;</span> </span><br><span class="line">vim /etc/sysconfig/network </span><br><span class="line">HOSTNAME=node2.test.com </span><br><span class="line"> </span><br><span class="line">hostname <span class="string">&quot;nfs.test.com&quot;</span> </span><br><span class="line">vim /etc/sysconfig/network </span><br><span class="line">HOSTNAME=nfs.test.com </span><br></pre></td></tr></table></figure>
+<p>#②web服务器能够基于公钥登陆 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa  -f ~/.ssh/id_rsa -P <span class="string">&#x27;&#x27;</span> </span><br><span class="line">ssh-copy-id -i ~/.ssh/id_rsa.pub root@192.168.122.244 </span><br><span class="line"> </span><br><span class="line">ssh-keygen -t rsa  -f ~/.ssh/id_rsa -P <span class="string">&#x27;&#x27;</span> </span><br><span class="line">ssh-copy-id -i ~/.ssh/id_rsa.pub root@192.168.122.162 </span><br></pre></td></tr></table></figure>
+<p>#③提供hosts文件 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> &gt;&gt;/etc/hosts&lt;&lt;<span class="string">EOF </span></span><br><span class="line"><span class="string">192.168.122.162    node1.test.com </span></span><br><span class="line"><span class="string">192.168.122.244    node2.test.com </span></span><br><span class="line"><span class="string">EOF</span> </span><br><span class="line">scp /etc/hosts node2:/etc/ </span><br></pre></td></tr></table></figure>
+<p>#④时间同步 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ntpdate ntp.api.bz </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;*/5     *       *       *       *       ntpdate ntp.api.bz &amp;&gt;/dev/null&quot;</span> &gt;&gt; /etc/crontab </span><br></pre></td></tr></table></figure>
+<p>#⑤利用epel源，安装heartbeat </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">yum -y install epel-release </span><br><span class="line">yum -y install heartbeat &amp;&amp; chkconfig heartbeat on </span><br><span class="line">yum -y install httpd &amp;&amp; chkconfig httpd off </span><br></pre></td></tr></table></figure>
+<p>#⑥提供配置文件 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> -p /usr/share/doc/heartbeat-3.0.4/&#123;authkeys,ha.cf,haresources&#125; /etc/ha.d </span><br><span class="line"><span class="built_in">cd</span> /etc/ha.d/ </span><br><span class="line"><span class="built_in">chmod</span> 600 authkeys </span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/random count=1 bs=512 | <span class="built_in">md5sum</span> </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cat</span> &gt;&gt;authkeys&lt;&lt;<span class="string">EOF </span></span><br><span class="line"><span class="string">auth1 </span></span><br><span class="line"><span class="string">1 md5 05d7ca80f950d1a7b41322bd39220d2a </span></span><br><span class="line"><span class="string">EOF</span> </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cat</span> &gt;&gt;ha.cf&lt;&lt;<span class="string">EOF </span></span><br><span class="line"><span class="string">logfacility    local0 </span></span><br><span class="line"><span class="string">keepalive 2 </span></span><br><span class="line"><span class="string">deadtime 30 </span></span><br><span class="line"><span class="string">warntime 10 </span></span><br><span class="line"><span class="string">initdead 120 </span></span><br><span class="line"><span class="string">udpport    694 </span></span><br><span class="line"><span class="string">mcast eth1 225.0.0.1 694 1 0 </span></span><br><span class="line"><span class="string">auto_failback on </span></span><br><span class="line"><span class="string">node    node1.test.com </span></span><br><span class="line"><span class="string">node    node2.test.com </span></span><br><span class="line"><span class="string">ping 192.168.122.1 </span></span><br><span class="line"><span class="string">deadping 30 </span></span><br><span class="line"><span class="string">compression    bz2 </span></span><br><span class="line"><span class="string">compression_threshold 2 </span></span><br><span class="line"><span class="string">EOF</span> </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cat</span> &gt;&gt;haresources&lt;&lt;<span class="string">EOF </span></span><br><span class="line"><span class="string">node1.test.com IPaddr::192.168.122.100/24/eth1 httpd </span></span><br><span class="line"><span class="string">EOF</span> </span><br><span class="line"> </span><br><span class="line">scp  /etc/ha.d/&#123;ha.cf,authkeys,haresources&#125; node2:/etc/ha.d/ </span><br><span class="line"> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;node1.test.com&quot;</span> &gt; /var/www/html/index.html </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;node2.test.com&quot;</span> &gt; /var/www/html/index.html </span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> &#123;1..2&#125;;<span class="keyword">do</span> ssh node<span class="variable">$x</span> <span class="string">&#x27;service heartbeat start&#x27;</span> start;<span class="keyword">done</span> </span><br><span class="line"> </span><br><span class="line"><span class="comment">#进行访问测试，然后转到/usr/share/heartbeat-3.0.4 &amp;&amp; ./hb_standby 将自己转移为备节点，那么另外一个将成为主节点； </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#提供nfs服务器文件共享: </span></span><br><span class="line">yum -y install nfs-utils rpcbind </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;&lt;h1&gt;success&lt;/h1&gt;&quot;</span> &gt; /web/htdocs/index.html </span><br><span class="line">service nfs start </span><br><span class="line">service rpcbind start </span><br><span class="line">showmount -e 192.168.122.27 </span><br><span class="line"> </span><br><span class="line">mount -t nfs 192.168.122.27:/web/htdocs /mnt </span><br><span class="line">umount /mnt      <span class="comment">#heartbeat会进行自动挂载，但是要注意:nfs服务不能关掉，否则资源不会被访问到； </span></span><br><span class="line"> </span><br><span class="line"><span class="built_in">cat</span> &gt;&gt;haresources&lt;&lt;<span class="string">EOF </span></span><br><span class="line"><span class="string">node1.test.com IPaddr::192.168.122.100/24/eth1 Filesystem::172.16.100.27:/web/htdocs::/var/www/html::nfs httpd </span></span><br><span class="line"><span class="string">EOF</span> </span><br><span class="line"> </span><br><span class="line">scp haresources node2:/etc/ha.d/ </span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> &#123;1..2&#125;;<span class="keyword">do</span> ssh node<span class="variable">$x</span> <span class="string">&#x27;service heartbeat start&#x27;</span> start;<span class="keyword">done</span> </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#启动heartbeat会出现，稍微等一会，就会发现资源能够正常工作了，如果不行，那么service heartbeat restart即可；下面是首次启动时的输出样例； </span><br><span class="line">#Starting High-Availability services: INFO:  Resource is stoppedDone. </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">#如果开启了iptables服务器： </span><br><span class="line">#iptables -A INPUT -p udp -dport 694 -j ACCEPT </span><br><span class="line">#iptables -A OUTPUT -p udp --sport 694 -j ACCEPT </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+<p>因为我的网卡是eth1,所以全文的网络接口指向的是eth1;;;</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/04/38-04-2-%E5%AE%9E%E9%AA%8C%E5%88%A9%E7%94%A8haresources%E8%BF%9B%E8%A1%8C%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-38-03Linux集群系列之九-高可用集群原理详解之多节点集群" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/03/38-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B9%9D-%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E5%A4%9A%E8%8A%82%E7%82%B9%E9%9B%86%E7%BE%A4/">38_03Linux集群系列之九--高可用集群原理详解之多节点集群</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/03/38-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B9%9D-%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E5%A4%9A%E8%8A%82%E7%82%B9%E9%9B%86%E7%BE%A4/" class="archive-article-date">
+  	<time datetime="2015-04-03T10:19:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-03</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>quorum:法定票数<br>默认都为１票 </p>
+<p>failover domain(故障转移域) </p>
+<p>Messaging Layer:<br>HeartBeat v1<br>HeartBeat v2<br>HeartBeat v3<br>        UDP:694<br>HeartBeat v3<br>    heartbeat,pacemaker,cluster-glue </p>
+<p>corosync+pacemaker<br>cman<br>keepalived:由于使用的是VRRP(虚拟路由冗余协议)，所以更适合于做双主模型；<br>ultramonky </p>
+<p>CRM:<br>在heartbeat v1.x版本中，默认的是haresource，在heartbeat v2.x版本中，增加了crm资源管理器，crm管理方式有两个，一种是基于命令行的crmsh,另一个是基于图形界面的hb_gui;<br>pacemaker(heartbeat v3或corosync)<br>rgmanager(cman) </p>
+<p>Resource type:<br>    Primitive<br>    clone<br>    group<br>    master&#x2F;slave:drbd </p>
+<p>RA Type:<br>    Legacy heartbeat v1 RA<br>    Linux Standard Base<br>    OCF(Open Cluster Framework)<br>        pacemaker<br>        linbit(drbd)<br>    STONITH </p>
+<p>STONITH设备:<br>1、Power Distribution Units(PDU)带网线的 </p>
+<p>2、Uninterruptible Power Supplies(UPS) </p>
+<p>3、Blade Power Control Devices(刀片服务器电源控制器) </p>
+<p>4、Lights-out Devices </p>
+<p>5、Testing Devices<br>    meatware:手动STONITH设备 </p>
+<p>STONITH的实现:<br>stonithd </p>
+<p>STONITH plug-ins </p>
+<p>Pacemaker 提供了多种用户管理接口，分别如下：<br>(1).基于命令的管理方式<br>crmsh<br>pcs<br>(2).基于图形界面的管理方式<br>pygui<br>hawk<br>LCMC<br>pcs </p>
+<p><a target="_blank" rel="noopener" href="http://www.linuxidc.com/Linux/2013-08/88521.htm">http://www.linuxidc.com/Linux/2013-08/88521.htm</a><br><a target="_blank" rel="noopener" href="http://blog.csdn.net/sdd00001/article/details/21464713">http://blog.csdn.net/sdd00001/article/details/21464713</a><br>HA集群之CoroSync+Pacemaker浅析和实现<br><a target="_blank" rel="noopener" href="http://www.it165.net/admin/html/201405/3066.html">http://www.it165.net/admin/html/201405/3066.html</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/03/38-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B9%9D-%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E5%A4%9A%E8%8A%82%E7%82%B9%E9%9B%86%E7%BE%A4/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-20-02DNS子域授权" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1075,276 +1275,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/03/27/18-02SSL%E5%8D%8F%E8%AE%AE%E5%8F%8AOpenSSL%E5%8F%8A%E5%88%9B%E5%BB%BA%E7%A7%81%E6%9C%89CA/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-18-01-2-防火墙的基本概念" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/26/18-01-2-%E9%98%B2%E7%81%AB%E5%A2%99%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/">18_01_2_防火墙的基本概念</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/26/18-01-2-%E9%98%B2%E7%81%AB%E5%A2%99%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/" class="archive-article-date">
-  	<time datetime="2015-03-26T14:51:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-26</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>说明：《Linux网络安全技术与实现》<br>以下内容均来自此书第1章，因好奇，故摘取一部分，如果有需要，均可直接参阅此书，无需读以下内容。 </p>
-<p>TCP&#x2F;IP的基本概念:</p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/TCP/IP%E5%8D%8F%E8%AE%AE%E6%97%8F(%E5%8F%AF%E7%9B%B4%E6%8E%A5%E5%8F%82%E8%80%83%E8%BF%99%E4%B8%AA)">http://zh.wikipedia.org/wiki/TCP/IP%E5%8D%8F%E8%AE%AE%E6%97%8F(可直接参考这个)</a> </p>
-</blockquote>
-<ol>
-<li>应用层(Application Layer) </li>
-<li>传输层(Transport Layer) <blockquote>
-<p>传输层用于定义数据传输方法，传输层主要定义了两种通信协议，分别是TCP协议和UDP协议 </p>
-</blockquote>
-</li>
-<li>网络层(Network Layer) <blockquote>
-<p>使用IP(Internet Protocol)地址来定位网络上的每一台计算机，并采用路由(Routing)方法决定数据传输路径，将数据传输到正确的目的端 </p>
-</blockquote>
-</li>
-<li>链路层(Link Layer) <blockquote>
-<p>链路层又称数据链路层(Data Link)或网络接入层(Network Interface)，也就是网络的基础设施，它可能是以太网(Ethernet)&#x2F;光纤(Fiber)&#x2F;无线网络(Wireless)&#x2F;帧中继(Frame Relay)或者点对点(PPP)等实体网络。</p>
-</blockquote>
-</li>
-</ol>
-<p>TCP&#x2F;IP&#x2F;Socket之间的关系 </p>
-<blockquote>
-<p>Socket是指一个上面有很多“洞”的东西，而Socket上面的这些洞，则称为端口。在OS的网络系统中会有两个Socket，分别是TCP Socket及UDP Socket，Socket上各有65536个洞，由0开始算起，<br>其范围是0<del>65535,称之为Port 0 ~ Port 65535.<br>公认的端口:0</del>1023<br>注册的端口:1024<del>49151<br>动态端口:49152</del>65535 </p>
-</blockquote>
-<p>注册的端口 </p>
-<blockquote>
-<p>可以到IANA的网站上，选用一个没有其他应用程序在使用的端口，并将其注册下来。 </p>
-</blockquote>
-<p>动态端口 </p>
-<blockquote>
-<p>通常供临时使用，例如:几乎所有客户端应用程序都会使用动态端口，当客户端应用程序启动时，系统就会分配一个“动态端口”给该应用程序来使用，当应用程序结束时，即会把占用的端口归还给系统。 </p>
-</blockquote>
-<p>防火墙: </p>
-<blockquote>
-<p><a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/%E9%98%B2%E7%81%AB%E5%A2%99%EF%BC%88%E5%8F%AF%E7%9B%B4%E6%8E%A5%E5%8F%82%E8%80%83%E8%BF%99%E4%B8%AA%EF%BC%89">http://zh.wikipedia.org/wiki/%E9%98%B2%E7%81%AB%E5%A2%99（可直接参考这个）</a><br>规则(rule)：转发或者不转发，过滤或者不过滤<br>数据包过滤(Packet Level Filter)防火墙<br>应用层(Application Level Filter)防火墙 </p>
-</blockquote>
-<p>常见的防火墙结构: </p>
-<blockquote>
-<p>单机防火墙:<br>ADSL–&gt;NAT–&gt;内部网络<br>   –&gt;开放的环境(公网IP主机)<br>如如果企业选择ADSL上网，第一个公网IP通常会分配给网络地址转换器(Network Address Translation,NAT)来使用，而整个企业的内部网络就隐藏在NAT之后，另外的公网IP就直接给企业的服务主机使用。由于公网的主机没有架设防火墙，使其直接暴露在因特网上，任何来自互联网的攻击行为，均有其自己承担。所以这种方式相当不安全。 </p>
-<p>网关式防火墙1:<br>ADSL–&gt;防火墙–&gt;企业内部网络<br>由于所有主机(包括对外提供的主机和内部主机)均在防火墙后，也许会好奇因特网上的用户怎么访问内网的主机，这个叫做一对一NAT：即在防火墙主机上设置3（两台对外主机）个ISP所分配的IP，而内部之使用192.168.1.0&#x2F;24这个私有IP段，并且设置Mail和web主机上设置192.168.1.1和192.168.1.2两个私有IP，然后在防火墙主机上设置如果访问mail就直接转到1.1主机上，&gt;如果访问web，就转到1.2主机上。<br>由于均在内网，当用户访问web服务器即在内网，就会造成私有主机有很大的安全性，这种方式不会使用。 </p>
-<p>网关式防火墙2：<br>多加一块网卡，使网关式防火墙1的对外主机和私有内部主机不在同一IP段内。 </p>
-<p>网关式防火墙3:<br>ADSL–&gt;防火墙1–&gt;对外服务器<br>    –&gt;防火墙2–&gt;内部主机<br>这种方式由于采用两台防火墙，安全性也就相对提升，不过，务必选用两家不同的产品。 </p>
-<p>透明防火墙:<br>由于在网关式防火墙中，不管哪一种类型，防火墙本身就是一个路由器，因此在部署防火墙时，必须考虑路由问题。<br>透明防火墙就是一个网桥设备，并且在网桥设备上赋予了过滤器(Filter)功能，因为网桥是工作在OSI第二层的网络设备，因此不存在任何路由设备，并且网桥上可以不需要设置任何IP，如此就没有路由的问题，又因为防火墙主机本身无需设置IP，所以透明防火墙的部署能力相当强，隐蔽性相当高，即便黑客要攻击这个防火墙，也可能会因为没有目的段IP而无功而返。 
- </p>
-</blockquote>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/26/18-01-2-%E9%98%B2%E7%81%AB%E5%A2%99%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-17-03sudo详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/25/17-03sudo%E8%AF%A6%E8%A7%A3/">17_03sudo详解</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/25/17-03sudo%E8%AF%A6%E8%A7%A3/" class="archive-article-date">
-  	<time datetime="2015-03-25T01:24:24.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-25</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="参考文档："><a href="#参考文档：" class="headerlink" title="参考文档："></a>参考文档：</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://wiki.archlinux.org/index.php/Sudo_%28%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87%29%EF%BC%88%E6%9C%89%E6%AF%94%E8%BE%83%E8%AF%A6%E7%BB%86%E7%9A%84%E4%BD%BF%E7%94%A8%E4%BB%8B%E7%BB%8D%EF%BC%89">https://wiki.archlinux.org/index.php/Sudo_%28%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87%29（有比较详细的使用介绍）</a></p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/etc/sudoers</span><br><span class="line">visudo</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>当调用sudo，会在接下来5分钟内可以不再输入密码，这样却带来一个问题，就是别人<br>在这个时间点内用你的帐号修改信息，所以可以加入-k选项。即：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$sudo -k</span><br></pre></td></tr></table></figure>
-
-<p>再调用sudo,不管调用多少次，都需要输入密码</p>
-<p>sudo命令:</p>
-<blockquote>
-<p>   -l:列出当前用户可以使用的所有sudo类命令<br>   -k:如上所示，调用sudo不保存密码，即让认证信息失败<br>   -u:后跟username，以制定用户的身份执行命令(root除外)</p>
-</blockquote>
-<p>一个sudo条目:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">who    which_hosts(runas)    Tag:command</span><br><span class="line"></span><br><span class="line">root    ALL=(ALL)    ALL    </span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>表示root用户可以在任何主机上运行所有命令</p>
-</blockquote>
-<blockquote>
-<p>如果只想允许以某个主机名登录用户执行命令：<br>用户名   主机名&#x3D;(ALL) ALL</p>
-<p>允许wheel用户组成员无密码使用sudo：<br>%wheel      ALL&#x3D;(ALL) NOPASSWD: ALL</p>
-<p>who:User_Alias<br>which_hosts:Host_Alias<br>runas:Runas_Alias<br>Tag:NOPASSWD,用户不再需要输入密码 PASSWD：需要输入密码(针对单个命令定义)<br>commmand:Command_Alias</p>
-<p>别名：类似定义组</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#man sudoers</span><br></pre></td></tr></table></figure>
-
-<p>别名必须全部而且只能使用大写英文字母的组合</p>
-<p>用户别名:<br>User_Alias USERADMIN&#x3D;</p>
-<blockquote>
-<p>   系统用户的用户名<br>   组名:使用%引导<br>   还可以包含其他已经用户别名</p>
-</blockquote>
-<p>Host_Alias:</p>
-<blockquote>
-<p>   主机名<br>   IP<br>   网络地址<br>   其他主机别名</p>
-</blockquote>
-<p>Runas_Alias:</p>
-<blockquote>
-<p>   用户名<br>   %组名<br>   其他的Runas别名</p>
-</blockquote>
-<p>Cmnd_Alias:</p>
-<blockquote>
-<p>   命令绝对路径<br>   目录(此目录所有命令)<br>   其他事先定义过的命令别名</p>
-</blockquote>
-<h2 id="练习"><a href="#练习" class="headerlink" title="练习"></a>练习</h2><blockquote>
-<p> hadoop,root,useradd,usermod<br>#visudo</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hadoop ALL=(root) /usr/sbin/useradd /usr/sbin/usermod</span><br><span class="line">$sudo useradd xiaosan</span><br></pre></td></tr></table></figure>
-
-<p>即可成功</p>
-<p>定义一个用户别名（hadoop,hadoop组，useradmin组），命令别名：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">User_Alias USERADMIN = hadoop,%hadoop,%useradmin</span><br><span class="line">Cmnd_Alias USERADMINCMND  = /usr/sbin/useradd,/usr/sbin/userdel,/usr/bin/passwd [A-Za-z]*， !/usr/bin/passwd root </span><br><span class="line"></span><br><span class="line">USERADMIN    ALL=(root)    NOPASSWD:USERADMINCMND</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Cmnd_Alias WHEELER = /usr/sbin/lsof, /bin/nice, /bin/ps, /usr/bin/top, /usr/local/bin/nano, /usr/sbin/ss, /usr/bin/locate, /usr/bin/find, /usr/bin/rsync</span><br><span class="line">Cmnd_Alias PROCESSES = /bin/nice, /bin/kill, /usr/bin/nice, /usr/bin/ionice, /usr/bin/top, /usr/bin/kill, /usr/bin/killall, /usr/bin/ps, /usr/bin/pkill</span><br><span class="line">Cmnd_Alias EDITS = /usr/bin/vim, /usr/bin/nano, /usr/bin/cat, /usr/bin/vi</span><br><span class="line">Cmnd_Alias ARCHLINUX = /usr/sbin/gparted, /usr/bin/pacman</span><br><span class="line"></span><br><span class="line">root ALL = (ALL) ALL</span><br><span class="line">yourusename ALL = (ALL) ALL, NOPASSWD: WHEELER, NOPASSWD: PROCESSES, NOPASSWD: ARCHLINUX, NOPASSWD: EDITS</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>&#x2F;var&#x2F;log&#x2F;secure 记录了详细信息</p>
-</blockquote>
-<blockquote>
-<p>注意日志的安全性</p>
-</blockquote>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/25/17-03sudo%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
         </p>
       
 

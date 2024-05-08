@@ -206,6 +206,190 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-textrank关键句" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/11/14/textrank%E5%85%B3%E9%94%AE%E5%8F%A5/">textrank关键句</a>
+    </h1>
+  
+
+        
+        <a href="/2022/11/14/textrank%E5%85%B3%E9%94%AE%E5%8F%A5/" class="archive-article-date">
+  	<time datetime="2022-11-14T02:12:39.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-11-14</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>最近在面试北京技术负责人一位候选者（学校杠杠的）时，他对现在公司的新闻领域做摘要时说准确率能达99%，并且也通过了他们内部验证以及用户的对外展示（这家公司你就可劲想吧）。心里是有点不太相信可以达到这么高，理由：</p>
+<ol>
+<li>新闻常见字数成千上万，对于这种情况人的理解也有所差异，但只要摘要中出现核心关键词&#x2F;句子基本也认可。</li>
+<li>对于所用到的无监督的方式（用到了textrank），目前业界的上限在那，同时受限于特征工程。</li>
+<li>对于使用生成式模型，比如使用PGN，这类方式就要有标注数据。以及有个问题就是生成文本不可控，这也是目前业界在研究的方向。</li>
+<li>用到了textrank，那么句子都是从原文中获得的，那么连续性无法保证，更应该说从原文提取关键句子，代表原文。</li>
+</ol>
+<p>之前没做过这方面，就比较好奇怎么实现的。所以此篇为开篇之作，研究<a target="_blank" rel="noopener" href="https://github.com/letiantian/TextRank4ZH.git">TextRank4ZH</a>是怎么做关键句提取的。</p>
+<h2 id="TextRank4ZH关键句实现"><a href="#TextRank4ZH关键句实现" class="headerlink" title="TextRank4ZH关键句实现"></a>TextRank4ZH关键句实现</h2><p>啊，这个项目够久远的了～</p>
+<h3 id="1-实现"><a href="#1-实现" class="headerlink" title="1. 实现"></a>1. 实现</h3><p>看<a target="_blank" rel="noopener" href="https://github.com/letiantian/TextRank4ZH/blob/fb1339620818a0b0c16f5613ebf54153faa41636/example/example01.py#L28">入口</a>，核心在<a target="_blank" rel="noopener" href="https://github.com/letiantian/TextRank4ZH/blob/fb1339620818a0b0c16f5613ebf54153faa41636/textrank4zh/util.py#L169">sort_sentences</a>，构造了一个无向加权图，来计算textrank。那加权是怎么计算的呢？看<a target="_blank" rel="noopener" href="https://github.com/letiantian/TextRank4ZH/blob/fb1339620818a0b0c16f5613ebf54153faa41636/textrank4zh/util.py#L102">sim_func</a>函数，它是通过计算两个句子共现词来实现。</p>
+<h3 id="2-总结"><a href="#2-总结" class="headerlink" title="2. 总结"></a>2. 总结</h3><p>整理流程不复杂，具体可归纳为下面几步：</p>
+<ol>
+<li>对原文分句，并对每个句子分词，过滤停用词，获取指定词性候选词</li>
+<li>计算两两句子之间的相似度来构成textrank无向图。</li>
+</ol>
+<p>作者这里计算句子相似度的方式可以更改成比如使用word2vec来表示句子的向量，或许他是这种方式来实现的。</p>
+<h3 id="3-textrank"><a href="#3-textrank" class="headerlink" title="3. textrank"></a>3. textrank</h3><p>那关键点就变成了怎么使用textrank了，textrank的核心就是：<strong>当前节点的重要程度是由引用它的节点的数量以及对应重要程度所决定</strong>。</p>
+<p>下面我通过几个例子来说明textrank怎么使用networkx来实现计算的，方便以后使用。</p>
+<h4 id="1-使用方式"><a href="#1-使用方式" class="headerlink" title="1. 使用方式"></a>1. <a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/blob/m2/python/textrank/nx_impl.py">使用方式</a></h4><p>使用方式有两种：</p>
+<ol>
+<li>通过add_edge来构造有向图</li>
+<li>通过matrix来构造有向图</li>
+</ol>
+<p>但是这里是没有权重的，所以引入第二个例子。</p>
+<h4 id="2-引入权重"><a href="#2-引入权重" class="headerlink" title="2. 引入权重"></a>2. <a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/blob/m2/python/textrank/weight_graph.py">引入权重</a></h4><p>这里在add_edge的时候指定weight，可看到<code>nx.to_numpy_matrix</code>的矩阵变化了。</p>
+<h4 id="3-无向图"><a href="#3-无向图" class="headerlink" title="3. 无向图"></a>3. <a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/blob/m2/python/textrank/undirected_graph.py">无向图</a></h4><p>textrank4ZH使用的都是无向图，这个并不影响textrank的计算结果。</p>
+<h4 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h4><p>根据上面几个例子，下次在计算textrank的时候，</p>
+<ol>
+<li>构造无向图(有个小坑:<code>nx.from_numpy_matrix</code>不指定<code>create_using</code>,会导致生成的G2和原来的G的matrix不一样,导致最终的textrank也不一样.<a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/blob/e7203c886fb810ba1a0f4457b4ecfc46886752f5/python/textrank/nx_impl.py#L28">例子</a>,但是具体怎么使用都是可以滴)</li>
+<li>指定weight(weight可以通过其他方式来获得)</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/11/14/textrank%E5%85%B3%E9%94%AE%E5%8F%A5/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-图算法基础知识概览" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/11/02/%E5%9B%BE%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E6%A6%82%E8%A7%88/">图算法基础知识概览</a>
+    </h1>
+  
+
+        
+        <a href="/2022/11/02/%E5%9B%BE%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E6%A6%82%E8%A7%88/" class="archive-article-date">
+  	<time datetime="2022-11-02T03:18:10.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-11-02</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>分享一篇<a target="_blank" rel="noopener" href="https://baijiahao.baidu.com/s?id=1633671997477590496&wfr=spider&for=pc">文章</a>，这篇文章对图算法做了一个概览，主要分成三块：</p>
+<ol>
+<li>路径搜索（DFS、BFS、prime tree， Dijkstra， ranom rank）</li>
+<li>中心性计算（度中心性，紧密性中心性，pagerank）</li>
+<li>社群发现（聚类，等）</li>
+</ol>
+<p>同样更推荐《算法》，是一本系统完备的书，不管从工程还是算法角度都很适合。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/11/02/%E5%9B%BE%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E6%A6%82%E8%A7%88/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-单塔文本匹配" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1193,207 +1377,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2022/08/09/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E5%B1%9E%E6%80%A7%E6%8F%90%E5%8F%96/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-讯飞2020年事件提取比赛第一名-主客体提取" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/08/08/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E4%B8%BB%E5%AE%A2%E4%BD%93%E6%8F%90%E5%8F%96/">讯飞2020年事件提取比赛第一名-主客体提取</a>
-    </h1>
-  
-
-        
-        <a href="/2022/08/08/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E4%B8%BB%E5%AE%A2%E4%BD%93%E6%8F%90%E5%8F%96/" class="archive-article-date">
-  	<time datetime="2022-08-08T03:40:17.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-08</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>这是第二篇文章，因为主客体提取需要依赖触发词识别。上一篇是<a href="/2022/07/29/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E8%A7%A6%E5%8F%91%E8%AF%8D%E6%8F%90%E5%8F%96/" title="讯飞2020年事件提取比赛第一名-触发词提取">讯飞2020年事件提取比赛第一名-触发词提取</a>。</p>
-<h3 id="1-跑通代码"><a href="#1-跑通代码" class="headerlink" title="1. 跑通代码"></a>1. 跑通代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">args = TrainArgs().get_parser()</span><br><span class="line">args.gpu_ids = <span class="string">&#x27;0&#x27;</span></span><br><span class="line">args.mode = <span class="string">&quot;train&quot;</span></span><br><span class="line">args.raw_data_dir = <span class="string">&#x27;./data/final/raw_data&#x27;</span></span><br><span class="line">args.mid_data_dir = <span class="string">&#x27;./data/final/mid_data&#x27;</span></span><br><span class="line">args.aux_data_dir = <span class="string">&quot;./data/final/preliminary_clean&quot;</span></span><br><span class="line">args.bert_dir = <span class="string">&#x27;/home/yuzhang/PycharmProjects/xf_event_extraction2020Top1/bert/torch_roberta_wwm&#x27;</span></span><br><span class="line">args.output_dir = <span class="string">&#x27;./out&#x27;</span></span><br><span class="line">args.bert_type = <span class="string">&#x27;roberta_wwm&#x27;</span></span><br><span class="line">args.task_type = <span class="string">&#x27;role1&#x27;</span> <span class="comment"># 改动这里</span></span><br><span class="line">args.max_seq_len = <span class="number">320</span></span><br><span class="line">args.train_epochs = <span class="number">6</span></span><br><span class="line">args.train_batch_size = <span class="number">3</span></span><br><span class="line">args.lr = <span class="number">2e-5</span></span><br><span class="line">args.other_lr = <span class="number">2e-4</span></span><br><span class="line">args.attack_train = <span class="string">&quot;pgd&quot;</span></span><br><span class="line">args.swa_start = <span class="number">4</span></span><br><span class="line">args.eval_model = <span class="literal">True</span></span><br><span class="line">args.enhance_data = <span class="literal">True</span></span><br><span class="line">args.use_trigger_distance = <span class="literal">True</span></span><br><span class="line">args.use_distant_trigger = <span class="literal">True</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="2-模型结构"><a href="#2-模型结构" class="headerlink" title="2. 模型结构"></a>2. 模型结构</h3><img src="/2022/08/08/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E4%B8%BB%E5%AE%A2%E4%BD%93%E6%8F%90%E5%8F%96/role.png" class="" title="模型结构">
-
-<h3 id="3-模型结构"><a href="#3-模型结构" class="headerlink" title="3. 模型结构"></a>3. 模型结构</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Role1Extractor(</span><br><span class="line">  (bert_module): BertModel()</span><br><span class="line">  (dropout_layer): Dropout(p=0.1, inplace=False)</span><br><span class="line">  (conditional_layer_norm): ConditionalLayerNorm(</span><br><span class="line">    (weight_dense): Linear(in_features=1536, out_features=768, bias=False)</span><br><span class="line">    (bias_dense): Linear(in_features=1536, out_features=768, bias=False)</span><br><span class="line">  )</span><br><span class="line">  (trigger_distance_embedding): Embedding(512, 256)</span><br><span class="line">  (layer_norm): LayerNorm((<span class="number">1024</span>,), eps=<span class="number">1</span>e-<span class="number">12</span>, elementwise_affine=True)</span><br><span class="line">  (mid_linear): Sequential(</span><br><span class="line">    (<span class="number">0</span>): Linear(in_features=<span class="number">1024</span>, out_features=<span class="number">128</span>, bias=True)</span><br><span class="line">    (<span class="number">1</span>): ReLU()</span><br><span class="line">    (<span class="number">2</span>): Dropout(p=<span class="number">0.1</span>, inplace=False)</span><br><span class="line">  )</span><br><span class="line">  (obj_classifier): Linear(in_features=<span class="number">128</span>, out_features=<span class="number">2</span>, bias=True)</span><br><span class="line">  (sub_classifier): Linear(in_features=<span class="number">128</span>, out_features=<span class="number">2</span>, bias=True)</span><br><span class="line">  (activation): Sigmoid()</span><br><span class="line">  (criterion): BCELoss()</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<h3 id="4-训练中需要注意的点"><a href="#4-训练中需要注意的点" class="headerlink" title="4. 训练中需要注意的点"></a>4. 训练中需要注意的点</h3><h4 id="1-label构造"><a href="#1-label构造" class="headerlink" title="1. label构造"></a>1. label构造</h4><p>具体代码<a target="_blank" rel="noopener" href="https://github.com/WuHuRestaurant/xf_event_extraction2020Top1/blob/156b2fd429c3a752134b4050f97db7a06ea38c24/src_final/preprocess/processor.py#L396">这里</a>。因为这个任务作者只提取主客体，所以每一个label的长度为4。<br>前两个为客体的开始和结束，后两个为主体的开始和结束。<br>所在的index对应句子的位置。<br>具体代码<a target="_blank" rel="noopener" href="https://github.com/WuHuRestaurant/xf_event_extraction2020Top1/blob/156b2fd429c3a752134b4050f97db7a06ea38c24/src_final/preprocess/processor.py#L411">这里</a>。</p>
-<p>比如：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">label = [</span><br><span class="line">    [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line"></span><br><span class="line">]</span><br></pre></td></tr></table></figure>
-
-
-<p>看到这里，基本就明白主体思路和触发词提取是一样的。</p>
-<h4 id="2-相对位置编码"><a href="#2-相对位置编码" class="headerlink" title="2.相对位置编码"></a>2.相对位置编码</h4><p>这个是指引入了一个新的feature，这个feature是以trigger位置来算前面和后面的位置编码。比如trigger为(32,33)，那(32,33)的位置编码为0,左右两边递增。</p>
-<p>比如:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">distince_feature = [<span class="number">3</span>,<span class="number">2</span>,<span class="number">1</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]</span><br></pre></td></tr></table></figure>
-<p>我对这一步的做法能带来多大的提升保留质疑。<br>所以此处就不细讲了。以后有机会试试效果。</p>
-<h4 id="3-conditional-layer-norm"><a href="#3-conditional-layer-norm" class="headerlink" title="3. conditional layer norm"></a>3. conditional layer norm</h4><p>这个作者的思想来自<a target="_blank" rel="noopener" href="https://kexue.fm/archives/7124">苏剑林的CondiationalLayerNorm</a>，但是我没找到它的源码。</p>
-<p>** 作用：**<br>作者这里采用的是利用Conditional Layer Normalization来将外部条件和bert output做了一次注意力。</p>
-<p>** 具体流程：**<br>1、通过trigger index获取对应的bert output（看batch_gather函数），这里假设叫做trigger feature。<br>2、接着将trigger feature和bert output通过conditional layer norm进行融合。</p>
-<p>** conditional layer norm流程：**<br>1、对bert output做layer norm，这一步没什么可说的。<br>2、将trigger feature经过weight linear和bias linear，这个做法其实和正常的layer norm指定elementwise_affine做法是类似的，正常的layer norm做归一化没有训练参数。<br>3、和bert_output进行相乘。这个地方可以理解成trigger和其他词做了一个注意力。</p>
-<p>** 举例说明 **<br>在本次任务里，<code>触发词</code>的长度都为<code>2</code>,所以<code>self.weight_dense</code>和<code>self.bias_dense</code>都是<code>normalized_shape * 2</code>。batch_gather后拿到的触发词shape为<code>（32,2,768）</code>,这步叫做trigger feature。然后进行reshape，变成了<code>(32, 1, 1536)</code>，经过<code>self.weight_dense</code>和<code>self.bias_dense</code>变换后变成了<code>(32, 1, 768)</code>，随后和bert_output进行相乘，即和每个字做了一个注意力。</p>
-<p>作者代码如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ConditionalLayerNorm</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self,</span></span><br><span class="line"><span class="params">                 normalized_shape,</span></span><br><span class="line"><span class="params">                 eps=<span class="number">1e-12</span></span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line"></span><br><span class="line">        self.eps = eps</span><br><span class="line"></span><br><span class="line">        self.weight = nn.Parameter(torch.Tensor(normalized_shape))</span><br><span class="line">        self.bias = nn.Parameter(torch.Tensor(normalized_shape))</span><br><span class="line"></span><br><span class="line">        self.weight_dense = nn.Linear(normalized_shape * <span class="number">2</span>, normalized_shape, bias=<span class="literal">False</span>)</span><br><span class="line">        self.bias_dense = nn.Linear(normalized_shape * <span class="number">2</span>, normalized_shape, bias=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">        self.reset_weight_and_bias()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">reset_weight_and_bias</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        此处初始化的作用是在训练开始阶段不让 conditional layer norm 起作用</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        nn.init.ones_(self.weight)</span><br><span class="line">        nn.init.zeros_(self.bias)</span><br><span class="line"></span><br><span class="line">        nn.init.zeros_(self.weight_dense.weight)</span><br><span class="line">        nn.init.zeros_(self.bias_dense.weight)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, inputs, cond=<span class="literal">None</span></span>):</span><br><span class="line">        <span class="keyword">assert</span> cond <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>, <span class="string">&#x27;Conditional tensor need to input when use conditional layer norm&#x27;</span></span><br><span class="line">        cond = torch.unsqueeze(cond, <span class="number">1</span>)  <span class="comment"># (b, 1, h*2)</span></span><br><span class="line"></span><br><span class="line">        weight = self.weight_dense(cond) + self.weight  <span class="comment"># (b, 1, h)</span></span><br><span class="line">        bias = self.bias_dense(cond) + self.bias  <span class="comment"># (b, 1, h)</span></span><br><span class="line"></span><br><span class="line">        mean = torch.mean(inputs, dim=-<span class="number">1</span>, keepdim=<span class="literal">True</span>)  <span class="comment"># （b, s, 1）</span></span><br><span class="line">        outputs = inputs - mean  <span class="comment"># (b, s, h)</span></span><br><span class="line"></span><br><span class="line">        variance = torch.mean(outputs ** <span class="number">2</span>, dim=-<span class="number">1</span>, keepdim=<span class="literal">True</span>)</span><br><span class="line">        std = torch.sqrt(variance + self.eps)  <span class="comment"># (b, s, 1)</span></span><br><span class="line"></span><br><span class="line">        outputs = outputs / std  <span class="comment"># (b, s, h)</span></span><br><span class="line">        <span class="comment"># 这里做了一个交互</span></span><br><span class="line">        outputs = outputs * weight + bias</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> outputs</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>作者说添加了这个layer后效果有小幅度提升，以后可以试试。</p>
-<p>如果说有很大创新的吧，算不上，我觉得把bert output不做layer norm最终效果也大差不差。</p>
-<p>** 备注： **</p>
-<p>这里有个问题，如果触发词的长度是变长的话，怎么用呢？估计引入一个mask，算出来。</p>
-<p>以后试试。</p>
-<h4 id="4-多feature-layer-norm"><a href="#4-多feature-layer-norm" class="headerlink" title="4. 多feature layer norm"></a>4. 多feature layer norm</h4><p>这地方作者代码是在使用了trigger相对位置编码后和bert output进行concat到一起时用到的，如下所示。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">if</span> self.use_trigger_distance:</span><br><span class="line">    <span class="keyword">assert</span> trigger_distance <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>, \</span><br><span class="line">        <span class="string">&#x27;When using trigger distance features, trigger distance should be implemented&#x27;</span></span><br><span class="line"></span><br><span class="line">    trigger_distance_feature = self.trigger_distance_embedding(trigger_distance)</span><br><span class="line">    seq_out = torch.cat([seq_out, trigger_distance_feature], dim=-<span class="number">1</span>)</span><br><span class="line">    seq_out = self.layer_norm(seq_out)</span><br></pre></td></tr></table></figure>
-
-
-<p>这里的做法觉得是平时没注意到的一个点～</p>
-<p>平时俩向量直接concat到一起完事。这里还进行了一个layer norm。算是一个挺细心的点。至于能不能带来效果提升，此处就不特别注意啦。</p>
-<h3 id="5-计算loss"><a href="#5-计算loss" class="headerlink" title="5. 计算loss"></a>5. 计算loss</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> labels <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">    masks = torch.unsqueeze(attention_masks, -<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    labels = labels.<span class="built_in">float</span>()</span><br><span class="line">    obj_loss = self.criterion(obj_logits * masks, labels[:, :, :<span class="number">2</span>])</span><br><span class="line">    sub_loss = self.criterion(sub_logits * masks, labels[:, :, <span class="number">2</span>:])</span><br><span class="line"></span><br><span class="line">    loss = obj_loss + sub_loss</span><br></pre></td></tr></table></figure>
-
-
-<p>这里没什么特别需要注意的地方了，这里和trigger的做法类似，只是这里分成了两个loss，一个是subject loss，一个是object loss。</p>
-<h3 id="6-解码"><a href="#6-解码" class="headerlink" title="6. 解码"></a>6. 解码</h3><p>这部分没细看了，猜测和trigger解码应该也是类似的。</p>
-<h3 id="7-备注"><a href="#7-备注" class="headerlink" title="7. 备注"></a>7. 备注</h3><p>关于conditional layer norm</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ConditionalLayerNorm</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self,</span></span><br><span class="line"><span class="params">                 normalized_shape,</span></span><br><span class="line"><span class="params">                 eps=<span class="number">1e-12</span></span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line"></span><br><span class="line">        self.eps = eps</span><br><span class="line"></span><br><span class="line">        self.weight = nn.Parameter(torch.Tensor(normalized_shape))</span><br><span class="line">        self.bias = nn.Parameter(torch.Tensor(normalized_shape))</span><br><span class="line"></span><br><span class="line">        self.weight_dense = nn.Linear(normalized_shape * <span class="number">2</span>, normalized_shape, bias=<span class="literal">False</span>)</span><br><span class="line">        self.bias_dense = nn.Linear(normalized_shape * <span class="number">2</span>, normalized_shape, bias=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">        self.reset_weight_and_bias()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">reset_weight_and_bias</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        此处初始化的作用是在训练开始阶段不让 conditional layer norm 起作用</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        nn.init.ones_(self.weight)</span><br><span class="line">        nn.init.zeros_(self.bias)</span><br><span class="line"></span><br><span class="line">        nn.init.zeros_(self.weight_dense.weight)</span><br><span class="line">        nn.init.zeros_(self.bias_dense.weight)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, inputs, cond=<span class="literal">None</span></span>):</span><br><span class="line">        <span class="keyword">assert</span> cond <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>, <span class="string">&#x27;Conditional tensor need to input when use conditional layer norm&#x27;</span></span><br><span class="line">        cond = torch.unsqueeze(cond, <span class="number">1</span>)  <span class="comment"># (b, 1, h*2)</span></span><br><span class="line"></span><br><span class="line">        weight = self.weight_dense(cond) + self.weight  <span class="comment"># (b, 1, h)</span></span><br><span class="line">        bias = self.bias_dense(cond) + self.bias  <span class="comment"># (b, 1, h)</span></span><br><span class="line"></span><br><span class="line">        mean = torch.mean(inputs, dim=-<span class="number">1</span>, keepdim=<span class="literal">True</span>)  <span class="comment"># （b, s, 1）</span></span><br><span class="line">        outputs = inputs - mean  <span class="comment"># (b, s, h)</span></span><br><span class="line"></span><br><span class="line">        variance = torch.mean(outputs ** <span class="number">2</span>, dim=-<span class="number">1</span>, keepdim=<span class="literal">True</span>)</span><br><span class="line">        std = torch.sqrt(variance + self.eps)  <span class="comment"># (b, s, 1)</span></span><br><span class="line"></span><br><span class="line">        outputs = outputs / std  <span class="comment"># (b, s, h)</span></span><br><span class="line">        <span class="comment"># 这里做了一个交互</span></span><br><span class="line">        outputs = outputs * weight + bias</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> outputs</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line"></span><br><span class="line">    bert_output = torch.rand(<span class="number">32</span>, <span class="number">128</span>, <span class="number">768</span>)</span><br><span class="line">    <span class="comment"># 当然，每个句子的trigger_index都是变化的</span></span><br><span class="line">    <span class="comment"># 此处假设这个batch的index span为(56, 58)</span></span><br><span class="line">    trigger_feature = bert_output[:, <span class="number">56</span>:<span class="number">58</span>, :]</span><br><span class="line"></span><br><span class="line">    trigger_feature = trigger_feature.view(<span class="number">32</span>, <span class="number">768</span> * <span class="number">2</span>)</span><br><span class="line">    cln = ConditionalLayerNorm(<span class="number">768</span>)</span><br><span class="line">    output = cln(bert_output, trigger_feature)</span><br><span class="line">    <span class="built_in">print</span>(output)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/08/08/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E4%B8%BB%E5%AE%A2%E4%BD%93%E6%8F%90%E5%8F%96/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-模型优化点" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/08/05/%E6%A8%A1%E5%9E%8B%E4%BC%98%E5%8C%96%E7%82%B9/">模型优化点</a>
-    </h1>
-  
-
-        
-        <a href="/2022/08/05/%E6%A8%A1%E5%9E%8B%E4%BC%98%E5%8C%96%E7%82%B9/" class="archive-article-date">
-  	<time datetime="2022-08-05T08:56:52.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-05</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="1-SWA-随机权重平均"><a href="#1-SWA-随机权重平均" class="headerlink" title="1. SWA(随机权重平均)"></a>1. SWA(随机权重平均)</h3><p>简单来说就是将指定epochs范围内训练出来的模型，将这些模型的weight取平均赋值给这个swa_model。</p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://pytorch.org/blog/pytorch-1.6-now-includes-stochastic-weight-averaging/">Pytorch内置的swa</a>，但是引入了一个SWALR。</li>
-<li><a target="_blank" rel="noopener" href="https://github.com/WuHuRestaurant/xf_event_extraction2020Top1/blob/156b2fd429c3a752134b4050f97db7a06ea38c24/src_final/utils/functions_utils.py#L121">一个项目用到的</a>。</li>
-</ol>
-<h3 id="2-attack-training-对抗训练"><a href="#2-attack-training-对抗训练" class="headerlink" title="2. attack training(对抗训练)"></a>2. attack training(对抗训练)</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># FGM</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">FGM</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, model: nn.Module, eps=<span class="number">1.</span></span>):</span><br><span class="line">        self.model = (</span><br><span class="line">            model.module <span class="keyword">if</span> <span class="built_in">hasattr</span>(model, <span class="string">&quot;module&quot;</span>) <span class="keyword">else</span> model</span><br><span class="line">        )</span><br><span class="line">        self.eps = eps</span><br><span class="line">        self.backup = &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment"># only attack word embedding</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">attack</span>(<span class="params">self, emb_name=<span class="string">&#x27;word_embeddings&#x27;</span></span>):</span><br><span class="line">        <span class="keyword">for</span> name, param <span class="keyword">in</span> self.model.named_parameters():</span><br><span class="line">            <span class="keyword">if</span> param.requires_grad <span class="keyword">and</span> emb_name <span class="keyword">in</span> name:</span><br><span class="line">                self.backup[name] = param.data.clone()</span><br><span class="line">                norm = torch.norm(param.grad)</span><br><span class="line">                <span class="keyword">if</span> norm <span class="keyword">and</span> <span class="keyword">not</span> torch.isnan(norm):</span><br><span class="line">                    r_at = self.eps * param.grad / norm</span><br><span class="line">                    param.data.add_(r_at)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">restore</span>(<span class="params">self, emb_name=<span class="string">&#x27;word_embeddings&#x27;</span></span>):</span><br><span class="line">        <span class="keyword">for</span> name, para <span class="keyword">in</span> self.model.named_parameters():</span><br><span class="line">            <span class="keyword">if</span> para.requires_grad <span class="keyword">and</span> emb_name <span class="keyword">in</span> name:</span><br><span class="line">                <span class="keyword">assert</span> name <span class="keyword">in</span> self.backup</span><br><span class="line">                para.data = self.backup[name]</span><br><span class="line"></span><br><span class="line">        self.backup = &#123;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># PGD</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PGD</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, model, eps=<span class="number">1.</span>, alpha=<span class="number">0.3</span></span>):</span><br><span class="line">        self.model = (</span><br><span class="line">            model.module <span class="keyword">if</span> <span class="built_in">hasattr</span>(model, <span class="string">&quot;module&quot;</span>) <span class="keyword">else</span> model</span><br><span class="line">        )</span><br><span class="line">        self.eps = eps</span><br><span class="line">        self.alpha = alpha</span><br><span class="line">        self.emb_backup = &#123;&#125;</span><br><span class="line">        self.grad_backup = &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">attack</span>(<span class="params">self, emb_name=<span class="string">&#x27;word_embeddings&#x27;</span>, is_first_attack=<span class="literal">False</span></span>):</span><br><span class="line">        <span class="keyword">for</span> name, param <span class="keyword">in</span> self.model.named_parameters():</span><br><span class="line">            <span class="keyword">if</span> param.requires_grad <span class="keyword">and</span> emb_name <span class="keyword">in</span> name:</span><br><span class="line">                <span class="keyword">if</span> is_first_attack:</span><br><span class="line">                    self.emb_backup[name] = param.data.clone()</span><br><span class="line">                norm = torch.norm(param.grad)</span><br><span class="line">                <span class="keyword">if</span> norm != <span class="number">0</span> <span class="keyword">and</span> <span class="keyword">not</span> torch.isnan(norm):</span><br><span class="line">                    r_at = self.alpha * param.grad / norm</span><br><span class="line">                    param.data.add_(r_at)</span><br><span class="line">                    param.data = self.project(name, param.data)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">restore</span>(<span class="params">self, emb_name=<span class="string">&#x27;word_embeddings&#x27;</span></span>):</span><br><span class="line">        <span class="keyword">for</span> name, param <span class="keyword">in</span> self.model.named_parameters():</span><br><span class="line">            <span class="keyword">if</span> param.requires_grad <span class="keyword">and</span> emb_name <span class="keyword">in</span> name:</span><br><span class="line">                <span class="keyword">assert</span> name <span class="keyword">in</span> self.emb_backup</span><br><span class="line">                param.data = self.emb_backup[name]</span><br><span class="line">        self.emb_backup = &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">project</span>(<span class="params">self, param_name, param_data</span>):</span><br><span class="line">        r = param_data - self.emb_backup[param_name]</span><br><span class="line">        <span class="keyword">if</span> torch.norm(r) &gt; self.eps:</span><br><span class="line">            r = self.eps * r / torch.norm(r)</span><br><span class="line">        <span class="keyword">return</span> self.emb_backup[param_name] + r</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backup_grad</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">for</span> name, param <span class="keyword">in</span> self.model.named_parameters():</span><br><span class="line">            <span class="keyword">if</span> param.requires_grad <span class="keyword">and</span> param.grad <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">                self.grad_backup[name] = param.grad.clone()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">restore_grad</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">for</span> name, param <span class="keyword">in</span> self.model.named_parameters():</span><br><span class="line">            <span class="keyword">if</span> param.requires_grad <span class="keyword">and</span> param.grad <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">                param.grad = self.grad_backup[name]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 初始化</span></span><br><span class="line">fgm = FGM(model)</span><br><span class="line"><span class="keyword">for</span> batch_input, batch_label <span class="keyword">in</span> data:</span><br><span class="line">  <span class="comment"># 正常训练</span></span><br><span class="line">  loss = model(batch_input, batch_label)</span><br><span class="line">  loss.backward() <span class="comment"># 反向传播，得到正常的grad</span></span><br><span class="line">  <span class="comment"># 对抗训练</span></span><br><span class="line">  fgm.attack() <span class="comment"># embedding被修改了</span></span><br><span class="line">  <span class="comment"># optimizer.zero_grad() # 如果不想累加梯度，就把这里的注释取消</span></span><br><span class="line">  loss_sum = model(batch_input, batch_label)</span><br><span class="line">  loss_sum.backward() <span class="comment"># 反向传播，在正常的grad基础上，累加对抗训练的梯度</span></span><br><span class="line">  fgm.restore() <span class="comment"># 恢复Embedding的参数</span></span><br><span class="line">  <span class="comment"># 梯度下降，更新参数</span></span><br><span class="line">  optimizer.step()</span><br><span class="line">  optimizer.zero_grad()</span><br></pre></td></tr></table></figure>
-
-<ol>
-<li><a target="_blank" rel="noopener" href="https://wmathor.com/index.php/archives/1537/">https://wmathor.com/index.php/archives/1537/</a></li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/08/05/%E6%A8%A1%E5%9E%8B%E4%BC%98%E5%8C%96%E7%82%B9/">展开全文 >></a>
         </p>
       
 
