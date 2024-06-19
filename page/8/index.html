@@ -206,6 +206,139 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-expand和unsqueeze在一些情况使用的含义" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/08/13/expand%E5%92%8Cunsqueeze%E5%9C%A8%E4%B8%80%E4%BA%9B%E6%83%85%E5%86%B5%E4%BD%BF%E7%94%A8%E7%9A%84%E5%90%AB%E4%B9%89/">expand和unsqueeze在一些情况使用的含义</a>
+    </h1>
+  
+
+        
+        <a href="/2021/08/13/expand%E5%92%8Cunsqueeze%E5%9C%A8%E4%B8%80%E4%BA%9B%E6%83%85%E5%86%B5%E4%BD%BF%E7%94%A8%E7%9A%84%E5%90%AB%E4%B9%89/" class="archive-article-date">
+  	<time datetime="2021-08-13T03:18:31.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-08-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="情况一"><a href="#情况一" class="headerlink" title="情况一"></a>情况一</h2><blockquote>
+<p>input:</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="comment"># a 模拟的是: batch_size: 2, sequence_length:3, feature: 4</span></span><br><span class="line">a = torch.arange(<span class="number">24</span>).reshape(<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)</span><br><span class="line"><span class="comment"># b 代表的是: feature: 4 * 4</span></span><br><span class="line">b = a.unsqueeze(<span class="number">2</span>).expand(-<span class="number">1</span>, -<span class="number">1</span>, <span class="number">4</span>, -<span class="number">1</span>) <span class="comment"># shape: torch.Size([2, 3, 4, 4])</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>output:</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">a[<span class="number">0</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>tensor([[ <span class="number">0</span>,  <span class="number">1</span>,  <span class="number">2</span>,  <span class="number">3</span>],</span><br><span class="line">        [ <span class="number">4</span>,  <span class="number">5</span>,  <span class="number">6</span>,  <span class="number">7</span>],</span><br><span class="line">        [ <span class="number">8</span>,  <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>]])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">b[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt;tensor([[[ <span class="number">0</span>,  <span class="number">1</span>,  <span class="number">2</span>,  <span class="number">3</span>],</span><br><span class="line">         [ <span class="number">0</span>,  <span class="number">1</span>,  <span class="number">2</span>,  <span class="number">3</span>],</span><br><span class="line">         [ <span class="number">0</span>,  <span class="number">1</span>,  <span class="number">2</span>,  <span class="number">3</span>],</span><br><span class="line">         [ <span class="number">0</span>,  <span class="number">1</span>,  <span class="number">2</span>,  <span class="number">3</span>]],</span><br><span class="line">        [[ <span class="number">4</span>,  <span class="number">5</span>,  <span class="number">6</span>,  <span class="number">7</span>],</span><br><span class="line">         [ <span class="number">4</span>,  <span class="number">5</span>,  <span class="number">6</span>,  <span class="number">7</span>],</span><br><span class="line">         [ <span class="number">4</span>,  <span class="number">5</span>,  <span class="number">6</span>,  <span class="number">7</span>],</span><br><span class="line">         [ <span class="number">4</span>,  <span class="number">5</span>,  <span class="number">6</span>,  <span class="number">7</span>]],</span><br><span class="line">        [[ <span class="number">8</span>,  <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>],</span><br><span class="line">         [ <span class="number">8</span>,  <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>],</span><br><span class="line">         [ <span class="number">8</span>,  <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>],</span><br><span class="line">         [ <span class="number">8</span>,  <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>]]])</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>换种说法就是:</p>
+</blockquote>
+<p>a: [B, L, F]<br>b: [B, L, F, F]</p>
+<p>每个字对应一个[F, F]的矩阵<br>这个矩阵的第i行第j列的元素的含义是：<code>上一时刻tag为i, 这一时刻tag为j的分数</code>。比如应用到一阶马尔可夫相关的模型中。</p>
+<h2 id="情况二（这种情况没真实测试过，需谨慎对待）"><a href="#情况二（这种情况没真实测试过，需谨慎对待）" class="headerlink" title="情况二（这种情况没真实测试过，需谨慎对待）"></a>情况二（这种情况没真实测试过，需谨慎对待）</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># b 代表的是: sequence length: 3 * 3</span></span><br><span class="line">b = a.unsqueeze(<span class="number">1</span>).expand(-<span class="number">1</span>, <span class="number">3</span>, -<span class="number">1</span>, -<span class="number">1</span>) <span class="comment"># shape: torch.Size([2, 3, 3, 4])</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">b[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">tensor([[[ <span class="number">0</span>,  <span class="number">1</span>,  <span class="number">2</span>,  <span class="number">3</span>],</span><br><span class="line">         [ <span class="number">4</span>,  <span class="number">5</span>,  <span class="number">6</span>,  <span class="number">7</span>],</span><br><span class="line">         [ <span class="number">8</span>,  <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>]],</span><br><span class="line">        [[ <span class="number">0</span>,  <span class="number">1</span>,  <span class="number">2</span>,  <span class="number">3</span>],</span><br><span class="line">         [ <span class="number">4</span>,  <span class="number">5</span>,  <span class="number">6</span>,  <span class="number">7</span>],</span><br><span class="line">         [ <span class="number">8</span>,  <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>]],</span><br><span class="line">        [[ <span class="number">0</span>,  <span class="number">1</span>,  <span class="number">2</span>,  <span class="number">3</span>],</span><br><span class="line">         [ <span class="number">4</span>,  <span class="number">5</span>,  <span class="number">6</span>,  <span class="number">7</span>],</span><br><span class="line">         [ <span class="number">8</span>,  <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>]]])</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>即这个长度为3的句子形成一个首尾的矩阵，最后一维代表相关的概率。</p>
+<p>比如在嵌套ner任务中，</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>我</th>
+<th>爱</th>
+<th>北</th>
+<th>京</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>我</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>爱</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>北</td>
+<td>0.03</td>
+<td>0.02</td>
+<td>0.05</td>
+<td>0.9</td>
+</tr>
+<tr>
+<td>京</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/08/13/expand%E5%92%8Cunsqueeze%E5%9C%A8%E4%B8%80%E4%BA%9B%E6%83%85%E5%86%B5%E4%BD%BF%E7%94%A8%E7%9A%84%E5%90%AB%E4%B9%89/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-我最敬爱的老婆" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1041,90 +1174,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2021/06/25/bert%E4%BB%A5%E9%A6%96%E5%AD%97%E8%A1%A8%E7%A4%BA%E8%AF%8D%E5%90%91%E9%87%8F(2)/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-bert以平均、首字、尾字表示词向量(1)" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/06/25/bert%E4%BB%A5%E5%B9%B3%E5%9D%87%E3%80%81%E9%A6%96%E5%AD%97%E3%80%81%E5%B0%BE%E5%AD%97%E8%A1%A8%E7%A4%BA%E8%AF%8D%E5%90%91%E9%87%8F(1)/">bert以平均、首字、尾字表示词向量(1)</a>
-    </h1>
-  
-
-        
-        <a href="/2021/06/25/bert%E4%BB%A5%E5%B9%B3%E5%9D%87%E3%80%81%E9%A6%96%E5%AD%97%E3%80%81%E5%B0%BE%E5%AD%97%E8%A1%A8%E7%A4%BA%E8%AF%8D%E5%90%91%E9%87%8F(1)/" class="archive-article-date">
-  	<time datetime="2021-06-25T09:02:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-25</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="1-word-preprocess"><a href="#1-word-preprocess" class="headerlink" title="1. word preprocess."></a>1. word preprocess.</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> AutoTokenizer</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">encoder_texts</span>(<span class="params">texts: <span class="type">List</span>[<span class="type">List</span>[<span class="built_in">str</span>]], tokenizer</span>):</span><br><span class="line">    <span class="comment"># 统计句子中最大的词长度</span></span><br><span class="line">    fix_len = <span class="built_in">max</span>([<span class="built_in">max</span>([<span class="built_in">len</span>(word) <span class="keyword">for</span> word <span class="keyword">in</span> text]) <span class="keyword">for</span> text <span class="keyword">in</span> texts])</span><br><span class="line"></span><br><span class="line">    matrix = []</span><br><span class="line">    <span class="keyword">for</span> text <span class="keyword">in</span> texts:</span><br><span class="line">        vector = []</span><br><span class="line"></span><br><span class="line">        text = [tokenizer.cls_token, *text, tokenizer.sep_token]</span><br><span class="line">        input_ids = tokenizer.batch_encode_plus(</span><br><span class="line">            text,</span><br><span class="line">            add_special_tokens=<span class="literal">False</span>,</span><br><span class="line">        )[<span class="string">&#x27;input_ids&#x27;</span>]</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> _input_ids <span class="keyword">in</span> input_ids:</span><br><span class="line">            <span class="comment"># 修复例如: texts = [[&#x27;\ue5f1\ue5f1\ue5f1\ue5f1&#x27;]] 这种情况</span></span><br><span class="line">            _input_ids = _input_ids <span class="keyword">or</span> [tokenizer.unk_token_id]</span><br><span class="line">            vector.append(_input_ids + (fix_len - <span class="built_in">len</span>(_input_ids)) * [tokenizer.pad_token_id])</span><br><span class="line">        matrix.append(torch.tensor(vector, dtype=torch.long))</span><br><span class="line">    <span class="keyword">return</span> pad_sequence(matrix, batch_first=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    texts = [</span><br><span class="line">        [<span class="string">&#x27;我&#x27;</span>, <span class="string">&#x27;爱中国&#x27;</span>],</span><br><span class="line">        [<span class="string">&#x27;我&#x27;</span>, <span class="string">&#x27;爱&#x27;</span>, <span class="string">&#x27;中国&#x27;</span>]</span><br><span class="line">    ]</span><br><span class="line">    tokenizer = AutoTokenizer.from_pretrained(<span class="string">&#x27;ckiplab/albert-tiny-chinese&#x27;</span>)</span><br><span class="line">    <span class="built_in">print</span>(encoder_texts(texts, tokenizer))</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>output：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">tensor([[[ 101,    0,    0],</span><br><span class="line">         [2769,    0,    0],</span><br><span class="line">         [4263,  704, 1744],</span><br><span class="line">         [   0,    0,    0]],</span><br><span class="line"></span><br><span class="line">        [[ 101,    0,    0],</span><br><span class="line">         [2769,    0,    0],</span><br><span class="line">         [4263,    0,    0],</span><br><span class="line">         [ 704, 1744,    0]]])</span><br></pre></td></tr></table></figure>
-
-
-
-
-<h3 id="2-transformer-layer"><a href="#2-transformer-layer" class="headerlink" title="2. transformer layer."></a>2. transformer layer.</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">from</span> supar.modules.scalar_mix <span class="keyword">import</span> ScalarMix</span><br><span class="line"><span class="keyword">from</span> supar.utils.fn <span class="keyword">import</span> pad</span><br><span class="line"></span><br><span class="line"><span class="comment"># pad 等价于 pad_sequence。</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># from torch.nn.utils.rnn import pad_sequence</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TransformerEmbedding</span>(nn.Module):</span><br><span class="line">    <span class="string">r&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    A module that directly utilizes the pretrained models in `transformers`_ to produce BERT representations.</span></span><br><span class="line"><span class="string">    While mainly tailored to provide input preparation and post-processing for the BERT model,</span></span><br><span class="line"><span class="string">    it is also compatible with other pretrained language models like XLNet, RoBERTa and ELECTRA, etc.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        model (str):</span></span><br><span class="line"><span class="string">            Path or name of the pretrained models registered in `transformers`_, e.g., ``&#x27;bert-base-cased&#x27;``.</span></span><br><span class="line"><span class="string">        n_layers (int):</span></span><br><span class="line"><span class="string">            The number of BERT layers to use. If 0, uses all layers.</span></span><br><span class="line"><span class="string">        n_out (int):</span></span><br><span class="line"><span class="string">            The requested size of the embeddings. If 0, uses the size of the pretrained embedding model. Default: 0.</span></span><br><span class="line"><span class="string">        stride (int):</span></span><br><span class="line"><span class="string">            A sequence longer than max length will be splitted into several small pieces</span></span><br><span class="line"><span class="string">            with a window size of ``stride``. Default: 10.</span></span><br><span class="line"><span class="string">        pooling (str):</span></span><br><span class="line"><span class="string">            Pooling way to get from token piece embeddings to token embedding.</span></span><br><span class="line"><span class="string">            ``first``: take the first subtoken. ``last``: take the last subtoken. ``mean``: take a mean over all.</span></span><br><span class="line"><span class="string">            Default: ``mean``.</span></span><br><span class="line"><span class="string">        pad_index (int):</span></span><br><span class="line"><span class="string">            The index of the padding token in BERT vocabulary. Default: 0.</span></span><br><span class="line"><span class="string">        dropout (float):</span></span><br><span class="line"><span class="string">            The dropout ratio of BERT layers. Default: 0. This value will be passed into the :class:`ScalarMix` layer.</span></span><br><span class="line"><span class="string">        requires_grad (bool):</span></span><br><span class="line"><span class="string">            If ``True``, the model parameters will be updated together with the downstream task. Default: ``False``.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    .. _transformers:</span></span><br><span class="line"><span class="string">        https://github.com/huggingface/transformers</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, model, n_layers=<span class="number">4</span>, n_out=<span class="number">0</span>, stride=<span class="number">256</span>, pooling=<span class="string">&#x27;mean&#x27;</span>, pad_index=<span class="number">0</span>, dropout=<span class="number">0</span>, requires_grad=<span class="literal">True</span></span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">from</span> transformers <span class="keyword">import</span> AutoConfig, AutoModel, AutoTokenizer</span><br><span class="line">        self.bert = AutoModel.from_pretrained(model, config=AutoConfig.from_pretrained(model, output_hidden_states=<span class="literal">True</span>))</span><br><span class="line">        self.bert = self.bert.requires_grad_(requires_grad)</span><br><span class="line"></span><br><span class="line">        self.model = model</span><br><span class="line">        self.n_layers = n_layers <span class="keyword">or</span> self.bert.config.num_hidden_layers</span><br><span class="line">        self.hidden_size = self.bert.config.hidden_size</span><br><span class="line">        self.n_out = n_out <span class="keyword">or</span> self.hidden_size</span><br><span class="line">        self.stride = stride</span><br><span class="line">        self.pooling = pooling</span><br><span class="line">        self.pad_index = pad_index</span><br><span class="line">        self.dropout = dropout</span><br><span class="line">        self.requires_grad = requires_grad</span><br><span class="line">        self.max_len = <span class="built_in">int</span>(<span class="built_in">max</span>(<span class="number">0</span>, self.bert.config.max_position_embeddings) <span class="keyword">or</span> <span class="number">1e12</span>) - <span class="number">2</span></span><br><span class="line"></span><br><span class="line">        self.tokenizer = AutoTokenizer.from_pretrained(model)</span><br><span class="line"></span><br><span class="line">        self.scalar_mix = ScalarMix(self.n_layers, dropout)</span><br><span class="line">        self.projection = nn.Linear(self.hidden_size, self.n_out, <span class="literal">False</span>) <span class="keyword">if</span> self.hidden_size != n_out <span class="keyword">else</span> nn.Identity()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__repr__</span>(<span class="params">self</span>):</span><br><span class="line">        s = <span class="string">f&quot;<span class="subst">&#123;self.model&#125;</span>, n_layers=<span class="subst">&#123;self.n_layers&#125;</span>, n_out=<span class="subst">&#123;self.n_out&#125;</span>, &quot;</span></span><br><span class="line">        s += <span class="string">f&quot;stride=<span class="subst">&#123;self.stride&#125;</span>, pooling=<span class="subst">&#123;self.pooling&#125;</span>, pad_index=<span class="subst">&#123;self.pad_index&#125;</span>&quot;</span></span><br><span class="line">        <span class="keyword">if</span> self.dropout &gt; <span class="number">0</span>:</span><br><span class="line">            s += <span class="string">f&quot;, dropout=<span class="subst">&#123;self.dropout&#125;</span>&quot;</span></span><br><span class="line">        <span class="keyword">if</span> self.requires_grad:</span><br><span class="line">            s += <span class="string">f&quot;, requires_grad=<span class="subst">&#123;self.requires_grad&#125;</span>&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="string">f&quot;<span class="subst">&#123;self.__class__.__name__&#125;</span>(<span class="subst">&#123;s&#125;</span>)&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, subwords</span>):</span><br><span class="line">        <span class="string">r&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            subwords (~torch.Tensor): ``[batch_size, seq_len, fix_len]``.</span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            ~torch.Tensor:</span></span><br><span class="line"><span class="string">                BERT embeddings of shape ``[batch_size, seq_len, n_out]``.</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        mask = subwords.ne(self.pad_index)</span><br><span class="line">        lens = mask.<span class="built_in">sum</span>((<span class="number">1</span>, <span class="number">2</span>))</span><br><span class="line">        <span class="comment"># [batch_size, n_subwords]</span></span><br><span class="line">        subwords = pad(subwords[mask].split(lens.tolist()), self.pad_index, padding_side=self.tokenizer.padding_side)</span><br><span class="line">        bert_mask = pad(mask[mask].split(lens.tolist()), <span class="number">0</span>, padding_side=self.tokenizer.padding_side)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># return the hidden states of all layers</span></span><br><span class="line">        bert = self.bert(subwords[:, :self.max_len], attention_mask=bert_mask[:, :self.max_len].<span class="built_in">float</span>())[-<span class="number">1</span>]</span><br><span class="line">        <span class="comment"># [n_layers, batch_size, max_len, hidden_size]</span></span><br><span class="line">        bert = bert[-self.n_layers:]</span><br><span class="line">        <span class="comment"># [batch_size, max_len, hidden_size]</span></span><br><span class="line">        bert = self.scalar_mix(bert)</span><br><span class="line">        <span class="comment"># [batch_size, n_subwords, hidden_size]</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(self.stride, (subwords.shape[<span class="number">1</span>]-self.max_len+self.stride-<span class="number">1</span>)//self.stride*self.stride+<span class="number">1</span>, self.stride):</span><br><span class="line">            part = self.bert(subwords[:, i:i+self.max_len], attention_mask=bert_mask[:, i:i+self.max_len].<span class="built_in">float</span>())[-<span class="number">1</span>]</span><br><span class="line">            bert = torch.cat((bert, self.scalar_mix(part[-self.n_layers:])[:, self.max_len-self.stride:]), <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># [batch_size, seq_len]</span></span><br><span class="line">        bert_lens = mask.<span class="built_in">sum</span>(-<span class="number">1</span>)</span><br><span class="line">        bert_lens = bert_lens.masked_fill_(bert_lens.eq(<span class="number">0</span>), <span class="number">1</span>)</span><br><span class="line">        <span class="comment"># [batch_size, seq_len, fix_len, hidden_size]</span></span><br><span class="line">        embed = bert.new_zeros(*mask.shape, self.hidden_size).masked_scatter_(mask.unsqueeze(-<span class="number">1</span>), bert[bert_mask])</span><br><span class="line">        <span class="comment"># [batch_size, seq_len, hidden_size]</span></span><br><span class="line">        <span class="keyword">if</span> self.pooling == <span class="string">&#x27;first&#x27;</span>:</span><br><span class="line">            embed = embed[:, :, <span class="number">0</span>]</span><br><span class="line">        <span class="keyword">elif</span> self.pooling == <span class="string">&#x27;last&#x27;</span>:</span><br><span class="line">            embed = embed.gather(<span class="number">2</span>, (bert_lens-<span class="number">1</span>).unsqueeze(-<span class="number">1</span>).repeat(<span class="number">1</span>, <span class="number">1</span>, self.hidden_size).unsqueeze(<span class="number">2</span>)).squeeze(<span class="number">2</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            embed = embed.<span class="built_in">sum</span>(<span class="number">2</span>) / bert_lens.unsqueeze(-<span class="number">1</span>)</span><br><span class="line">        embed = self.projection(embed)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> embed</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>到此，能够拿到以词为级别的output，embed.shape查看一下即可，后续就可以concat其他input做多输入。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/06/25/bert%E4%BB%A5%E5%B9%B3%E5%9D%87%E3%80%81%E9%A6%96%E5%AD%97%E3%80%81%E5%B0%BE%E5%AD%97%E8%A1%A8%E7%A4%BA%E8%AF%8D%E5%90%91%E9%87%8F(1)/">展开全文 >></a>
         </p>
       
 

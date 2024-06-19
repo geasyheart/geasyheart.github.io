@@ -206,6 +206,102 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-24-02编译安装之MySQL-通用二进制格式" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/22/24-02%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85%E4%B9%8BMySQL-%E9%80%9A%E7%94%A8%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%A0%BC%E5%BC%8F/">24_02编译安装之MySQL_通用二进制格式_</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/22/24-02%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85%E4%B9%8BMySQL-%E9%80%9A%E7%94%A8%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%A0%BC%E5%BC%8F/" class="archive-article-date">
+  	<time datetime="2015-04-22T02:43:46.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="mysql通用二进制格式"><a href="#mysql通用二进制格式" class="headerlink" title="mysql通用二进制格式"></a>mysql通用二进制格式</h2><p>根据官网要求，安装目录必须是：&#x2F;usr&#x2F;local&#x2F;mysql<br> <br>说明，在解压后有一个INSTALL-BINARY打开后有安装步骤； </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#tar xf mysql**** -C /usr/local </span></span><br><span class="line"><span class="comment">#ln -sv mysql*********  mysql </span></span><br><span class="line"><span class="comment">#groupadd -r(系统用户，不能登录) -g(指定组ID) 306    mysql </span></span><br><span class="line"><span class="comment">#useradd -r(系统用户，不能登录) -g 306 -u (用户ID) 306 mysql </span></span><br><span class="line"><span class="comment">#mkdir /mydata/data             (mydata建议使用LVM) </span></span><br><span class="line"><span class="comment">#chown -R　mysql.mysql /mydata/data </span></span><br><span class="line"><span class="comment">#chmod 750 /mydata/data </span></span><br><span class="line"><span class="comment">#scripts/mysql_install_db --user=mysql --datadir=/mydata/data(初始化) </span></span><br><span class="line"><span class="comment">#chown -R root.mysql /usr/local/mysql/* （防止数据库被攻破后获得系统权限） </span></span><br><span class="line"><span class="comment">#bin/mysqld_safe --user=mysql &amp;   这步不用执行，这步只有默认时有意义 </span></span><br><span class="line"><span class="built_in">cp</span> support-files/mysql.server /etc/init.d/mysqld </span><br><span class="line">chkconfig --add mysqld </span><br><span class="line">  </span><br><span class="line"><span class="built_in">cp</span> support-files/my-default.cnf /etc/my.cnf </span><br><span class="line">可以通过修改（可自定义配置文件my_large,my_huge） </span><br><span class="line">里面的内容来定义； </span><br><span class="line">vi /etc/my.cnf </span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>thread_concurrency&#x3D;8 进程并发量(CPU*2)<br>添加:<br>datadir &#x3D; &#x2F;mydata&#x2F;data(这个必须添加)##############<br>            我在这都弄好后，遇到一个问题，就是以localhost登陆时，发现&#x2F;tmp&#x2F;mysql.sock没有找到，<br>            我在my.cnf里填写位置为&#x2F;tmp&#x2F;mysql.sock&#x2F;结果还是不对，不过我重启了下，输入mysql，然后设置<br>            localhost密码，就可以登陆了；<br>            <br>如果敲mysql （commond not found） </p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/profile.d/mysql.sh </span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:/usr/local/mysql/bin/  保存退出，重新登录即可 </span><br><span class="line">  </span><br><span class="line">vi /etc/man.config帮助文档 </span><br><span class="line">MANPATH /usr/local/mysql/man(添加) </span><br><span class="line">  </span><br><span class="line">vi /etc/ld.so.conf.d/mysql.conf 库文件路径 </span><br><span class="line">/usr/local/mysql/lib(添加) </span><br><span class="line">ldconfig -v让系统重新建立库文件缓存,缓存在/etc/ld.so.cache </span><br><span class="line">  </span><br><span class="line"><span class="built_in">ln</span> -sv /usr/local/mysql/include /usr/include/mysql  输出头文件 </span><br><span class="line">  </span><br></pre></td></tr></table></figure>
+
+<p> <br>Mysql:配置文件格式，集中式配置文件，可以为多个程序提供配置； </p>
+<blockquote>
+<p>    &#x2F;etc&#x2F;my.cnf<br>    <br>配置文件会找这些：<br>&#x2F;etc&#x2F;my.cnf –&gt; &#x2F;etc&#x2F;mysql&#x2F;my.cnf –&gt; $BASEDIR&#x2F;my.cnf –&gt; ~&#x2F;.my.cnf    <br> <br>SHOW DATABASES：多了一个数据库performance_schema；系统状态收集库；<br> <br>Mysql服务器维护了两类变量：<br>    服务器变量：<br>        定义Mysql服务器运行属性；<br>            SHOW GLOBAL VARIABLES [LIKE ‘datadir’];<br>    状态变量：<br>        保存了Mysql服务器运行统计数据；<br>            SHOW GLOBAL STATUS [LIKE ‘STRING’];         
+  </p>
+</blockquote>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/22/24-02%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85%E4%B9%8BMySQL-%E9%80%9A%E7%94%A8%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%A0%BC%E5%BC%8F/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-24-01LAMP编译安装之httpd" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1388,131 +1484,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/04/05/20-01-%E5%AE%9E%E9%AA%8C-DNS%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE%E4%B8%BB%E4%BB%8E/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-14-01-2-grub2引导修复" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/05/14-01-2-grub2%E5%BC%95%E5%AF%BC%E4%BF%AE%E5%A4%8D/">14_01_2_grub2引导修复</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/05/14-01-2-grub2%E5%BC%95%E5%AF%BC%E4%BF%AE%E5%A4%8D/" class="archive-article-date">
-  	<time datetime="2015-04-05T03:30:06.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-05</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <ol>
-<li>插入引导盘，或者不插，只要能进grub，一切好说(不过要看看有grub可用的命令么，例如kernel什么的(这个是grub))。 </li>
-<li>find (hdx,x)&#x2F;<br> 这一步就是找出rootfs所在的位置，更多不赘述，可参考前面grub的配置文档。。 </li>
-<li>这一步，就比较个性了，在用命令载入内核时，grub是kernel<br>例如:</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">grub&gt;kernel (hdx,x)/boot/vmlinuz-version  ro root=/dev/rootfs_position </span><br><span class="line">grub&gt;initrd (hdx,x)/boot/initramfs-version </span><br><span class="line">grub&gt;boot </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>但是grub2就不是这样了，示例二:   <br>帮好友引导OpenSUSE时， </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">grub&gt;linux (hdx,x)/boot/vmlinuz-version </span><br><span class="line">grub&gt;initrd (hdx,x)/boot/initramfs-version </span><br><span class="line">grub&gt;boot </span><br></pre></td></tr></table></figure>
-
-<p>不过fedora貌似就不是这样:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">grub&gt;linux16 (hdx,x)/vmlinuz-version ro root=/dev/sdax </span><br><span class="line">grub&gt;initrd16 (hdx,x)/initramfs-version </span><br><span class="line">grub&gt;boot </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>其实还可能不同，因为忘记当时怎么写的了，这两个是后来查看grub.cfg得到的，肯定不是这样的，不过内核肯定是linux开头，initramfs是init开头的，自行补全。哈哈，后来觉得，可能是由于grub2在对待i386和x86_64时加载命令有点不同，不过我想强调的是:<br>使用help命令 </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grub&gt;help </span><br></pre></td></tr></table></figure>
-
-<p>查看可用的命令，，不要随意看网上的教程就拿来操作，当然知道原理除外。。 </p>
-<ol start="4">
-<li>系统起来了，这又有问题了，怎么生成配置文件，这个也是最为重要的。。</li>
-</ol>
-<p>示例一:<br>OpenSUSE: </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#grub2-install /dev/sda </span><br><span class="line">#grub-mkconfig -o /boot/grub2/grub.cfg </span><br><span class="line">#reboot </span><br></pre></td></tr></table></figure>
-
-<p>但是fedora不是这样: </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#grub2-install /dev/sda </span><br></pre></td></tr></table></figure>
-
-<p>grub2-install：错误： &#x2F;usr&#x2F;lib&#x2F;grub&#x2F;x86_64&#x2F;modinfo.sh doesn’t exist. Please specify –target or –directory.<br>当时就好奇了，为什么OpenSUSE写这么简单就可以，为什么fedora就不行，后来觉得，还是没掌握更深的，你懂得。。<br>既然没有这个文件，我就要看看这个目录下有什么东西， </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#ls /usr/lib/grub/ </span><br></pre></td></tr></table></figure>
-
-<p>tab补全试试，会发现有个i386-pc文件， </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#ls /usr/lib/grub/i386-pc | grep modinfo.sh </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>真会有这个文件啊，看样子知道怎么解决了。。 </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#grub2-install --target=i386-pc /dev/sda </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>没报错，爽！ </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#grub2-mkconfig -o /boot/grub2/grub.cfg </span><br><span class="line">#reboot </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>引导就成功了!!! </p>
-<p>#补充，当重新启动时，可以看到选项栏，但是当随便启动一个，可能会提示No linuxefi和initefi(貌似这两个命令)，反正我是遇到了，<br>重新引导进系统，再 </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#grub2-install -target=i386-pc /dev/sda </span><br><span class="line">#grub2-mkconfig -o /boot/grub2/grub.cfg </span><br><span class="line">#vim /boot/grub2/grub.cfg </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>可以看到加载内核和initramfs的命令变了，， </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#reboot </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>至此搞定。。。 </p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/05/14-01-2-grub2%E5%BC%95%E5%AF%BC%E4%BF%AE%E5%A4%8D/">展开全文 >></a>
         </p>
       
 

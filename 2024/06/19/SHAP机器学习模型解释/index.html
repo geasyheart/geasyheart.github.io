@@ -7,16 +7,19 @@
   <meta name="baidu-site-verification" content="code-Wz3hIIlkFx" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://geasyheart.github.io">
-  <title>Archives | 博客</title>
+  <title>SHAP机器学习模型解释 | 博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="张宇个人博客">
-<meta property="og:type" content="website">
-<meta property="og:title" content="博客">
-<meta property="og:url" content="https://geasyheart.github.io/archives/page/14/index.html">
+  <meta name="description" content="介绍分享个模型可解释的库SHAP，其可以对XGBoost等机器学习库进行结果解释。 更多还有类似Paddle中的TrustAI。 什么是SHAP？SHAP（SHapley Additive exPlanations）是用来解释机器学习模型的工具。它告诉我们每个特征对模型预测结果的贡献有多大。想象一下你和几个朋友一起干活，最后得到了一笔报酬。你想知道每个人应该分多少钱，SHAP就是在做类似的事情，只">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SHAP机器学习模型解释">
+<meta property="og:url" content="https://geasyheart.github.io/2024/06/19/SHAP%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E8%A7%A3%E9%87%8A/index.html">
 <meta property="og:site_name" content="博客">
-<meta property="og:description" content="张宇个人博客">
+<meta property="og:description" content="介绍分享个模型可解释的库SHAP，其可以对XGBoost等机器学习库进行结果解释。 更多还有类似Paddle中的TrustAI。 什么是SHAP？SHAP（SHapley Additive exPlanations）是用来解释机器学习模型的工具。它告诉我们每个特征对模型预测结果的贡献有多大。想象一下你和几个朋友一起干活，最后得到了一笔报酬。你想知道每个人应该分多少钱，SHAP就是在做类似的事情，只">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-06-19T01:53:29.000Z">
+<meta property="article:modified_time" content="2024-06-19T03:06:50.958Z">
 <meta property="article:author" content="张宇">
+<meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="博客" type="application/atom+xml">
@@ -204,515 +207,204 @@ var _hmt = _hmt || [];
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-SHAP机器学习模型解释" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      SHAP机器学习模型解释
+    </h1>
+  
+
+        
+        <a href="/2024/06/19/SHAP%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E8%A7%A3%E9%87%8A/" class="archive-article-date">
+  	<time datetime="2024-06-19T01:53:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-06-19</time>
+</a>
+        
+      </header>
     
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>分享个模型可解释的库<a target="_blank" rel="noopener" href="https://github.com/shap/shap">SHAP</a>，其可以对XGBoost等机器学习库进行结果解释。</p>
+<p>更多还有类似Paddle中的<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/TrustAI/tree/main">TrustAI</a>。</p>
+<h3 id="什么是SHAP？"><a href="#什么是SHAP？" class="headerlink" title="什么是SHAP？"></a>什么是SHAP？</h3><p>SHAP（SHapley Additive exPlanations）是用来解释机器学习模型的工具。它告诉我们每个特征对模型预测结果的贡献有多大。想象一下你和几个朋友一起干活，最后得到了一笔报酬。你想知道每个人应该分多少钱，SHAP就是在做类似的事情，只不过它是在告诉你每个特征对模型预测结果的贡献。</p>
+<h3 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h3><h4 id="1-Shapley值："><a href="#1-Shapley值：" class="headerlink" title="1. Shapley值："></a>1. Shapley值：</h4><p>   想象一个团队在完成任务后得到一笔奖金，我们想公平地分配这笔奖金。Shapley值就是一种分配方法，告诉我们每个成员（在机器学习中是每个特征）应得的报酬（对预测结果的贡献）。</p>
+<h4 id="2-边际贡献："><a href="#2-边际贡献：" class="headerlink" title="2. 边际贡献："></a>2. 边际贡献：</h4><p>   假设我们在玩一个游戏，每次加入一个新成员（特征），看看他们对团队成绩（模型预测）的贡献有多大。边际贡献就是每次新加入的成员对总成绩的额外贡献。</p>
+<h3 id="SHAP如何工作？"><a href="#SHAP如何工作？" class="headerlink" title="SHAP如何工作？"></a>SHAP如何工作？</h3><p>SHAP计算每个特征的贡献时，会考虑所有可能的加入顺序。这是因为不同的加入顺序可能会导致不同的贡献。举个例子：</p>
+<ul>
+<li>如果你和你的朋友们一起完成一个项目，每个朋友加入的顺序不同，他们的贡献也可能不同。</li>
+<li>SHAP通过计算所有可能顺序中的平均贡献来确定每个特征的Shapley值。</li>
+</ul>
+<h3 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤"></a>具体步骤</h3><h4 id="1-考虑所有可能的特征子集："><a href="#1-考虑所有可能的特征子集：" class="headerlink" title="1. 考虑所有可能的特征子集："></a>1. 考虑所有可能的特征子集：</h4><p>   对于每个特征，计算它加入不同特征子集时，对模型预测结果的边际贡献。</p>
+<h4 id="2-计算平均贡献："><a href="#2-计算平均贡献：" class="headerlink" title="2. 计算平均贡献："></a>2. 计算平均贡献：</h4><p>   对于每个特征，计算它在所有可能子集中的平均贡献，这就是这个特征的Shapley值。</p>
+<h3 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h3><p>假设我们有一个模型在预测一个人是否会购买某产品，模型用到了年龄、收入和是否有孩子三个特征。SHAP会做以下事情：</p>
+<h4 id="1-计算每个特征的贡献："><a href="#1-计算每个特征的贡献：" class="headerlink" title="1. 计算每个特征的贡献："></a>1. 计算每个特征的贡献：</h4><ul>
+<li>先只考虑收入，再加上年龄，看看预测结果有多大变化。再加上是否有孩子，看看预测结果再变化多少。</li>
+<li>再换个顺序，先考虑年龄，再加上收入，然后加上是否有孩子。</li>
+<li>如此继续，考虑所有可能的加入顺序。</li>
+</ul>
+<h4 id="2-计算平均值："><a href="#2-计算平均值：" class="headerlink" title="2. 计算平均值："></a>2. 计算平均值：</h4><p>   对于每个特征，计算它在所有顺序中的平均贡献，这个平均值就是该特征的Shapley值。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>SHAP通过考虑每个特征在不同组合中的贡献，并取平均值，来告诉我们每个特征对模型预测的影响有多大。这样，我们就能清楚地知道模型是如何做出预测的，每个特征在其中起了多大作用。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/blob/m2/python/shap_demo.ipynb">演示代码</a>：<a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/blob/m2/python/shap_demo.ipynb">https://github.com/geasyheart/algo/blob/m2/python/shap_demo.ipynb</a></p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/assets/alipay.png">
+                      <span class="reward-type">支付宝</span>
+                    </div>
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2017" class="archive-year">2017</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/10/02/grpc-timeout/" class="archive-article-date">
-  	<time datetime="2017-10-02T07:28:42.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-10-02</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/10/02/grpc-timeout/">grpc-timeout</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">grpc</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/grpc//" class="article-tag-list-link color5">grpc</a>
-        		</li>
-      		
-		</ul>
-	</div>
+      
 
+      
 
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://geasyheart.github.io/2024/06/19/SHAP%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E8%A7%A3%E9%87%8A/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/10/01/grpc%E7%94%9F%E6%88%90server-and-client%E4%BB%A3%E7%A0%81%E5%AF%BC%E5%85%A5%E8%B7%AF%E5%BE%84%E9%97%AE%E9%A2%98/" class="archive-article-date">
-  	<time datetime="2017-10-01T01:28:42.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-10-01</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2024/05/08/DPO/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">DPO</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/10/01/grpc%E7%94%9F%E6%88%90server-and-client%E4%BB%A3%E7%A0%81%E5%AF%BC%E5%85%A5%E8%B7%AF%E5%BE%84%E9%97%AE%E9%A2%98/">grpc生成server-and-client代码导入路径问题</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">grpc</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/grpc//" class="article-tag-list-link color5">grpc</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFSHAP%EF%BC%9F"><span class="toc-number">1.1.</span> <span class="toc-text">什么是SHAP？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><span class="toc-number">1.2.</span> <span class="toc-text">核心概念</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-Shapley%E5%80%BC%EF%BC%9A"><span class="toc-number">1.2.1.</span> <span class="toc-text">1. Shapley值：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E8%BE%B9%E9%99%85%E8%B4%A1%E7%8C%AE%EF%BC%9A"><span class="toc-number">1.2.2.</span> <span class="toc-text">2. 边际贡献：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SHAP%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C%EF%BC%9F"><span class="toc-number">1.3.</span> <span class="toc-text">SHAP如何工作？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E6%AD%A5%E9%AA%A4"><span class="toc-number">1.4.</span> <span class="toc-text">具体步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E8%80%83%E8%99%91%E6%89%80%E6%9C%89%E5%8F%AF%E8%83%BD%E7%9A%84%E7%89%B9%E5%BE%81%E5%AD%90%E9%9B%86%EF%BC%9A"><span class="toc-number">1.4.1.</span> <span class="toc-text">1. 考虑所有可能的特征子集：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E8%AE%A1%E7%AE%97%E5%B9%B3%E5%9D%87%E8%B4%A1%E7%8C%AE%EF%BC%9A"><span class="toc-number">1.4.2.</span> <span class="toc-text">2. 计算平均贡献：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%8B%E5%AD%90"><span class="toc-number">1.5.</span> <span class="toc-text">例子</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E8%AE%A1%E7%AE%97%E6%AF%8F%E4%B8%AA%E7%89%B9%E5%BE%81%E7%9A%84%E8%B4%A1%E7%8C%AE%EF%BC%9A"><span class="toc-number">1.5.1.</span> <span class="toc-text">1. 计算每个特征的贡献：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E8%AE%A1%E7%AE%97%E5%B9%B3%E5%9D%87%E5%80%BC%EF%BC%9A"><span class="toc-number">1.5.2.</span> <span class="toc-text">2. 计算平均值：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">1.6.</span> <span class="toc-text">总结</span></a></li></ol></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/09/26/protocol-buffters/" class="archive-article-date">
-  	<time datetime="2017-09-26T07:27:09.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-09-26</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/09/26/protocol-buffters/">protocol-buffters</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">grpc</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/grpc//" class="article-tag-list-link color5">grpc</a>
-        		</li>
-      		
-		</ul>
-	</div>
+        
+    </div>
+</aside>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/08/26/govendor%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8/" class="archive-article-date">
-  	<time datetime="2017-08-26T07:24:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-08-26</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/08/26/govendor%E5%AE%89%E8%A3%85%E4%BD%BF%E7%94%A8/">govendor安装使用</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">go</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/go//" class="article-tag-list-link color3">go</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/07/28/rabbitmq-server%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/" class="archive-article-date">
-  	<time datetime="2017-07-28T07:44:13.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-07-28</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/07/28/rabbitmq-server%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE/">rabbitmq-server简单配置</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/07/28/gitlab-ci%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE/" class="archive-article-date">
-  	<time datetime="2017-07-28T07:29:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-07-28</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/07/28/gitlab-ci%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE/">gitlab-ci安装配置</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">CI</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/CI//" class="article-tag-list-link color3">CI</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/06/30/%E5%85%B3%E4%BA%8Etornado-rabbitmq/" class="archive-article-date">
-  	<time datetime="2017-06-30T07:36:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-06-30</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/06/30/%E5%85%B3%E4%BA%8Etornado-rabbitmq/">关于tornado+rabbitmq</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/05/26/flask%E8%B7%A8%E5%9F%9F/" class="archive-article-date">
-  	<time datetime="2017-05-26T07:39:18.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-05-26</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/05/26/flask%E8%B7%A8%E5%9F%9F/">flask跨域</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/05/21/click%E4%BD%BF%E7%94%A8/" class="archive-article-date">
-  	<time datetime="2017-05-21T07:31:13.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-05-21</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/05/21/click%E4%BD%BF%E7%94%A8/">click使用</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/05/10/%E8%A7%86%E9%A2%91%E7%9B%B4%E6%92%AD/" class="archive-article-date">
-  	<time datetime="2017-05-10T07:38:01.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-05-10</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/05/10/%E8%A7%86%E9%A2%91%E7%9B%B4%E6%92%AD/">视频直播</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
   
-    </div></section>
   
 
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/page/13/">&amp;laquo; Prev</a><a class="page-number" href="/archives/">1</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/12/">12</a><a class="page-number" href="/archives/page/13/">13</a><span class="page-number current">14</span><a class="page-number" href="/archives/page/15/">15</a><a class="page-number" href="/archives/page/16/">16</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/27/">27</a><a class="extend next" rel="next" href="/archives/page/15/">Next &amp;raquo;</a>
-    </nav>
+  
+
+  
+
   
 
 
@@ -736,8 +428,8 @@ var _hmt = _hmt || [];
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

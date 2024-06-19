@@ -206,6 +206,85 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-求合理路径" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/11/18/%E6%B1%82%E5%90%88%E7%90%86%E8%B7%AF%E5%BE%84/">求合理路径</a>
+    </h1>
+  
+
+        
+        <a href="/2022/11/18/%E6%B1%82%E5%90%88%E7%90%86%E8%B7%AF%E5%BE%84/" class="archive-article-date">
+  	<time datetime="2022-11-18T01:45:52.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-11-18</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>今天在群里看到有人问了这么一道题，如下图所示。瞬间让我大呼这不就是我之前想出的一道面试题么，不过有可能是我当时没有表达清楚，发现小伙伴们理解的不是很透彻。</p>
+<img src="/2022/11/18/%E6%B1%82%E5%90%88%E7%90%86%E8%B7%AF%E5%BE%84/a1.png" class="" title="a1">
+
+
+<p>那我的方法就是基于每个元素的position，构成一个有向图即可。</p>
+<p>代码如下（也方便未来自己再重新写😂）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="keyword">import</span> math</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">List</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">trace_path</span>(<span class="params">vec, pathes</span>):</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> vec:</span><br><span class="line">        <span class="keyword">return</span> pathes</span><br><span class="line">    valid_pathes = []</span><br><span class="line">    <span class="keyword">for</span> item <span class="keyword">in</span> vec[<span class="number">0</span>]:</span><br><span class="line">        <span class="keyword">for</span> path <span class="keyword">in</span> pathes:</span><br><span class="line">            <span class="keyword">if</span> item &gt; path[-<span class="number">1</span>]:</span><br><span class="line">                valid_pathes.append([*path, item])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> trace_path(vec=vec[<span class="number">1</span>:], pathes=valid_pathes)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_all_valid_path</span>(<span class="params">vec: <span class="type">List</span>[<span class="type">List</span>[<span class="built_in">int</span>]]</span>) -&gt; <span class="type">List</span>[<span class="type">List</span>[<span class="built_in">int</span>]]:</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> vec: <span class="keyword">return</span> []</span><br><span class="line">    <span class="keyword">for</span> v <span class="keyword">in</span> vec:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> v:</span><br><span class="line">            <span class="keyword">return</span> []</span><br><span class="line">    <span class="keyword">return</span> trace_path(vec=vec[<span class="number">1</span>:], pathes=[[i] <span class="keyword">for</span> i <span class="keyword">in</span> vec[<span class="number">0</span>]])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_sub_sum</span>(<span class="params">path: <span class="type">List</span>[<span class="built_in">int</span>]</span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line">    _<span class="built_in">sum</span> = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> index, item <span class="keyword">in</span> <span class="built_in">enumerate</span>(path):</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            next_item = path[index + <span class="number">1</span>]</span><br><span class="line">            _<span class="built_in">sum</span> += (next_item - item)</span><br><span class="line">        <span class="keyword">except</span> IndexError:</span><br><span class="line">            <span class="keyword">pass</span></span><br><span class="line">    <span class="keyword">return</span> _<span class="built_in">sum</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_shortest_path</span>(<span class="params">vec: <span class="type">List</span>[<span class="type">List</span>[<span class="built_in">int</span>]]</span>) -&gt; <span class="type">List</span>[<span class="built_in">int</span>]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    输出最短的那个路径</span></span><br><span class="line"><span class="string">    :param vec:</span></span><br><span class="line"><span class="string">    :return:</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    pathes = get_all_valid_path(vec=vec)</span><br><span class="line">    short_path, short_sum = [], math.inf</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> path <span class="keyword">in</span> pathes:</span><br><span class="line">        _<span class="built_in">sum</span> = _sub_sum(path=path)</span><br><span class="line">        <span class="keyword">if</span> short_sum &gt; _<span class="built_in">sum</span>:</span><br><span class="line">            short_path = path</span><br><span class="line">            short_sum = _<span class="built_in">sum</span></span><br><span class="line">    <span class="keyword">return</span> short_path</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    <span class="comment"># 结果</span></span><br><span class="line">    <span class="comment"># 1, 2, 6</span></span><br><span class="line">    <span class="comment"># 1, 2, 7</span></span><br><span class="line">    <span class="comment"># 1, 4, 6</span></span><br><span class="line">    <span class="comment"># 1, 4, 7</span></span><br><span class="line">    <span class="comment"># 3, 4, 6</span></span><br><span class="line">    <span class="comment"># 3, 4, 7</span></span><br><span class="line">    <span class="comment"># 我这里的vec代表元素的position～</span></span><br><span class="line">    vec = [</span><br><span class="line">        [<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>],</span><br><span class="line">        [<span class="number">2</span>, <span class="number">4</span>],</span><br><span class="line">        [<span class="number">6</span>, <span class="number">7</span>]</span><br><span class="line">    ]</span><br><span class="line">    <span class="built_in">print</span>(get_all_valid_path(vec))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/11/18/%E6%B1%82%E5%90%88%E7%90%86%E8%B7%AF%E5%BE%84/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-textrank关键句" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1264,119 +1343,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2022/08/12/bert%E8%9E%8D%E5%85%A5%E5%A4%96%E9%83%A8%E7%89%B9%E5%BE%81/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-讯飞2020年事件提取比赛第一名-属性提取" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/08/09/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E5%B1%9E%E6%80%A7%E6%8F%90%E5%8F%96/">讯飞2020年事件提取比赛第一名-属性提取</a>
-    </h1>
-  
-
-        
-        <a href="/2022/08/09/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E5%B1%9E%E6%80%A7%E6%8F%90%E5%8F%96/" class="archive-article-date">
-  	<time datetime="2022-08-09T08:11:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-09</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>这是第三篇文章，和第二篇本质没有顺序之分，上一篇是<a href="/2022/08/08/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E4%B8%BB%E5%AE%A2%E4%BD%93%E6%8F%90%E5%8F%96/" title="讯飞2020年事件提取比赛第一名-主客体提取">讯飞2020年事件提取比赛第一名-主客体提取</a>。</p>
-<h3 id="1-跑通代码"><a href="#1-跑通代码" class="headerlink" title="1. 跑通代码"></a>1. 跑通代码</h3><p>只需要改动task_type，如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">args = TrainArgs().get_parser()</span><br><span class="line">args.gpu_ids = <span class="string">&#x27;0&#x27;</span></span><br><span class="line">args.mode = <span class="string">&quot;train&quot;</span></span><br><span class="line">args.raw_data_dir = <span class="string">&#x27;./data/final/raw_data&#x27;</span></span><br><span class="line">args.mid_data_dir = <span class="string">&#x27;./data/final/mid_data&#x27;</span></span><br><span class="line">args.aux_data_dir = <span class="string">&quot;./data/final/preliminary_clean&quot;</span></span><br><span class="line">args.bert_dir = <span class="string">&#x27;/home/yuzhang/PycharmProjects/xf_event_extraction2020Top1/bert/torch_roberta_wwm&#x27;</span></span><br><span class="line">args.output_dir = <span class="string">&#x27;./out&#x27;</span></span><br><span class="line">args.bert_type = <span class="string">&#x27;roberta_wwm&#x27;</span></span><br><span class="line">args.task_type = <span class="string">&#x27;attribution&#x27;</span></span><br><span class="line">args.max_seq_len = <span class="number">320</span></span><br><span class="line">args.train_epochs = <span class="number">6</span></span><br><span class="line">args.train_batch_size = <span class="number">3</span></span><br><span class="line">args.lr = <span class="number">2e-5</span></span><br><span class="line">args.other_lr = <span class="number">2e-4</span></span><br><span class="line">args.attack_train = <span class="string">&quot;pgd&quot;</span></span><br><span class="line">args.swa_start = <span class="number">4</span></span><br><span class="line">args.eval_model = <span class="literal">True</span></span><br><span class="line">args.enhance_data = <span class="literal">True</span></span><br><span class="line">args.use_trigger_distance = <span class="literal">True</span></span><br><span class="line">args.use_distant_trigger = <span class="literal">True</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="2-模型结构"><a href="#2-模型结构" class="headerlink" title="2. 模型结构"></a>2. 模型结构</h3><img src="/2022/08/09/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E5%B1%9E%E6%80%A7%E6%8F%90%E5%8F%96/attribution.png" class="" title="模型结构">
-
-<h3 id="3-模型结构"><a href="#3-模型结构" class="headerlink" title="3. 模型结构"></a>3. 模型结构</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">AttributionClassifier(</span><br><span class="line">  (bert_module): BertModel()</span><br><span class="line">  (dropout_layer): Dropout(p=0.1, inplace=False)</span><br><span class="line">  (pooling_layer): AdaptiveMaxPool1d(output_size=1)</span><br><span class="line">  (tense_classifier): Linear(in_features=2304, out_features=4, bias=True)</span><br><span class="line">  (polarity_classifier): Linear(in_features=2304, out_features=3, bias=True)</span><br><span class="line">  (criterion): CrossEntropyLoss()</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<h3 id="4-整体流程"><a href="#4-整体流程" class="headerlink" title="4. 整体流程"></a>4. 整体流程</h3><p>根据<a target="_blank" rel="noopener" href="http://challenge.xfyun.cn/topic/info?type=hotspot">挑战</a>可知事件属性抽取分成两部分：</p>
-<ol>
-<li>极性分为：肯定、否定、可能；</li>
-<li>时态分为：过去、现在、将来、其他。</li>
-</ol>
-<p>这俩分别对应<code>tense_classifier</code>和<code>polarity_classifier</code>。</p>
-<h4 id="1-输入句子，拿到bert-output"><a href="#1-输入句子，拿到bert-output" class="headerlink" title="1. 输入句子，拿到bert output"></a>1. 输入句子，拿到bert output</h4><h4 id="2、做动态池化"><a href="#2、做动态池化" class="headerlink" title="2、做动态池化"></a>2、做动态池化</h4><p>在<code>属性分类优化</code>ppt那页，作者认为：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">能决定事件属性的词大多存在触发词左右，故舍弃CLS中的全局特征，采用trigger左右两端动态池化特征作为全局特征；</span><br></pre></td></tr></table></figure>
-
-<p>具体做法即以触发词所在位置为准，设置window_size&#x3D;20，只考虑这个范围内的bert output。</p>
-<p>示例：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 假设爱是trigger word。</span></span><br><span class="line"><span class="built_in">input</span> = [<span class="string">&#x27;我&#x27;</span>, <span class="string">&#x27;爱&#x27;</span>, <span class="string">&#x27;你&#x27;</span>, <span class="string">&#x27;北&#x27;</span>, <span class="string">&#x27;京&#x27;</span>, <span class="string">&#x27;。&#x27;</span>, ..., <span class="string">&#x27;你&#x27;</span>, <span class="string">&#x27;好&#x27;</span>, <span class="string">&#x27;呀&#x27;</span>]</span><br><span class="line">mask =  [<span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, ..., <span class="number">0</span>, <span class="number">0</span>,<span class="number">0</span>] <span class="comment"># 超过window_size就设置为0</span></span><br><span class="line"><span class="comment"># 即除这些mask外的都设置为-math.inf</span></span><br><span class="line">bert_output.fill(~mask, -math.inf)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h4 id="3、获取window-size内最大的feature"><a href="#3、获取window-size内最大的feature" class="headerlink" title="3、获取window_size内最大的feature"></a>3、获取window_size内最大的feature</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># 下面三步就是这面示例</span></span><br><span class="line">seq_out = torch.transpose(seq_out, -<span class="number">1</span>, -<span class="number">2</span>)  <span class="comment"># (bs, hidden, seq_len)</span></span><br><span class="line">pooling_masks = torch.unsqueeze(pooling_masks, <span class="number">1</span>)</span><br><span class="line">seq_out = seq_out + (<span class="number">1</span> - pooling_masks) * (-<span class="number">1e7</span>)  <span class="comment"># mask 无关区域</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 这里拿到max,这里看备忘那里的AdaptiveMaxPool1d</span></span><br><span class="line">pooled_out = self.pooling_layer(seq_out).squeeze(-<span class="number">1</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h4 id="4、和trigger-feature进行concat"><a href="#4、和trigger-feature进行concat" class="headerlink" title="4、和trigger feature进行concat"></a>4、和trigger feature进行concat</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">logits = torch.cat([pooled_out, trigger_label_feature], dim=-<span class="number">1</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h4 id="5、整体forward代码"><a href="#5、整体forward代码" class="headerlink" title="5、整体forward代码"></a>5、整体forward代码</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">bert_outputs = self.bert_module(</span><br><span class="line">    input_ids=token_ids,</span><br><span class="line">    attention_mask=attention_masks,</span><br><span class="line">    token_type_ids=token_type_ids</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">seq_out = bert_outputs[<span class="number">0</span>]</span><br><span class="line"><span class="comment"># 拿到trigger feature</span></span><br><span class="line">trigger_label_feature = self._batch_gather(seq_out, trigger_index)</span><br><span class="line"></span><br><span class="line">trigger_label_feature = trigger_label_feature.view([trigger_label_feature.size()[<span class="number">0</span>], -<span class="number">1</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 做动态池化</span></span><br><span class="line">seq_out = torch.transpose(seq_out, -<span class="number">1</span>, -<span class="number">2</span>)  <span class="comment"># (bs, hidden, seq_len)</span></span><br><span class="line">pooling_masks = torch.unsqueeze(pooling_masks, <span class="number">1</span>)</span><br><span class="line">seq_out = seq_out + (<span class="number">1</span> - pooling_masks) * (-<span class="number">1e7</span>)  <span class="comment"># mask 无关区域</span></span><br><span class="line"></span><br><span class="line">pooled_out = self.pooling_layer(seq_out).squeeze(-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 合并两个feature</span></span><br><span class="line">logits = torch.cat([pooled_out, trigger_label_feature], dim=-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">polarity_logits = self.polarity_classifier(self.dropout_layer(logits))</span><br><span class="line">tense_logits = self.tense_classifier(self.dropout_layer(logits))</span><br><span class="line"></span><br><span class="line">out = (torch.softmax(polarity_logits, dim=-<span class="number">1</span>), torch.softmax(tense_logits, dim=-<span class="number">1</span>),)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> labels <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">    labels = labels.long()</span><br><span class="line"></span><br><span class="line">    tense_loss = self.criterion(tense_logits, labels[:, <span class="number">0</span>])</span><br><span class="line">    polarity_loss = self.criterion(polarity_logits, labels[:, <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">    loss = polarity_loss + tense_loss</span><br><span class="line"></span><br><span class="line">    out = (loss,) + out</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> out</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="5、值得注意的点"><a href="#5、值得注意的点" class="headerlink" title="5、值得注意的点"></a>5、值得注意的点</h3><p>核心在于作者的这句话：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">能决定事件属性的词大多存在触发词左右，故舍弃CLS中的全局特征，采用trigger左右两端动态池化特征作为全局特征；</span><br></pre></td></tr></table></figure>
-
-<p>比如我们可以这么做，直接拿[CLS]位置，然后输入两个linear(一个极性，一个时态)，分别拿到各自loss，就ok了。</p>
-<p>但是作者这里没有拿[CLS]来代表整个句子，因为作者认为<code>能决定事件属性的词大多存在触发词左右</code>。所以他这里采用了以trigger左右window_size&#x3D;20来缩减范围。</p>
-<p>从个人角度来讲，他这种方式第一能加快速度，第二是可能会有更好的泛化效果。</p>
-<p>因为打比赛这种东西，恨不得啥奇淫巧技都上。但是这种思想可以借鉴。</p>
-<h3 id="备忘"><a href="#备忘" class="headerlink" title="备忘"></a>备忘</h3><p>关于<code>AdaptiveMaxPool1d</code>的用法</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">a = torch.arange(<span class="number">24</span>, dtype=torch.float32).view(<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>)</span><br><span class="line">a</span><br><span class="line">Out[<span class="number">11</span>]: </span><br><span class="line">tensor([[[ <span class="number">0.</span>,  <span class="number">1.</span>,  <span class="number">2.</span>,  <span class="number">3.</span>],</span><br><span class="line">         [ <span class="number">4.</span>,  <span class="number">5.</span>,  <span class="number">6.</span>,  <span class="number">7.</span>],</span><br><span class="line">         [ <span class="number">8.</span>,  <span class="number">9.</span>, <span class="number">10.</span>, <span class="number">11.</span>]],</span><br><span class="line">        [[<span class="number">12.</span>, <span class="number">13.</span>, <span class="number">14.</span>, <span class="number">15.</span>],</span><br><span class="line">         [<span class="number">16.</span>, <span class="number">17.</span>, <span class="number">18.</span>, <span class="number">19.</span>],</span><br><span class="line">         [<span class="number">20.</span>, <span class="number">21.</span>, <span class="number">22.</span>, <span class="number">23.</span>]]])</span><br><span class="line"></span><br><span class="line">torch.functional.F.max_pool1d(a,kernel_size=<span class="number">4</span>)</span><br><span class="line">Out[<span class="number">12</span>]: </span><br><span class="line">tensor([[[ <span class="number">3.</span>],</span><br><span class="line">         [ <span class="number">7.</span>],</span><br><span class="line">         [<span class="number">11.</span>]],</span><br><span class="line">        [[<span class="number">15.</span>],</span><br><span class="line">         [<span class="number">19.</span>],</span><br><span class="line">         [<span class="number">23.</span>]]])</span><br><span class="line">torch.nn.AdaptiveMaxPool1d(<span class="number">1</span>)(a)</span><br><span class="line">Out[<span class="number">13</span>]: </span><br><span class="line">tensor([[[ <span class="number">3.</span>],</span><br><span class="line">         [ <span class="number">7.</span>],</span><br><span class="line">         [<span class="number">11.</span>]],</span><br><span class="line">        [[<span class="number">15.</span>],</span><br><span class="line">         [<span class="number">19.</span>],</span><br><span class="line">         [<span class="number">23.</span>]]])</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/08/09/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E5%B1%9E%E6%80%A7%E6%8F%90%E5%8F%96/">展开全文 >></a>
         </p>
       
 

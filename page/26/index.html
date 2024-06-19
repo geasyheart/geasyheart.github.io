@@ -206,6 +206,126 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-09-02磁盘及文件系统管理详解之四" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/15/09-02%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E5%9B%9B/">09_02磁盘及文件系统管理详解之四</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/15/09-02%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E5%9B%9B/" class="archive-article-date">
+  	<time datetime="2015-02-14T16:29:56.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-15</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>分区完成后，查看 &#x2F;proc&#x2F;partitions可能没有得到新的磁盘分区情况，<br>可以执行partprobe命令<br>partprobe:redhat5用，redhat6使用其他的，不过也可以用<br> 通知内核重读硬盘分区表 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#cat /proc/partitions </span><br><span class="line">#partprobe /dev/sdx </span><br></pre></td></tr></table></figure>
+
+<p>创建文件系统: </p>
+<blockquote>
+<p>cat &#x2F;proc&#x2F;filesystems <br>查看系统所支持的文件系统<br>或者mkfs双tab查看 </p>
+<p>mkfs <br>-t fstype </p>
+<p>mkfs.ext2&#x2F;3&#x2F;4 </p>
+<p>mkfs -t ext2 &#x3D; mkfs.ext2<br>即mkfs -t 调用mkfs.ext(x)。。。 </p>
+</blockquote>
+<p>专门管理ext系列文件: </p>
+<blockquote>
+<p>mke2fs<br>-j:ext3<br>mke2fs -j &#x2F;dev&#x2F;sda5 (ext3)<br>mke2fs &#x2F;dev&#x2F;sda5(ext2)<br>-t fstype：ext2&#x2F;ext3&#x2F;ext4<br>-b:指定block size，默认为4096，可用取值为1024，2048，4096    ！！！！！！！！！！！！<br>-L:指定分区卷标(label),<br>mke2fs -L mydata &#x2F;dev&#x2F;sda5<br>-m:指定预留给超级用户的块数百分比，默认%5..<br>mke2fs -m 3 &#x2F;dev&#x2F;sda5 预留%3<br>-i:默认8K块一个inode；<br>mke2fs -i 4096 &#x2F;dev&#x2F;sda5<br>-N:指定要创建的inode的个数<br>-F:强制创建文件系统<br>-E:用于指定额外的文件系统属性 </p>
+</blockquote>
+<h2 id="blkid-查看磁盘分区的相关属性"><a href="#blkid-查看磁盘分区的相关属性" class="headerlink" title="blkid:查看磁盘分区的相关属性"></a>blkid:查看磁盘分区的相关属性</h2><blockquote>
+<p>UUID:系统生成用于唯一指明磁盘设备的身份<br>TYPE:查看文件系统类型<br>LABEL:查看卷标 </p>
+</blockquote>
+<p>e2label:用于查看或定义卷标<br>e2label 设备文件  卷标:设定卷标 </p>
+<h2 id="tune2fs-调整文件系统的相关属性"><a href="#tune2fs-调整文件系统的相关属性" class="headerlink" title="tune2fs:调整文件系统的相关属性"></a>tune2fs:调整文件系统的相关属性</h2><blockquote>
+<p>-j:升级文件系统ext2 到 ext3<br>tune2fs -j &#x2F;dev&#x2F;sda5<br>blkid &#x2F;dev&#x2F;sda5 查看就是ext3了；<br>这个无损创建(即不损坏原来的数据)<br>-L:设定卷标<br>tune2fs -L  mydata &#x2F;dev&#x2F;sda5(设定或修改卷标)<br>-m:调整预留百分比(和上面一样用法)<br>-r：指定预留块数<br>-o：设定默认挂载选项<br>acl:Enable Access control list </p>
+</blockquote>
+<h2 id="以下这两个很重要"><a href="#以下这两个很重要" class="headerlink" title="以下这两个很重要"></a>以下这两个很重要</h2><blockquote>
+<p>（在分区时会提示挂载20次或者使用180时会进行自检，而<br>当服务器上的磁盘有几个T大小时，自检就会消耗大量的资源，这个<br>时候，可使其关闭)<br>-c #:指定挂载次数达到#次之后进行自检(0或-1表示关闭此功能)<br>-i #:每挂载多少天后进行自检(0或-1表示关闭此功能表示关闭此功能) </p>
+</blockquote>
+<h2 id="dumpe2fs-显示文件属性信息-这个很重要，可以查看分区的详细信息，以及碎片"><a href="#dumpe2fs-显示文件属性信息-这个很重要，可以查看分区的详细信息，以及碎片" class="headerlink" title="dumpe2fs:显示文件属性信息(这个很重要，可以查看分区的详细信息，以及碎片)"></a>dumpe2fs:显示文件属性信息(这个很重要，可以查看分区的详细信息，以及碎片)</h2><blockquote>
+<p> -h:只显示超级块信息  superbpock<br> dumpe2fs -h &#x2F;dev&#x2F;sda5 </p>
+<p>fsck:检查并修复Linux文件系统<br> -t fstype：指定文件系统属性(可以不指定，系统会调用blkid)<br> -a 自动修复 </p>
+<p>e2fsck:检查ext2和ext3和ext4文件系统<br> -f：强制检查<br> -p:自动修复 </p>
+</blockquote>
+<p>挂载:将新的文件系统关联至当前根文件系统<br>卸载:将某文件系统与根文件系统的关联关系予以移除 </p>
+<p>mount 设备 挂载点<br> 设备:<br> 设备文件 : &#x2F;dev&#x2F;sda5<br> 卷标 : LABEL&#x3D;””<br> UUID : UUID&#x3D;””<br> 挂载点:目录<br> 要求: </p>
+<ol>
+<li>此目录没有被其他进程使用 </li>
+<li>目录得事先存在 </li>
+<li>目录中的原有的文件将会暂时隐蔽<br> mount 不带选项就会显示当前系统的设备及挂载点<br> -a:表示&#x2F;etc&#x2F;fstab文件中所有的文件系统<br> -n:默认情况下，mount每挂载一个设备，都会把挂载的设备信息存至&#x2F;etc&#x2F;mtab文件，<br> 使用-n选项意味着挂载设备时，不会把信息写入&#x2F;etc&#x2F;mtab文件，<br> -t：fstype：指定当前挂载设备上的文件系统的类型，默认情况下不使用-t会识别的也会识别很好<br> -r：只读挂载(这个挂载光盘时可使用)<br> -w：读写挂载<br> -o：指定额外的挂载选项，也即指定文件系统<br> async<br> atime(如果服务器比较繁忙，没必要使用这个)<br> noexec(禁止二进制文件直接执行，这个在U盘上很重要，防止病毒自动执行)<br> suid(启用suid，这个一定要注意，坚决禁止外来设备使用此选项)<br> netdev如果挂载的设备是一个网络设备，如果开机时没法ping的到，就会跳过，然后挂载其他的，这个在&#x2F;etc&#x2F;fstab中很重要<br> ro:挂载为只读<br> rw:读写挂载<br> remount：重新挂载<br> mount -o ro,remount &#x2F;dev&#x2F;sda5<br>umount:<br> 卸载注意事项:<br> 要求:<br> 1&#x2F;挂载的设备没有被进程使用</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/15/09-02%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E5%9B%9B/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-09-01磁盘及文件系统管理详解之三" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1097,126 +1217,6 @@ else
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/02/11/07-01Vim%E7%BC%96%E8%BE%91%E5%99%A8%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-06-03bash编程之五-字符串测试及for语句" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/10/06-03bash%E7%BC%96%E7%A8%8B%E4%B9%8B%E4%BA%94-%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%B5%8B%E8%AF%95%E5%8F%8Afor%E8%AF%AD%E5%8F%A5/">06_03bash编程之五-字符串测试及for语句</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/10/06-03bash%E7%BC%96%E7%A8%8B%E4%B9%8B%E4%BA%94-%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%B5%8B%E8%AF%95%E5%8F%8Afor%E8%AF%AD%E5%8F%A5/" class="archive-article-date">
-  	<time datetime="2015-02-10T15:41:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-10</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="字符串测试"><a href="#字符串测试" class="headerlink" title="字符串测试"></a>字符串测试</h2><blockquote>
-<p>&#x3D;&#x3D;：测试字符串是否相等 (其实 &#x3D; 也可以，不过一般不用这种)<br>such as: A&#x3D;hello B&#x3D;hi [ $A &#x3D;&#x3D; $B ] echo $?(注意，等号前后A和B要有空格)<br>!&#x3D;:用来测试是否不等，不等为真，否则为假；<br>&gt;: 大于<br>&lt;: 小于（一般这两个不用）<br>-n string:测试指定字符串是否为空，空则真，不空为假；<br>-s string:测试指定字符串是否不空，不空为真，空为假； </p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"><span class="keyword">if</span> ! <span class="built_in">id</span> <span class="variable">$1</span> &amp;&gt;/dev/null ; <span class="keyword">then</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;No such user&quot;</span> </span><br><span class="line"><span class="built_in">exit</span> 10 </span><br><span class="line"><span class="keyword">fi</span> </span><br><span class="line"><span class="keyword">if</span> [ `<span class="built_in">id</span> -n -u $!` == `<span class="built_in">id</span> -n -g $!` ];<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;yiyang&quot;</span> </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;NO&quot;</span> </span><br><span class="line"><span class="keyword">fi</span> </span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>传递三个参数给脚本，第一个为整数，第二个为算数运算符，第三个为整数，将其结果显示出来，要求保留两位精度；形如：.&#x2F;cal.sh 5&#x2F;2 </p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">a=<span class="variable">$1</span> </span><br><span class="line"><span class="built_in">shift</span> </span><br><span class="line">b=<span class="variable">$1</span> </span><br><span class="line"><span class="built_in">shift</span> </span><br><span class="line">c=<span class="variable">$1</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot; `echo &quot;</span>scale=2;$a$b<span class="variable">$c</span><span class="string">&quot; bc` &quot;</span> </span><br><span class="line">or <span class="built_in">echo</span> <span class="string">&quot; `bc&lt;&lt;&lt;&quot;</span>scale=2;$a$b<span class="variable">$c</span><span class="string">&quot;` &quot;</span> </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="for-循环"><a href="#for-循环" class="headerlink" title="for 循环"></a>for 循环</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">for</span> <span class="keyword">while</span> <span class="keyword">until</span> </span><br><span class="line"> <span class="keyword">for</span> 变量 <span class="keyword">in</span> 列表;<span class="keyword">do</span> </span><br><span class="line"> 循环体 </span><br><span class="line"> <span class="keyword">done</span> </span><br><span class="line"><span class="comment"># 或者: </span></span><br><span class="line"> <span class="keyword">for</span> 变量 <span class="keyword">in</span> 列表 </span><br><span class="line"> <span class="keyword">do</span> </span><br><span class="line"> 循环体 </span><br><span class="line"> <span class="keyword">done</span> </span><br><span class="line">如何生成列表： </span><br><span class="line"> &#123;1..100&#125;:1~100 </span><br><span class="line"> <span class="built_in">seq</span> 100  (<span class="built_in">seq</span> 2 10 <span class="built_in">seq</span>起始数 步进长度 结束数) </span><br></pre></td></tr></table></figure>
-<p>   </p>
-<h2 id="练习"><a href="#练习" class="headerlink" title="练习"></a>练习</h2><ol>
-<li>1~100加和</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"><span class="built_in">declare</span> -i <span class="built_in">sum</span> = 0  </span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span>  `<span class="built_in">seq</span> 100`; <span class="keyword">do</span> </span><br><span class="line"><span class="built_in">sum</span>=$[<span class="variable">$sum</span>+<span class="variable">$x</span>] </span><br><span class="line"><span class="keyword">done</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;<span class="variable">$sum</span>&quot;</span> </span><br></pre></td></tr></table></figure>
-<ol start="2">
-<li>向系统中所有用户问好</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">USER=<span class="built_in">cat</span> /etc/passwd | <span class="built_in">cut</span> -d: -f1 </span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> <span class="variable">$USER</span>;<span class="keyword">do</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Hello ,<span class="variable">$x</span>&quot;</span> </span><br><span class="line"><span class="keyword">done</span> </span><br></pre></td></tr></table></figure>
-
-<ol start="3">
-<li>写一个脚本，添加10个用户，user1<del>user10，密码同用户名<br> 扩展：<br> 输入add,添加用户use1</del>user10<br> 输入del，删除用户user1~user10</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$1</span> == add ];<span class="keyword">then</span> </span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> `<span class="built_in">seq</span> 10`;<span class="keyword">do</span> </span><br><span class="line">useradd -m user<span class="variable">$x</span> &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;user<span class="variable">$x</span>&quot;</span> | passwd --stdin user<span class="variable">$x</span> &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;user<span class="variable">$x</span> founded&quot;</span> </span><br><span class="line"><span class="keyword">done</span> </span><br><span class="line"><span class="keyword">elif</span> [ <span class="variable">$1</span> == del ];<span class="keyword">then</span> </span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> `<span class="built_in">seq</span> 10`;<span class="keyword">do</span> </span><br><span class="line">userdel -r user<span class="variable">$x</span> &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;deleted&quot;</span> </span><br><span class="line"><span class="keyword">done</span> </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;./user.sh add or del.&quot;</span> </span><br><span class="line"><span class="keyword">fi</span> </span><br></pre></td></tr></table></figure>
-
-<p>(补充说明，这个脚本不完善，准确来说，这个脚本即使在用户存在的条件下也可以跳过执行其他的) </p>
-<ol start="4">
-<li>计算100以内所有能被3整除的正整数的和</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"><span class="built_in">declare</span> -i <span class="built_in">sum</span>=0 </span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> `<span class="built_in">seq</span> 100`;<span class="keyword">do</span> </span><br><span class="line">yu=$[ 100%<span class="variable">$x</span> ] </span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$yu</span> -eq 0 ];<span class="keyword">then</span> </span><br><span class="line">shang=$[ 100/<span class="variable">$x</span> ] </span><br><span class="line"><span class="built_in">sum</span>=$[ <span class="variable">$sum</span> + <span class="variable">$shang</span> ] </span><br><span class="line"><span class="keyword">fi</span> </span><br><span class="line"><span class="keyword">done</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;<span class="variable">$sum</span>&quot;</span> </span><br></pre></td></tr></table></figure>
-
-<ol start="5">
-<li>计算100以内所有奇数的和以及所有偶数的和，分别显示</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"><span class="built_in">declare</span> -i <span class="built_in">sum</span>=0 SUM=0 </span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> `<span class="built_in">seq</span> 100`;<span class="keyword">do</span> </span><br><span class="line">yu=$[ <span class="variable">$x</span>/2 ] </span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$yu</span> -eq 0 ];<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">sum</span>=$[ <span class="variable">$sum</span> + <span class="variable">$x</span> ] </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line">SUM=$[　<span class="variable">$SUM</span> + <span class="variable">$x</span> ] </span><br><span class="line"><span class="keyword">fi</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;ji:<span class="variable">$sum</span>&quot;</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;ou:<span class="variable">$SUM</span>&quot;</span> </span><br></pre></td></tr></table></figure>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/10/06-03bash%E7%BC%96%E7%A8%8B%E4%B9%8B%E4%BA%94-%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%B5%8B%E8%AF%95%E5%8F%8Afor%E8%AF%AD%E5%8F%A5/">展开全文 >></a>
         </p>
       
 
