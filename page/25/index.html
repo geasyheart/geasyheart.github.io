@@ -206,6 +206,123 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-14-02Linux系统启动流程之二内核及init" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/27/14-02Linux%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B9%8B%E4%BA%8C%E5%86%85%E6%A0%B8%E5%8F%8Ainit/">14_02Linux系统启动流程之二内核及init</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/27/14-02Linux%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B9%8B%E4%BA%8C%E5%86%85%E6%A0%B8%E5%8F%8Ainit/" class="archive-article-date">
+  	<time datetime="2015-02-26T16:32:13.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-27</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>kernel 最后加single进入单用户模式 </p>
+<p>给grub进行加密 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment">#grub-md5-crypt </span></span><br><span class="line"> ************* </span><br><span class="line"> <span class="comment">#vim /boot/grub/grub.cfg </span></span><br><span class="line"> password --md5 ******** </span><br><span class="line"> </span><br><span class="line">安装grub stage1: </span><br><span class="line"> grub&gt;root (hd0,0) </span><br><span class="line"> grub&gt;setup (hd0) </span><br><span class="line"> </span><br><span class="line">安装grub第二种方式: </span><br><span class="line"><span class="comment">#fdisk -l  </span></span><br><span class="line"><span class="comment">#mount /dev/sda1 /mnt </span></span><br><span class="line"><span class="comment">#grub-install --root-directory=/mnt /dev/sda  </span></span><br><span class="line">如果有其他系统: </span><br><span class="line"><span class="comment">#sudo update-grub </span></span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+<p>安装grub第三种方式:<br>grub&gt;root (hd0,0)<br>grub&gt;kernel &#x2F;PATH&#x2F;TO&#x2F;KERNEL_FILE 可双tab补全<br>grub&gt;initrd &#x2F;PATH&#x2F;TO&#x2F;KERNEL_FILE <br>grub&gt;boot  </p>
+<p>Kernel初始化的过程: </p>
+<ol>
+<li>设备探测 </li>
+<li>驱动初始化(可能会从initrd(initramfs)文件中装载驱动模块) </li>
+<li>以只读挂载根文件系统 </li>
+<li>装载第一个进程init(PID&#x3D;1)</li>
+</ol>
+<p>&#x2F;sbin&#x2F;init : (&#x2F;etc&#x2F;inittab)<br> upstart:ubuntu开发，基于D-BUS开发<br> systemd </p>
+<p>&#x2F;etc&#x2F;inittab：<br> &#x2F;etc&#x2F;inittab中初始化的文件被分开存放在&#x2F;etc&#x2F;init目录下<br> 在这个配置文件中可以看到。 </p>
+<p> id:runlevel:action:process<br> id:标识符<br> runlevel:在哪个级别运行<br> action:在什么情况下执行此行<br> process:要运行程序 </p>
+<p> action:<br> initdefault:设定默认运行级别<br> sysinit:系统初始化<br> wait:等待级别切换至此级别时执行<br> respawn:一旦程序终止，会重新启动<br>这个在RHEL5上有更为详细的介绍。。<br>&#x2F;etc&#x2F;init.d&#x2F; </p>
+<p> &#x2F;etc&#x2F;rc.d&#x2F;rc.sysinit完成的任务: </p>
+<ol>
+<li>激活udev和selinux </li>
+<li>根据&#x2F;etc&#x2F;sysctl.conf文件，设定内核参数 </li>
+<li>设定时钟 </li>
+<li>装载键盘映射 </li>
+<li>启用交换分区 </li>
+<li>设置主机名 </li>
+<li>根文件系统检测。并以读写方式重新挂载 </li>
+<li>激活RAID和LVM设备 </li>
+<li>启用磁盘配额 </li>
+<li>根据&#x2F;etc&#x2F;fstab,检查并挂载其他文件系统 </li>
+<li>清理过期的锁和PID文件</li>
+</ol>
+<p>&#x2F;etc&#x2F;rc.d&#x2F;rc<br> 完成相应运行级别的文件启动和关闭。<br> 例如运行级别3:<br> for I in &#x2F;etc&#x2F;rc3.d&#x2F;K*; do<br> $I stop<br> done </p>
+<p> for I in &#x2F;etc&#x2F;rc3.d&#x2F;S*;do<br> $I start<br> done<br> 注意:数字越小越先关闭或者启动(K11<em><strong>和K22</strong>则K11</em>*会早关闭)<br>  <br>&#x2F;etc&#x2F;local<br> 可自定义 </p>
+<p>这些文件在使用systemd后都没有了。<br>关于grub引导修复可直接参考这个文章:<br><a target="_blank" rel="noopener" href="http://www.centoscn.com/CentosBug/osbug/2014/0327/2671.html">http://www.centoscn.com/CentosBug/osbug/2014/0327/2671.html</a><br>练习:修复grub(这个在实验中可行)<br>grub配置文件出错:<br>grub&gt;root (hd0,0)<br>grub&gt;kernel &#x2F;vmlinuz-2.6.32-431.e16.x86_64 ro root&#x3D;&#x2F;dev&#x2F;mapper&#x2F;vg_centos-lv_root<br>grub&gt;initrd &#x2F;initramfs-2.6.32-431.e16.x86_64.img<br>grub&gt;boot </p>
+<p>(在kernel地方，指定rootfs的时候，我忘记他的路径了，我在实验的时候插上镜像盘，mount &#x2F;dev&#x2F;sda1 &#x2F;mnt 然后查看grub.cfg得知的，不过这个名字有<br>命名规则，就是卷组名-lv_root，然后就可正常启动，更多可直接参考上面那个grub引导修复文章<br>另说明，我使用grub安装方式2的时候没有成功，因为我在执行grub-install –root-directory&#x3D;&#x2F;mnt &#x2F;dev&#x2F;sda的时候报错:No boot directory，这个时候即使我想创建这个<br>文件的时候会提示这个文件已经存在，所以这个方式我没有成功) </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/27/14-02Linux%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E4%B9%8B%E4%BA%8C%E5%86%85%E6%A0%B8%E5%8F%8Ainit/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-14-01Linux系统启动流程详解之一-运行级别及grub" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1132,120 +1249,6 @@ traceroute:
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/02/17/10-01Raid%E5%8F%8Amadadm%E5%91%BD%E4%BB%A4%E4%B9%8B%E4%B8%80/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-09-04linux压缩与归档" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/15/09-04linux%E5%8E%8B%E7%BC%A9%E4%B8%8E%E5%BD%92%E6%A1%A3/">09_04linux压缩与归档</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/15/09-04linux%E5%8E%8B%E7%BC%A9%E4%B8%8E%E5%BD%92%E6%A1%A3/" class="archive-article-date">
-  	<time datetime="2015-02-15T15:37:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-15</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>默认压缩后删除原文件，解压亦然，另外下面的三个只能压缩文件，不能压缩目录，zip可以。 </p>
-<ol>
-<li><p>gzip: .gz<br> gzip &#x2F;PATH&#x2F;TO&#x2F;FILE,压缩完成后将会删除原文件<br>   -d：解压<br>   -#(1~9):指定压缩比，默认是6，9最大 </p>
-</li>
-<li><p>gunzip:<br> 解压完成后会删除原文件 </p>
-</li>
-<li><p>zcat &#x2F;path&#x2F;to&#x2F;file.gz：在不解压的情况下，查看文本文件内容 </p>
-</li>
-<li><p>bzip2：.bz2<br> bzip2:<br> -d：解压<br> -#(1-9):指定压缩比，默认是6，9最大<br> -k:保留原文件<br>bunzip2:解压<br>bzcat &#x2F;path&#x2F;to&#x2F;file.bz2  </p>
-</li>
-<li><p>xz:.xz<br> xz &#x2F;path&#x2F;to&#x2F;file <br> -d：解压<br> -#(1-9):指定压缩比，默认是6，9最大<br> -k：压缩保留原文件<br>unxz：解压<br>xzcat：在不解压的情况下，查看文本文件。。 </p>
-</li>
-<li><p>zip:既归档又压缩的工具<br> zip FILENAME.zip  file1,file2,file3…压缩后不删除原文件<br>unzip:解压 </p>
-</li>
-<li><p>tar:<br> -c:创建归档文件<br> -f FILE.tar：操作的归档文件<br> -x：展开归档<br> -t:不展开归档，直接查看归档了哪些文件</p>
-</li>
-</ol>
-<p> xzvf:解压归档文件.tar.gz<br> czvf:创建归档文件并压缩.gz </p>
-<p> xzjf:解压归档文件.tar.bz2<br> czjf:创建归档文件并压缩.tar.bz2 </p>
-<ol start="8">
-<li>cpio:也是一个归档工具</li>
-</ol>
-<p>read name age<br>user1 18<br>如果读入的内容的格式和提示的格式相同，就会很正常<br>如果是:<br>user1 18 19<br>就会输出<br>user1 18 19<br>这样就会和你所期望的有点不同<br>read：<br> -p:给出提示 </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line"> </span><br><span class="line">read -p &quot;Three files:&quot; FILE1 FILE2 FILE3 </span><br><span class="line">read -p &quot;Destination:&quot; DEST </span><br><span class="line">read -p &quot;Compress[zip|bzip2|gzip]:&quot; COMP </span><br><span class="line">case $COMP in </span><br><span class="line">gzip) </span><br><span class="line"> tar czf $&#123;DEST&#125;.tar.gz  $FILE1 $FILE2 $FILE3 </span><br><span class="line"> ;; </span><br><span class="line">bzip2) </span><br><span class="line"> tar cjf $&#123;DEST&#125;.tar.bz2  $FILE1 $FILE2 $FILE3 </span><br><span class="line"> ;; </span><br><span class="line">xz) </span><br><span class="line"> tar cf $&#123;DEST&#125;.tar  $FILE1 $FILE2 $FILE3 </span><br><span class="line"> xz $&#123;DEST&#125;.tar  </span><br><span class="line"> ;; </span><br><span class="line">*) </span><br><span class="line"> echo &quot;Unknown Error.&quot; </span><br><span class="line"> exit 7 </span><br><span class="line"> ;; </span><br><span class="line">esac </span><br></pre></td></tr></table></figure>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">while循环:使用于循环次数位置的场景 </span><br><span class="line"> while CONDITION; do </span><br><span class="line"> startment  </span><br><span class="line"> ... </span><br><span class="line"> done </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">read -p &quot;Input something:&quot;STRING </span><br><span class="line">while [ $STRING != &#x27;quit&#x27; ];do </span><br><span class="line"> echo &quot;$STRING | tr a-z A-Z&quot; </span><br><span class="line"> read -p &quot;Input something:&quot;STRING </span><br><span class="line">done </span><br></pre></td></tr></table></figure>
-<h2 id="1"><a href="#1" class="headerlink" title="1"></a>1</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">who | grep $1 &amp;&gt;/dev/null </span><br><span class="line">RET=$? </span><br><span class="line">while [ RET -ne 1 ];do </span><br><span class="line"> echo &quot;`date`,$1 is not login.&quot; </span><br><span class="line"> sleep 5 </span><br><span class="line"> who | grep $1 &amp;&gt;/dev/null </span><br><span class="line"> RET=$? </span><br><span class="line">done </span><br><span class="line">echo &quot;$1 is logged in &quot; </span><br></pre></td></tr></table></figure>
-
-<h2 id="2"><a href="#2" class="headerlink" title="2"></a>2</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">RAN=$RANDOM </span><br><span class="line">echo &quot;guess a number:&quot; </span><br><span class="line">read NUM </span><br><span class="line">[ $RAN -ne $NUM　] </span><br><span class="line">while [ $? -ne 1 ]do </span><br><span class="line"> if [ $RAN -lt $NUM ];then </span><br><span class="line"> echo &quot;Try lower.&quot; </span><br><span class="line"> fi </span><br><span class="line"> if [ $RAN -gt $NUM ];then </span><br><span class="line"> echo &quot;Try higher.&quot; </span><br><span class="line"> fi </span><br><span class="line"> read NUM </span><br><span class="line"> [ $RAN -ne $NUM ] </span><br><span class="line">done </span><br><span class="line">echo &quot;you guessed right!!&quot; </span><br></pre></td></tr></table></figure>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/15/09-04linux%E5%8E%8B%E7%BC%A9%E4%B8%8E%E5%BD%92%E6%A1%A3/">展开全文 >></a>
         </p>
       
 

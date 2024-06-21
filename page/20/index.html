@@ -206,6 +206,103 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-30-04nss" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/05/10/30-04nss/">30_04nss</a>
+    </h1>
+  
+
+        
+        <a href="/2015/05/10/30-04nss/" class="archive-article-date">
+  	<time datetime="2015-05-10T15:10:02.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-05-10</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>————————————————–常用模块简介———————————————————-<br>&#x2F;etc&#x2F;pam.d&#x2F;* : 每个程序个别的PAM配置文件<br>&#x2F;lib(64)&#x2F;security&#x2F;* : PAM模块文件的实际放置目录<br>&#x2F;etc&#x2F;secutiry&#x2F;* : 其他PAM环境的配置文件 </p>
+<p>1、实现指定组用户可以登录系统<br>&#x2F;etc&#x2F;pam.d&#x2F;login实际上指向 &#x2F;etc&#x2F;pam.d&#x2F;system-auth,所以，修改<br>#vim &#x2F;etc&#x2F;pam.d&#x2F;system-auth<br>在auth    required pam_env.so后面添加，因为这行做环境变量等操作<br>auth    required pam_listfile.so item&#x3D;group sense&#x3D;allow file&#x3D;&#x2F;etc&#x2F;pam_allowgroups<br>#vim &#x2F;etc&#x2F;pam_allowgroups  (把权限改成700)<br>root<br>allowgrp<br>#groupadd allowgrp<br>#usermod -a -G allowgrp fedora<br>即可实现某些运行的组可以登录（这种需要用户名和密码） </p>
+<p>方式二:<br>vim &#x2F;etc&#x2F;pam.d&#x2F;su<br>#auth    sufficient    pam_wheel.so trust use_uid<br>把这行启用，另外添加用户到wheel组中，用户可以直接su到root。 </p>
+<p>个人觉得挺重要的是&#x2F;etc&#x2F;security&#x2F;limits.conf文件: </p>
+<p>domain:<br>    a user name<br>    a group name,with @group syntax<br>    …<br>    <br>type:<br>    soft:软限制<br>    hard:硬限制<br>    -   :表示软硬都包含 </p>
+<p>item:<br>    fsize :文件的最大值(KB)<br>    nofile:最大文件个数 ulimit -n<br>    nproc:最大进程个数 ulimit -u<br>    data  :最大数据大小<br>如果内容多，可以建立保存到&#x2F;etc&#x2F;security&#x2F;limit.d&#x2F;*.conf </p>
+<p>ulimit:<br>-a      显示所有限制<br>-d      进程数据段大小的上限<br>-f      shell所能创建的文件大小的上限<br>-m      驻留内存大小的上限<br>-n      打开文件数的上限<br>-u      进程数的上限<br>-v      虚拟内存的上限 </p>
+<p>示例:<br>    <br>1、限制test用户只能新建100M的文件，且大于90M便会有警告<br>    #vim &#x2F;etc&#x2F;security&#x2F;limits.conf<br>    test    soft    fsize    90000<br>    test    hard    fsize    100000<br>    $ulimit -a 可以看到有限制<br>    $dd if&#x3D;&#x2F;dev&#x2F;zero of&#x3D;test bs&#x3D;1M count&#x3D;110<br>    File size limit exceeded<br>2、限制pro1这个组，每次只能有一个用户登录系统<br>    #vim &#x2F;etc&#x2F;security&#x2F;limits.conf<br>    @pro1    hard    maxlogins    1 </p>
+<p>另外想说明，在设置文件最大打开数的时候，不可以直接设置成unlimited,否则会无法验证登录。 </p>
+<p>ulimit unlimited 不限制用户可以使用的资源，但本设置对可打开的最大文件数（max open files） 　　<br>和可同时运行的最大进程数（max user processes）无效 　　 </p>
+<p>另外在设置最大打开文件数时，看到《构建Linux高可用服务器》P56说道在&#x2F;etc&#x2F;security&#x2F;limits.conf中开机后不会生效，这个我在实验时没有遇到，<br>不知道是不是6+版本什么其他的原因。。 </p>
+<p>个人觉得这篇文章不错:<br><a target="_blank" rel="noopener" href="http://blog.itpub.net/22418990/viewspace-715239/">http://blog.itpub.net/22418990/viewspace-715239/</a><br>更多关于这个文件和ulimit命令，可以参考这个文章!! </p>
+<p>关于常见模块的介绍，可以直接如下。<br>这篇文章主要参考《鸟哥的Linux私房菜》，更多可直接参阅原书。。 </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/05/10/30-04nss/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-30-03nss" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1056,95 +1153,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/04/22/24-03-2-%E5%AE%9E%E9%AA%8C-%E5%AE%8C%E6%88%90LAMP%E6%A8%A1%E5%9D%97%E5%8C%96%E6%90%AD%E5%BB%BA/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-24-02-2-编译安装PHP" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/22/24-02-2-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85PHP/">24_02_2_编译安装PHP</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/22/24-02-2-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85PHP/" class="archive-article-date">
-  	<time datetime="2015-04-22T02:58:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>pmfind.net是一个比较方便的下载软件的网站 </p>
-<h2 id="编译安装php"><a href="#编译安装php" class="headerlink" title="编译安装php"></a>编译安装php</h2><p> <br>php-mbstring  用来表示中文和多字节的； 
-  </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#./configure --prefix=/usr/local/php --with-config-file-path=/etc  --with-openssl --with-mysql=/usr/local/mysql   --with-mysqli=/usr/local/mysql/bin/mysql_config </span></span><br><span class="line">--enable-mbstring --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr/local/libxml2 --enable-xml --enable-sockets </span><br><span class="line">--with-apxs2=/usr/local/apache/bin/apxs --with-mcrypt=/usr/local/mycrypt  --with-config-file-scan-dir=/etc/php.d --with-bz2 --enable-maintainer-zts（prefork不需要，其他MPM需要这项）（--with-gd  --with-soap） </span><br><span class="line">  </span><br><span class="line"><span class="comment">#cp php.ini-production /etc/php.ini   （配置文件在解压目录里，当时找了半天～～～） </span></span><br><span class="line"><span class="comment">#vim /etc/httpd/httpd.conf </span></span><br><span class="line">AddType application/x-httpd-php .php </span><br><span class="line">Addtype application/x-httpd-php-source .phps </span><br><span class="line">还有DirectoryIndex 把index.html改为index.php </span><br><span class="line">        对于这个是指定你的主页是动态的； </span><br><span class="line">  </span><br><span class="line">--with-mcrypt 需要安装libmcrypt.rpm libmcrypt-devel.rpm和mhash.rpm mhash-devel.rpm；(这个是教程上说的，不过我是源码编译，没有用到这个)； </span><br><span class="line">    <span class="comment"># ./configure --prefix=/usr/local/mcrypt </span></span><br><span class="line">    <span class="comment"># make &amp;&amp; make install </span></span><br><span class="line">  </span><br><span class="line">我在编译时按照上面的编译，freetype我是yum install freetype,jpeg 我是yum install openjpeg png我是yum install libpng-devel,zlib我是yum install zlib zlib-devel   </span><br><span class="line">libxml 我是在官网下载的libxml2，然后编译安装： </span><br><span class="line"><span class="comment"># ./configure --prefix=/usr/local/libxml2 </span></span><br><span class="line"><span class="comment">#make &amp;&amp; make install </span></span><br><span class="line">如果使用RPM包时，需要安装libxml2-devel </span><br><span class="line">  </span><br><span class="line"> bz2 我是yum install bzip2 bzip2-devel  mcrypt我是官网下载libmcrypt编译安装。 </span><br><span class="line">  </span><br><span class="line"><span class="comment">##################################################################################################         </span></span><br><span class="line">                相隔一年,第二次编译时: </span><br><span class="line"><span class="comment">#./configure --prefix=/usr/local/php --with-config-file-path=/etc  --with-openssl --with-mysql=/usr/local/mysql   --with-mysqli=/usr/local/mysql/bin/mysql_config </span></span><br><span class="line">--enable-mbstring --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr/local/libxml2 --enable-xml --enable-sockets </span><br><span class="line">--with-apxs2=/usr/local/apache/bin/apxs --with-mcrypt=/usr/local/mcrypt  --with-config-file-scan-dir=/etc/php.d --with-bz2 --enable-maintainer-zts </span><br><span class="line">  </span><br><span class="line">confiure:error:Please reinstall the BZip2 distribution </span><br><span class="line">    <span class="comment">#yum install bzip2 bzip2-devel </span></span><br><span class="line">  </span><br><span class="line">configure:error:Please reinstall libmcrypt </span><br><span class="line">    在默认的yum源中没有找到包，所以去官网下载libmcrypt.gz, </span><br><span class="line">        <span class="comment"># ./configure --prefix=/usr/local/mcrypt </span></span><br><span class="line">        <span class="comment"># make &amp;&amp; make install </span></span><br><span class="line">    额，竟然提示要2.5.6以上版本的，，重来即可。。 </span><br><span class="line">     </span><br><span class="line">    如果提示感谢你使用PHP，则意味着配置成功!!     </span><br><span class="line">        <span class="comment"># make  </span></span><br><span class="line">     </span><br><span class="line">make: *** [ext/fileinfo/libmagic/apprentice.lo] Error 1 </span><br><span class="line">解决方法: </span><br><span class="line">    http://wudi.in/archives/284.html </span><br><span class="line">    由于内存小于1G所导致. </span><br><span class="line">    添加:    --disable-fileinfo    </span><br><span class="line">    <span class="comment">#make &amp;&amp; make install </span></span><br><span class="line">这次竟然没有提示jpeg/png的安装，，，，这个，自己看着办吧。 </span><br><span class="line">  </span><br><span class="line">编写这个php-test.php </span><br><span class="line">&lt;?php </span><br><span class="line">phpinfo(); </span><br><span class="line">?&gt; </span><br><span class="line">  </span><br><span class="line">&lt;?php </span><br><span class="line">    <span class="variable">$conn</span>=mysql_connect(<span class="string">&#x27;localhost&#x27;</span>,<span class="string">&#x27;root&#x27;</span>,<span class="string">&#x27;password&#x27;</span>)； </span><br><span class="line">    <span class="keyword">if</span> (<span class="variable">$conn</span>) </span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;Success&quot;</span>； </span><br><span class="line">    <span class="keyword">else</span> </span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;Failure&quot;</span>； </span><br><span class="line">?&gt; </span><br><span class="line">重启httpd,访问，如果显示，则编译成功。。 </span><br><span class="line">  </span><br></pre></td></tr></table></figure>
-<p>说明：<br>1、为了支持apache的worker或event这两个MPM，编译使用了–enable-maintainer-zts;<br>2、如果使用了PHP5.3以上的版本，为了链接Mysql数据库，可以指定mysqlid，这样在本机就不需要先安装Mysql或者Mysql开发包了，<br>mysqlnd从PHP5.3开始使用，可以编译时绑定到它（而不用和具体的Mysql客户端库形成依赖），但从PHP5.4开始它就是默认的了； </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#./configure --with-mysql=mysqlnd --with-pdo-mysql=mysqlnd --with-mysqli=mysqlnd</span></span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/22/24-02-2-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85PHP/">展开全文 >></a>
         </p>
       
 

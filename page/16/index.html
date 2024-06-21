@@ -206,6 +206,102 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-47-02Tomcat系列之apache负载均衡请求至tomcat及Deltamanager的使用" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/10/31/47-02Tomcat%E7%B3%BB%E5%88%97%E4%B9%8Bapache%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E8%AF%B7%E6%B1%82%E8%87%B3tomcat%E5%8F%8ADeltamanager%E7%9A%84%E4%BD%BF%E7%94%A8/">47_02Tomcat系列之apache负载均衡请求至tomcat及Deltamanager的使用</a>
+    </h1>
+  
+
+        
+        <a href="/2015/10/31/47-02Tomcat%E7%B3%BB%E5%88%97%E4%B9%8Bapache%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E8%AF%B7%E6%B1%82%E8%87%B3tomcat%E5%8F%8ADeltamanager%E7%9A%84%E4%BD%BF%E7%94%A8/" class="archive-article-date">
+  	<time datetime="2015-10-31T08:30:11.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-31</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#scp /etc/profile.d/&#123;java.sh tomcat.sh &#125; 192.168.10.9:/etc/profile.d/ </span></span><br><span class="line"><span class="comment">#tar xf apache-tomcat-7.0.62.tar.gz -C /usr/local </span></span><br><span class="line"><span class="comment">#cd /usr/local </span></span><br><span class="line"><span class="comment"># ln -sv apache-tomcat-7.0.62/ tomcat </span></span><br><span class="line"><span class="comment">#scp /usr/local/tomcat/conf/server.xml 192.168.10.9:/usr/local/tomcat/conf </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#vim /usr/local/tomcat/conf/server.xml </span></span><br><span class="line">改成： </span><br><span class="line">&lt;Engine name=<span class="string">&quot;Cataina&quot;</span>&gt; defaultHost=<span class="string">&quot;www.test.com&quot;</span> jvmRoute=<span class="string">&quot;Tomcat2&quot;</span>&gt; </span><br><span class="line"> </span><br><span class="line"><span class="comment">#mkdir -pv /web/webapps </span></span><br><span class="line"><span class="comment">#vim /web/webapps/index.jsp </span></span><br></pre></td></tr></table></figure>
+<p>基于mod_proxy实现负载均衡 </p>
+<p>在httpd.conf的虚拟主机中配置如下内容： </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">ProxyRequests Off </span><br><span class="line">&lt;proxy balancer://lbcluster1&gt; </span><br><span class="line">  BalancerMember ajp://192.168.10.8:8009 loadfactor=1 route=Tomcat1 </span><br><span class="line">  BalancerMember ajp://192.168.10.9:8009 loadfactor=1 route=Tomcat2 </span><br><span class="line">  ProxySet lbmethod=bytraffic </span><br><span class="line">&lt;/proxy&gt; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">&lt;VirtualHost *:80&gt; </span><br><span class="line">  ServerName www.test.com </span><br><span class="line">  ProxyVia Off </span><br><span class="line">  ProxyPass / balancer://lbcluster1/  stickysession=jsessionid </span><br><span class="line">  ProxyPassReverse / balancer://lbcluster1/ </span><br><span class="line">    &lt;Location /balancer-manager&gt; </span><br><span class="line">      SetHandler balancer-manager </span><br><span class="line">      ProxyPass ! </span><br><span class="line">      Require all granted </span><br><span class="line">   &lt;/Location&gt; </span><br><span class="line">&lt;Proxy *&gt; </span><br><span class="line">    Require all granted </span><br><span class="line">&lt;/Proxy&gt; </span><br><span class="line"> &lt;Location /&gt; </span><br><span class="line">     Require all granted </span><br><span class="line"> &lt;/Location&gt; </span><br><span class="line">&lt;/VirtualHost&gt; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"># servive httpd restart </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p> 如果出错，看日志；； </p>
+<p> 172.16.100.106&#x2F;balancer-manager </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">#vim /usr/local/tomcat/conf/server.xml </span><br><span class="line"> 在Engine下面添加如下内容，要根据自己需要修改的；； </span><br><span class="line">    &lt;Cluster className=&quot;org.apache.catalina.ha.tcp.SimpleTcpCluster&quot;   </span><br><span class="line">             channelSendOptions=&quot;8&quot;&gt;   </span><br><span class="line">       </span><br><span class="line">      &lt;Manager className=&quot;org.apache.catalina.ha.session.DeltaManager&quot;   </span><br><span class="line">               expireSessionsOnShutdown=&quot;false&quot;   </span><br><span class="line">               notifyListenersOnReplication=&quot;true&quot;/&gt;   </span><br><span class="line">       </span><br><span class="line">      &lt;Channel className=&quot;org.apache.catalina.tribes.group.GroupChannel&quot;&gt;   </span><br><span class="line">        &lt;Membership className=&quot;org.apache.catalina.tribes.membership.McastService&quot;   </span><br><span class="line">                    address=&quot;228.50.10.1&quot;   </span><br><span class="line">                    bind=&quot;192.168.10.8&quot;　　　//我在实验时如果加上这个出错； </span><br><span class="line">                    port=&quot;45564&quot;   </span><br><span class="line">                    frequency=&quot;500&quot;   </span><br><span class="line">                    dropTime=&quot;3000&quot;/&gt;   </span><br><span class="line">        &lt;Receiver className=&quot;org.apache.catalina.tribes.transport.nio.NioReceiver&quot;   </span><br><span class="line">                  address=&quot;192.168.10.8&quot;   </span><br><span class="line">                  port=&quot;4000&quot;   </span><br><span class="line">                  autoBind=&quot;100&quot;   </span><br><span class="line">                  selectorTimeout=&quot;5000&quot;   </span><br><span class="line">                  maxThreads=&quot;6&quot;/&gt;   </span><br><span class="line">       </span><br><span class="line">        &lt;Sender className=&quot;org.apache.catalina.tribes.transport.ReplicationTransmitter&quot;&gt;   </span><br><span class="line">          &lt;Transport className=&quot;org.apache.catalina.tribes.transport.nio.PooledParallelSender&quot;/&gt;   </span><br><span class="line">        &lt;/Sender&gt;   </span><br><span class="line">        &lt;Interceptor className=&quot;org.apache.catalina.tribes.group.interceptors.TcpFailureDetector&quot;/&gt;   </span><br><span class="line">        &lt;Interceptor className=&quot;org.apache.catalina.tribes.group.interceptors.MessageDispatch15Interceptor&quot;/&gt;   </span><br><span class="line">      &lt;/Channel&gt;   </span><br><span class="line">       </span><br><span class="line">      &lt;Valve className=&quot;org.apache.catalina.ha.tcp.ReplicationValve&quot;   </span><br><span class="line">             filter=&quot;&quot;/&gt;   </span><br><span class="line">      &lt;Valve className=&quot;org.apache.catalina.ha.session.JvmRouteBinderValve&quot;/&gt;   </span><br><span class="line">       </span><br><span class="line">      &lt;Deployer className=&quot;org.apache.catalina.ha.deploy.FarmWarDeployer&quot;   </span><br><span class="line">                tempDir=&quot;/tmp/war-temp/&quot;   </span><br><span class="line">                deployDir=&quot;/tmp/war-deploy/&quot;   </span><br><span class="line">                watchDir=&quot;/tmp/war-listen/&quot;   </span><br><span class="line">                watchEnabled=&quot;false&quot;/&gt;   </span><br><span class="line">       </span><br><span class="line">      &lt;ClusterListener className=&quot;org.apache.catalina.ha.session.JvmRouteSessionIDBinderListener&quot;/&gt;   </span><br><span class="line">      &lt;ClusterListener className=&quot;org.apache.catalina.ha.session.ClusterSessionListener&quot;/&gt;   </span><br><span class="line">    &lt;/Cluster&gt;       </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+
+<p>两台Tomcat主机： </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mkdir /web/webapps/WEB-INF </span></span><br><span class="line"><span class="comment"># cp /usr/local/tomcat/conf/web.xml /web/webapps/WEB-INF/ </span></span><br><span class="line"><span class="comment"># vim /web/webapps/WEB-INF/web.xml </span></span><br><span class="line"></span><br><span class="line">在=========Introduction===========上面添加： </span><br><span class="line">&lt;distributable/&gt; </span><br><span class="line"></span><br><span class="line">scp -r /web/webapps/WEB-INF/ 192.168.10.9:/web/webapps/ </span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="http://blog.csdn.net/bluishglc/article/details/6867358">http://blog.csdn.net/bluishglc/article/details/6867358</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/10/31/47-02Tomcat%E7%B3%BB%E5%88%97%E4%B9%8Bapache%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E8%AF%B7%E6%B1%82%E8%87%B3tomcat%E5%8F%8ADeltamanager%E7%9A%84%E4%BD%BF%E7%94%A8/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-46-03-实验-JDK-Tomcat-Nginx实现jsp服务器" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1471,142 +1567,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/10/06/43-03-2-%E6%90%AD%E5%BB%BALNMP/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-42-04-2-mysql-proxy实验" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/10/03/42-04-2-mysql-proxy%E5%AE%9E%E9%AA%8C/">42_04_2_mysql-proxy实验</a>
-    </h1>
-  
-
-        
-        <a href="/2015/10/03/42-04-2-mysql-proxy%E5%AE%9E%E9%AA%8C/" class="archive-article-date">
-  	<time datetime="2015-10-03T03:12:53.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-03</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="环境设置"><a href="#环境设置" class="headerlink" title="环境设置"></a>环境设置</h2><blockquote>
-<p>Master MySQL服务器：192.168.122.220    node1.test.com node1<br>Slave MySQL服务器：   192.168.122.14    node2.test.com node2<br>MySQL Proxy服务器：   192.168.122.25    nfs.test.com    nfs </p>
-</blockquote>
-<ol>
-<li>安装配置MySQL-Proxy(这里我没有使用编译安装)</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@nfs ~]<span class="comment"># tar xf mysql-proxy-0.8.5-linux-el6-x86-64bit.tar.gz -C /usr/local </span></span><br><span class="line">[root@nfs ~]<span class="comment"># cd /usr/local </span></span><br><span class="line">[root@nfs <span class="built_in">local</span>]<span class="comment">#ln -sv mysql-proxy-0.8.5-linux-el6-x86-64bit/ mysql-proxy </span></span><br><span class="line">[root@nfs <span class="built_in">local</span>]<span class="comment">#vim /etc/profile.d/mysql-proxy.sh </span></span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:/usr/local/mysql-proxy/bin </span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>给用户授权<br>在Master&#x2F;Slave建立一个测试用户，因为以后客户端发送的SQL都是通过mysql-proxy服务器来转发，所以要确保可以从mysql-proxy服务器上登录MySQL主从库，分别在主机MySQL和从机MySQL上执行如下命令；</li>
-</ol>
-<p>主机MySQL上执行命令如下： </p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">grant</span> <span class="keyword">all</span> <span class="keyword">on</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">to</span> <span class="string">&#x27;test&#x27;</span>@<span class="string">&#x27;192.168.122.25&#x27;</span> identified <span class="keyword">by</span> <span class="string">&#x27;redhat&#x27;</span>; </span><br></pre></td></tr></table></figure>
-
-<p>从机MySQL上执行命令如下： </p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">grant</span> <span class="keyword">all</span> <span class="keyword">on</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">to</span> <span class="string">&#x27;test&#x27;</span>@<span class="string">&#x27;192.168.122.25&#x27;</span> identified <span class="keyword">by</span> <span class="string">&#x27;redhat&#x27;</span>; </span><br></pre></td></tr></table></figure>
-<p>在这一步，如果前面已经配置了主从复制的话，没必要写两遍； </p>
-<ol start="3">
-<li>复制admin.lua脚本：<br>这一步必有，因为mysql-proxy会到这个目录下找脚本： <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> -p /usr/local/mysql-proxy/lib/mysql-proxy/lua/admin.lua /usr/local/mysql-proxy/share/doc/mysql-proxy/ </span><br><span class="line"> </span><br></pre></td></tr></table></figure></li>
-</ol>
-<p>mysql-proxy的配置文件： </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@nfs <span class="built_in">local</span>]<span class="comment"># vim /etc/sysconfig/mysql-proxy </span></span><br><span class="line">ADMIN_USER=<span class="string">&quot;admin&quot;</span> </span><br><span class="line">ADMIN_PASSWD=<span class="string">&quot;admin&quot;</span> </span><br><span class="line">PROXY_PID=/var/run/mysql-proxy.pid </span><br><span class="line">PROXY_USER=<span class="string">&quot;mysql-proxy&quot;</span> </span><br><span class="line">RW=<span class="string">&quot;192.168.122.220:3306&quot;</span> </span><br><span class="line">RO=<span class="string">&quot;192.168.122.14:3306&quot;</span> </span><br><span class="line"><span class="built_in">split</span>=<span class="string">&quot;/usr/local/mysql-proxy/share/doc/mysql-proxy/rw-splitting.lua&quot;</span> </span><br><span class="line">ADMINSO=<span class="string">&quot;/usr/local/mysql-proxy/share/doc/mysql-proxy/admin.lua&quot;</span> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">[root@nfs <span class="built_in">local</span>]<span class="comment">#chmod 0600 /etc/sysconfig/mysql-proxy </span></span><br><span class="line">如下所示：否则不能启动；具体信息可查看/var/log/mysql-proxy </span><br><span class="line">[root@nfs lua]<span class="comment"># ls -al /etc/sysconfig/mysql-proxy </span></span><br><span class="line">-rw------- 1 root root 360 10月  3 10:38 /etc/sysconfig/mysql-proxy </span><br></pre></td></tr></table></figure>
-<p>mysql-proxy的启动脚本： </p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="comment">#set default mysql-proxy configuration </span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="comment">#chkconfig: - 78 30 </span></span><br><span class="line">. /etc/rc.d/init.d/functions </span><br><span class="line"> </span><br><span class="line">prog=<span class="string">&quot;/usr/local/mysql-proxy/bin/mysql-proxy&quot;</span> </span><br><span class="line"> </span><br><span class="line"><span class="keyword">if</span> [ -f /etc/sysconfig/network ];<span class="keyword">then</span> </span><br><span class="line">    . /etc/sysconfig/network </span><br><span class="line"><span class="keyword">fi</span> </span><br><span class="line">[ <span class="variable">$&#123;NETWORKING&#125;</span> = <span class="string">&quot;no&quot;</span> ] &amp;&amp; <span class="built_in">exit</span> 0 </span><br><span class="line"><span class="comment">#Source mysql-proxy configuraion. </span></span><br><span class="line"><span class="keyword">if</span> [ -f /etc/sysconfig/mysql-proxy ];<span class="keyword">then</span> </span><br><span class="line">    . /etc/sysconfig/mysql-proxy </span><br><span class="line"><span class="keyword">fi</span> </span><br><span class="line"> </span><br><span class="line">RETVAL=0 </span><br><span class="line"><span class="function"><span class="title">start</span></span>() &#123; </span><br><span class="line">    <span class="built_in">echo</span> -n $<span class="string">&quot;Stating <span class="variable">$prog</span>: &quot;</span> </span><br><span class="line">    daemon <span class="variable">$prog</span> --daemon --log-level=debug --pid-file=<span class="variable">$PROXY_PID</span> --log-file=/var/log/mysql-proxy.log   --plugins=<span class="string">&quot;proxy&quot;</span> --proxy-backend-addresses=<span class="variable">$RW</span> --proxy-read-only-backend-addresses=<span class="variable">$RO</span>  --proxy-lua-script=<span class="variable">$split</span> --plugins=<span class="string">&quot;admin&quot;</span> --admin-username=<span class="variable">$ADMIN_USER</span> --admin-password=<span class="variable">$ADMIN_PASSWD</span> --admin-lua-script=<span class="variable">$ADMINSO</span> --proxy-address=<span class="string">&quot;0.0.0.0:3306&quot;</span> --user=<span class="variable">$PROXY_USER</span> --keepalive </span><br><span class="line"> </span><br><span class="line">    RETVAL=$? </span><br><span class="line">    <span class="built_in">echo</span> </span><br><span class="line">    <span class="keyword">if</span> [ <span class="variable">$RETVAL</span> -eq 0 ];<span class="keyword">then</span> </span><br><span class="line">        <span class="built_in">touch</span> /var/lock/subsys/mysql-proxy </span><br><span class="line">    <span class="keyword">fi</span> </span><br><span class="line">&#125; </span><br><span class="line"><span class="function"><span class="title">stop</span></span>() &#123; </span><br><span class="line">    <span class="built_in">echo</span> -n $<span class="string">&quot;Stopping <span class="variable">$prog</span>: &quot;</span> </span><br><span class="line">    killproc -p <span class="variable">$PROXY_PID</span> -d 3 <span class="variable">$prog</span> </span><br><span class="line">    RETVAL=$? </span><br><span class="line">    <span class="built_in">echo</span> </span><br><span class="line">    <span class="keyword">if</span> [ <span class="variable">$RETVAL</span> -eq 0 ];<span class="keyword">then</span> </span><br><span class="line">        <span class="built_in">rm</span> -f /var/lock/subsys/mysql-proxy </span><br><span class="line">        <span class="built_in">rm</span> -f <span class="variable">$PROXY_PID</span> </span><br><span class="line">    <span class="keyword">fi</span> </span><br><span class="line">&#125; </span><br><span class="line"><span class="comment">#See how we were called </span></span><br><span class="line"><span class="keyword">case</span> <span class="string">&quot;<span class="variable">$1</span>&quot;</span> <span class="keyword">in</span> </span><br><span class="line">    start) </span><br><span class="line">        start </span><br><span class="line">        ;; </span><br><span class="line">    stop) </span><br><span class="line">        stop </span><br><span class="line">        ;; </span><br><span class="line">    restart) </span><br><span class="line">        stop </span><br><span class="line">        start </span><br><span class="line">        ;; </span><br><span class="line">    condrestart|try-restart) </span><br><span class="line">        <span class="keyword">if</span> status -p <span class="variable">$PROXY_PIDFILE</span> <span class="variable">$porg</span> &amp;&gt;/dev/null;<span class="keyword">then</span> </span><br><span class="line">            stop </span><br><span class="line">            start </span><br><span class="line">        <span class="keyword">fi</span> </span><br><span class="line">        ;; </span><br><span class="line">    status) </span><br><span class="line">        status -p <span class="variable">$PROXY_PID</span> <span class="variable">$prog</span> </span><br><span class="line">        ;; </span><br><span class="line">    *) </span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;Usage: <span class="variable">$0</span> &#123;start|stop|restart|reload|status|condrestart|try-restart&#125;&quot;</span> </span><br><span class="line">        RETVAL=1 </span><br><span class="line">        ;; </span><br><span class="line"><span class="keyword">esac</span> </span><br><span class="line"><span class="built_in">exit</span> <span class="variable">$RETVAL</span> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">[root@nfs <span class="built_in">local</span>]<span class="comment">#chmod +x /etc/rc.d/init.d/mysql-proxy </span></span><br><span class="line">[root@nfs <span class="built_in">local</span>]<span class="comment">#chkconfig --add mysql-proxy </span></span><br><span class="line">[root@nfs <span class="built_in">local</span>]<span class="comment">#service mysql-proxy start </span></span><br></pre></td></tr></table></figure>
-
-<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>测试一</p>
-<ul>
-<li>tail &#x2F;var&#x2F;log&#x2F;mysql-proxy </li>
-<li>进行查看启动信息</li>
-</ul>
-<p>    <br>测试二： </p>
-<ul>
-<li>mysql -utest -h192.168.122.25 -p </li>
-<li>redhat </li>
-<li>实现读写分离；</li>
-</ul>
-<p>    <br>测试三：进行监管 </p>
-<ul>
-<li>mysql -uadmin -h 192.168.122.25 -p –port&#x3D;4041 </li>
-<li>admin    </li>
-<li>select * from backends;</li>
-</ul>
-<p>      </p>
-<h2 id="测试遇到的问题"><a href="#测试遇到的问题" class="headerlink" title="测试遇到的问题"></a>测试遇到的问题</h2><ol>
-<li>MySQL Proxy默认最小4个最大8个的客户端才会实现读写分离，所以可以将其改为最小1个最大2个:</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> not proxy.global.config.rwsplit <span class="keyword">then</span> </span><br><span class="line">        proxy.global.config.rwsplit = &#123; </span><br><span class="line">                min_idle_connections = 4,           1, </span><br><span class="line">                max_idle_connections = 8,             2, </span><br><span class="line"> </span><br><span class="line">                is_debug = <span class="literal">false</span> </span><br><span class="line">        &#125; </span><br><span class="line">end </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<ol start="2">
-<li>MySQL Proxy服务启动后，看到网页全是乱码，可以将主从数据库的配置文件my.cnf中加入如下代码：</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[mysqld] </span><br><span class="line">skip-character-set-client-handshake </span><br><span class="line">init-connect=&#x27;SET NAMES utf8&#x27; </span><br><span class="line">default-character-set=utf8 </span><br></pre></td></tr></table></figure>
-<p>本文有参考《构建高可用Linux服务器》5.2.3，但是有一点没能明白的是本书第二步，故而改成如上所示；<br>以后可直接从25这个主机上操作，不需考虑后面主机；；；</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/10/03/42-04-2-mysql-proxy%E5%AE%9E%E9%AA%8C/">展开全文 >></a>
         </p>
       
 

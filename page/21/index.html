@@ -206,6 +206,95 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-24-02-2-编译安装PHP" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/22/24-02-2-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85PHP/">24_02_2_编译安装PHP</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/22/24-02-2-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85PHP/" class="archive-article-date">
+  	<time datetime="2015-04-22T02:58:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>pmfind.net是一个比较方便的下载软件的网站 </p>
+<h2 id="编译安装php"><a href="#编译安装php" class="headerlink" title="编译安装php"></a>编译安装php</h2><p> <br>php-mbstring  用来表示中文和多字节的； 
+  </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#./configure --prefix=/usr/local/php --with-config-file-path=/etc  --with-openssl --with-mysql=/usr/local/mysql   --with-mysqli=/usr/local/mysql/bin/mysql_config </span></span><br><span class="line">--enable-mbstring --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr/local/libxml2 --enable-xml --enable-sockets </span><br><span class="line">--with-apxs2=/usr/local/apache/bin/apxs --with-mcrypt=/usr/local/mycrypt  --with-config-file-scan-dir=/etc/php.d --with-bz2 --enable-maintainer-zts（prefork不需要，其他MPM需要这项）（--with-gd  --with-soap） </span><br><span class="line">  </span><br><span class="line"><span class="comment">#cp php.ini-production /etc/php.ini   （配置文件在解压目录里，当时找了半天～～～） </span></span><br><span class="line"><span class="comment">#vim /etc/httpd/httpd.conf </span></span><br><span class="line">AddType application/x-httpd-php .php </span><br><span class="line">Addtype application/x-httpd-php-source .phps </span><br><span class="line">还有DirectoryIndex 把index.html改为index.php </span><br><span class="line">        对于这个是指定你的主页是动态的； </span><br><span class="line">  </span><br><span class="line">--with-mcrypt 需要安装libmcrypt.rpm libmcrypt-devel.rpm和mhash.rpm mhash-devel.rpm；(这个是教程上说的，不过我是源码编译，没有用到这个)； </span><br><span class="line">    <span class="comment"># ./configure --prefix=/usr/local/mcrypt </span></span><br><span class="line">    <span class="comment"># make &amp;&amp; make install </span></span><br><span class="line">  </span><br><span class="line">我在编译时按照上面的编译，freetype我是yum install freetype,jpeg 我是yum install openjpeg png我是yum install libpng-devel,zlib我是yum install zlib zlib-devel   </span><br><span class="line">libxml 我是在官网下载的libxml2，然后编译安装： </span><br><span class="line"><span class="comment"># ./configure --prefix=/usr/local/libxml2 </span></span><br><span class="line"><span class="comment">#make &amp;&amp; make install </span></span><br><span class="line">如果使用RPM包时，需要安装libxml2-devel </span><br><span class="line">  </span><br><span class="line"> bz2 我是yum install bzip2 bzip2-devel  mcrypt我是官网下载libmcrypt编译安装。 </span><br><span class="line">  </span><br><span class="line"><span class="comment">##################################################################################################         </span></span><br><span class="line">                相隔一年,第二次编译时: </span><br><span class="line"><span class="comment">#./configure --prefix=/usr/local/php --with-config-file-path=/etc  --with-openssl --with-mysql=/usr/local/mysql   --with-mysqli=/usr/local/mysql/bin/mysql_config </span></span><br><span class="line">--enable-mbstring --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr/local/libxml2 --enable-xml --enable-sockets </span><br><span class="line">--with-apxs2=/usr/local/apache/bin/apxs --with-mcrypt=/usr/local/mcrypt  --with-config-file-scan-dir=/etc/php.d --with-bz2 --enable-maintainer-zts </span><br><span class="line">  </span><br><span class="line">confiure:error:Please reinstall the BZip2 distribution </span><br><span class="line">    <span class="comment">#yum install bzip2 bzip2-devel </span></span><br><span class="line">  </span><br><span class="line">configure:error:Please reinstall libmcrypt </span><br><span class="line">    在默认的yum源中没有找到包，所以去官网下载libmcrypt.gz, </span><br><span class="line">        <span class="comment"># ./configure --prefix=/usr/local/mcrypt </span></span><br><span class="line">        <span class="comment"># make &amp;&amp; make install </span></span><br><span class="line">    额，竟然提示要2.5.6以上版本的，，重来即可。。 </span><br><span class="line">     </span><br><span class="line">    如果提示感谢你使用PHP，则意味着配置成功!!     </span><br><span class="line">        <span class="comment"># make  </span></span><br><span class="line">     </span><br><span class="line">make: *** [ext/fileinfo/libmagic/apprentice.lo] Error 1 </span><br><span class="line">解决方法: </span><br><span class="line">    http://wudi.in/archives/284.html </span><br><span class="line">    由于内存小于1G所导致. </span><br><span class="line">    添加:    --disable-fileinfo    </span><br><span class="line">    <span class="comment">#make &amp;&amp; make install </span></span><br><span class="line">这次竟然没有提示jpeg/png的安装，，，，这个，自己看着办吧。 </span><br><span class="line">  </span><br><span class="line">编写这个php-test.php </span><br><span class="line">&lt;?php </span><br><span class="line">phpinfo(); </span><br><span class="line">?&gt; </span><br><span class="line">  </span><br><span class="line">&lt;?php </span><br><span class="line">    <span class="variable">$conn</span>=mysql_connect(<span class="string">&#x27;localhost&#x27;</span>,<span class="string">&#x27;root&#x27;</span>,<span class="string">&#x27;password&#x27;</span>)； </span><br><span class="line">    <span class="keyword">if</span> (<span class="variable">$conn</span>) </span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;Success&quot;</span>； </span><br><span class="line">    <span class="keyword">else</span> </span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;Failure&quot;</span>； </span><br><span class="line">?&gt; </span><br><span class="line">重启httpd,访问，如果显示，则编译成功。。 </span><br><span class="line">  </span><br></pre></td></tr></table></figure>
+<p>说明：<br>1、为了支持apache的worker或event这两个MPM，编译使用了–enable-maintainer-zts;<br>2、如果使用了PHP5.3以上的版本，为了链接Mysql数据库，可以指定mysqlid，这样在本机就不需要先安装Mysql或者Mysql开发包了，<br>mysqlnd从PHP5.3开始使用，可以编译时绑定到它（而不用和具体的Mysql客户端库形成依赖），但从PHP5.4开始它就是默认的了； </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#./configure --with-mysql=mysqlnd --with-pdo-mysql=mysqlnd --with-mysqli=mysqlnd</span></span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/22/24-02-2-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85PHP/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-24-02编译安装之MySQL-通用二进制格式" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1395,95 +1484,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/04/21/21-03Httpd%E5%B1%9E%E6%80%A7%E9%85%8D%E7%BD%AE/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-20-01-实验-DNS简单配置主从" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/05/20-01-%E5%AE%9E%E9%AA%8C-DNS%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE%E4%B8%BB%E4%BB%8E/">20_01_实验_DNS简单配置主从</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/05/20-01-%E5%AE%9E%E9%AA%8C-DNS%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE%E4%B8%BB%E4%BB%8E/" class="archive-article-date">
-  	<time datetime="2015-04-05T06:34:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-05</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>环境说明:<br> 主DNS：192.168.122.104<br> 副DNS：192.168.122.64 </p>
-<p>yum -y install bind*<br>chkconfig –level 2345 named on         &#x2F;&#x2F;两个都做；；； </p>
-<p>主DNS服务器: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#cp /etc/named.conf /etc/named.conf.bak </span></span><br><span class="line"><span class="comment">#vim /etc/named.conf </span></span><br><span class="line">options &#123; </span><br><span class="line">        directory <span class="string">&quot;/var/named&quot;</span>; </span><br><span class="line">        notify <span class="built_in">yes</span>; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone <span class="string">&quot;.&quot;</span> IN &#123; </span><br><span class="line">        <span class="built_in">type</span> hint; </span><br><span class="line">        file <span class="string">&quot;named.ca&quot;</span>; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone <span class="string">&quot;localhost&quot;</span> IN &#123; </span><br><span class="line">        <span class="built_in">type</span> master; </span><br><span class="line">        file <span class="string">&quot;named.localhost&quot;</span>; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone <span class="string">&quot;0.0.127.in-addr-arpa&quot;</span> IN &#123; </span><br><span class="line">        <span class="built_in">type</span> master; </span><br><span class="line">        file <span class="string">&quot;named.loopback&quot;</span>; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone <span class="string">&quot;geasyheart.com&quot;</span> IN &#123; </span><br><span class="line">        <span class="built_in">type</span> master; </span><br><span class="line">        allow-transfer &#123; 192.168.122.64; &#125;; </span><br><span class="line">        file <span class="string">&quot;geasyheart.com.zone&quot;</span>; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone <span class="string">&quot;122.168.192.in-addr-arpa&quot;</span> IN &#123; </span><br><span class="line">        <span class="built_in">type</span> master; </span><br><span class="line">        file <span class="string">&quot;122.168.192.zone&quot;</span>; </span><br><span class="line">&#125;; </span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"><span class="comment">#vim /var/named/geasyheart.com.zone </span></span><br><span class="line"><span class="variable">$TTL</span>    68400; </span><br><span class="line">@       IN      SOA     ns1.geasyheart.com.        admin.geasyheart.com.( </span><br><span class="line"> 20150101 </span><br><span class="line">                1H </span><br><span class="line">                2M </span><br><span class="line">                2D </span><br><span class="line">                6H) </span><br><span class="line">        IN       NS      ns1 </span><br><span class="line">        IN       NS      ns2 </span><br><span class="line">        IN       MX      10      mail </span><br><span class="line">ns1     IN       A       192.168.122.104 </span><br><span class="line">ns2     IN       A       　　192.168.122.64 </span><br><span class="line">www     IN       A       192.168.122.64 </span><br><span class="line">ww IN     CNAME  www </span><br><span class="line">mail IN A 192.168.122.104 </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">#chmod 640 /var/named/geasyheart.com.zone  </span></span><br><span class="line"><span class="comment">#chown root:named /var/named/geasyheart.com.zone  </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#vim /var/named/122.168.192.zone </span></span><br><span class="line"> </span><br><span class="line"><span class="variable">$TTL</span> 86400; </span><br><span class="line">@       IN      SOA     ns1.geasyheart.com.     admin.geasyheart.com. ( </span><br><span class="line">                20150105 </span><br><span class="line">                1H </span><br><span class="line">                2M </span><br><span class="line">                2D </span><br><span class="line">                6H) </span><br><span class="line">        　IN      NS      ns1.geasyheart.com. </span><br><span class="line">        　IN      NS      ns2.geasyheart.com. </span><br><span class="line">104     IN      PTR     ns1.geasyheart.com. </span><br><span class="line">64    　IN      PTR     ns2.geasyheart.com. </span><br><span class="line">104     IN      PTR     www.geasyheart.com. </span><br><span class="line">104     IN      PTR     mail.geasyheart.com. </span><br><span class="line"> </span><br><span class="line"><span class="built_in">chmod</span> 640 /var/named/106.17.172.zone  </span><br><span class="line"><span class="built_in">chown</span> root:named /var/named/106.17.172.zone  </span><br><span class="line"><span class="comment">#service named start </span></span><br><span class="line"> </span><br><span class="line">从DNS服务器: </span><br><span class="line"><span class="comment">#yum install bind </span></span><br><span class="line"><span class="comment">#cp /etc/named.conf /etc/named.conf.bak </span></span><br><span class="line"><span class="comment">#vim /etc/named.conf </span></span><br><span class="line">options &#123; </span><br><span class="line">        directory <span class="string">&quot;/var/named&quot;</span>; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone <span class="string">&quot;geasyheart.com&quot;</span> IN   &#123; </span><br><span class="line">        <span class="built_in">type</span> slave; </span><br><span class="line">        file <span class="string">&quot;slaves/geasyheart.com.zone&quot;</span>; </span><br><span class="line">        masters &#123; 192.168.122.104; &#125;; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone <span class="string">&quot;122.168.192.in-addr-arpa&quot;</span> IN &#123; </span><br><span class="line">        <span class="built_in">type</span> slave; </span><br><span class="line">        file <span class="string">&quot;slaves/192.168.122.zone&quot;</span>; </span><br><span class="line">        masters &#123; 192.168.122.104; &#125;; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line"><span class="comment">#chown root.named /etc/named.cof </span></span><br><span class="line"><span class="comment">#chmod 640 /etc/named.conf </span></span><br><span class="line"><span class="comment">#service named start </span></span><br><span class="line">就会完成主从DNS传送 （更多细节参考文档说明） </span><br></pre></td></tr></table></figure>
-<p>&#x2F;&#x2F;注意：如果DNS的记录被更新了，那么版本号应该更新；；；这个需要注意；； </p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/05/20-01-%E5%AE%9E%E9%AA%8C-DNS%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE%E4%B8%BB%E4%BB%8E/">展开全文 >></a>
         </p>
       
 

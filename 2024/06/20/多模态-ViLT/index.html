@@ -7,16 +7,19 @@
   <meta name="baidu-site-verification" content="code-Wz3hIIlkFx" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://geasyheart.github.io">
-  <title>博客</title>
+  <title>多模态-ViLT | 博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="张宇个人博客">
-<meta property="og:type" content="website">
-<meta property="og:title" content="博客">
-<meta property="og:url" content="https://geasyheart.github.io/index.html">
+  <meta name="description" content="最近面试了一北京候选者，之前使用电子病例以及CT图像两种模态信息，训练ViLT多模态预测模型，提高肺结节良恶性预测准确率。正好我对多模态如何对齐也比较感兴趣，以Transformers-Tutorials提供的代码为例，来看下其内部是如何实现的。数据集我没有从VQA下载，太大了，这里也强烈安利huggingface提供的lmms-lab&#x2F;VQAv2 dataset。 剩下就改下VQADataset">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多模态-ViLT">
+<meta property="og:url" content="https://geasyheart.github.io/2024/06/20/%E5%A4%9A%E6%A8%A1%E6%80%81-ViLT/index.html">
 <meta property="og:site_name" content="博客">
-<meta property="og:description" content="张宇个人博客">
+<meta property="og:description" content="最近面试了一北京候选者，之前使用电子病例以及CT图像两种模态信息，训练ViLT多模态预测模型，提高肺结节良恶性预测准确率。正好我对多模态如何对齐也比较感兴趣，以Transformers-Tutorials提供的代码为例，来看下其内部是如何实现的。数据集我没有从VQA下载，太大了，这里也强烈安利huggingface提供的lmms-lab&#x2F;VQAv2 dataset。 剩下就改下VQADataset">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-06-20T07:34:27.000Z">
+<meta property="article:modified_time" content="2024-06-21T06:26:40.634Z">
 <meta property="article:author" content="张宇">
+<meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="博客" type="application/atom+xml">
@@ -204,16 +207,14 @@ var _hmt = _hmt || [];
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-    <article id="post-多模态-ViLT" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+            <article id="post-多模态-ViLT" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2024/06/20/%E5%A4%9A%E6%A8%A1%E6%80%81-ViLT/">多模态-ViLT</a>
+    <h1 class="article-title" itemprop="name">
+      多模态-ViLT
     </h1>
   
 
@@ -270,99 +271,31 @@ var _hmt = _hmt || [];
       
 
       
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2024/06/20/%E5%A4%9A%E6%A8%A1%E6%80%81-ViLT/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/assets/alipay.png">
+                      <span class="reward-type">支付宝</span>
+                    </div>
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
         </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-SHAP机器学习模型解释" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2024/06/19/SHAP%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E8%A7%A3%E9%87%8A/">SHAP机器学习模型解释</a>
-    </h1>
-  
-
-        
-        <a href="/2024/06/19/SHAP%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E8%A7%A3%E9%87%8A/" class="archive-article-date">
-  	<time datetime="2024-06-19T01:53:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-06-19</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>分享个模型可解释的库<a target="_blank" rel="noopener" href="https://github.com/shap/shap">SHAP</a>，其可以对XGBoost等机器学习库进行结果解释。</p>
-<p>更多还有类似Paddle中的<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/TrustAI/tree/main">TrustAI</a>。</p>
-<h3 id="什么是SHAP？"><a href="#什么是SHAP？" class="headerlink" title="什么是SHAP？"></a>什么是SHAP？</h3><p>SHAP（SHapley Additive exPlanations）是用来解释机器学习模型的工具。它告诉我们每个特征对模型预测结果的贡献有多大。想象一下你和几个朋友一起干活，最后得到了一笔报酬。你想知道每个人应该分多少钱，SHAP就是在做类似的事情，只不过它是在告诉你每个特征对模型预测结果的贡献。</p>
-<h3 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h3><h4 id="1-Shapley值："><a href="#1-Shapley值：" class="headerlink" title="1. Shapley值："></a>1. Shapley值：</h4><p>   想象一个团队在完成任务后得到一笔奖金，我们想公平地分配这笔奖金。Shapley值就是一种分配方法，告诉我们每个成员（在机器学习中是每个特征）应得的报酬（对预测结果的贡献）。</p>
-<h4 id="2-边际贡献："><a href="#2-边际贡献：" class="headerlink" title="2. 边际贡献："></a>2. 边际贡献：</h4><p>   假设我们在玩一个游戏，每次加入一个新成员（特征），看看他们对团队成绩（模型预测）的贡献有多大。边际贡献就是每次新加入的成员对总成绩的额外贡献。</p>
-<h3 id="SHAP如何工作？"><a href="#SHAP如何工作？" class="headerlink" title="SHAP如何工作？"></a>SHAP如何工作？</h3><p>SHAP计算每个特征的贡献时，会考虑所有可能的加入顺序。这是因为不同的加入顺序可能会导致不同的贡献。举个例子：</p>
-<ul>
-<li>如果你和你的朋友们一起完成一个项目，每个朋友加入的顺序不同，他们的贡献也可能不同。</li>
-<li>SHAP通过计算所有可能顺序中的平均贡献来确定每个特征的Shapley值。</li>
-</ul>
-<h3 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤"></a>具体步骤</h3><h4 id="1-考虑所有可能的特征子集："><a href="#1-考虑所有可能的特征子集：" class="headerlink" title="1. 考虑所有可能的特征子集："></a>1. 考虑所有可能的特征子集：</h4><p>   对于每个特征，计算它加入不同特征子集时，对模型预测结果的边际贡献。</p>
-<h4 id="2-计算平均贡献："><a href="#2-计算平均贡献：" class="headerlink" title="2. 计算平均贡献："></a>2. 计算平均贡献：</h4><p>   对于每个特征，计算它在所有可能子集中的平均贡献，这就是这个特征的Shapley值。</p>
-<h3 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h3><p>假设我们有一个模型在预测一个人是否会购买某产品，模型用到了年龄、收入和是否有孩子三个特征。SHAP会做以下事情：</p>
-<h4 id="1-计算每个特征的贡献："><a href="#1-计算每个特征的贡献：" class="headerlink" title="1. 计算每个特征的贡献："></a>1. 计算每个特征的贡献：</h4><ul>
-<li>先只考虑收入，再加上年龄，看看预测结果有多大变化。再加上是否有孩子，看看预测结果再变化多少。</li>
-<li>再换个顺序，先考虑年龄，再加上收入，然后加上是否有孩子。</li>
-<li>如此继续，考虑所有可能的加入顺序。</li>
-</ul>
-<h4 id="2-计算平均值："><a href="#2-计算平均值：" class="headerlink" title="2. 计算平均值："></a>2. 计算平均值：</h4><p>   对于每个特征，计算它在所有顺序中的平均贡献，这个平均值就是该特征的Shapley值。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>SHAP通过考虑每个特征在不同组合中的贡献，并取平均值，来告诉我们每个特征对模型预测的影响有多大。这样，我们就能清楚地知道模型是如何做出预测的，每个特征在其中起了多大作用。</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/blob/m2/python/shap_demo.ipynb">演示代码</a>：<a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/blob/m2/python/shap_demo.ipynb">https://github.com/geasyheart/algo/blob/m2/python/shap_demo.ipynb</a></p>
-
-      
-
       
     </div>
     <div class="article-info article-info-index">
@@ -382,16 +315,75 @@ var _hmt = _hmt || [];
       
 
       
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2024/06/19/SHAP%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E8%A7%A3%E9%87%8A/">展开全文 >></a>
-        </p>
-      
 
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://geasyheart.github.io/2024/06/20/%E5%A4%9A%E6%A8%A1%E6%80%81-ViLT/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
       
       <div class="clearfix"></div>
     </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2024/06/19/SHAP%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E8%A7%A3%E9%87%8A/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">SHAP机器学习模型解释</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -406,844 +398,32 @@ var _hmt = _hmt || [];
         </div>
         
         
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-DPO" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2024/05/08/DPO/">DPO</a>
-    </h1>
-  
-
-        
-        <a href="/2024/05/08/DPO/" class="archive-article-date">
-  	<time datetime="2024-05-08T03:03:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-05-08</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>DPO全称Direct Preference Optimization，它是RLHF算法的一种，相比PPO算法来讲，它只需要actor和ref model,少了critic和reward model。其核心期望为good loss - bad loss越来越大， 这点和排序模型中的rank loss很相似，但是又不希望和ref model偏差太多。</p>
-<h2 id="最小实现代码"><a href="#最小实现代码" class="headerlink" title="最小实现代码"></a>最小实现代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">from</span> copy <span class="keyword">import</span> deepcopy</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> AutoModelForCausalLM, LlamaForCausalLM, LlamaConfig</span><br><span class="line"></span><br><span class="line">torch.manual_seed(<span class="number">0</span>)</span><br><span class="line"><span class="comment"># 超参数</span></span><br><span class="line">beta = <span class="number">0.1</span></span><br><span class="line"><span class="comment"># 加载模型</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># data</span></span><br><span class="line">prompt_ids = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]</span><br><span class="line">good_response_ids = [<span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>]</span><br><span class="line"><span class="comment"># 对loss稍加修改可以应对一个good和多个bad的情况</span></span><br><span class="line">bad_response_ids_list = [[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">0</span>], [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">0</span>]]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换成模型输入</span></span><br><span class="line">input_ids = torch.LongTensor(</span><br><span class="line">    [prompt_ids + good_response_ids, *[prompt_ids + bad_response_ids <span class="keyword">for</span> bad_response_ids <span class="keyword">in</span> bad_response_ids_list]]</span><br><span class="line">)</span><br><span class="line"><span class="comment"># labels 提前做个shift</span></span><br><span class="line">labels = torch.LongTensor(</span><br><span class="line">    [</span><br><span class="line">        [-<span class="number">100</span>] * <span class="built_in">len</span>(prompt_ids) + good_response_ids,</span><br><span class="line">        *[[-<span class="number">100</span>] * <span class="built_in">len</span>(prompt_ids) + bad_response_ids <span class="keyword">for</span> bad_response_ids <span class="keyword">in</span> bad_response_ids_list]</span><br><span class="line">    ]</span><br><span class="line">)[:, <span class="number">1</span>:]</span><br><span class="line">loss_mask = (labels != -<span class="number">100</span>)</span><br><span class="line">labels[labels == -<span class="number">100</span>] = <span class="number">0</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">policy_model = LlamaForCausalLM(config=LlamaConfig(vocab_size=<span class="number">1000</span>, num_hidden_layers=<span class="number">1</span>, hidden_size=<span class="number">128</span>))</span><br><span class="line">reference_model = deepcopy(policy_model)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算 policy model的log prob</span></span><br><span class="line">logits = policy_model(input_ids)[<span class="string">&quot;logits&quot;</span>][:, :-<span class="number">1</span>, :]</span><br><span class="line">per_token_logps = torch.gather(logits.log_softmax(-<span class="number">1</span>), dim=<span class="number">2</span>, index=labels.unsqueeze(<span class="number">2</span>)).squeeze(<span class="number">2</span>)</span><br><span class="line">all_logps = (per_token_logps * loss_mask).<span class="built_in">sum</span>(-<span class="number">1</span>)</span><br><span class="line"><span class="comment"># 暂时写死第一个是good response的概率</span></span><br><span class="line">policy_good_logps, policy_bad_logps = all_logps[:<span class="number">1</span>], all_logps[<span class="number">1</span>:]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算 reference model的log prob</span></span><br><span class="line"><span class="keyword">with</span> torch.no_grad():</span><br><span class="line">    logits = reference_model(input_ids)[<span class="string">&quot;logits&quot;</span>][:, :-<span class="number">1</span>, :]</span><br><span class="line">    per_token_logps = torch.gather(logits.log_softmax(-<span class="number">1</span>), dim=<span class="number">2</span>, index=labels.unsqueeze(<span class="number">2</span>)).squeeze(<span class="number">2</span>)</span><br><span class="line">    all_logps = (per_token_logps * loss_mask).<span class="built_in">sum</span>(-<span class="number">1</span>)</span><br><span class="line">    <span class="comment"># 暂时写死第一个是good response的概率</span></span><br><span class="line">    reference_good_logps, reference_bad_logps = all_logps[:<span class="number">1</span>], all_logps[<span class="number">1</span>:]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算loss，会自动进行广播</span></span><br><span class="line">logits = (policy_good_logps - reference_good_logps) - (policy_bad_logps - reference_bad_logps)</span><br><span class="line">loss = -F.logsigmoid(beta * logits).mean()</span><br><span class="line"><span class="built_in">print</span>(loss)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
-<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/642569664">知乎介绍1</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/huggingface/trl/blob/3b4c24946b7d5580fd354b0e3800fc1047b82a41/trl/trainer/dpo_trainer.py#L965">trl dpo loss计算</a></li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2024/05/08/DPO/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-text%E5%92%8Cimage%E5%A6%82%E4%BD%95%E5%AF%B9%E9%BD%90%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">1. text和image如何对齐？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E7%AB%9F%E7%84%B6%E6%9C%89ViltForTokenClassification%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">2. 竟然有ViltForTokenClassification？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-ViltForQuestionAnswering%E6%98%AFQA%E5%90%97%EF%BC%9F"><span class="toc-number">3.</span> <span class="toc-text">3. ViltForQuestionAnswering是QA吗？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E6%8E%92%E5%BA%8F%E6%96%B0%E6%93%8D%E4%BD%9C"><span class="toc-number">4.</span> <span class="toc-text">4. 排序新操作</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-%E4%BD%9C%E8%80%85%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 作者实现思路</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1%E3%80%81%E5%A4%84%E7%90%86answer"><span class="toc-number">4.1.1.</span> <span class="toc-text">1、处理answer</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2%E3%80%81ViltForQuestionAnswering"><span class="toc-number">4.1.2.</span> <span class="toc-text">2、ViltForQuestionAnswering</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3%E3%80%81%E8%A7%A3%E7%A0%81"><span class="toc-number">4.1.3.</span> <span class="toc-text">3、解码</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-%E5%85%B6%E4%BB%96%E6%8E%92%E5%BA%8F%E6%80%9D%E8%B7%AF"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 其他排序思路</span></a></li></ol></li></ol>
+                    </div>
+                </span>
             </div>
         </div>
         
-        
     </div>
 </aside>
 
 
 
-
-  
-    <article id="post-RLHF-Actor-Critic" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2024/05/07/RLHF-Actor-Critic/">RLHF-Actor-Critic</a>
-    </h1>
-  
-
-        
-        <a href="/2024/05/07/RLHF-Actor-Critic/" class="archive-article-date">
-  	<time datetime="2024-05-07T03:41:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-05-07</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>值函数希望学习一个价值函数，这个值可以用于评估当前决策的分值。策略函数希望学习一个策略函数，拿到其动作的概率分布。</p>
-<blockquote>
-<p>Actor-Critic是在策略函数的基础上，额外引入学习价值函数，来帮助策略函数更好地学习。</p>
-</blockquote>
-<p>下面这个图很好表示了两者关系。<br><img src="https://hrl.boyuai.com/static/640.5dee5ab0.jpg" alt="图"></p>
-<p>重点看<a target="_blank" rel="noopener" href="https://hrl.boyuai.com/chapter/2/actor-critic%E7%AE%97%E6%B3%95">actor-critic算法</a>中<code>update函数log_probs</code>部分。actor采用策略，critic来进行评价。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2024/05/07/RLHF-Actor-Critic/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-RLHF-policy-gradient" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2024/04/26/RLHF-policy-gradient/">RLHF-policy_gradient</a>
-    </h1>
-  
-
-        
-        <a href="/2024/04/26/RLHF-policy-gradient/" class="archive-article-date">
-  	<time datetime="2024-04-26T02:46:31.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-04-26</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这个是RLHF系列中的策略梯度部分，在看了<a target="_blank" rel="noopener" href="https://github.com/boyu-ai/Hands-on-RL/blob/main/%E7%AC%AC9%E7%AB%A0-%E7%AD%96%E7%95%A5%E6%A2%AF%E5%BA%A6%E7%AE%97%E6%B3%95.ipynb">Hands-on-RL</a>和<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PARL/tree/develop/examples/QuickStart">parl</a>两者实现后，感觉整体难度并不是很高，但是当自己从零实现时还是会莫名其妙多一些问题，相比深度学习来讲，还是有蛮多小细节是需要额外注意的。</p>
-<h2 id="注意点"><a href="#注意点" class="headerlink" title="注意点"></a>注意点</h2><h3 id="1-log平滑"><a href="#1-log平滑" class="headerlink" title="1. log平滑"></a>1. log平滑</h3><p>这里是指learn阶段中的获取最大期望阶段，如下代码所示：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">output = self.model(obs_bs)</span><br><span class="line">output = torch.log(output.gather(-<span class="number">1</span>, action_bs.reshape(-<span class="number">1</span>, <span class="number">1</span>)))</span><br></pre></td></tr></table></figure>
-
-<p>在最开始自己实现时，我没有加log进行平滑，发现模型没法收敛(CarPole-v0 reward最大得分为200)，一直是8,9徘徊。后来我看了上述实现，发现这里多了个log,这里让我觉得很困惑，因为我觉得这一步是不必要的，原因有以下几个方面：</p>
-<ol>
-<li>model.forward部分，已经用softmax做归一化了，已经避免了差异较大的情况。</li>
-<li>从某种角度来讲，我甚至觉得model.forward中的softmax部分也不应该添加。因为本质来讲就是希望期望最大嘛。</li>
-</ol>
-<p>但是呢，如果不加log这一步，模型就无法收敛。</p>
-<h3 id="2-折扣因子"><a href="#2-折扣因子" class="headerlink" title="2. 折扣因子"></a>2. 折扣因子</h3><p>这里是指在每一次done，产生了一批state、reward、action之后，在进行计算loss时，下一步的reward还要考虑当前步reward的结果，即下一步的reward一定要小于当前步的reward。也就是<code>calc_reward_to_go</code>函数这里。</p>
-<p>这里同样也会觉得很困惑，因为如果希望期望最大，那就reward * prob使其概率最大即可。</p>
-<p>如果看<a target="_blank" rel="noopener" href="https://github.com/boyu-ai/Hands-on-RL/blob/main/%E7%AC%AC9%E7%AB%A0-%E7%AD%96%E7%95%A5%E6%A2%AF%E5%BA%A6%E7%AE%97%E6%B3%95.ipynb">Hands-on-RL</a>他的实现，不会感到任何困惑，因为他是用for来做的。但是呢，<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PARL/tree/develop/examples/QuickStart">parl</a>的实现在考虑了<code>reward * prob使其概率最大</code>这一步之后，又添加了<code>calc_reward_to_go</code>函数，从而本来是个离散的东西，强生生的给变成了一个连续状态的事情，关键呢，怎么看都不像是连续的，因为当前步在计算loss时也并没有跟上一步扯上直接的关系。</p>
-<p>这一步还好，从理解角度来讲，我会更倾向<a target="_blank" rel="noopener" href="https://github.com/boyu-ai/Hands-on-RL/blob/main/%E7%AC%AC9%E7%AB%A0-%E7%AD%96%E7%95%A5%E6%A2%AF%E5%BA%A6%E7%AE%97%E6%B3%95.ipynb">Hands-on-RL</a>的实现，容易理解。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>关于第一点，我的感觉是步子不能迈太大，宁可慢慢收敛，也要比无法收敛更强，例如model部分我尝试改成如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">PolicyNet</span>(torch.nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, state_dim, hidden_dim, action_dim</span>):</span><br><span class="line">        <span class="built_in">super</span>(PolicyNet, self).__init__()</span><br><span class="line">        self.state_dim = state_dim</span><br><span class="line">        self.action_dim = action_dim</span><br><span class="line">        self.fc1 = torch.nn.Linear(state_dim, hidden_dim)</span><br><span class="line">        self.fc2 = torch.nn.Linear(hidden_dim, action_dim)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        x = F.relu(self.fc1(x))</span><br><span class="line">        <span class="comment"># return F.softmax(self.fc2(x), dim=-1)</span></span><br><span class="line">        <span class="keyword">return</span> self.fc2(x)</span><br><span class="line"><span class="meta">    @torch.no_grad()</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">sample</span>(<span class="params">self, obs</span>):</span><br><span class="line">        result = self(torch.FloatTensor(obs))</span><br><span class="line">        result = F.softmax(result, dim=-<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> torch.multinomial(result, <span class="number">1</span>).item()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>即forward部分不用softmax,剩下代码保持不变，也同样处于无法收敛状态，似乎来看,softmax+log才是这个算法成功的关键。</p>
-<p>这里让我想到一个事情，在深度学习Layer参数初始化的过程，比如：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a = nn.Linear(2222, 11)</span><br></pre></td></tr></table></figure>
-<p>我们会是这么写，基本不会关心a这个linear的参数是如何初始化的。是因为框架内部已经考虑了kaiming、xavier、uniform等各种初始化技术。如果不加这些参数初始化技术，模型基本也很难收敛。</p>
-<p>所以如果应用的话，可以采用现成的实现，如果研究的话，其中一些细节可以慢慢调整。</p>
-<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> random</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> gym</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> tqdm <span class="keyword">import</span> tqdm</span><br><span class="line"><span class="keyword">import</span> rl_utils</span><br><span class="line"><span class="keyword">from</span> parl.env <span class="keyword">import</span> CompatWrapper</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PolicyNet</span>(torch.nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, state_dim, hidden_dim, action_dim</span>):</span><br><span class="line">        <span class="built_in">super</span>(PolicyNet, self).__init__()</span><br><span class="line">        self.state_dim = state_dim</span><br><span class="line">        self.action_dim = action_dim</span><br><span class="line">        self.fc1 = torch.nn.Linear(state_dim, hidden_dim)</span><br><span class="line">        self.fc2 = torch.nn.Linear(hidden_dim, action_dim)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        x = F.relu(self.fc1(x))</span><br><span class="line">        <span class="keyword">return</span> F.softmax(self.fc2(x), dim=-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @torch.no_grad()</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">sample</span>(<span class="params">self, obs</span>):</span><br><span class="line">        result = self(torch.FloatTensor(obs))</span><br><span class="line">        <span class="keyword">return</span> torch.multinomial(result, <span class="number">1</span>).item()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">calc_reward_to_go</span>(<span class="params">reward_list, gamma=<span class="number">1.0</span></span>):</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(reward_list) - <span class="number">2</span>, -<span class="number">1</span>, -<span class="number">1</span>):</span><br><span class="line">        <span class="comment"># G_i = r_i + γ·G_i+1</span></span><br><span class="line">        reward_list[i] += gamma * reward_list[i + <span class="number">1</span>]  <span class="comment"># Gt</span></span><br><span class="line">    <span class="keyword">return</span> np.array(reward_list)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Agent</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, state_dim, action_dim, hidden_dim</span>):</span><br><span class="line">        self.model = PolicyNet(state_dim=state_dim, hidden_dim=hidden_dim, action_dim=action_dim)</span><br><span class="line">        self.optim = torch.optim.Adam(self.model.parameters(), lr=<span class="number">1e-3</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">train</span>(<span class="params">self, env</span>):</span><br><span class="line">        total_reward = <span class="number">0</span></span><br><span class="line">        obs_bs, action_bs, next_obs_bs, reward_bs, done_bs = [], [], [], [], []</span><br><span class="line">        obs = env.reset()</span><br><span class="line">        <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">            action = self.model.sample(obs=obs)</span><br><span class="line">            next_obs, reward, done, info = env.step(action=action)</span><br><span class="line">            <span class="keyword">if</span> done:</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">            obs_bs.append(obs)</span><br><span class="line">            action_bs.append(action)</span><br><span class="line">            next_obs_bs.append(next_obs)</span><br><span class="line">            reward_bs.append(reward)</span><br><span class="line">            done_bs.append(done)</span><br><span class="line"></span><br><span class="line">            total_reward += reward</span><br><span class="line">            obs = next_obs</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> obs_bs: <span class="keyword">return</span> total_reward</span><br><span class="line">        <span class="comment"># learn</span></span><br><span class="line">        reward_bs = calc_reward_to_go(reward_bs)</span><br><span class="line"></span><br><span class="line">        obs_bs = torch.FloatTensor(np.array(obs_bs))</span><br><span class="line">        action_bs = torch.LongTensor(np.array(action_bs))</span><br><span class="line">        reward_bs = torch.FloatTensor(np.array(reward_bs))</span><br><span class="line"></span><br><span class="line">        output = self.model(obs_bs)</span><br><span class="line">        output = torch.log(output.gather(-<span class="number">1</span>, action_bs.reshape(-<span class="number">1</span>, <span class="number">1</span>)))</span><br><span class="line"></span><br><span class="line">        loss = torch.mean(-<span class="number">1</span> * output.flatten() * reward_bs)</span><br><span class="line"></span><br><span class="line">        self.optim.zero_grad()</span><br><span class="line">        loss.backward()</span><br><span class="line">        self.optim.step()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> total_reward</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    env = CompatWrapper(gym.make(<span class="string">&#x27;CartPole-v0&#x27;</span>))</span><br><span class="line">    agent = Agent(env.observation_space.shape[<span class="number">0</span>], action_dim=env.action_space.n, hidden_dim=<span class="number">64</span>)</span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10000</span>):</span><br><span class="line">        total_reward = agent.train(env=env)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&#x27;Epoch[<span class="subst">&#123;epoch&#125;</span>]--&gt;<span class="subst">&#123;total_reward&#125;</span>&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2024/04/26/RLHF-policy-gradient/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-RLHF-DQN" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2024/04/24/RLHF-DQN/">RLHF-DQN</a>
-    </h1>
-  
-
-        
-        <a href="/2024/04/24/RLHF-DQN/" class="archive-article-date">
-  	<time datetime="2024-04-24T06:06:01.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-04-24</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>下面记录下DQN算法以及一些细节，注意哦，本博客更多目的在于当下记录，并非完整严谨的哦，也或许有理解错误。</p>
-<p>关于DQN，看了下网上的介绍以及从Q-Learning到DQN解决state和action无法枚举完的情况。另外也强烈推荐下面链接：</p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/624217793">知乎网友实现DQN</a>：可直接按照这个跑通体验下效果。</li>
-<li><a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PARL/tree/develop">PaddlePaddle&#x2F;PARL</a>：这个是paddle出的RLHF库，并提供了相应的examples帮助入门和深入，并且环境也帮忙解决好了，如果debug能力比较强的话，建议直接看这个哦。</li>
-<li><a target="_blank" rel="noopener" href="https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html">PyTorch DQN实现</a>：这个是pytorch官方实现的DQN算法。</li>
-</ol>
-<h2 id="一些特别的点"><a href="#一些特别的点" class="headerlink" title="一些特别的点"></a>一些特别的点</h2><h3 id="1-俺是value-based的，所以不需要softmax"><a href="#1-俺是value-based的，所以不需要softmax" class="headerlink" title="1. 俺是value based的，所以不需要softmax"></a>1. 俺是value based的，所以不需要softmax</h3><p>看下面这个DQN网络，你觉得有问题么？</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">DQN</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, obs, action</span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        self.fc1 = nn.Linear(obs, <span class="number">64</span>)</span><br><span class="line">        self.fc2 = nn.Linear(<span class="number">64</span>, <span class="number">64</span>)</span><br><span class="line">        self.fc3 = nn.Linear(<span class="number">64</span>, action)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, obs</span>):</span><br><span class="line">        x = torch.relu(self.fc1(obs))</span><br><span class="line">        x = torch.relu(self.fc2(x))</span><br><span class="line">        x = torch.softmax(self.fc3(x))</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>啊啊啊，这里为什么要加softmax呢，是不是习惯了深度学习那套分类思想，再好好想想这里，是不是不应该加softmax。</p>
-<h3 id="2-eps是干嘛的，是否是必须的？"><a href="#2-eps是干嘛的，是否是必须的？" class="headerlink" title="2. eps是干嘛的，是否是必须的？"></a>2. eps是干嘛的，是否是必须的？</h3><p>仔细观察下面代码，eps是在做sample时起作用的，也就是<code>select_action</code>这里，可以看到，在每个epoch结束时，更新新的eps值，从最开始的1,到最后的eps_end&#x3D;0.1,它是一个比较平滑的曲线。</p>
-<p>从<code>select_action</code>可以观察到，action早期处于随机采样的状态，随着epoch的增加，action的决策更多过度到model决策。</p>
-<blockquote>
-<p>那这里是否是必须的呢？</p>
-</blockquote>
-<p>不，这里并不是必须的，因为完全可以在train之前加一个warmup步骤，让model一定程度上学会state到action这个变化。再到后面，就是正常训练流程，不需要sample这个过程了。</p>
-<blockquote>
-<p>那这里更多起到什么作用?</p>
-</blockquote>
-<p>我觉得有个点可以很好理解这里，即从完全小白到慢慢学习直至认知理解的过程。添加warmup，即先提前产生一批训练样本，而eps这里，即随着过程慢慢学习，不过相比warmup，可以更优采取权重随机采样方案，即<code>torch.multinomial(torch.softmax(self(obs), dim=-1), 1).item()</code>，它表现出来的特点是权重高的多次采样出现的频率也会更高，那么随着模型的优化，采样更优的可能性也会提升。</p>
-<h3 id="3-target-net是否是必须的？"><a href="#3-target-net是否是必须的？" class="headerlink" title="3. target_net是否是必须的？"></a>3. target_net是否是必须的？</h3><p>不，这里也并不是必须的。观察整个过程，policy_net要比target_net新一个epoch，而且他俩实际上是在干同一个事情，那么可以将target_net指向policy_net,可以发现epoch的增加，reward的值也是正常提升的。</p>
-<h3 id="4-reply-memory是干嘛的？"><a href="#4-reply-memory是干嘛的？" class="headerlink" title="4. reply memory是干嘛的？"></a>4. reply memory是干嘛的？</h3><p>reply memory可以说记录了整个state和action等的过程，当然有一个maxlen来限制其大小，过早的数据就不要了。</p>
-<p>不过需要指出的是，改动了上面这些点，虽然也可以收敛，但是可能会收敛变慢。</p>
-<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p>这里借鉴了<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/624217793">知乎网友实现DQN</a>。</p>
-<p>pygame&#x3D;&#x3D;2.1.0</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> gym</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch.optim <span class="keyword">as</span> optim</span><br><span class="line"><span class="keyword">from</span> torch.utils.tensorboard <span class="keyword">import</span> SummaryWriter</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> deque</span><br><span class="line"><span class="keyword">from</span> tqdm <span class="keyword">import</span> tqdm</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">DQN</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, state_dim, action_dim</span>):</span><br><span class="line">        <span class="built_in">super</span>(DQN, self).__init__()</span><br><span class="line">        self.fc1 = nn.Linear(state_dim, <span class="number">64</span>)</span><br><span class="line">        self.fc2 = nn.Linear(<span class="number">64</span>, <span class="number">64</span>)</span><br><span class="line">        self.fc3 = nn.Linear(<span class="number">64</span>, action_dim)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        x = torch.relu(self.fc1(x))</span><br><span class="line">        x = torch.relu(self.fc2(x))</span><br><span class="line">        x = self.fc3(x)</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Agent</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, state_dim, action_dim, memory_size=<span class="number">10000</span>, batch_size=<span class="number">64</span>, gamma=<span class="number">0.99</span>, lr=<span class="number">1e-4</span></span>):</span><br><span class="line">        self.device = torch.device(<span class="string">&quot;cuda&quot;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&quot;cpu&quot;</span>)</span><br><span class="line">        self.state_dim = state_dim</span><br><span class="line">        self.action_dim = action_dim</span><br><span class="line">        self.memory = deque(</span><br><span class="line">            maxlen=memory_size)  <span class="comment"># deque是一个双端队列，可以在队首或队尾插入或删除元素。在DQN算法中，我们使用deque实现经验池来存储之前的经验，因为它可以在队尾插入新的经验，并在队首删除最老的经验，从而保持经验池的大小不变。</span></span><br><span class="line">        self.batch_size = batch_size</span><br><span class="line">        self.gamma = gamma</span><br><span class="line">        self.lr = lr</span><br><span class="line">        self.policy_net = DQN(state_dim, action_dim).to(self.device)</span><br><span class="line">        self.target_net = DQN(state_dim, action_dim).to(self.device)</span><br><span class="line">        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.lr)</span><br><span class="line">        self.loss_fn = nn.MSELoss()</span><br><span class="line">        self.steps = <span class="number">0</span></span><br><span class="line">        self.writer = SummaryWriter()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">select_action</span>(<span class="params">self, state, eps</span>):</span><br><span class="line">        <span class="keyword">if</span> random.random() &lt; eps:</span><br><span class="line">            <span class="keyword">return</span> random.randint(<span class="number">0</span>, self.action_dim - <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            state = torch.FloatTensor(state).to(self.device)</span><br><span class="line">            <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">                action = self.policy_net(state).argmax().item()</span><br><span class="line">            <span class="keyword">return</span> action</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">store_transition</span>(<span class="params">self, state, action, reward, next_state, done</span>):</span><br><span class="line">        self.memory.append((state, action, reward, next_state, done))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">train</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(self.memory) &lt; self.batch_size:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        transitions = random.sample(self.memory, self.batch_size)</span><br><span class="line">        batch = <span class="built_in">list</span>(<span class="built_in">zip</span>(*transitions))</span><br><span class="line"></span><br><span class="line">        state_batch = torch.FloatTensor(batch[<span class="number">0</span>]).to(self.device)</span><br><span class="line">        action_batch = torch.LongTensor(batch[<span class="number">1</span>]).to(self.device)</span><br><span class="line">        reward_batch = torch.FloatTensor(batch[<span class="number">2</span>]).to(self.device)</span><br><span class="line">        next_state_batch = torch.FloatTensor(batch[<span class="number">3</span>]).to(self.device)</span><br><span class="line">        done_batch = torch.FloatTensor(batch[<span class="number">4</span>]).to(self.device)</span><br><span class="line"></span><br><span class="line">        q_values = self.policy_net(state_batch).gather(<span class="number">1</span>, action_batch.unsqueeze(<span class="number">1</span>)).squeeze(<span class="number">1</span>)</span><br><span class="line">        next_q_values = self.target_net(next_state_batch).<span class="built_in">max</span>(<span class="number">1</span>)[<span class="number">0</span>]</span><br><span class="line">        expected_q_values = reward_batch + self.gamma * next_q_values * (<span class="number">1</span> - done_batch)</span><br><span class="line"></span><br><span class="line">        loss = self.loss_fn(q_values, expected_q_values.detach())</span><br><span class="line"></span><br><span class="line">        self.optimizer.zero_grad()</span><br><span class="line">        loss.backward()</span><br><span class="line">        self.optimizer.step()</span><br><span class="line"></span><br><span class="line">        self.steps += <span class="number">1</span></span><br><span class="line">        self.writer.add_scalar(<span class="string">&quot;Loss&quot;</span>, loss.item(), self.steps)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update_target</span>(<span class="params">self</span>):</span><br><span class="line">        self.target_net.load_state_dict(self.policy_net.state_dict())</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">train_epoch</span>(<span class="params">env, eps</span>):</span><br><span class="line">    state = env.reset()</span><br><span class="line">    total_reward = <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        action = agent.select_action(state, eps)</span><br><span class="line"></span><br><span class="line">        next_state, reward, done, _ = env.step(action)</span><br><span class="line"></span><br><span class="line">        agent.store_transition(state, action, reward, next_state, done)</span><br><span class="line">        state = next_state</span><br><span class="line">        agent.train()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># env.render()</span></span><br><span class="line">        total_reward += reward</span><br><span class="line">        <span class="keyword">if</span> done:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">return</span> total_reward</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">train_dqn</span>(<span class="params">env, agent: Agent, eps_start=<span class="number">1</span>, eps_end=<span class="number">0.1</span>, eps_decay=<span class="number">0.995</span>, max_episodes=<span class="number">1000</span>, max_steps=<span class="number">1000</span></span>):</span><br><span class="line">    eps = eps_start</span><br><span class="line">    <span class="keyword">for</span> episode <span class="keyword">in</span> tqdm(<span class="built_in">range</span>(max_episodes)):</span><br><span class="line">        reward = train_epoch(env, eps)</span><br><span class="line">        agent.update_target()</span><br><span class="line">        eps = <span class="built_in">max</span>(eps * eps_decay, eps_end)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&#x27;<span class="subst">&#123;episode&#125;</span> --&gt; <span class="subst">&#123;reward&#125;</span>&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    env = gym.make(<span class="string">&quot;CartPole-v1&quot;</span>)</span><br><span class="line">    state_dim = env.observation_space.shape[<span class="number">0</span>]</span><br><span class="line">    action_dim = env.action_space.n</span><br><span class="line">    agent = Agent(state_dim, action_dim)</span><br><span class="line">    train_dqn(env, agent)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2024/04/24/RLHF-DQN/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-LLM-RLHF工作原理一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2024/04/07/LLM-RLHF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/">LLM-RLHF工作原理一</a>
-    </h1>
-  
-
-        
-        <a href="/2024/04/07/LLM-RLHF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/" class="archive-article-date">
-  	<time datetime="2024-04-07T07:41:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-04-07</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>大模型最近很是火啊，媒体铺天盖地的宣传，候选者简历中写LLM微调等等。本文希望以<a target="_blank" rel="noopener" href="https://github.com/huggingface/trl/blob/main/examples/notebooks/">huggingface trl&#x2F;RLHF notebooks</a>讲到的几个例子作为入口，介绍下RLHF在整个训练工作中的位置以及起到的作用，方便理解与后续应用。</p>
-<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><p>在<a target="_blank" rel="noopener" href="https://github.com/huggingface/trl/blob/main/examples/notebooks/">huggingface trl&#x2F;RLHF notebooks</a>这个文件夹下，一共有三个例子：</p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://github.com/huggingface/trl/blob/main/examples/notebooks/gpt2-sentiment.ipynb">gpt2-sentiment.ipynb</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/huggingface/trl/blob/main/examples/notebooks/gpt2-sentiment-control.ipynb">gpt2-sentiment-control.ipynb</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/huggingface/trl/blob/main/examples/notebooks/best_of_n.ipynb">best_of_n.ipynb</a></li>
-</ol>
-<p>同时也按照上述这三个文件顺序进行分析。</p>
-<h3 id="一、gpt2-sentiment-ipynb"><a href="#一、gpt2-sentiment-ipynb" class="headerlink" title="一、gpt2-sentiment.ipynb"></a>一、gpt2-sentiment.ipynb</h3><blockquote>
-<p>目的：这个文件实现的是如何利用RLHF学会生成正向评论。</p>
-</blockquote>
-<img src="/2024/04/07/LLM-RLHF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/1.png" class="" title="流程图">
-
-
-<h4 id="1-Load-IMDB-dataset"><a href="#1-Load-IMDB-dataset" class="headerlink" title="1. Load IMDB dataset"></a>1. Load IMDB dataset</h4><p>数据集默认有两个字段，<code>text</code> 和<code>label</code>，即用户对一部电影的评论和这条评论的情感倾向（正向、负向）。</p>
-<p>这里对<code>text</code>字段随机截断长度为n后面的文本，例如：text&#x3D;<code>这个电影我觉得很棒</code>。 截取后变成query&#x3D;<code>这个电影</code>。</p>
-<h4 id="2-Model和Ref-Model"><a href="#2-Model和Ref-Model" class="headerlink" title="2. Model和Ref Model"></a>2. Model和Ref Model</h4><p>这里采用GPT2作为训练model,ref model和model是一样的，可先理解成model是用来训练的，ref model是用来参考的。<br>ref model是RLHF训练过程中不可缺少的一部分，也跟在generation model后面添加ValueHead层是一个道理，关于强化学习更细力度，本文先忽略。</p>
-<h4 id="3-reward-model"><a href="#3-reward-model" class="headerlink" title="3. reward model"></a>3. reward model</h4><p>这里采用distilbert-imdb模型来作为打分模型，这个模型的作用是输入一条评论，它会给出positive、negative的打分。</p>
-<h4 id="4-训练"><a href="#4-训练" class="headerlink" title="4. 训练"></a>4. 训练</h4><p>即让model基于query生成指max_new_tokens的文本，然后让reward model来打分，以positive score为目标，不断优化model,使其能够基于用户给定的文本开头来生成正向评论。</p>
-<p>这里的max_new_tokens也比较有意思，它可以有两层的不同解释：</p>
-<ol>
-<li>一条文本的长度不会很长</li>
-<li>折扣因子</li>
-</ol>
-<p>关于后者，我觉得会是一个比较有意思的点。在RLHF中，有针对每一步给一个score，还有走完后针对整条路径给一个score。那这里的max_new_tokens是不是就可以理解成是中间的状态～<br>既不会因为每一步都打分造成训练效率低下也不会因为对整条路径打分导致某些点决策失误所带来的更大偏差，尽量缓解这种情况。</p>
-<p>结束。</p>
-<h3 id="二、gpt2-sentiment-control-ipynb"><a href="#二、gpt2-sentiment-control-ipynb" class="headerlink" title="二、gpt2-sentiment-control.ipynb"></a>二、gpt2-sentiment-control.ipynb</h3><blockquote>
-<p>目的：通过添加prompt来控制生成评论的情感。</p>
-</blockquote>
-<img src="/2024/04/07/LLM-RLHF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/2.png" class="" title="流程图">
-
-<p>这里的prompt有三类：positive、negative、neutral。由于neutral是reward model本身能力所不具备的，看到这里也可以跳过。</p>
-<p>其构造示例如下：</p>
-<figure class="highlight md"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">query=&quot;[positive]这个电影很&quot;</span><br></pre></td></tr></table></figure>
-
-<p>那么预期目标是<code>好</code>。</p>
-<p>如果是</p>
-<figure class="highlight md"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">query=&quot;[negative]这个电影很&quot;</span><br></pre></td></tr></table></figure>
-
-<p>那么预期目标是<code>不好</code>，<code>差</code>之类的情感。</p>
-<p>剩下流程和上面文件一致，此处忽略。</p>
-<h3 id="三、best-of-n-ipynb"><a href="#三、best-of-n-ipynb" class="headerlink" title="三、best_of_n.ipynb"></a>三、best_of_n.ipynb</h3><p>目的：RLHF的目标是超越原有天花板，那这种是选取ref model的best of n来和RLHF训练后的做个比对。</p>
-<p>整体下来，reward model占据很重要的作用，决定了RLHF的效果，需要注意。</p>
-<p>更多看下原代码，整体流程不是很复杂。又水水水了一篇。</p>
-<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><h3 id="1-数据集"><a href="#1-数据集" class="headerlink" title="1. 数据集"></a>1. 数据集</h3><p>以<a target="_blank" rel="noopener" href="https://dataset-bj.cdn.bcebos.com/qianyan/ChnSentiCorp.zip">ChnSentiCorp</a>作为情感分类数据集。</p>
-<h3 id="2-reward-model"><a href="#2-reward-model" class="headerlink" title="2. reward model"></a>2. reward model</h3><blockquote>
-<p>train_score.py</p>
-</blockquote>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> datasets <span class="keyword">import</span> load_dataset</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> AutoModelForSequenceClassification, AutoTokenizer, Trainer, TrainingArguments</span><br><span class="line"></span><br><span class="line">checkpoint = <span class="string">&#x27;chinese-roberta-wwm-ext&#x27;</span></span><br><span class="line"></span><br><span class="line">model = AutoModelForSequenceClassification.from_pretrained(checkpoint, num_labels=<span class="number">2</span>)</span><br><span class="line">tokenizer = AutoTokenizer.from_pretrained(checkpoint)</span><br><span class="line"></span><br><span class="line">raw_dataset = load_dataset(</span><br><span class="line">    <span class="string">&#x27;csv&#x27;</span>,</span><br><span class="line">    data_files=&#123;</span><br><span class="line">        <span class="string">&quot;train&quot;</span>: <span class="string">&quot;train.tsv&quot;</span>,</span><br><span class="line">        <span class="string">&quot;dev&quot;</span>: <span class="string">&quot;dev.tsv&quot;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    delimiter=<span class="string">&#x27;\t&#x27;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">data_collator</span>(<span class="params">batch_data</span>):</span><br><span class="line">    text_a = [_[<span class="string">&#x27;text_a&#x27;</span>] <span class="keyword">for</span> _ <span class="keyword">in</span> batch_data]</span><br><span class="line">    data = tokenizer.batch_encode_plus(text_a, max_length=<span class="number">510</span>, truncation=<span class="literal">True</span>, return_tensors=<span class="string">&#x27;pt&#x27;</span>, padding=<span class="literal">True</span>)</span><br><span class="line">    data.update(&#123;<span class="string">&quot;labels&quot;</span>: torch.tensor([_[<span class="string">&#x27;label&#x27;</span>] <span class="keyword">for</span> _ <span class="keyword">in</span> batch_data]).reshape(-<span class="number">1</span>, <span class="number">1</span>)&#125;)</span><br><span class="line">    <span class="keyword">return</span> data</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">compute_metrics</span>(<span class="params">data</span>):</span><br><span class="line">    <span class="keyword">from</span> umetrics.macrometrics <span class="keyword">import</span> MacroMetrics</span><br><span class="line">    macro = MacroMetrics(labels=[<span class="number">0</span>, <span class="number">1</span>])</span><br><span class="line">    predictions = data.predictions.argmax(-<span class="number">1</span>).tolist()</span><br><span class="line">    labels = data.label_ids.flatten().tolist()</span><br><span class="line">    macro.step(y_trues=labels, y_preds=predictions)</span><br><span class="line">    macro.classification_report(<span class="built_in">print</span>)</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;f1&quot;</span>: macro.f1_score()&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">args = TrainingArguments(</span><br><span class="line">    output_dir=<span class="string">&#x27;score_model&#x27;</span>,</span><br><span class="line">    remove_unused_columns=<span class="literal">False</span>,</span><br><span class="line">    seed=<span class="number">1</span>,</span><br><span class="line">    do_train=<span class="literal">True</span>,</span><br><span class="line">    do_eval=<span class="literal">True</span>,</span><br><span class="line">    evaluation_strategy=<span class="string">&#x27;epoch&#x27;</span>,</span><br><span class="line">    learning_rate=<span class="number">1e-5</span>,</span><br><span class="line">    num_train_epochs=<span class="number">10</span>,</span><br><span class="line">    per_device_train_batch_size=<span class="number">16</span>,</span><br><span class="line">    fp16=<span class="literal">True</span>,</span><br><span class="line">    save_total_limit=<span class="number">1</span>,</span><br><span class="line">    metric_for_best_model=<span class="string">&#x27;f1&#x27;</span>,</span><br><span class="line">  </span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">trainer = Trainer(</span><br><span class="line">    model=model,</span><br><span class="line">    args=args,</span><br><span class="line">    data_collator=data_collator,</span><br><span class="line">    train_dataset=raw_dataset[<span class="string">&#x27;train&#x27;</span>],</span><br><span class="line">    eval_dataset=raw_dataset[<span class="string">&#x27;dev&#x27;</span>],</span><br><span class="line">    tokenizer=tokenizer,</span><br><span class="line">    compute_metrics=compute_metrics</span><br><span class="line">)</span><br><span class="line">trainer.train()</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>训练后F1能达到95%，所以打分模型至此结束。</p>
-<h3 id="3-train-RLHF"><a href="#3-train-RLHF" class="headerlink" title="3. train RLHF"></a>3. train RLHF</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> datasets <span class="keyword">import</span> load_dataset</span><br><span class="line"><span class="keyword">from</span> tqdm <span class="keyword">import</span> tqdm</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> AutoTokenizer, set_seed, pipeline</span><br><span class="line"><span class="keyword">from</span> trl <span class="keyword">import</span> AutoModelForCausalLMWithValueHead, create_reference_model, PPOConfig, PPOTrainer</span><br><span class="line"><span class="keyword">from</span> trl.core <span class="keyword">import</span> LengthSampler</span><br><span class="line"></span><br><span class="line">model_name = <span class="string">&quot;Wenzhong-GPT2-110M&quot;</span></span><br><span class="line">config = PPOConfig(</span><br><span class="line">    model_name=model_name,</span><br><span class="line">    learning_rate=<span class="number">1.41e-5</span>,</span><br><span class="line">    log_with=<span class="string">&quot;tensorboard&quot;</span>,</span><br><span class="line">    batch_size=<span class="number">64</span>,</span><br><span class="line">    gradient_accumulation_steps=<span class="number">8</span>,</span><br><span class="line">    mini_batch_size=<span class="number">8</span>,</span><br><span class="line">)</span><br><span class="line">sent_kwargs = &#123;<span class="string">&quot;return_all_scores&quot;</span>: <span class="literal">True</span>, <span class="string">&quot;function_to_apply&quot;</span>: <span class="string">&quot;none&quot;</span>, <span class="string">&quot;batch_size&quot;</span>: <span class="number">16</span>&#125;</span><br><span class="line"></span><br><span class="line">gpt2_tokenizer = AutoTokenizer.from_pretrained(config.model_name)</span><br><span class="line">gpt2_tokenizer.pad_token = gpt2_tokenizer.eos_token</span><br><span class="line"></span><br><span class="line">set_seed(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ################</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">build_dataset</span>(<span class="params">input_min_text_length=<span class="number">2</span>, input_max_text_length=<span class="number">8</span></span>):</span><br><span class="line">    ds = load_dataset(</span><br><span class="line">        <span class="string">&#x27;csv&#x27;</span>,</span><br><span class="line">        data_files=&#123;</span><br><span class="line">            <span class="string">&quot;train&quot;</span>: <span class="string">&quot;train.tsv&quot;</span>,</span><br><span class="line">            <span class="string">&quot;dev&quot;</span>: <span class="string">&quot;dev.tsv&quot;</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">        delimiter=<span class="string">&#x27;\t&#x27;</span></span><br><span class="line">    )[<span class="string">&#x27;train&#x27;</span>]</span><br><span class="line">    ds = ds.rename_columns(&#123;<span class="string">&quot;text_a&quot;</span>: <span class="string">&quot;review&quot;</span>&#125;)</span><br><span class="line">    ds = ds.<span class="built_in">filter</span>(<span class="keyword">lambda</span> x: <span class="built_in">len</span>(x[<span class="string">&#x27;review&#x27;</span>]) &gt; <span class="number">10</span>, batched=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">    input_size = LengthSampler(input_min_text_length, input_max_text_length)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">tokenize</span>(<span class="params">sample</span>):</span><br><span class="line">        sample[<span class="string">&quot;input_ids&quot;</span>] = gpt2_tokenizer.encode(sample[<span class="string">&quot;review&quot;</span>][: input_size()])</span><br><span class="line">        sample[<span class="string">&quot;query&quot;</span>] = gpt2_tokenizer.decode(sample[<span class="string">&quot;input_ids&quot;</span>])</span><br><span class="line">        <span class="keyword">return</span> sample</span><br><span class="line"></span><br><span class="line">    ds = ds.<span class="built_in">map</span>(tokenize, batched=<span class="literal">False</span>)</span><br><span class="line">    ds.set_format(<span class="built_in">type</span>=<span class="string">&quot;torch&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> ds</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">dataset = build_dataset()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ##################</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">collator</span>(<span class="params">data</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">dict</span>((key, [d[key] <span class="keyword">for</span> d <span class="keyword">in</span> data]) <span class="keyword">for</span> key <span class="keyword">in</span> data[<span class="number">0</span>])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ##################</span></span><br><span class="line"></span><br><span class="line">sentiment_pipe = pipeline(</span><br><span class="line">    <span class="string">&quot;sentiment-analysis&quot;</span>,</span><br><span class="line">    model=<span class="string">&#x27;/score_model/checkpoint-1000&#x27;</span>,</span><br><span class="line">    device=<span class="string">&#x27;cuda:1&#x27;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">text = <span class="string">&quot;今天天气很好&quot;</span></span><br><span class="line"><span class="built_in">print</span>(sentiment_pipe(text, **sent_kwargs))</span><br><span class="line"><span class="comment"># [[&#123;&#x27;label&#x27;: &#x27;LABEL_0&#x27;, &#x27;score&#x27;: -2.200057029724121&#125;, &#123;&#x27;label&#x27;: &#x27;LABEL_1&#x27;, &#x27;score&#x27;: 2.2879886627197266&#125;]]</span></span><br><span class="line">text = <span class="string">&#x27;这个电影主角演的真心一般般&#x27;</span></span><br><span class="line"><span class="built_in">print</span>(sentiment_pipe(text, **sent_kwargs))</span><br><span class="line"><span class="comment"># [[&#123;&#x27;label&#x27;: &#x27;LABEL_0&#x27;, &#x27;score&#x27;: 4.0778069496154785&#125;, &#123;&#x27;label&#x27;: &#x27;LABEL_1&#x27;, &#x27;score&#x27;: -4.0350117683410645&#125;]]</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># # ##############</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">output_min_length = <span class="number">16</span></span><br><span class="line">output_max_length = <span class="number">32</span></span><br><span class="line">output_length_sampler = LengthSampler(output_min_length, output_max_length)</span><br><span class="line"></span><br><span class="line">model = AutoModelForCausalLMWithValueHead.from_pretrained(config.model_name)</span><br><span class="line">ref_model = create_reference_model(model)</span><br><span class="line"></span><br><span class="line">ppo_trainer = PPOTrainer(config, model, ref_model, gpt2_tokenizer, dataset, data_collator=collator)</span><br><span class="line"></span><br><span class="line">generation_kwargs = &#123;</span><br><span class="line">    <span class="string">&quot;min_length&quot;</span>: -<span class="number">1</span>,</span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;top_k&quot;</span>: <span class="number">0</span>,</span><br><span class="line">    <span class="string">&quot;top_p&quot;</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="string">&quot;do_sample&quot;</span>: <span class="literal">True</span>,</span><br><span class="line">    <span class="string">&quot;pad_token_id&quot;</span>: gpt2_tokenizer.eos_token_id,</span><br><span class="line">    <span class="string">&quot;bos_token_id&quot;</span>: gpt2_tokenizer.bos_token_id,</span><br><span class="line">    <span class="string">&quot;eos_token_id&quot;</span>: gpt2_tokenizer.eos_token_id,</span><br><span class="line">&#125;</span><br><span class="line">device = <span class="string">&#x27;cuda:0&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>):</span><br><span class="line">    <span class="keyword">for</span> epoch, batch <span class="keyword">in</span> tqdm(<span class="built_in">enumerate</span>(ppo_trainer.dataloader)):</span><br><span class="line">        query_tensors = batch[<span class="string">&#x27;input_ids&#x27;</span>]</span><br><span class="line">        response_tensors = []</span><br><span class="line">        <span class="keyword">for</span> query <span class="keyword">in</span> query_tensors:</span><br><span class="line">            gen_len = output_length_sampler()</span><br><span class="line"></span><br><span class="line">            response = ppo_trainer.generate(query, **&#123;**generation_kwargs, <span class="string">&quot;max_new_tokens&quot;</span>: gen_len&#125;)</span><br><span class="line">            response_tensors.append(response.squeeze()[-gen_len:])</span><br><span class="line">        batch[<span class="string">&quot;response&quot;</span>] = [gpt2_tokenizer.decode(r.squeeze()) <span class="keyword">for</span> r <span class="keyword">in</span> response_tensors]</span><br><span class="line">        <span class="comment">#### Compute sentiment score</span></span><br><span class="line">        texts = [q + r <span class="keyword">for</span> q, r <span class="keyword">in</span> <span class="built_in">zip</span>(batch[<span class="string">&quot;query&quot;</span>], batch[<span class="string">&quot;response&quot;</span>])]</span><br><span class="line">        pipe_outputs = sentiment_pipe(texts, **sent_kwargs)</span><br><span class="line">        rewards = [torch.tensor(output[<span class="number">1</span>][<span class="string">&quot;score&quot;</span>]) <span class="keyword">for</span> output <span class="keyword">in</span> pipe_outputs]</span><br><span class="line"></span><br><span class="line">        <span class="comment">#### Run PPO step</span></span><br><span class="line">        stats = ppo_trainer.step(query_tensors, response_tensors, rewards)</span><br><span class="line">        ppo_trainer.log_stats(stats, batch, rewards)</span><br><span class="line"></span><br><span class="line">        <span class="comment">#### get a batch from the dataset</span></span><br><span class="line">        bs = <span class="number">16</span></span><br><span class="line">        game_data = <span class="built_in">dict</span>()</span><br><span class="line">        dataset.set_format(<span class="string">&quot;pandas&quot;</span>)</span><br><span class="line">        df_batch = dataset[:].sample(bs)</span><br><span class="line">        game_data[<span class="string">&quot;query&quot;</span>] = df_batch[<span class="string">&quot;query&quot;</span>].tolist()</span><br><span class="line">        query_tensors = df_batch[<span class="string">&quot;input_ids&quot;</span>].tolist()</span><br><span class="line"></span><br><span class="line">        response_tensors_ref, response_tensors = [], []</span><br><span class="line"></span><br><span class="line">        <span class="comment">#### get response from gpt2 and gpt2_ref</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(bs):</span><br><span class="line">            gen_len = output_length_sampler()</span><br><span class="line">            output = ref_model.generate(</span><br><span class="line">                torch.tensor(query_tensors[i]).unsqueeze(dim=<span class="number">0</span>).to(device), max_new_tokens=gen_len, **generation_kwargs</span><br><span class="line">            ).squeeze()[-gen_len:]</span><br><span class="line">            response_tensors_ref.append(output)</span><br><span class="line">            output = model.generate(</span><br><span class="line">                torch.tensor(query_tensors[i]).unsqueeze(dim=<span class="number">0</span>).to(device), max_new_tokens=gen_len, **generation_kwargs</span><br><span class="line">            ).squeeze()[-gen_len:]</span><br><span class="line">            response_tensors.append(output)</span><br><span class="line"></span><br><span class="line">        <span class="comment">#### decode responses</span></span><br><span class="line">        game_data[<span class="string">&quot;response (before)&quot;</span>] = [gpt2_tokenizer.decode(response_tensors_ref[i]) <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(bs)]</span><br><span class="line">        game_data[<span class="string">&quot;response (after)&quot;</span>] = [gpt2_tokenizer.decode(response_tensors[i]) <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(bs)]</span><br><span class="line"></span><br><span class="line">        <span class="comment">#### sentiment analysis of query/response pairs before/after</span></span><br><span class="line">        texts = [q + r <span class="keyword">for</span> q, r <span class="keyword">in</span> <span class="built_in">zip</span>(game_data[<span class="string">&quot;query&quot;</span>], game_data[<span class="string">&quot;response (before)&quot;</span>])]</span><br><span class="line">        game_data[<span class="string">&quot;rewards (before)&quot;</span>] = [output[<span class="number">1</span>][<span class="string">&quot;score&quot;</span>] <span class="keyword">for</span> output <span class="keyword">in</span> sentiment_pipe(texts, **sent_kwargs)]</span><br><span class="line"></span><br><span class="line">        texts = [q + r <span class="keyword">for</span> q, r <span class="keyword">in</span> <span class="built_in">zip</span>(game_data[<span class="string">&quot;query&quot;</span>], game_data[<span class="string">&quot;response (after)&quot;</span>])]</span><br><span class="line">        game_data[<span class="string">&quot;rewards (after)&quot;</span>] = [output[<span class="number">1</span>][<span class="string">&quot;score&quot;</span>] <span class="keyword">for</span> output <span class="keyword">in</span> sentiment_pipe(texts, **sent_kwargs)]</span><br><span class="line"></span><br><span class="line">        <span class="comment"># store results in a dataframe</span></span><br><span class="line">        df_results = pd.DataFrame(game_data)</span><br><span class="line">        <span class="built_in">print</span>(df_results)</span><br><span class="line"></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;mean:&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(df_results[[<span class="string">&quot;rewards (before)&quot;</span>, <span class="string">&quot;rewards (after)&quot;</span>]].mean())</span><br><span class="line">        <span class="built_in">print</span>()</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;median:&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(df_results[[<span class="string">&quot;rewards (before)&quot;</span>, <span class="string">&quot;rewards (after)&quot;</span>]].median())</span><br><span class="line"></span><br><span class="line">model.save_pretrained(<span class="string">&quot;gpt2-imdb-pos-v2&quot;</span>, push_to_hub=<span class="literal">False</span>)</span><br><span class="line">gpt2_tokenizer.save_pretrained(<span class="string">&quot;gpt2-imdb-pos-v2&quot;</span>, push_to_hub=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="4-eval-RLHF"><a href="#4-eval-RLHF" class="headerlink" title="4. eval RLHF"></a>4. eval RLHF</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> AutoModelForCausalLM, AutoTokenizer</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line">model_path1 = <span class="string">&#x27;Wenzhong-GPT2-110M&#x27;</span></span><br><span class="line">model_path2 = <span class="string">&#x27;gpt2-imdb-pos-v2&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> model_path <span class="keyword">in</span> (model_path1, model_path2):</span><br><span class="line">    model = AutoModelForCausalLM.from_pretrained(model_path).to(<span class="string">&quot;cuda&quot;</span>)</span><br><span class="line"></span><br><span class="line">    tokenizer = AutoTokenizer.from_pretrained(model_path)</span><br><span class="line"></span><br><span class="line">    generation_kwargs = &#123;</span><br><span class="line">    <span class="string">&quot;min_length&quot;</span>: -<span class="number">1</span>,</span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;top_k&quot;</span>: <span class="number">0</span>,</span><br><span class="line">    <span class="string">&quot;top_p&quot;</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="string">&quot;do_sample&quot;</span>: <span class="literal">True</span>,</span><br><span class="line">    <span class="string">&quot;pad_token_id&quot;</span>: tokenizer.eos_token_id,</span><br><span class="line">    <span class="string">&quot;bos_token_id&quot;</span>: tokenizer.bos_token_id,</span><br><span class="line">    <span class="string">&quot;eos_token_id&quot;</span>: tokenizer.eos_token_id,</span><br><span class="line">    <span class="string">&quot;max_new_tokens&quot;</span>: <span class="number">100</span>,</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> query <span class="keyword">in</span> (<span class="string">&quot;这个电影&quot;</span>, <span class="string">&quot;今天要下雨，心情太&quot;</span>, <span class="string">&quot;今天天气很差&quot;</span>, <span class="string">&#x27;这个手机屏幕很差，手感&#x27;</span>):</span><br><span class="line">        input_ids = torch.tensor(tokenizer.encode(query)).to(<span class="string">&quot;cuda&quot;</span>).reshape(<span class="number">1</span>, -<span class="number">1</span>)</span><br><span class="line">        response = model.generate(input_ids, **generation_kwargs)[<span class="number">0</span>]</span><br><span class="line">        <span class="built_in">print</span>(tokenizer.decode(response))</span><br><span class="line">   </span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>使用RLHF训练后的生成结果示例如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">这个电影，见证点深的艺术价值。&lt;|endoftext|&gt;</span><br><span class="line">今天要下雨，心情太好了，很舒服了。整个人还算可以，心情的状态都还可以的好。所以，周末的时候接触我的朋友们都会给我一种�</span><br><span class="line">今天天气很差，但是连续8天都是安安静静休息，也很好！水的这出入口很好，很适合我们的婚了。&lt;|endoftext|&gt;</span><br><span class="line">这个手机屏幕很差，手感显示是手机配置高品质，但真是非常棒！&lt;|endoftext|&gt;</span><br></pre></td></tr></table></figure>
-
-
-<p>前两个例子还好，比较容易生成理想的正面评论，第三个和第四个例子前面说到了<code>天气很差</code>和<code>屏幕很差</code>，都是偏负面的评论，但是后面生成的文本还是能生成正向的回答，说明经过强化学习的确有产生预期效果。</p>
-<p>关于文本流畅问题，有个问题是Wenzhong-GPT2本身产生通顺句子的能力就比较弱，但经过多轮训练，也能产生除生成正向评论外的效果，这点也是很nice.</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2024/04/07/LLM-RLHF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%80/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-qwen1-8B试玩" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2023/12/21/qwen1-8B%E8%AF%95%E7%8E%A9/">qwen1.8B试玩</a>
-    </h1>
-  
-
-        
-        <a href="/2023/12/21/qwen1-8B%E8%AF%95%E7%8E%A9/" class="archive-article-date">
-  	<time datetime="2023-12-21T06:52:58.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-12-21</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>阿里出了个qwen1.8B，对于资源有所要求的场景或者需要支持长文本的场景，应该是目前国内在这个量级内最优的选择了吧。接下来以此来打通微调、部署各个流程，算是一次记录。</p>
-<h2 id="微调"><a href="#微调" class="headerlink" title="微调"></a>微调</h2><p>首先按照<a target="_blank" rel="noopener" href="https://github.com/QwenLM/Qwen/blob/main/README_CN.md#%E8%A6%81%E6%B1%82">要求</a>和<a target="_blank" rel="noopener" href="https://github.com/QwenLM/Qwen/blob/main/README_CN.md#%E5%BF%AB%E9%80%9F%E4%BD%BF%E7%94%A8">快速使用</a>来跑起来，安装flash-attn，先跑下推理，正常，接下来就进入微调阶段。</p>
-<p>按照<a target="_blank" rel="noopener" href="https://github.com/QwenLM/Qwen/blob/main/README_CN.md#%E5%BE%AE%E8%B0%83">微调流程</a>，这里采用LoRA进行微调，但是需要注意的是，虽然官方给出了<a target="_blank" rel="noopener" href="https://github.com/QwenLM/Qwen/blob/main/README_CN.md#%E6%98%BE%E5%AD%98%E5%8D%A0%E7%94%A8%E5%8F%8A%E8%AE%AD%E7%BB%83%E9%80%9F%E5%BA%A6">显存占用及训练速度</a>，但是我在1080Ti上得到的显存占用还是要更高一些，大家可以将这个指标理解成为运行起来至少需要的显存，在进行训练时，还是会有一些增高。</p>
-<p>训练的话采用<code>finetune_lora_single_gpu.sh</code>默认配置，幸亏我没有采用train，而是使用了dev数据集，7500条数据，8个多小时，，不过整个loss还是蛮正常的，没有出现issue里出现的各种问题。。。</p>
-<img src="/2023/12/21/qwen1-8B%E8%AF%95%E7%8E%A9/Figure_1.png" class="" title="loss">
-
-<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>我这里保存到了outout_qwen,下面为调用LoRA微调后的模型。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">path = <span class="string">&#x27;Qwen-1_8B-Chat&#x27;</span></span><br><span class="line">tokenizer = AutoTokenizer.from_pretrained(path, trust_remote_code=<span class="literal">True</span>)</span><br><span class="line">model = AutoPeftModelForCausalLM.from_pretrained(</span><br><span class="line">     <span class="string">&#x27;Qwen/output_qwen&#x27;</span>,</span><br><span class="line">     device_map=<span class="string">&#x27;auto&#x27;</span>,</span><br><span class="line">     trust_remote_code=<span class="literal">True</span></span><br><span class="line">)</span><br><span class="line">model.generation_config = GenerationConfig.from_pretrained(path, trust_remote_code=<span class="literal">True</span>)</span><br><span class="line">model.<span class="built_in">eval</span>()</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>注意的是，如果到此就打算部署的话，也要将<code>adapter_config.json</code>中的<code>base_model_name_or_path</code>正确引用，不过官方也给了合并代码，可以将LoRA和qwen合并到一起。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> peft <span class="keyword">import</span> AutoPeftModelForCausalLM</span><br><span class="line"></span><br><span class="line">model = AutoPeftModelForCausalLM.from_pretrained(</span><br><span class="line">    path_to_adapter, <span class="comment"># path to the output directory</span></span><br><span class="line">    device_map=<span class="string">&quot;auto&quot;</span>,</span><br><span class="line">    trust_remote_code=<span class="literal">True</span></span><br><span class="line">).<span class="built_in">eval</span>()</span><br><span class="line"></span><br><span class="line">merged_model = model.merge_and_unload()</span><br><span class="line"><span class="comment"># max_shard_size and safe serialization are not necessary. </span></span><br><span class="line"><span class="comment"># They respectively work for sharding checkpoint and save the model to safetensors</span></span><br><span class="line">merged_model.save_pretrained(new_model_directory, max_shard_size=<span class="string">&quot;2048MB&quot;</span>, safe_serialization=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
-
-<h2 id="llama-cpp"><a href="#llama-cpp" class="headerlink" title="llama.cpp"></a>llama.cpp</h2><p>如果需要使用<a target="_blank" rel="noopener" href="https://github.com/ggerganov/llama.cpp">llama.cpp</a>，这里还是建议进行上述步骤合并的，使用llama.cpp也不是很复杂，可按照官方README安装cmake编译安装，后续也不是很复杂，官方提供了非常清晰的使用说明。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> build</span><br><span class="line"><span class="built_in">cd</span> build</span><br><span class="line">cmake ..</span><br><span class="line">cmake --build . --config Release</span><br></pre></td></tr></table></figure>
-
-
-
-<p>不过需要注意的是，用不用量化或者说要不要做转换，本身上还是要根据转换后的效果和效率来决定的，由于目前我们直接跑在GPU上，后续有机会单独针对llama.cpp尝试深入一下～</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2023/12/21/qwen1-8B%E8%AF%95%E7%8E%A9/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-lora原理与实现" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2023/11/29/lora%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E7%8E%B0/">lora原理与实现</a>
-    </h1>
-  
-
-        
-        <a href="/2023/11/29/lora%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E7%8E%B0/" class="archive-article-date">
-  	<time datetime="2023-11-29T07:59:56.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-11-29</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>Lora,是微软出的一种在低资源场景下进行微调大模型的实现方式，在transformers里有peft这个包进行调用，它通过固定预训练模型权重并只训练新增lora层来实现微调，目前其在比如Baichuan2、ChatGLM上都有相关资料，更多介绍可自行搜索了解。</p>
-<h3 id="简单理解"><a href="#简单理解" class="headerlink" title="简单理解"></a>简单理解</h3><p>其简单理解实现方式为，比如qkv的linear为768*768（更大模型可能会更大），那lora通过新增两个linear（lora_A和lora_B），引入一个超参<code>r</code>来降低训练参数量，其伪代码如下:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">in_feature, out_feature = <span class="number">768</span>, <span class="number">768</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># old</span></span><br><span class="line">self.q = nn.Linear(in_feature, out_feature)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Lora</span></span><br><span class="line"></span><br><span class="line">self.lora_A = nn.Linear(in_feature, r)</span><br><span class="line">self.lora_B = nn.Linear(r, out_feature)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>比如当r设置为1时，是否可以明显感受到训练参数量的变化。</p>
-<p>注意：Lora本质只有在微调阶段生效，其加速了微调，但是对于推理阶段不会加速，而且因引入了新的计算会导致推理速度略有下降。</p>
-<h3 id="paddle实现"><a href="#paddle实现" class="headerlink" title="paddle实现"></a>paddle实现</h3><p>注意，此篇文章通过介绍LoraLinear的实现，来说明Lora的工作原理。</p>
-<p>其实现在<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/5eb2eae1c73e983bbaa8302573a985ebdfa19801/paddlenlp/peft/lora/lora_layers.py#L28">这里</a>。</p>
-<h4 id="注意点1"><a href="#注意点1" class="headerlink" title="注意点1"></a>注意点1</h4><p>LoraLinear继承自nn.Linear，所以是在Linear的基础上进行改动。</p>
-<h4 id="注意点2"><a href="#注意点2" class="headerlink" title="注意点2"></a>注意点2</h4><p>Linear的<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/5eb2eae1c73e983bbaa8302573a985ebdfa19801/paddlenlp/peft/lora/lora_layers.py#L70">weight不进行训练</a>，这也符合Lora的原理说明。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">self.weight.stop_gradient=<span class="literal">True</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="注意点3"><a href="#注意点3" class="headerlink" title="注意点3"></a>注意点3</h4><p>forward部分，代码如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, <span class="built_in">input</span>: paddle.Tensor</span>):</span><br><span class="line">        result = F.linear(x=<span class="built_in">input</span>, weight=self.weight, bias=self.bias, name=self.name)</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> self.merged:</span><br><span class="line">            result += (self.lora_dropout(<span class="built_in">input</span>) @ self.lora_A @ self.lora_B) * self.scaling</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>我们看如果pretrained model和lora不进行merge的时候，其推理是pretrained model先计算，拿到result，然后和lora计算结果进行相加获取最终结果。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>对于Parameter Efficient fine-tune，Lora是其中一个实现方式，其他还有比如p-tuning等。但是通过Lora，我们大致理解了从原来直接对pretrained model fine-tune到现在的引入新的参数（比如）来使得我们能用低资源来使用LLM的能力。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2023/11/29/lora%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E7%8E%B0/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-document-QA-layoutLMv2" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2023/10/31/document-QA-layoutLMv2/">document-QA-layoutLMv2</a>
-    </h1>
-  
-
-        
-        <a href="/2023/10/31/document-QA-layoutLMv2/" class="archive-article-date">
-  	<time datetime="2023-10-31T03:05:44.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-10-31</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>书接上文，<a href="/2022/12/12/layoutLM%E5%BE%AE%E8%B0%83FUNSD%E6%95%B0%E6%8D%AE%E9%9B%86/" title="layoutLM微调FUNSD数据集">layoutLM微调FUNSD数据集</a>介绍了layoutlm和layoutxlm如何做named entity recognition，以及<a href="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/" title="多模态-CLIP">多模态-CLIP</a>和<a href="/2023/10/16/%E5%A4%9A%E6%A8%A1%E6%80%81-%E5%AD%97%E5%B9%95%E7%94%9F%E6%88%90/" title="多模态-字幕生成">多模态-字幕生成</a>介绍多模态是如何融合的，本文继续基于layoutLM系列，基于<a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/v4.34.1/en/tasks/document_question_answering">huggingface document_question_answering</a>来进行debug是如何实现的。</p>
-<p>更新：<strong>针对layoutxlm在docvqa_zh上的训练代码已经放到<a target="_blank" rel="noopener" href="https://github.com/geasyheart/document-qa">document-qa</a>啦</strong>。</p>
-<h2 id="原始数据"><a href="#原始数据" class="headerlink" title="原始数据"></a>原始数据</h2><p>在<a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/v4.34.1/en/tasks/document_question_answering#preprocess-the-data">这</a>之前，都是在介绍如何处理数据，也即如下代码：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="keyword">from</span> datasets <span class="keyword">import</span> load_dataset</span><br><span class="line"></span><br><span class="line">dataset = load_dataset(<span class="string">&quot;nielsr/docvqa_1200_examples&quot;</span>)</span><br><span class="line"></span><br><span class="line">updated_dataset = dataset.<span class="built_in">map</span>(<span class="keyword">lambda</span> example: &#123;<span class="string">&quot;question&quot;</span>: example[<span class="string">&quot;query&quot;</span>][<span class="string">&quot;en&quot;</span>]&#125;, remove_columns=[<span class="string">&quot;query&quot;</span>])</span><br><span class="line">updated_dataset = updated_dataset.<span class="built_in">map</span>(</span><br><span class="line">    <span class="keyword">lambda</span> example: &#123;<span class="string">&quot;answer&quot;</span>: example[<span class="string">&quot;answers&quot;</span>][<span class="number">0</span>]&#125;, remove_columns=[<span class="string">&quot;answer&quot;</span>, <span class="string">&quot;answers&quot;</span>]</span><br><span class="line">)</span><br><span class="line">updated_dataset = updated_dataset.<span class="built_in">filter</span>(<span class="keyword">lambda</span> x: <span class="built_in">len</span>(x[<span class="string">&quot;words&quot;</span>]) + <span class="built_in">len</span>(x[<span class="string">&quot;question&quot;</span>].split()) &lt; <span class="number">512</span>)</span><br><span class="line"></span><br><span class="line">updated_dataset = updated_dataset.remove_columns(<span class="string">&quot;words&quot;</span>)</span><br><span class="line">updated_dataset = updated_dataset.remove_columns(<span class="string">&quot;bounding_boxes&quot;</span>)</span><br><span class="line"></span><br><span class="line">updated_dataset[<span class="string">&#x27;train&#x27;</span>] = updated_dataset[<span class="string">&#x27;train&#x27;</span>].select(<span class="built_in">range</span>(<span class="number">10</span>))</span><br><span class="line">updated_dataset[<span class="string">&#x27;test&#x27;</span>] = updated_dataset[<span class="string">&#x27;test&#x27;</span>].select(<span class="built_in">range</span>(<span class="number">5</span>))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>dataset[<span class="string">&#x27;test&#x27;</span>].select(<span class="built_in">range</span>(<span class="number">1</span>)).to_dict().keys()</span><br><span class="line">dict_keys([<span class="string">&#x27;id&#x27;</span>, <span class="string">&#x27;image&#x27;</span>, <span class="string">&#x27;query&#x27;</span>, <span class="string">&#x27;answers&#x27;</span>, <span class="string">&#x27;words&#x27;</span>, <span class="string">&#x27;bounding_boxes&#x27;</span>, <span class="string">&#x27;answer&#x27;</span>])</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>dataset[<span class="string">&#x27;test&#x27;</span>].select(<span class="built_in">range</span>(<span class="number">1</span>)).to_dict()[<span class="string">&#x27;query&#x27;</span>]</span><br><span class="line">[&#123;<span class="string">&#x27;de&#x27;</span>: <span class="string">&#x27;Was ist die Standortadresse von NSDA?&#x27;</span>, <span class="string">&#x27;en&#x27;</span>: <span class="string">&#x27;What the location address of NSDA?&#x27;</span>, <span class="string">&#x27;es&#x27;</span>: <span class="string">&#x27;¿Cuál es la dirección de ubicación del NSDA?&#x27;</span>, <span class="string">&#x27;fr&#x27;</span>: <span class="string">&quot;Quelle est l&#x27;adresse de la NSDA?&quot;</span>, <span class="string">&#x27;it&#x27;</span>: <span class="string">&quot;Qual e&#x27; l&#x27;indirizzo della NSDA?&quot;</span>&#125;]</span><br></pre></td></tr></table></figure>
-
-<p>可以看到，默认dataset有如上几个字段，其中query有德语以及英语，后面updated_dataset做了过滤，只保留了为英语的、以及长度小于512的，最终保留字段如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>updated_dataset[<span class="string">&#x27;test&#x27;</span>]</span><br><span class="line">Dataset(&#123;</span><br><span class="line">    features: [<span class="string">&#x27;id&#x27;</span>, <span class="string">&#x27;image&#x27;</span>, <span class="string">&#x27;answer&#x27;</span>, <span class="string">&#x27;question&#x27;</span>],</span><br><span class="line">    num_rows: <span class="number">5</span></span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>updated_dataset[<span class="string">&#x27;test&#x27;</span>].select(<span class="built_in">range</span>(<span class="number">1</span>)).to_dict()[<span class="string">&#x27;question&#x27;</span>]</span><br><span class="line">[<span class="string">&#x27;What the location address of NSDA?&#x27;</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>updated_dataset[<span class="string">&#x27;test&#x27;</span>].select(<span class="built_in">range</span>(<span class="number">1</span>)).to_dict()[<span class="string">&#x27;answer&#x27;</span>]</span><br><span class="line">[<span class="string">&#x27;1128 SIXTEENTH ST., N. W., WASHINGTON, D. C. 20036&#x27;</span>]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>反而变简单了，所以咱们也不用再刻意关注dataset了。</p>
-<p>其中一条数据如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>aaa = updated_dataset[<span class="string">&#x27;test&#x27;</span>].select(<span class="built_in">range</span>(<span class="number">1</span>)).to_dict()</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> io</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>Image.<span class="built_in">open</span>(io.BytesIO(aaa[<span class="string">&#x27;image&#x27;</span>][<span class="number">0</span>][<span class="string">&#x27;bytes&#x27;</span>])).show()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>aaa[<span class="string">&#x27;question&#x27;</span>]</span><br><span class="line">[<span class="string">&#x27;What the location address of NSDA?&#x27;</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>aaa[<span class="string">&#x27;answer&#x27;</span>]</span><br><span class="line">[<span class="string">&#x27;1128 SIXTEENTH ST., N. W., WASHINGTON, D. C. 20036&#x27;</span>]</span><br></pre></td></tr></table></figure>
-
-
-<img src="/2023/10/31/document-QA-layoutLMv2/tmpglx6m6gm.PNG" class="">
-
-
-
-<h2 id="图像处理"><a href="#图像处理" class="headerlink" title="图像处理"></a>图像处理</h2><p>看看人家，标注的bbox之类的就不要啦，咱要自己搞。。不过这可以理解它是怎么处理滴。</p>
-<p>这部分对应<a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/v4.34.1/en/tasks/document_question_answering#preprocessing-document-images">Preprocessing document images</a>,也即如下代码。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">image_processor = processor.image_processor</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_ocr_words_and_boxes</span>(<span class="params">examples</span>):</span><br><span class="line">    images = [image.convert(<span class="string">&quot;RGB&quot;</span>) <span class="keyword">for</span> image <span class="keyword">in</span> examples[<span class="string">&quot;image&quot;</span>]]</span><br><span class="line">    encoded_inputs = image_processor(images)</span><br><span class="line"></span><br><span class="line">    examples[<span class="string">&quot;image&quot;</span>] = encoded_inputs.pixel_values</span><br><span class="line">    examples[<span class="string">&quot;words&quot;</span>] = encoded_inputs.words</span><br><span class="line">    examples[<span class="string">&quot;boxes&quot;</span>] = encoded_inputs.boxes</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> examples</span><br><span class="line"></span><br><span class="line">dataset_with_ocr = updated_dataset.<span class="built_in">map</span>(get_ocr_words_and_boxes, batched=<span class="literal">True</span>, batch_size=<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
-
-
-<p>从<code>image_processor</code>进去，最终到<a target="_blank" rel="noopener" href="https://github.com/huggingface/transformers/blob/8211c59b9a8fe84d2861446b26542f89a0260e64/src/transformers/models/layoutlmv2/image_processing_layoutlmv2.py#L54">apply_tesseract</a>,其代码如下所示：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">apply_tesseract</span>(<span class="params"></span></span><br><span class="line"><span class="params">    image: np.ndarray,</span></span><br><span class="line"><span class="params">    lang: <span class="type">Optional</span>[<span class="built_in">str</span>],</span></span><br><span class="line"><span class="params">    tesseract_config: <span class="type">Optional</span>[<span class="built_in">str</span>] = <span class="literal">None</span>,</span></span><br><span class="line"><span class="params">    input_data_format: <span class="type">Optional</span>[<span class="type">Union</span>[<span class="built_in">str</span>, ChannelDimension]] = <span class="literal">None</span>,</span></span><br><span class="line"><span class="params"></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Applies Tesseract OCR on a document image, and returns recognized words + normalized bounding boxes.&quot;&quot;&quot;</span></span><br><span class="line">    tesseract_config = tesseract_config <span class="keyword">if</span> tesseract_config <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">else</span> <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># apply OCR</span></span><br><span class="line">    pil_image = to_pil_image(image, input_data_format=input_data_format)</span><br><span class="line">    image_width, image_height = pil_image.size</span><br><span class="line">    data = pytesseract.image_to_data(pil_image, lang=lang, output_type=<span class="string">&quot;dict&quot;</span>, config=tesseract_config)</span><br><span class="line">    words, left, top, width, height = data[<span class="string">&quot;text&quot;</span>], data[<span class="string">&quot;left&quot;</span>], data[<span class="string">&quot;top&quot;</span>], data[<span class="string">&quot;width&quot;</span>], data[<span class="string">&quot;height&quot;</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># filter empty words and corresponding coordinates</span></span><br><span class="line">    irrelevant_indices = [idx <span class="keyword">for</span> idx, word <span class="keyword">in</span> <span class="built_in">enumerate</span>(words) <span class="keyword">if</span> <span class="keyword">not</span> word.strip()]</span><br><span class="line">    words = [word <span class="keyword">for</span> idx, word <span class="keyword">in</span> <span class="built_in">enumerate</span>(words) <span class="keyword">if</span> idx <span class="keyword">not</span> <span class="keyword">in</span> irrelevant_indices]</span><br><span class="line">    left = [coord <span class="keyword">for</span> idx, coord <span class="keyword">in</span> <span class="built_in">enumerate</span>(left) <span class="keyword">if</span> idx <span class="keyword">not</span> <span class="keyword">in</span> irrelevant_indices]</span><br><span class="line">    top = [coord <span class="keyword">for</span> idx, coord <span class="keyword">in</span> <span class="built_in">enumerate</span>(top) <span class="keyword">if</span> idx <span class="keyword">not</span> <span class="keyword">in</span> irrelevant_indices]</span><br><span class="line">    width = [coord <span class="keyword">for</span> idx, coord <span class="keyword">in</span> <span class="built_in">enumerate</span>(width) <span class="keyword">if</span> idx <span class="keyword">not</span> <span class="keyword">in</span> irrelevant_indices]</span><br><span class="line">    height = [coord <span class="keyword">for</span> idx, coord <span class="keyword">in</span> <span class="built_in">enumerate</span>(height) <span class="keyword">if</span> idx <span class="keyword">not</span> <span class="keyword">in</span> irrelevant_indices]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># turn coordinates into (left, top, left+width, top+height) format</span></span><br><span class="line">    actual_boxes = []</span><br><span class="line">    <span class="keyword">for</span> x, y, w, h <span class="keyword">in</span> <span class="built_in">zip</span>(left, top, width, height):</span><br><span class="line">        actual_box = [x, y, x + w, y + h]</span><br><span class="line">        actual_boxes.append(actual_box)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># finally, normalize the bounding boxes</span></span><br><span class="line">    normalized_boxes = []</span><br><span class="line">    <span class="keyword">for</span> box <span class="keyword">in</span> actual_boxes:</span><br><span class="line">        normalized_boxes.append(normalize_box(box, image_width, image_height))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">assert</span> <span class="built_in">len</span>(words) == <span class="built_in">len</span>(normalized_boxes), <span class="string">&quot;Not as many words as there are bounding boxes&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> words, normalized_boxes</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>咱来看下tesseract识别结果：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> ImageDraw</span><br><span class="line">draw = ImageDraw.ImageDraw(pil_image)</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"><span class="keyword">for</span> b <span class="keyword">in</span> actual_boxes:</span><br><span class="line">    draw.rectangle(b, outline=(random.randint(<span class="number">0</span>, <span class="number">255</span>), random.randint(<span class="number">0</span>, <span class="number">255</span>), random.randint(<span class="number">0</span>, <span class="number">255</span>)))</span><br><span class="line">    </span><br><span class="line">pil_image.show()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>识别结果如下：</p>
-<img src="/2023/10/31/document-QA-layoutLMv2/tmp6k5bv0ch.PNG" class="">
-
-<p>可以看到，tesseract拿到每个词的识别坐标。</p>
-<blockquote>
-<p>注意：这里忽略了图片本身操作，比如resize、reshape等操作哦</p>
-</blockquote>
-<p>相关的也有：</p>
-<table>
-<thead>
-<tr>
-<th><img src="/2023/10/31/document-QA-layoutLMv2/o1.PNG" class=""></th>
-<th><img src="/2023/10/31/document-QA-layoutLMv2/a1.PNG" class=""></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>原始图片1</td>
-<td>OCR1</td>
-</tr>
-</tbody></table>
-<h2 id="文本处理"><a href="#文本处理" class="headerlink" title="文本处理"></a>文本处理</h2><p>这部分对应<a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/v4.34.1/en/tasks/document_question_answering#preprocessing-text-data">Preprocessing text data</a>.</p>
-<img src="/2023/10/31/document-QA-layoutLMv2/b1.png" class="">
-
-<p>基于上图知道其<code>answer</code>为<code>T.F. Riehl</code>，通过subfinder函数其在原文的位置为<code>start_index=17</code>和<code>end_index=18</code>，通过<code>OCR1</code>图可知其具体位置。</p>
-<p>接着tokenizer传入了question,words（ocr原文识别结果）,boxes,我们来看其是怎么实现的以及其具体目的。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">encoding = tokenizer(example[<span class="string">&quot;question&quot;</span>], example[<span class="string">&quot;words&quot;</span>], example[<span class="string">&quot;boxes&quot;</span>])</span><br><span class="line">tokenizer.decode(encoding[<span class="string">&quot;input_ids&quot;</span>])</span><br></pre></td></tr></table></figure>
-
-<p>在<a target="_blank" rel="noopener" href="https://github.com/huggingface/transformers/blob/8211c59b9a8fe84d2861446b26542f89a0260e64/src/transformers/models/layoutlmv2/tokenization_layoutlmv2_fast.py#L554">这</a>之前，我们可以看到，其具体做的就是encode拿input_ids, attention_mask和token_type_ids,其具体如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>self.decode(sanitized_tokens[<span class="string">&#x27;input_ids&#x27;</span>][<span class="number">0</span>])</span><br><span class="line"><span class="string">&#x27;[CLS] who is in cc in this letter? [SEP] wie baw brown &amp; williamson tobacco corporation research &amp; development internal correspondence to : r. h. honeycutt ce : t. f. riehl from :. c. j. cook date : may 8, 1995 subject : review of existing brainstorming ideas / 483 the major function of the product innovation graup is to develop marketable nove! products that would be profitable to manufacture and sell. novel is defined as : of a new kind, or different from anything seen or known before. innovation is defined as : something new or different introduced ; act of innovating ; introduction of new things or methods. the products may incorporate the latest technologies, materials and know - how available to give then a unique taste or look. the first task of the product innovation group was to assemble, review and categorize a list of existing brainstorming ideas. ideas were grouped into two major categories labeled appearance and taste / aroma. these categories are used for novel products that may differ from a visual and / or taste / aroma point of view compared to canventional cigarettes. other categories include a combination of the above, filters, packaging and brand extensions. appearance this category is used for novel cigarette constructions that yield visually different products with minimal changes in smoke chemistry two cigarettes in cne. emulti - plug te build yaur awn cigarette. eswitchable menthol or non menthol cigarette. * cigarettes with interspaced perforations to enable smoker to separate unburned section for future smoking. « short cigarette, tobacco section 30 mm. « extremely fast buming cigarette. « novel cigarette constructions that permit a significant reduction iretobacco weight while maintaining smoking mechanics and visual characteristics. higher basis weight paper : potential reduction in tobacco weight. « more rigid tobacco column ; stiffing agent for tobacco ; e. g. starch * colored tow and cigarette papers ; seasonal promotions, e. g. pastel colored cigarettes for easter or in an ebony and ivory brand containing a mixture of all black ( black paper and tow ) and ail white cigarettes. 499150498 [SEP]&#x27;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>但是也是从<a target="_blank" rel="noopener" href="https://github.com/huggingface/transformers/blob/8211c59b9a8fe84d2861446b26542f89a0260e64/src/transformers/models/layoutlmv2/tokenization_layoutlmv2_fast.py#L554">这</a>开始，讲述了bbox是如何跟words对齐的。</p>
-<p>其代码如下：</p>
-<img src="/2023/10/31/document-QA-layoutLMv2/c1.png" class="">
-
-
-<p>最终生成的结果如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">for</span> input_id, box <span class="keyword">in</span> <span class="built_in">zip</span>(sanitized_tokens[<span class="string">&#x27;input_ids&#x27;</span>][<span class="number">0</span>], sanitized_tokens[<span class="string">&#x27;bbox&#x27;</span>][<span class="number">0</span>]):</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>    <span class="built_in">print</span>(self.decode(input_id),<span class="string">&#x27;\t&#x27;</span>, box)</span><br><span class="line">    </span><br><span class="line">[CLS] 	 [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]</span><br><span class="line">who 	 [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]</span><br><span class="line"><span class="keyword">is</span> 	 [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]</span><br><span class="line"><span class="keyword">in</span> 	 [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]</span><br><span class="line">cc 	 [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]</span><br><span class="line"><span class="keyword">in</span> 	 [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]</span><br><span class="line">this 	 [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]</span><br><span class="line">letter 	 [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]</span><br><span class="line">? 	 [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]</span><br><span class="line">[SEP] 	 [<span class="number">1000</span>, <span class="number">1000</span>, <span class="number">1000</span>, <span class="number">1000</span>]</span><br><span class="line">wi 	 [<span class="number">455</span>, <span class="number">66</span>, <span class="number">502</span>, <span class="number">91</span>]</span><br><span class="line"><span class="comment">##e 	 [455, 66, 502, 91]</span></span><br><span class="line">ba 	 [<span class="number">455</span>, <span class="number">93</span>, <span class="number">503</span>, <span class="number">103</span>]</span><br><span class="line"><span class="comment">##w 	 [455, 93, 503, 103]</span></span><br><span class="line">brown 	 [<span class="number">296</span>, <span class="number">116</span>, <span class="number">348</span>, <span class="number">133</span>]</span><br><span class="line">&amp; 	 [<span class="number">356</span>, <span class="number">121</span>, <span class="number">367</span>, <span class="number">129</span>]</span><br><span class="line">williamson 	 [<span class="number">372</span>, <span class="number">120</span>, <span class="number">470</span>, <span class="number">129</span>]</span><br><span class="line">tobacco 	 [<span class="number">475</span>, <span class="number">120</span>, <span class="number">547</span>, <span class="number">128</span>]</span><br><span class="line">corporation 	 [<span class="number">552</span>, <span class="number">118</span>, <span class="number">661</span>, <span class="number">127</span>]</span><br><span class="line">research 	 [<span class="number">372</span>, <span class="number">133</span>, <span class="number">452</span>, <span class="number">142</span>]</span><br><span class="line">&amp; 	 [<span class="number">457</span>, <span class="number">133</span>, <span class="number">468</span>, <span class="number">141</span>]</span><br><span class="line">development 	 [<span class="number">473</span>, <span class="number">133</span>, <span class="number">585</span>, <span class="number">142</span>]</span><br><span class="line">internal 	 [<span class="number">623</span>, <span class="number">158</span>, <span class="number">691</span>, <span class="number">165</span>]</span><br><span class="line">correspondence 	 [<span class="number">694</span>, <span class="number">158</span>, <span class="number">823</span>, <span class="number">165</span>]</span><br><span class="line">to 	 [<span class="number">143</span>, <span class="number">200</span>, <span class="number">168</span>, <span class="number">215</span>]</span><br><span class="line">: 	 [<span class="number">143</span>, <span class="number">200</span>, <span class="number">168</span>, <span class="number">215</span>]</span><br><span class="line">r 	 [<span class="number">239</span>, <span class="number">201</span>, <span class="number">253</span>, <span class="number">211</span>]</span><br><span class="line">. 	 [<span class="number">239</span>, <span class="number">201</span>, <span class="number">253</span>, <span class="number">211</span>]</span><br><span class="line">h 	 [<span class="number">259</span>, <span class="number">201</span>, <span class="number">273</span>, <span class="number">211</span>]</span><br><span class="line">. 	 [<span class="number">259</span>, <span class="number">201</span>, <span class="number">273</span>, <span class="number">211</span>]</span><br><span class="line">honey 	 [<span class="number">279</span>, <span class="number">201</span>, <span class="number">351</span>, <span class="number">212</span>]</span><br><span class="line"><span class="comment">##cut 	 [279, 201, 351, 212]</span></span><br><span class="line"><span class="comment">##t 	 [279, 201, 351, 212]</span></span><br><span class="line">ce 	 [<span class="number">144</span>, <span class="number">224</span>, <span class="number">168</span>, <span class="number">245</span>]</span><br><span class="line">: 	 [<span class="number">144</span>, <span class="number">224</span>, <span class="number">168</span>, <span class="number">245</span>]</span><br><span class="line">t 	 [<span class="number">231</span>, <span class="number">224</span>, <span class="number">265</span>, <span class="number">244</span>]</span><br><span class="line">. 	 [<span class="number">231</span>, <span class="number">224</span>, <span class="number">265</span>, <span class="number">244</span>]</span><br><span class="line">f 	 [<span class="number">231</span>, <span class="number">224</span>, <span class="number">265</span>, <span class="number">244</span>]</span><br><span class="line">. 	 [<span class="number">231</span>, <span class="number">224</span>, <span class="number">265</span>, <span class="number">244</span>]</span><br><span class="line">ri 	 [<span class="number">267</span>, <span class="number">224</span>, <span class="number">307</span>, <span class="number">244</span>]</span><br><span class="line"><span class="comment">##eh 	 [267, 224, 307, 244]</span></span><br><span class="line"><span class="comment">##l 	 [267, 224, 307, 244]</span></span><br><span class="line"><span class="keyword">from</span> 	 [<span class="number">145</span>, <span class="number">259</span>, <span class="number">193</span>, <span class="number">269</span>]</span><br><span class="line">: 	 [<span class="number">145</span>, <span class="number">259</span>, <span class="number">193</span>, <span class="number">269</span>]</span><br><span class="line">. 	 [<span class="number">211</span>, <span class="number">268</span>, <span class="number">212</span>, <span class="number">269</span>]</span><br><span class="line">c 	 [<span class="number">239</span>, <span class="number">259</span>, <span class="number">269</span>, <span class="number">268</span>]</span><br><span class="line">. 	 [<span class="number">239</span>, <span class="number">259</span>, <span class="number">269</span>, <span class="number">268</span>]</span><br><span class="line">j 	 [<span class="number">239</span>, <span class="number">259</span>, <span class="number">269</span>, <span class="number">268</span>]</span><br><span class="line">. 	 [<span class="number">239</span>, <span class="number">259</span>, <span class="number">269</span>, <span class="number">268</span>]</span><br><span class="line">cook 	 [<span class="number">276</span>, <span class="number">259</span>, <span class="number">313</span>, <span class="number">268</span>]</span><br><span class="line">date 	 [<span class="number">145</span>, <span class="number">285</span>, <span class="number">189</span>, <span class="number">302</span>]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<p>着重看上图40~46行，即可明白tokenizer分成subword后，其box按照原词的box进行分配。这个也和原来使用layoutXLM来做是一样的，其在<a target="_blank" rel="noopener" href="https://github.com/geasyheart/layoutlm/blob/21b2ab47468186145e60c22f1a92688572080bec/src/transform.py#L190">这里</a>。</p>
-<p>剩下部分就是<code>encode_dataset</code>函数了，除了和box对齐，另外一个就是基于subfinder函数来找到<code>start_positions</code>和<code>end_positions</code>来作为label。</p>
-<p>至此，大致理解了其文本处理方式以及如何和box进行对齐，但是要注意subfinder函数，如果answer没有在words（即ocr识别原文）没有找到，<strong>这条数据就废掉了</strong>。</p>
-<h2 id="模型"><a href="#模型" class="headerlink" title="模型"></a>模型</h2><p>模型部分简单如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">self</span><br><span class="line">LayoutLMv2ForQuestionAnswering(</span><br><span class="line">  (layoutlmv2): LayoutLMv2Model(</span><br><span class="line">    (embeddings): LayoutLMv2Embeddings(</span><br><span class="line">      (word_embeddings): Embedding(30522, 768, padding_idx=0)</span><br><span class="line">      (position_embeddings): Embedding(512, 768)</span><br><span class="line">      (x_position_embeddings): Embedding(1024, 128)</span><br><span class="line">      (y_position_embeddings): Embedding(1024, 128)</span><br><span class="line">      (h_position_embeddings): Embedding(1024, 128)</span><br><span class="line">      (w_position_embeddings): Embedding(1024, 128)</span><br><span class="line">      (token_type_embeddings): Embedding(2, 768)</span><br><span class="line">      (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)</span><br><span class="line">      (dropout): Dropout(p=0.1, inplace=False)</span><br><span class="line">    )</span><br><span class="line">    (visual): LayoutLMv2VisualBackbone(</span><br><span class="line">      (backbone): FPN(</span><br><span class="line">        (fpn_lateral2): Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1))</span><br><span class="line">        (fpn_output2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))</span><br><span class="line">        (fpn_lateral3): Conv2d(512, 256, kernel_size=(1, 1), stride=(1, 1))</span><br><span class="line">        (fpn_output3): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))</span><br><span class="line">        (fpn_lateral4): Conv2d(1024, 256, kernel_size=(1, 1), stride=(1, 1))</span><br><span class="line">        (fpn_output4): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))</span><br><span class="line">        (fpn_lateral5): Conv2d(2048, 256, kernel_size=(1, 1), stride=(1, 1))</span><br><span class="line">        (fpn_output5): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))</span><br><span class="line">        (top_block): LastLevelMaxPool()</span><br><span class="line">        (bottom_up): ResNet(</span><br><span class="line">          ）</span><br><span class="line">    )</span><br><span class="line">    (visual_proj): Linear(in_features=256, out_features=768, bias=True)</span><br><span class="line">    (visual_LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)</span><br><span class="line">    (visual_dropout): Dropout(p=0.1, inplace=False)</span><br><span class="line">    (encoder): LayoutLMv2Encoder(</span><br><span class="line">    </span><br><span class="line">  )</span><br><span class="line">  (qa_outputs): Linear(in_features=768, out_features=2, bias=True)</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>但是一直没搞清楚其visual用的是resnet还是变种，不过这里就忽略了。。。（layoutLMv3用的就是ViT了）。</p>
-<p>那接下来我们就一个目的了，看visual feature和text feature如何融合。</p>
-<p>这部分反而看的云里雾里，比如为什么生成一个<a target="_blank" rel="noopener" href="https://github.com/huggingface/transformers/blob/8211c59b9a8fe84d2861446b26542f89a0260e64/src/transformers/models/layoutlmv2/modeling_layoutlmv2.py#L865">visual_bbox</a>，剩下生成embedding、图像、transformer部分就是常规操作了，先忽略。</p>
-<h2 id="More"><a href="#More" class="headerlink" title="More"></a>More</h2><p>这种双指针的方式可以解决一部分文档问答问题，但是针对表格之类的，比如：</p>
-<img src="/2023/10/31/document-QA-layoutLMv2/f1.png" class="">
-
-<p>Q1: 班级1班的老师的姓名？<br>Q2： 班级1班语文老师的姓名和数学老师的姓名？</p>
-<p>即一个表格中多个答案和一个疑问句中多个疑问点，就造成这类模型的是无法满足的。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2023/10/31/document-QA-layoutLMv2/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
   
   
-    <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
-    </nav>
+  
+
+  
+
+  
+
   
 
 
@@ -1266,8 +446,8 @@ var _hmt = _hmt || [];
     <script>
 	var yiliaConfig = {
 		mathjax: false,
-		isHome: true,
-		isPost: false,
+		isHome: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,

@@ -206,6 +206,186 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-layoutLM微调FUNSD数据集" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/12/12/layoutLM%E5%BE%AE%E8%B0%83FUNSD%E6%95%B0%E6%8D%AE%E9%9B%86/">layoutLM微调FUNSD数据集</a>
+    </h1>
+  
+
+        
+        <a href="/2022/12/12/layoutLM%E5%BE%AE%E8%B0%83FUNSD%E6%95%B0%E6%8D%AE%E9%9B%86/" class="archive-article-date">
+  	<time datetime="2022-12-12T07:11:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-12-12</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>对表单、合同、收据等信息抽取、理解，单从NLP角度来做就丧失了一些比较重要的特征，比如排版、位置、字体大小、字体颜色等特征。</p>
+<p>如何引入这些特征对于关键信息抽取(Key Information Extraction)就比较重要。</p>
+<p>此篇文章围绕FUNSD数据集来进行，尝试在不同的layoutLM模型上实现，以及对比各自的效果。</p>
+<h2 id="FUNSD数据集"><a href="#FUNSD数据集" class="headerlink" title="FUNSD数据集"></a>FUNSD数据集</h2><p>常见的数据集有<a target="_blank" rel="noopener" href="https://guillaumejaume.github.io/FUNSD/">FUNSD</a>和<a target="_blank" rel="noopener" href="https://github.com/doc-analysis/XFUND">XFUND</a>，XFUND是一个融合了多语言的训练集，数据更为丰富。不过此处选择FUNSD来进行实验。</p>
+<p>FUNSD全称为Form Understanding in Noisy Scanned Documents，直译过来就是嘈杂的扫描文档的表单理解，因为是扫描件，或多或少都会有些噪点的，也可看官网的描述。</p>
+<p>数据集<a target="_blank" rel="noopener" href="https://guillaumejaume.github.io/FUNSD/dataset.zip">地址</a>。</p>
+<p>下载数据后，例如<code>dataset/training_data/annotations/00040534.json</code>中的<code>3-Hydroxy-3-methylbutanoic acid (Tur 13)</code>的文字(text)，它对应的坐标(box)为<code>[145, 98, 507, 116]</code>,即左上和右下, 标注的数据如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">	<span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;3-Hydroxy-3-methylbutanoic acid (Tur 13)&quot;</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;box&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="number">145</span><span class="punctuation">,</span> <span class="number">98</span><span class="punctuation">,</span> <span class="number">507</span><span class="punctuation">,</span> <span class="number">116</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;linking&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">		<span class="punctuation">[</span><span class="number">0</span><span class="punctuation">,</span> <span class="number">37</span><span class="punctuation">]</span></span><br><span class="line">	<span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="string">&quot;answer&quot;</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;words&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span></span><br><span class="line">		<span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;3-Hydroxy-3-methylbutanoic&quot;</span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;box&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="number">145</span><span class="punctuation">,</span> <span class="number">98</span><span class="punctuation">,</span> <span class="number">384</span><span class="punctuation">,</span> <span class="number">116</span><span class="punctuation">]</span></span><br><span class="line">	<span class="punctuation">&#125;</span><span class="punctuation">,</span> <span class="punctuation">&#123;</span></span><br><span class="line">		<span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;acid&quot;</span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;box&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="number">392</span><span class="punctuation">,</span> <span class="number">99</span><span class="punctuation">,</span> <span class="number">427</span><span class="punctuation">,</span> <span class="number">114</span><span class="punctuation">]</span></span><br><span class="line">	<span class="punctuation">&#125;</span><span class="punctuation">,</span> <span class="punctuation">&#123;</span></span><br><span class="line">		<span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;(Tur&quot;</span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;box&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="number">439</span><span class="punctuation">,</span> <span class="number">99</span><span class="punctuation">,</span> <span class="number">474</span><span class="punctuation">,</span> <span class="number">116</span><span class="punctuation">]</span></span><br><span class="line">	<span class="punctuation">&#125;</span><span class="punctuation">,</span> <span class="punctuation">&#123;</span></span><br><span class="line">		<span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;13)&quot;</span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;box&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="number">483</span><span class="punctuation">,</span> <span class="number">99</span><span class="punctuation">,</span> <span class="number">507</span><span class="punctuation">,</span> <span class="number">116</span><span class="punctuation">]</span></span><br><span class="line">	<span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">37</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>用cv2画出来，示例如下（具体实现请看附录1）：</p>
+<img src="/2022/12/12/layoutLM%E5%BE%AE%E8%B0%83FUNSD%E6%95%B0%E6%8D%AE%E9%9B%86/1.png" class="" title="1.png">
+
+
+
+<p>标签(label)的话有<code>question</code>，<code>header</code>，<code>answer</code>和<code>other</code>四种，比如：<code>甲方：江苏A公司</code>，其中<code>甲方</code>为<code>question</code>，<code>江苏A公司</code>为<code>answer</code>,<code>header</code>对应文章的标题，<code>other</code>为其他的一些信息。</p>
+<h2 id="layoutLM"><a href="#layoutLM" class="headerlink" title="layoutLM"></a>layoutLM</h2><h3 id="模型介绍"><a href="#模型介绍" class="headerlink" title="模型介绍"></a>模型介绍</h3><p>layoutLM是微软推出的一个通用文档智能预训练模型，它的模型结果如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">LayoutLMModel(</span><br><span class="line">  (embeddings): LayoutLMEmbeddings(</span><br><span class="line">    (word_embeddings): Embedding(30522, 768, padding_idx=0)</span><br><span class="line">    (position_embeddings): Embedding(512, 768)</span><br><span class="line">    (x_position_embeddings): Embedding(1024, 768)</span><br><span class="line">    (y_position_embeddings): Embedding(1024, 768)</span><br><span class="line">    (h_position_embeddings): Embedding(1024, 768)</span><br><span class="line">    (w_position_embeddings): Embedding(1024, 768)</span><br><span class="line">    (token_type_embeddings): Embedding(2, 768)</span><br><span class="line">    (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)</span><br><span class="line">    (dropout): Dropout(p=0.1, inplace=False)</span><br><span class="line">  )</span><br><span class="line">  (encoder): LayoutLMEncoder(</span><br><span class="line">    (layer): ModuleList(</span><br><span class="line">      (0): LayoutLMLayer(</span><br><span class="line">        (attention): LayoutLMAttention(</span><br><span class="line">          (self): LayoutLMSelfAttention(</span><br><span class="line">            (query): Linear(in_features=768, out_features=768, bias=True)</span><br><span class="line">            (key): Linear(in_features=768, out_features=768, bias=True)</span><br><span class="line">            (value): Linear(in_features=768, out_features=768, bias=True)</span><br><span class="line">            (dropout): Dropout(p=0.1, inplace=False)</span><br><span class="line">          )</span><br><span class="line">          (output): LayoutLMSelfOutput(</span><br><span class="line">            (dense): Linear(in_features=768, out_features=768, bias=True)</span><br><span class="line">            (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)</span><br><span class="line">            (dropout): Dropout(p=0.1, inplace=False)</span><br><span class="line">          )</span><br><span class="line">        )</span><br><span class="line">        (intermediate): LayoutLMIntermediate(</span><br><span class="line">          (dense): Linear(in_features=768, out_features=3072, bias=True)</span><br><span class="line">          (intermediate_act_fn): GELUActivation()</span><br><span class="line">        )</span><br><span class="line">        (output): LayoutLMOutput(</span><br><span class="line">          (dense): Linear(in_features=3072, out_features=768, bias=True)</span><br><span class="line">          (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)</span><br><span class="line">          (dropout): Dropout(p=0.1, inplace=False)</span><br><span class="line">        )</span><br><span class="line">      )</span><br><span class="line">     （1） ～（11）</span><br><span class="line">    )</span><br><span class="line">  )</span><br><span class="line">  (pooler): LayoutLMPooler(</span><br><span class="line">    (dense): Linear(in_features=768, out_features=768, bias=True)</span><br><span class="line">    (activation): Tanh()</span><br><span class="line">  )</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>此模型训练参考了bert的[MASK]训练方式，通过预测掩码位置信息来进行预训练。</p>
+<p>重点在<code>x_position_embeddings</code>，<code>y_position_embeddings</code>，<code>h_position_embeddings</code>， <code>w_position_embeddings</code>四个feature上，将字的坐标特征加入进来。</p>
+<p>由此可以简单将其理解成它在bert的基础上融合了位置信息特征，模型结构比较简单直接😂😂😂，可参考<a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/main/en/model_doc/layoutlm#overview">transformers layoutlm overview</a>，更多信息也可自行搜索。</p>
+<h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><p>本文示例参考<a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/v4.25.1/en/model_doc/layoutlm#transformers.LayoutLMForTokenClassification">transformers.LayoutLMForTokenClassification</a>，基于paddleNLP实现torch版本的。</p>
+<h4 id="1-数据处理"><a href="#1-数据处理" class="headerlink" title="1. 数据处理"></a>1. 数据处理</h4><p>参考上面示例（红框标识部分）：</p>
+<table>
+<thead>
+<tr>
+<th>words</th>
+<th>坐标</th>
+<th>转换1</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>3-Hydroxy-3-methylbutanoic</td>
+<td>186 98 494 116</td>
+<td>B-ANSWER</td>
+</tr>
+<tr>
+<td>acid</td>
+<td>504 99 549 114</td>
+<td>I-ANSWER</td>
+</tr>
+<tr>
+<td>(Tur</td>
+<td>564 99 610 116</td>
+<td>I-ANSWER</td>
+</tr>
+<tr>
+<td>13)</td>
+<td>621 99 652 116</td>
+<td>I-ANSWER (用E-ANSWER也可以)</td>
+</tr>
+</tbody></table>
+<p>这部分分成两部分：</p>
+<ol>
+<li>坐标经过normalize，即官网描述的<strong>Note that one first needs to normalize the bounding boxes to be on a 0-1000 scale.</strong></li>
+<li><code>转换1</code>为一个中间结果，对每个word分配一个初始label，后续还需对这个label再进行处理，获取最终训练的label。</li>
+</ol>
+<h4 id="2-label构造"><a href="#2-label构造" class="headerlink" title="2. label构造"></a>2. label构造</h4><p>拿到<code>转换1</code>的结果后，还是要对words再进行tokenizer才能输入到layoutLM：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">    &#x27;3&#x27;, &#x27;-&#x27;, &#x27;hydro&#x27;, &#x27;##xy&#x27;, &#x27;-&#x27;, &#x27;3&#x27;, &#x27;-&#x27;, &#x27;methyl&#x27;, &#x27;##bu&#x27;, &#x27;##tan&#x27;, &#x27;##oic&#x27;,</span><br><span class="line">    &#x27;acid&#x27;,</span><br><span class="line">    &#x27;(&#x27;, &#x27;tu&#x27;, &#x27;##r&#x27;,</span><br><span class="line">    &#x27;13&#x27;, &#x27;)&#x27;,</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>所以<code>转换1</code>对应的label也需要做最后调整。</p>
+<p>怎么调整呢，答案为取首字，剩下为交叉熵的ignore_index(-100)。</p>
+<p>比如<code>南京A公司</code>，假设words为:<code>南京</code>, <code>A</code>, <code>公司</code>，<br>转换1(中间结果)的结果为：<code>B-ANSWER,     I-ANSWER, I-ANSWER</code><br>最终label:   <code>B-ANSWER, -100, I-ANSWER, I-ANSWER, -100</code></p>
+<p>其他的比如bbox怎么构造[CLS]、[SEP]和padding位置值，可直接参考transformers文档或看代码。</p>
+<p><strong>时隔多日更新：怎么构造label也可自行尝试。</strong></p>
+<h3 id="微调结果"><a href="#微调结果" class="headerlink" title="微调结果"></a>微调结果</h3><table>
+<thead>
+<tr>
+<th><img src="/2022/12/12/layoutLM%E5%BE%AE%E8%B0%83FUNSD%E6%95%B0%E6%8D%AE%E9%9B%86/2.png" class="" title="2.png"></th>
+<th><img src="/2022/12/12/layoutLM%E5%BE%AE%E8%B0%83FUNSD%E6%95%B0%E6%8D%AE%E9%9B%86/3.png" class="" title="3.png"></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>dev</td>
+<td>train</td>
+</tr>
+</tbody></table>
+<p>这地方就一个注意点，这里使用的是<code>seqeval</code>来进行评估，可自行选择。</p>
+<h2 id="layoutXLM"><a href="#layoutXLM" class="headerlink" title="layoutXLM"></a>layoutXLM</h2><h3 id="模型介绍-1"><a href="#模型介绍-1" class="headerlink" title="模型介绍"></a>模型介绍</h3><p>layoutXLM是在<a target="_blank" rel="noopener" href="https://www.msra.cn/zh-cn/news/features/layoutlm-v2">layoutLMv2</a>模型的基础上增加了对英文，中文，日文等多语言的一个预训练模型，用官方的话来说就是：**It’s a multilingual extension of the LayoutLMv2 model trained on 53 languages.**。</p>
+<p>此模型训练上新增了<code>文本—图像对齐</code>和<code>文本—图像匹配</code>任务，按照描述为：</p>
+<ul>
+<li>文本—图像对齐（Text-Image Alignment）</li>
+</ul>
+<p>遮罩式视觉语言模型更关注模型的语言能力，视觉和布局信息只提供隐式线索，为此一种细粒度的多模态对齐任务在 LayoutLM 2.0 中被提出，即文本—图像对齐。该方法在文档图像上随机按行遮盖一部分文本，利用模型的文本部分输出进行词级别二分类，预测每个词是否被覆盖。文本—图像对齐任务帮助模型对齐文本和图像的位置信息。</p>
+<ul>
+<li>文本—图像匹配（Text-Image Match）</li>
+</ul>
+<p>现有工作证明，粗粒度的文本—图像匹配任务有助于帮助模态信息对齐。对于预训练阶段的文档数据，随机地替换或舍弃一部分文档图像，会构造图文失配的负样本。LayoutLM 2.0 的模型以文档级二分类的方式预测图文是否匹配，以此来对齐文本和图像的内容信息。</p>
+<p>使用上参考<a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/main/en/model_doc/layoutxlm#overview">transformers layoutXLM overview</a>可得知，除了tokenizer，其他都可直接参考<a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/main/en/model_doc/layoutlmv2">layoutLMv2</a>。</p>
+<p>相比layoutLM，增加了一个image的处理，从layoutXLM模型结构上来看，改成了LayoutLMv2VisualBackbone，额，网络结构复杂的真多哇，其中image处理可直接参考<a target="_blank" rel="noopener" href="https://pytorch.org/hub/pytorch_vision_resnet/">resnet preprocess</a>。</p>
+<h3 id="微调结果-1"><a href="#微调结果-1" class="headerlink" title="微调结果"></a>微调结果</h3><table>
+<thead>
+<tr>
+<th><img src="/2022/12/12/layoutLM%E5%BE%AE%E8%B0%83FUNSD%E6%95%B0%E6%8D%AE%E9%9B%86/4.png" class="" title="4.png"></th>
+<th><img src="/2022/12/12/layoutLM%E5%BE%AE%E8%B0%83FUNSD%E6%95%B0%E6%8D%AE%E9%9B%86/5.png" class="" title="5.png"></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>dev</td>
+<td>train</td>
+</tr>
+</tbody></table>
+<p>这还是在batch_size&#x3D;3上微调的。。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>相比layoutLM，layoutXLM效果的确有增加几个点，不过网络结构复杂了许多，图像部分以后再看，此处埋个坑。</p>
+<p>另外数据集太少了，如果想在下游任务直接拿来应用，或多或少还是会遇到效果的问题。</p>
+<p>本文相关代码请参考<a target="_blank" rel="noopener" href="https://github.com/geasyheart/layoutlm">layoutlm</a>，不同的分支对应不同的预训练模型。</p>
+<h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><h3 id="附录1：cv2画出坐标"><a href="#附录1：cv2画出坐标" class="headerlink" title="附录1：cv2画出坐标"></a>附录1：cv2画出坐标</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 实现代码</span></span><br><span class="line"><span class="keyword">import</span> os.path</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line">PATH = <span class="string">&quot;/layoutlm/data/funsd-dataset/dataset/training_data&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(os.path.join(PATH, <span class="string">&#x27;annotations&#x27;</span>, <span class="string">&#x27;00040534.json&#x27;</span>)) <span class="keyword">as</span> f:</span><br><span class="line">    data = json.loads(f.read())</span><br><span class="line">    <span class="comment"># 选择一个box</span></span><br><span class="line"><span class="comment"># 找到对应的image</span></span><br><span class="line">img_path = os.path.join(PATH, <span class="string">&#x27;images&#x27;</span>, <span class="string">&#x27;00040534.png&#x27;</span>)</span><br><span class="line">image = cv2.imread(img_path)</span><br><span class="line">draw_1 = cv2.rectangle(image, (<span class="number">145</span>, <span class="number">98</span>), (<span class="number">507</span>, <span class="number">116</span>), (<span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>), <span class="number">2</span>)</span><br><span class="line">cv2.imshow(<span class="string">&#x27;draw_0&#x27;</span>, draw_1)</span><br><span class="line">cv2.waitKey(<span class="number">0</span>)</span><br><span class="line">cv2.destroyWindow(<span class="string">&quot;draw_0&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="附录2：通过pymupdf来获取text的坐标"><a href="#附录2：通过pymupdf来获取text的坐标" class="headerlink" title="附录2：通过pymupdf来获取text的坐标"></a>附录2：通过pymupdf来获取text的坐标</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> fitz</span><br><span class="line"></span><br><span class="line">path = <span class="string">&#x27;aaa.pdf&#x27;</span></span><br><span class="line"></span><br><span class="line">doc = fitz.<span class="built_in">open</span>(path)</span><br><span class="line">pages = [doc[i] <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(doc.page_count)]</span><br><span class="line">page = pages[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">blocks = page.get_text(<span class="string">&quot;dict&quot;</span>)[<span class="string">&#x27;blocks&#x27;</span>]</span><br><span class="line">text_blocks = [block <span class="keyword">for</span> block <span class="keyword">in</span> blocks <span class="keyword">if</span> block[<span class="string">&#x27;type&#x27;</span>] == <span class="number">0</span>]</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;对第一张操作哦&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">recalculate_bbox</span>(<span class="params">span</span>):</span><br><span class="line">    a = span[<span class="string">&quot;ascender&quot;</span>] / <span class="number">1000</span> * span[<span class="string">&quot;size&quot;</span>]</span><br><span class="line">    d = span[<span class="string">&quot;descender&quot;</span>] / <span class="number">1000</span> * span[<span class="string">&quot;size&quot;</span>]</span><br><span class="line">    o = fitz.Point(span[<span class="string">&quot;origin&quot;</span>])</span><br><span class="line">    r = fitz.Rect(span[<span class="string">&quot;bbox&quot;</span>])</span><br><span class="line">    r.y1 = o.y - span[<span class="string">&quot;size&quot;</span>] * d / (a - d)</span><br><span class="line">    r.y0 = r.y1 - span[<span class="string">&quot;size&quot;</span>]</span><br><span class="line">    <span class="keyword">return</span> r</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="keyword">for</span> block <span class="keyword">in</span> text_blocks:</span><br><span class="line">    <span class="keyword">for</span> lines <span class="keyword">in</span> text_blocks:</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> lines[<span class="string">&#x27;lines&#x27;</span>]:</span><br><span class="line">            <span class="keyword">for</span> span <span class="keyword">in</span> line[<span class="string">&#x27;spans&#x27;</span>]:</span><br><span class="line">                page.draw_rect(recalculate_bbox(span), width=<span class="number">0.3</span>, color=(<span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>))</span><br><span class="line"></span><br><span class="line">page.get_pixmap().save(<span class="string">&#x27;1.png&#x27;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/12/12/layoutLM%E5%BE%AE%E8%B0%83FUNSD%E6%95%B0%E6%8D%AE%E9%9B%86/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-求合理路径" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1209,140 +1389,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-bert融入外部特征" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/08/12/bert%E8%9E%8D%E5%85%A5%E5%A4%96%E9%83%A8%E7%89%B9%E5%BE%81/">bert融入外部特征</a>
-    </h1>
-  
-
-        
-        <a href="/2022/08/12/bert%E8%9E%8D%E5%85%A5%E5%A4%96%E9%83%A8%E7%89%B9%E5%BE%81/" class="archive-article-date">
-  	<time datetime="2022-08-12T03:40:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-12</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>此文不是对预训练模型融入实体信息、知识图谱等类似ERNIE,k-bert这种，而是在拿到bert输出后，突出指定位置信息进去，从而控制判定的结果。</p>
-<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>比如这句话：</p>
-<blockquote>
-<p>该报还报道，法国达能集团日前宣布将投资1亿欧元，加强在中国市场的奶粉生产和研发，并表示“我们对中国市场的长期增长能力充满信心”。</p>
-</blockquote>
-<p>谁加强和谁表示呢？是法国达能集团，而不是该报。</p>
-<table>
-<thead>
-<tr>
-<th>主体</th>
-<th>触发词</th>
-<th>客体</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>法国达能集团</td>
-<td>加强</td>
-<td>在中国市场的奶粉生产和研发</td>
-</tr>
-<tr>
-<td>法国达能集团</td>
-<td>表示</td>
-<td>“我们对中国市场的长期增长能力充满信心”</td>
-</tr>
-</tbody></table>
-<p>那假设，我们在知道<code>触发词</code>和<code>客体</code>的情况下，如何从原句中获取<code>主体</code>呢？</p>
-<h3 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h3><h4 id="1-引入其他layer和bert进行concat"><a href="#1-引入其他layer和bert进行concat" class="headerlink" title="1. 引入其他layer和bert进行concat"></a>1. 引入其他layer和bert进行concat</h4><p>这怕是最容易想到的方法了。比如将<code>句子</code>、<code>触发词</code>和<code>客体</code>分别输入到bert，然后将这三者concat。emmm，这也怕是最蠢的方法了。</p>
-<h4 id="2-修改触发词和客体所在bert输出索引的权重"><a href="#2-修改触发词和客体所在bert输出索引的权重" class="headerlink" title="2. 修改触发词和客体所在bert输出索引的权重"></a>2. 修改<code>触发词</code>和<code>客体</code>所在bert输出索引的权重</h4><p>比如一句话长度为128,拿到bert输出后为<code>(128, 768)</code>，假设<code>触发词</code>和<code>客体</code>对应的span为<code>(10,12)</code>和<code>(15, 30)</code>，那如何手动修改对应span的weight呢？？</p>
-<p>方法一，直接进行mask_fill，将对应span的值改为比如<code>0</code>。这种方式,,,emmmm，怎么说呢，看看就行。<br>方法二，也是操作对应span的weights，但是分成两步，第一是取<code>触发词</code>的权重，第二是取<code>客体</code>的权重，各自经过各自的linear，得到新的权重，然后再和bert output做一个交互，意思还是想突出<code>触发词</code>和<code>客体</code>的权重。和方法一一样，只不过对应的weight不是0，而是经过反向传播更新后的值。</p>
-<p>比如conditional layer norm（对原conditional layer norm做修改了哦）。</p>
-<p>伪代码如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">NewConditionalLayerNorm</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, normalized_shape1, normalized_shape2</span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        <span class="comment"># 触发词的</span></span><br><span class="line">        self.trigger_feature_weight = ...</span><br><span class="line">        self.trigger_feature_bias = ...</span><br><span class="line"></span><br><span class="line">        self.trigger_feature_weight_dense = ...</span><br><span class="line">        self.trigger_feature_bias_dense = ...</span><br><span class="line">        <span class="comment"># 客体的</span></span><br><span class="line">        self.object_feature_weight = ...</span><br><span class="line">        self.object_feature_bias = ...</span><br><span class="line">        self.object_feature_weight_dense = ...</span><br><span class="line">        self.object_feature_bias_dense = ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, bert_output, trigger_feature, object_feature</span>):</span><br><span class="line">        <span class="comment"># 1. 先计算bert_output的layer norm</span></span><br><span class="line">        <span class="comment"># 2. 计算trigger的weight和bias</span></span><br><span class="line">        <span class="comment"># 3. 计算object的weight和bias</span></span><br><span class="line">        <span class="comment"># 4. 三者相乘        </span></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<p>关于Conditional Layer Normalization，可看：<a href="/2022/08/08/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E4%B8%BB%E5%AE%A2%E4%BD%93%E6%8F%90%E5%8F%96/" title="讯飞2020年事件提取比赛第一名-主客体提取">讯飞2020年事件提取比赛第一名-主客体提取</a>中Conditional Layer Normalization实现方式，难点在于变长罢了。</p>
-<p>效果没试，总感觉复杂了些。</p>
-<p>另外如果输入的feature个数是变化的，那这种方式就不可行了。</p>
-<h4 id="3-变化标注方式，还是利用bert本身"><a href="#3-变化标注方式，还是利用bert本身" class="headerlink" title="3. 变化标注方式，还是利用bert本身"></a>3. 变化标注方式，还是利用bert本身</h4><p>输入一句话，tokenizer后拿到<code>input_ids</code>,<code>token_type_ids</code>, <code>attention_mask</code>，那其中的<code>token_type_ids</code>是干嘛的呢？百度下就有结果，说是如果是<code>0</code>就表示第一句话，如果是<code>1</code>就表示第二句话。</p>
-<p>如果这样的话，那直接将<code>触发词</code>和<code>客体</code>的所对应的<code>token_type_ids</code>置为<code>1</code>不就又是一种方式么～，试了下效果出奇的不错。准确率嗖嗖的往上。而且还没引入额外的layer，相当拿bert就把这件事情搞定了。</p>
-<p>这也是我写这篇文章的动力。。。</p>
-<p>实现方式如下：</p>
-<p>比如一句话”我们喜欢晴天。”，label设计为如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 假设我们为主语</span></span><br><span class="line">input_tokens = [<span class="string">&#x27;我&#x27;</span>, <span class="string">&#x27;们&#x27;</span>, <span class="string">&#x27;喜&#x27;</span>, <span class="string">&#x27;欢&#x27;</span>, <span class="string">&#x27;晴&#x27;</span>, <span class="string">&#x27;天&#x27;</span>, <span class="string">&#x27;。&#x27;</span>]</span><br><span class="line"><span class="comment"># token_type_ids</span></span><br><span class="line">token_type_ids = [<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>]</span><br><span class="line"><span class="comment"># label</span></span><br><span class="line">label = [[<span class="number">1</span>, <span class="number">0</span>], [<span class="number">0</span>, <span class="number">1</span>], [<span class="number">0</span>, <span class="number">0</span>], [<span class="number">0</span>, <span class="number">0</span>], [<span class="number">0</span>, <span class="number">0</span>], [<span class="number">0</span>, <span class="number">0</span>], [<span class="number">0</span>, <span class="number">0</span>]]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>模型就是bert+linear，linear输出hidden_size为2,loss使用<code>binary_cross_entropy</code>即可。</p>
-<p>缺陷嘛就是它没有区分每个feature本身的label。客体就是客体，触发词就是触发词～～</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>所以通篇看下来，目的是想突出<code>触发词</code>和<code>客体</code>的weight，从而提取其对应的主体。前两者不同，那主体也有可能不同。</p>
-<p>实现下来呢，如果不区分触发词和客体的话呢，可以使用上面那种方式。如果区分呢，那貌似只能引入新的layer来解决。</p>
-<p>bert本身就够大的了，就不能一个预训练模型就能解决这种问题的么？比如下面这种方式：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">预训练模型：</span><br><span class="line">&gt; 输入句子：*******</span><br><span class="line">&gt; 输入客体和触发词: *******</span><br><span class="line"></span><br><span class="line">返回:</span><br><span class="line">&gt; 主体：***</span><br></pre></td></tr></table></figure>
-
-
-<p>嘿嘿，现在也有这种，不过坑更大，而且消耗的资源也更多，，，以后有机会再聊。</p>
-<p>额外说一句，和本文无关，如果一个任务业界没有相关的研究，那你对这个任务进行建模、训练等，怎么评估这个模型是有效的呢？</p>
-<ol>
-<li>有一定量的标注数据，这个应该是必不可免的。但是也是操作可能性很低的地方。</li>
-<li>搭建一个简单的模型，试下基本效果。为后续方式作参考。</li>
-<li>变换一种建模方式，模型参数尽量行之有效，并且建模方式又足够巧妙。</li>
-<li>看loss走向和评估指标的变化。</li>
-</ol>
-<p>又水了一篇～</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/08/12/bert%E8%9E%8D%E5%85%A5%E5%A4%96%E9%83%A8%E7%89%B9%E5%BE%81/">展开全文 >></a>
         </p>
       
 
