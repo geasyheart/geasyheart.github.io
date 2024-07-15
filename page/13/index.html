@@ -206,6 +206,162 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-SQLAlchemy会话与事务控制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/06/SQLAlchemy%E4%BC%9A%E8%AF%9D%E4%B8%8E%E4%BA%8B%E5%8A%A1%E6%8E%A7%E5%88%B6/">SQLAlchemy会话与事务控制</a>
+    </h1>
+  
+
+        
+        <a href="/2018/04/06/SQLAlchemy%E4%BC%9A%E8%AF%9D%E4%B8%8E%E4%BA%8B%E5%8A%A1%E6%8E%A7%E5%88%B6/" class="archive-article-date">
+  	<time datetime="2018-04-06T14:19:09.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-06</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h3><p>SQLAlchemy 的<code>session</code>是用于管理数据库操作的一个像容器一样的东西. 模型实例对象本身独立存在, 而要让其修改(创建)生效, 则需要把它们加入某个<code>session</code>. 同时你也可以把模型实例对象从<code>session</code>中去除. 被<code>session</code>管理的实例对象, 在<code>session.commit()</code>时被提交到数据库. 同时<code>session.rollback()</code>是回滚变更.</p>
+<p><code>session.flush()</code>的作用是在事务管理内与数据库发生交互, 对应的实例状态被反映到数据库. 比如自增<code>ID</code>被填充上值.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">user = User(name=<span class="string">u&#x27;名字&#x27;</span>)</span><br><span class="line">session.add(user)</span><br><span class="line">session.commit()</span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    user = session.Query(User).first()</span><br><span class="line">    user.name = <span class="string">u&#x27;改名字&#x27;</span></span><br><span class="line">    session.commit()</span><br><span class="line"><span class="keyword">except</span>:</span><br><span class="line">    session.rollback()</span><br></pre></td></tr></table></figure>
+
+<h3 id="for-update"><a href="#for-update" class="headerlink" title="for update"></a>for update</h3><p>SQLAlchemy 的 Query 支持 <code>select ... for update / share</code> .</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">session.Query(User).with_for_update().first()</span><br><span class="line">session.Query(User).with_for_update(read=<span class="literal">True</span>).first()</span><br></pre></td></tr></table></figure>
+
+<p>完整形式是:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">with_for_update(read=<span class="literal">False</span>, nowait=<span class="literal">False</span>, of=<span class="literal">None</span>)</span><br></pre></td></tr></table></figure>
+<h4 id="read"><a href="#read" class="headerlink" title="read"></a>read</h4><p>是标识加互斥锁还是共享锁. 当为<code>True</code>时, 即<code>for share</code>的语句, 是共享锁. 多个事务可以获取共享锁, 互斥锁只能一个事务获取. 有”多个地方”都希望是”这段时间我获取的数据不能被修改, 我也不会改”, 那么只能使用共享锁.</p>
+<h4 id="nowait"><a href="#nowait" class="headerlink" title="nowait"></a>nowait</h4><p>其它事务碰到锁, 是否不等待直接”报错”.</p>
+<h4 id="of"><a href="#of" class="headerlink" title="of"></a>of</h4><p>指明上锁的表, 如果不指明, 则查询中涉及的所有表(行)都会加锁.</p>
+<h3 id="事务嵌套"><a href="#事务嵌套" class="headerlink" title="事务嵌套"></a>事务嵌套</h3><p>SQLAlchemy 中的事务嵌套有两种情况. 一是在<code>session</code>中管理的事务, 本身有层次性. 二是<code>session</code>和原始的<code>connection</code>之间, 是一种层次关系, 在这<code>session</code>,<code>connection</code>两个概念之中的事务同样具有这样的层次.<br><code>session</code>中的事务, 可能通过<code>begin_nested()</code>方法做<code>savepoint</code>:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">session.add(u1)</span><br><span class="line">session.add(u2)</span><br><span class="line"></span><br><span class="line">session.begin_nested()</span><br><span class="line">session.add(u3)</span><br><span class="line">session.rollback() <span class="comment"># rolls back u3, keeps u1 and u2</span></span><br><span class="line"></span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
+
+<p>或者使用上下文对象:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> record <span class="keyword">in</span> records:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">with</span> session.begin_nested():</span><br><span class="line">            session.merge(record)</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="built_in">print</span> <span class="string">&quot;Skipped record %s&quot;</span> % record</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
+
+<p>嵌套的事务的一个效果, 是最外层事务提交整个变更才会生效.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">user = User(name=<span class="string">&#x27;2&#x27;</span>)</span><br><span class="line"></span><br><span class="line">session.begin_nested()</span><br><span class="line">session.add(user)</span><br><span class="line">session.commit()</span><br><span class="line"></span><br><span class="line">session.rollback()</span><br></pre></td></tr></table></figure>
+
+<p>于是, 前面说的第二种情况有一种应用方式, 就是在<code>connection</code>上做一个事务, 最终也在<code>connection</code>上回滚这个事务, 如果<code>session</code>是<code>bind</code>到这个连接上的, 那么 <code>session</code>上所做的更改全部不会生效:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">conn = Engine.connect()</span><br><span class="line">session = Session(bind=conn)</span><br><span class="line">trans = conn.begin()</span><br><span class="line"></span><br><span class="line">user = User(name=<span class="string">&#x27;2&#x27;</span>)</span><br><span class="line">session.begin_nested()</span><br><span class="line">session.add(user)</span><br><span class="line">session.commit()</span><br><span class="line"></span><br><span class="line">session.commit()</span><br><span class="line"></span><br><span class="line">trans.rollback()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>在测试中这种方式可能会有用.</p>
+<h3 id="二段式提交"><a href="#二段式提交" class="headerlink" title="二段式提交"></a>二段式提交</h3><p>二段式提交, <code>Two-Phase</code>, 是为解决分布式环境下多点事务控制的一套协议.<br>与一般事务控制的不同是, 一般事务是 <code>begin</code>, 之后 <code>commit</code> 结束.<br>而二段式提交的流程上, <code>begin</code> 之后, 是 <code>prepare transaction</code> <code>transaction_id</code> , 这时相关事务数据已经持久化了. 之后, 再在任何时候(哪怕重启服务), 作 <code>commit prepared</code> <code>transaction_id</code> 或者 <code>rollback prepared</code> <code>transaction_id</code> .<br>从多点事务的控制来看, 应用层要做的事是, 先把任务分发出去, 然后收集”事务准备”的状态(prepare transaction 的结果). 根据收集的结果决定最后是<code>commit</code>还是<code>rollback</code>.<br>简单来说, 就是事务先保存, 再说提交的事.<br>SQLAlchemy 中对这个机制的支持, 是在构建会话类是加入<code>twophase</code>参数:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Session = sessionmaker(twophase=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+<p>然后会话类可以根据一些策略, 绑定多个<code>Engine</code>, 可以是多个数据库连接, 比如:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Session = sessionmaker(twophase=<span class="literal">True</span>)</span><br><span class="line">Session.configure(binds=&#123;User: Engine, Blog: Engine2&#125;)</span><br></pre></td></tr></table></figure>
+<p>这样, 在获取一个会话实例之后, 就处在二段式提交机制的支持之下, SQLAlchemy 自己会作多点的协调了. 完整的流程:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Engine = create_engine(<span class="string">&#x27;postgresql://test@localhost:5432/test&#x27;</span>, echo=<span class="literal">True</span>)</span><br><span class="line">Engine2 = create_engine(<span class="string">&#x27;postgresql://test@localhost:5432/test2&#x27;</span>, echo=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">Session = sessionmaker(twophase=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">Session.configure(binds=&#123;User: Engine, Blog: Engine2&#125;)</span><br><span class="line">session = Session()</span><br><span class="line"></span><br><span class="line">user = User(name=<span class="string">u&#x27;名字&#x27;</span>)</span><br><span class="line">session.add(user)</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
+
+<p>对应的<code>SQL</code>大概就是:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">begin;</span><br><span class="line">insert into <span class="string">&quot;user&quot;</span> (name) values (?);</span><br><span class="line">prepare transaction <span class="string">&#x27;xx&#x27;</span>;</span><br><span class="line">commit prepared <span class="string">&#x27;xx&#x27;</span>;</span><br></pre></td></tr></table></figure>
+<p>使用时, <code>Postgresql</code>数据库需要把 <code>max_prepared_transactions</code>这个配置项的值改成大于 <code>0</code></p>
+<h3 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h3><h4 id="如何正确使用事务？"><a href="#如何正确使用事务？" class="headerlink" title="如何正确使用事务？"></a>如何正确使用事务？</h4><p>假设有一个简单的银行系统，一共两名用户：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">User</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;user&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    money = Column(DECIMAL(<span class="number">10</span>, <span class="number">2</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TanseferLog</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;tansefer_log&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    from_user = Column(Integer, ForeignKey(<span class="string">&#x27;user.id&#x27;</span>, ondelete=<span class="string">&#x27;CASCADE&#x27;</span>, onupdate=<span class="string">&#x27;CASCADE&#x27;</span>))</span><br><span class="line">    to_user = Column(Integer, ForeignKey(<span class="string">&#x27;user.id&#x27;</span>, ondelete=<span class="string">&#x27;CASCADE&#x27;</span>, onupdate=<span class="string">&#x27;CASCADE&#x27;</span>))</span><br><span class="line">    amount = Column(DECIMAL(<span class="number">10</span>, <span class="number">2</span>))</span><br><span class="line"></span><br><span class="line">user = User(money=<span class="number">100</span>)</span><br><span class="line">session.add(user)</span><br><span class="line">user = User(money=<span class="number">0</span>)</span><br><span class="line">session.add(user)</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
+
+<p>然后开两个 session，同时进行两次转账操作：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">session1 = DB_Session()</span><br><span class="line">session2 = DB_Session()</span><br><span class="line"></span><br><span class="line">user1 = session1.query(User).get(<span class="number">1</span>)</span><br><span class="line">user2 = session1.query(User).get(<span class="number">2</span>)</span><br><span class="line"><span class="keyword">if</span> user1.money &gt;= <span class="number">100</span>:</span><br><span class="line">    user1.money -= <span class="number">100</span></span><br><span class="line">    user2.money += <span class="number">100</span></span><br><span class="line">    session1.add(TanseferLog(from_user=<span class="number">1</span>, to_user=<span class="number">2</span>, amount=<span class="number">100</span>))</span><br><span class="line"></span><br><span class="line">user1 = session2.query(User).get(<span class="number">1</span>)</span><br><span class="line">user2 = session2.query(User).get(<span class="number">2</span>)</span><br><span class="line"><span class="keyword">if</span> user1.money &gt;= <span class="number">100</span>:</span><br><span class="line">    user1.money -= <span class="number">100</span></span><br><span class="line">    user2.money += <span class="number">100</span></span><br><span class="line">    session2.add(TanseferLog(from_user=<span class="number">1</span>, to_user=<span class="number">2</span>, amount=<span class="number">100</span>))</span><br><span class="line"></span><br><span class="line">session1.commit()</span><br><span class="line">session2.commit()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>现在看看结果：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>user1.money</span><br><span class="line">Decimal(<span class="string">&#x27;0.00&#x27;</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>user2.money</span><br><span class="line">Decimal(<span class="string">&#x27;100.00&#x27;</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>session.query(TanseferLog).count()</span><br><span class="line"><span class="number">2L</span></span><br></pre></td></tr></table></figure>
+
+
+<p>两次转账都成功了，但是只转走了一笔钱，这明显不科学。</p>
+<p>可见 MySQL InnoDB 虽然支持事务，但并不是那么简单的，还需要手动加锁。<br>首先来试试读锁：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">user1 = session1.query(User).with_lockmode(<span class="string">&#x27;read&#x27;</span>).get(<span class="number">1</span>)</span><br><span class="line">user2 = session1.query(User).with_lockmode(<span class="string">&#x27;read&#x27;</span>).get(<span class="number">2</span>)</span><br><span class="line"><span class="keyword">if</span> user1.money &gt;= <span class="number">100</span>:</span><br><span class="line">    user1.money -= <span class="number">100</span></span><br><span class="line">    user2.money += <span class="number">100</span></span><br><span class="line">    session1.add(TanseferLog(from_user=<span class="number">1</span>, to_user=<span class="number">2</span>, amount=<span class="number">100</span>))</span><br><span class="line"></span><br><span class="line">user1 = session2.query(User).with_lockmode(<span class="string">&#x27;read&#x27;</span>).get(<span class="number">1</span>)</span><br><span class="line">user2 = session2.query(User).with_lockmode(<span class="string">&#x27;read&#x27;</span>).get(<span class="number">2</span>)</span><br><span class="line"><span class="keyword">if</span> user1.money &gt;= <span class="number">100</span>:</span><br><span class="line">    user1.money -= <span class="number">100</span></span><br><span class="line">    user2.money += <span class="number">100</span></span><br><span class="line">    session2.add(TanseferLog(from_user=<span class="number">1</span>, to_user=<span class="number">2</span>, amount=<span class="number">100</span>))</span><br><span class="line">session1.commit()</span><br><span class="line">session2.commit()</span><br></pre></td></tr></table></figure>
+
+
+<p>现在在执行 session1.commit() 的时候，因为 user1 和 user2 都被 session2 加了读锁，所以会等待锁被释放。超时以后，session1.commit() 会抛出个超时的异常，如果捕捉了的话，或者 session2 在另一个进程，那么 session2.commit() 还是能正常提交的。这种情况下，有一个事务是肯定会提交失败的，所以那些更改等于白做了。</p>
+<p>接下来看看写锁，把上段代码中的 ‘read’ 改成 ‘update’ 即可。这次在执行 select 的时候就会被阻塞了：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user1 = session2.query(User).with_lockmode(<span class="string">&#x27;update&#x27;</span>).get(<span class="number">1</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>这样只要在超时期间内，session1 完成了提交或回滚，那么 session2 就能正常判断 user1.money &gt;&#x3D; 100 是否成立了。<br>由此可见，如果需要更改数据，最好加写锁。</p>
+<p>那么什么时候用读锁呢？如果要保证事务运行期间内，被读取的数据不被修改，自己也不去修改，加读锁即可。<br>举例来说，假设我查询一个用户的开支记录（同时包含余额和转账记录），可以直接把 user 和 tansefer_log 做个内连接。<br>但如果用户的转账记录特别多，我在查询前想先验证用户的密码（假设在 user 表中），确认相符后才查询转账记录。而这两次查询的期间内，用户可能收到了一笔转账，导致他的 money 字段被修改了，但我在展示给用户时，用户的余额仍然没变，这就不正常了。<br>而如果我在读取 user 时加了读锁，用户是无法收到转账的（因为无法被另一个事务加写锁来修改 money 字段），这就保证了不会查出额外的 tansefer_log 记录。等我查询完两张表，释放了读锁后，转账就可以继续进行了，不过我显示的数据在当时的确是正确和一致的。</p>
+<p>另外要注意的是，如果被查询的字段没有加索引的话，就会变成锁整张表了：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">session1.query(User).<span class="built_in">filter</span>(User.<span class="built_in">id</span> &gt; <span class="number">50</span>).with_lockmode(<span class="string">&#x27;update&#x27;</span>).<span class="built_in">all</span>()</span><br><span class="line">session2.query(User).<span class="built_in">filter</span>(User.<span class="built_in">id</span> &lt; <span class="number">40</span>).with_lockmode(<span class="string">&#x27;update&#x27;</span>).<span class="built_in">all</span>() <span class="comment"># 不会被锁，因为 id 是主键</span></span><br><span class="line"></span><br><span class="line">session1.rollback()</span><br><span class="line">session2.rollback()</span><br><span class="line"></span><br><span class="line">session1.query(User).<span class="built_in">filter</span>(User.money == <span class="number">50</span>).with_lockmode(<span class="string">&#x27;update&#x27;</span>).<span class="built_in">all</span>()</span><br><span class="line">session2.query(User).<span class="built_in">filter</span>(User.money == <span class="number">40</span>).with_lockmode(<span class="string">&#x27;update&#x27;</span>).<span class="built_in">all</span>() <span class="comment"># 会等待解锁，因为 money 上没有索引</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>要避免的话，可以这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">money = Column(DECIMAL(<span class="number">10</span>, <span class="number">2</span>), index=<span class="literal">True</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>另一个注意点是子事务。<br>InnoDB 支持子事务（savepoint 语句），可以简化一些逻辑。<br>例如有的方法是用于改写数据库的，它执行时可能提交了事务，但在后续的流程中却执行失败了，却没法回滚那个方法中已经提交的事务。这时就可以把那个方法当成子事务来运行了：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">step1</span>():</span><br><span class="line">    <span class="comment"># ...</span></span><br><span class="line">    <span class="keyword">if</span> success:</span><br><span class="line">        session.commit()</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">    session.rollback()</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">step2</span>():</span><br><span class="line">    <span class="comment"># ...</span></span><br><span class="line">    <span class="keyword">if</span> success:</span><br><span class="line">        session.commit()</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">    session.rollback()</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">session.begin_nested()</span><br><span class="line"><span class="keyword">if</span> step1():</span><br><span class="line">    session.begin_nested()</span><br><span class="line">    <span class="keyword">if</span> step2():</span><br><span class="line">        session.commit()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        session.rollback()</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    session.rollback()</span><br></pre></td></tr></table></figure>
+
+<p>此外，rollback 一个子事务，可以释放这个子事务中获得的锁，提高并发性和降低死锁概率。</p>
+<h4 id="如何对一个字段进行自增操作？"><a href="#如何对一个字段进行自增操作？" class="headerlink" title="如何对一个字段进行自增操作？"></a>如何对一个字段进行自增操作？</h4><p>最简单的办法就是获取时加上写锁：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">user = session.query(User).with_lockmode(<span class="string">&#x27;update&#x27;</span>).get(<span class="number">1</span>)</span><br><span class="line">user.age += <span class="number">1</span></span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
+
+<p>如果不想多一次读的话，这样写也是可以的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">session.query(User).<span class="built_in">filter</span>(User.<span class="built_in">id</span> == <span class="number">1</span>).update(&#123;</span><br><span class="line">    User.age: User.age + <span class="number">1</span></span><br><span class="line">&#125;)</span><br><span class="line">session.commit()</span><br><span class="line"><span class="comment"># 其实字段之间也可以做运算：</span></span><br><span class="line">session.query(User).<span class="built_in">filter</span>(User.<span class="built_in">id</span> == <span class="number">1</span>).update(&#123;</span><br><span class="line">    User.age: User.age + User.<span class="built_in">id</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">SQLAlchemy</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/SQLAlchemy//" class="article-tag-list-link color1">SQLAlchemy</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/04/06/SQLAlchemy%E4%BC%9A%E8%AF%9D%E4%B8%8E%E4%BA%8B%E5%8A%A1%E6%8E%A7%E5%88%B6/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-SQLAlchemy外键和关系" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1256,114 +1412,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2017/12/26/2017%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-推送" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/12/05/%E6%8E%A8%E9%80%81/">推送</a>
-    </h1>
-  
-
-        
-        <a href="/2017/12/05/%E6%8E%A8%E9%80%81/" class="archive-article-date">
-  	<time datetime="2017-12-05T06:33:58.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-12-05</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="如何定位到某一台设备"><a href="#如何定位到某一台设备" class="headerlink" title="如何定位到某一台设备"></a>如何定位到某一台设备</h3><p>根据不同的tag进行定位，例如： </p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;where&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;and&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">            <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;and&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">                    <span class="punctuation">&#123;</span></span><br><span class="line">                        <span class="attr">&quot;tag&quot;</span><span class="punctuation">:</span> <span class="string">&quot;guocheng67&quot;</span></span><br><span class="line">                    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">                    <span class="punctuation">&#123;</span></span><br><span class="line">                        <span class="attr">&quot;tag&quot;</span><span class="punctuation">:</span> <span class="string">&quot;njy12&quot;</span></span><br><span class="line">                    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">                    <span class="punctuation">&#123;</span></span><br><span class="line">                        <span class="attr">&quot;tag&quot;</span><span class="punctuation">:</span> <span class="string">&quot;test&quot;</span></span><br><span class="line">                    <span class="punctuation">&#125;</span></span><br><span class="line">                <span class="punctuation">]</span></span><br><span class="line">            <span class="punctuation">&#125;</span></span><br><span class="line">        <span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>上面表示: 发送消息给农技员ID为12、过程为67、环境为test。又由于多台设备可以指定相同的tag，从而单条推送可以推送给多台设备。所以此处的组播意思可能就变了，根据不同的tag组合定位到不同的设备个、群体，实现组播发送，此处tag为app端设置。</p>
-<h3 id="关于解决友盟推送每分钟限制"><a href="#关于解决友盟推送每分钟限制" class="headerlink" title="关于解决友盟推送每分钟限制"></a>关于解决友盟推送每分钟限制</h3><p>官方文档限制每分钟只能发送5条消息，所以后端维持一个<code>队列A</code>以及<code>计时器</code>，进行分批发送，保证消息发送出去。</p>
-<p>此队列实现思想：</p>
-<ol>
-<li>推送请求过来，将此推送消息体保存至redis hash表中，key为uuid,value为消息体</li>
-<li>将此 uuid lpush至队列A，等待任务被执行</li>
-</ol>
-<p>此计时器实现思想：</p>
-<ol>
-<li>每隔一段间隔(例如3s)进行轮询存储在队列A中的任务,如果有内容，则定位到当前时间至分钟，例如<code>201712100304</code>,利用redis incr进行操作此key，如果大于5，则表示此分钟已经发送满，则继续轮训至下分钟进行发送</li>
-<li>如果执行成功，则将此uuid rpop至另外一个<code>队列B</code>,实现原子性操作，此处只能表示此任务已经被执行了，但是不能代表执行成功，此处可参考<code>错误</code></li>
-</ol>
-<h3 id="错误"><a href="#错误" class="headerlink" title="错误"></a>错误</h3><ol>
-<li>任务没有被正常执行，或者消息丢失，涉及原因可能多样</li>
-<li>友盟推送返回错误，此处错误可以参考<a target="_blank" rel="noopener" href="http://dev.umeng.com/push/android/api-doc#4_8">错误</a></li>
-</ol>
-<p>对于错误1，理论应再次推入<code>队列A</code>，但此处不考虑。<br>对于错误2，除了应用次数限制错误，其余错误可以避免。</p>
-<h3 id="任务以及结果存储期限"><a href="#任务以及结果存储期限" class="headerlink" title="任务以及结果存储期限"></a>任务以及结果存储期限</h3><p>此处队列与存储均使用redis进行实现，所以理论上只要redis服务不停止，服务状态与结果均可以持久化存储，又由于推送非持久化过程，所以此处暂时满足。</p>
-<h3 id="定时发送消息"><a href="#定时发送消息" class="headerlink" title="定时发送消息"></a>定时发送消息</h3><p>后端维持一个定时任务，到达时间后，会将消息推送给队列A，等待发送。<br>此处可以动态增、删任务。</p>
-<h3 id="立即发送"><a href="#立即发送" class="headerlink" title="立即发送"></a>立即发送</h3><p>将此消息推到队首／尾，等待发送。</p>
-<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h3><p>转战友盟，此片结束。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/12/05/%E6%8E%A8%E9%80%81/">展开全文 >></a>
         </p>
       
 

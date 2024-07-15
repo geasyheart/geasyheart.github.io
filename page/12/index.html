@@ -206,6 +206,112 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-异步mq的窘境" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/06/29/%E5%BC%82%E6%AD%A5mq%E7%9A%84%E7%AA%98%E5%A2%83/">异步mq的窘境</a>
+    </h1>
+  
+
+        
+        <a href="/2018/06/29/%E5%BC%82%E6%AD%A5mq%E7%9A%84%E7%AA%98%E5%A2%83/" class="archive-article-date">
+  	<time datetime="2018-06-29T15:14:54.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-06-29</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>目前在开发的内部爬虫框架中，对于从消息队列中取任务部分，如下图所示，遇到了一些问题。</p>
+<img src="/2018/06/29/%E5%BC%82%E6%AD%A5mq%E7%9A%84%E7%AA%98%E5%A2%83/%E5%A4%84%E7%90%86%E6%A8%A1%E5%9E%8B.png" class="" title="消息处理模型">
+
+<p>因为我们整个模型为async的，底层使用的asyncio，对于消息队列的客户端来讲，可选择有的pika和kombu，对于kombu，的确是一个不错的选择，相比pika callback的写法，的确封装的更为高级，写起来比较方便，另外官方支持与eventlet工作，例如openstack的nova底层使用的就是eventlet与kombu，但是kombu目前不支持asyncio,官方将于5.0版本提供<a target="_blank" rel="noopener" href="https://github.com/celery/kombu/milestone/3">支持</a>,我很看好，题外话。</p>
+<p>那么目前能够选择貌似只有pika了，<a target="_blank" rel="noopener" href="https://pika.readthedocs.io/en/latest/examples/asyncio_consumer.html">官方示例</a>,奈何实力不高，只能在callback的基础上加代码，此处分成两个版本，如下所示。</p>
+<h3 id="推入线程池-进程池"><a href="#推入线程池-进程池" class="headerlink" title="推入线程池&#x2F;进程池"></a>推入线程池&#x2F;进程池</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Async</span> PikaConsumer(<span class="built_in">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_message</span>(<span class="params">self, unused_channel, basic_deliver, properties, body</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;Invoked by pika when a message is delivered from RabbitMQ. The</span></span><br><span class="line"><span class="string">        channel is passed for your convenience. The basic_deliver object that</span></span><br><span class="line"><span class="string">        is passed in carries the exchange, routing key, delivery tag and</span></span><br><span class="line"><span class="string">        a redelivered flag for the message. The properties passed in is an</span></span><br><span class="line"><span class="string">        instance of BasicProperties with the message properties and the body</span></span><br><span class="line"><span class="string">        is the message that was sent.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :param pika.channel.Channel unused_channel: The channel object</span></span><br><span class="line"><span class="string">        :param pika.Spec.Basic.Deliver: basic_deliver method</span></span><br><span class="line"><span class="string">        :param pika.Spec.BasicProperties: properties</span></span><br><span class="line"><span class="string">        :param str|unicode body: The message body</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        LOGGER.info(<span class="string">&#x27;Received message # %s from %s: %s&#x27;</span>,</span><br><span class="line">                    basic_deliver.delivery_tag, properties.app_id, body)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 将获取到的消息推入线程池/进程池中进行处理</span></span><br><span class="line">        self._connection.ioloop.loop.run_in_executor(crawl.dispatch)  <span class="comment">#此处传入dispatch...</span></span><br><span class="line">        <span class="comment"># 直接确认消息，不拒绝消息，不会重新入队列</span></span><br><span class="line">        self.acknowledge_message(basic_deliver.delivery_tag)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Crawl</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">dispatch</span>(<span class="params">unused_channel, basic_deliver, properties, body</span>):</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">if</span> body[<span class="string">&quot;type&quot;</span>] == <span class="string">&quot;list&quot;</span>:</span><br><span class="line">                <span class="keyword">return</span> self.get_list(body)</span><br><span class="line">            <span class="keyword">return</span> self.get_data(body)</span><br><span class="line">        <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">            <span class="comment"># todo something.</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_list</span>(<span class="params">self,task</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_data</span>(<span class="params">self,task</span>):</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>异步取来的任务，将其抛给线程池&#x2F;进程池处理，那么上层应用者直接在<code>get_list</code>和<code>get_data</code>中进行处理，那么此处就有非常大的问题了，因为一个好好的异步模型活生生的给改成了有点同步的感觉了，如果我想在业务层执行异步任务，会发现在当前线程中无法get eventloop,哈哈，好尴尬。这点实际在tornado官方文档中描述如何<a target="_blank" rel="noopener" href="http://www.tornadoweb.org/en/stable/faq.html">执行同步代码</a>中有提示，是不是和这个很类似.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">executor = concurrent.futures.ThreadPoolExecutor(<span class="number">8</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ThreadPoolHandler</span>(<span class="title class_ inherited__">RequestHandler</span>):</span><br><span class="line"><span class="meta">    @gen.coroutine</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">5</span>):</span><br><span class="line">            <span class="built_in">print</span>(i)</span><br><span class="line">            <span class="keyword">yield</span> executor.submit(time.sleep, <span class="number">1</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="异步处理"><a href="#异步处理" class="headerlink" title="异步处理"></a>异步处理</h3><p>上面的实在受不了，太烂了，所以此处还是要想办法给异步了，此处斜眼。<br>此前在看<a target="_blank" rel="noopener" href="https://github.com/nameko/nameko">nameko</a>中消费者处理时，他是使用eventlet.spawn方法开启一个新的协程进行处理，从而不阻塞当前loop,那么在asyncio中也一定有相应的方法，下面出场asyncio.async和asyncio.ensure_future方法，其实也是一个方法，asyncio.async将被放弃啦，所以所以介绍ensure_future方法。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Async</span> PikaConsumer(<span class="built_in">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_message</span>(<span class="params">self, unused_channel, basic_deliver, properties, body</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;Invoked by pika when a message is delivered from RabbitMQ. The</span></span><br><span class="line"><span class="string">        channel is passed for your convenience. The basic_deliver object that</span></span><br><span class="line"><span class="string">        is passed in carries the exchange, routing key, delivery tag and</span></span><br><span class="line"><span class="string">        a redelivered flag for the message. The properties passed in is an</span></span><br><span class="line"><span class="string">        instance of BasicProperties with the message properties and the body</span></span><br><span class="line"><span class="string">        is the message that was sent.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :param pika.channel.Channel unused_channel: The channel object</span></span><br><span class="line"><span class="string">        :param pika.Spec.Basic.Deliver: basic_deliver method</span></span><br><span class="line"><span class="string">        :param pika.Spec.BasicProperties: properties</span></span><br><span class="line"><span class="string">        :param str|unicode body: The message body</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        LOGGER.info(<span class="string">&#x27;Received message # %s from %s: %s&#x27;</span>,</span><br><span class="line">                    basic_deliver.delivery_tag, properties.app_id, body)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 此处改变了哦</span></span><br><span class="line">        asyncio.ensure_future(self.deal_message(unused_channel, basic_deliver, properties, body))</span><br><span class="line">        <span class="comment"># 直接确认消息，不拒绝消息，不会重新入队列</span></span><br><span class="line">        self.acknowledge_message(basic_deliver.delivery_tag)</span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Crawl</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    config = &#123;<span class="string">&quot;CONCURRENT&quot;</span>:<span class="number">2</span>&#125;</span><br><span class="line">    <span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">dispatch</span>(<span class="params">self,u,b,p, body</span>):</span><br><span class="line">        <span class="comment"># 简化写了，，，明白流程就行啦...</span></span><br><span class="line">        <span class="keyword">await</span> self.get_list(json.loads(body.decode()))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">get_list</span>(<span class="params">self,body</span>):</span><br><span class="line">        <span class="comment">#time.sleep(3)</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">with</span> aiohttp.ClientSession() <span class="keyword">as</span> session:</span><br><span class="line">                resp = <span class="keyword">await</span> session.get(body[<span class="string">&quot;url&quot;</span>], timeout=<span class="number">10</span>)</span><br><span class="line">                body = <span class="keyword">await</span> resp.text()</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&quot;异步处理body:&quot;</span>, resp.status)</span><br><span class="line">        <span class="keyword">except</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;超时&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>由于使用的pika连接器是asyncio的，那么根据pika的官方文档描述，获取到的任务只有在完成的时候才会进行下发新的任务，<br>如果如上<code>get_list</code>方法下面的使用者写的是同步代码，会导致效率非常地下，所以此处会强制提升业务代码至异步模型，貌似有点激进，所以暂时不更新.</p>
+<h3 id="同步处理"><a href="#同步处理" class="headerlink" title="同步处理"></a>同步处理</h3><p>额，几天没有更新了，经过几天的思考，目前采用多线程&#x2F;多进程模型，为什么没有使用异步呢？我觉得可以从一下几方面总结：</p>
+<ol>
+<li>关于消息队列客户端，没有异步支持的客户端，kazoo亦是如此，但是这两者都有gevent、eventlet的支持，为什么不使用呢？因为在看openstack官方论坛以及asyncio的发展趋势，更应该顺应技术发展，如果kombu明年支持了，可以自行再重新实现一遍，整体架构会比目前的更为成熟.</li>
+<li>代理隧道数量有限，其实这个不应该考虑到框架层面上的，因为这个可以通过并发数(目前通过信号量控制)控制，目前没有达到必须使用异步的地步，去加速速度或者减轻资源的消耗.</li>
+<li>满足目前的整体需求，另外使用同步的话整个爬虫团队更方便和他们熟悉的软件工具配合使用，例如chrome headless、selenium、splash等等，如果使用异步的话，还要把他run_in_executor中，还要在同步处理上进一步封装，也比较麻烦.</li>
+<li>真正使用时遇到了其他的问题. 因为我们list和data任务推入同一个消息队列中，导致list任务会非常多导致data任务很难被消费，以及消息堆积导致最新消息不能被及时消费。由于消息队列是FIFO模型，由于生产速度大于消费速度，导致迟迟无法看到data结果，这一方面准备改成两个队列，list和data队列,data队列优先级提高，加速获取结果.<br>另外由于list任务生产速度过快，如何加速处理呢，可以使用多个客户端同时处理，由于有去重，那么就会加速消费速度.</li>
+</ol>
+<p>先把第一个版本做稳定了，因为目前还是有一些问题的，因为分布式爬虫框架，程序异常退出以及退出迟迟没有在server端看到客户端下线，还要定位原因以及加强处理，等稳定后再加入timer等其他功能。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/06/29/%E5%BC%82%E6%AD%A5mq%E7%9A%84%E7%AA%98%E5%A2%83/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-python中不得不说的装饰器" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1260,162 +1366,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2018/04/10/SQLAlchemy%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-SQLAlchemy会话与事务控制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/06/SQLAlchemy%E4%BC%9A%E8%AF%9D%E4%B8%8E%E4%BA%8B%E5%8A%A1%E6%8E%A7%E5%88%B6/">SQLAlchemy会话与事务控制</a>
-    </h1>
-  
-
-        
-        <a href="/2018/04/06/SQLAlchemy%E4%BC%9A%E8%AF%9D%E4%B8%8E%E4%BA%8B%E5%8A%A1%E6%8E%A7%E5%88%B6/" class="archive-article-date">
-  	<time datetime="2018-04-06T14:19:09.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-06</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h3><p>SQLAlchemy 的<code>session</code>是用于管理数据库操作的一个像容器一样的东西. 模型实例对象本身独立存在, 而要让其修改(创建)生效, 则需要把它们加入某个<code>session</code>. 同时你也可以把模型实例对象从<code>session</code>中去除. 被<code>session</code>管理的实例对象, 在<code>session.commit()</code>时被提交到数据库. 同时<code>session.rollback()</code>是回滚变更.</p>
-<p><code>session.flush()</code>的作用是在事务管理内与数据库发生交互, 对应的实例状态被反映到数据库. 比如自增<code>ID</code>被填充上值.</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">user = User(name=<span class="string">u&#x27;名字&#x27;</span>)</span><br><span class="line">session.add(user)</span><br><span class="line">session.commit()</span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    user = session.Query(User).first()</span><br><span class="line">    user.name = <span class="string">u&#x27;改名字&#x27;</span></span><br><span class="line">    session.commit()</span><br><span class="line"><span class="keyword">except</span>:</span><br><span class="line">    session.rollback()</span><br></pre></td></tr></table></figure>
-
-<h3 id="for-update"><a href="#for-update" class="headerlink" title="for update"></a>for update</h3><p>SQLAlchemy 的 Query 支持 <code>select ... for update / share</code> .</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">session.Query(User).with_for_update().first()</span><br><span class="line">session.Query(User).with_for_update(read=<span class="literal">True</span>).first()</span><br></pre></td></tr></table></figure>
-
-<p>完整形式是:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">with_for_update(read=<span class="literal">False</span>, nowait=<span class="literal">False</span>, of=<span class="literal">None</span>)</span><br></pre></td></tr></table></figure>
-<h4 id="read"><a href="#read" class="headerlink" title="read"></a>read</h4><p>是标识加互斥锁还是共享锁. 当为<code>True</code>时, 即<code>for share</code>的语句, 是共享锁. 多个事务可以获取共享锁, 互斥锁只能一个事务获取. 有”多个地方”都希望是”这段时间我获取的数据不能被修改, 我也不会改”, 那么只能使用共享锁.</p>
-<h4 id="nowait"><a href="#nowait" class="headerlink" title="nowait"></a>nowait</h4><p>其它事务碰到锁, 是否不等待直接”报错”.</p>
-<h4 id="of"><a href="#of" class="headerlink" title="of"></a>of</h4><p>指明上锁的表, 如果不指明, 则查询中涉及的所有表(行)都会加锁.</p>
-<h3 id="事务嵌套"><a href="#事务嵌套" class="headerlink" title="事务嵌套"></a>事务嵌套</h3><p>SQLAlchemy 中的事务嵌套有两种情况. 一是在<code>session</code>中管理的事务, 本身有层次性. 二是<code>session</code>和原始的<code>connection</code>之间, 是一种层次关系, 在这<code>session</code>,<code>connection</code>两个概念之中的事务同样具有这样的层次.<br><code>session</code>中的事务, 可能通过<code>begin_nested()</code>方法做<code>savepoint</code>:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">session.add(u1)</span><br><span class="line">session.add(u2)</span><br><span class="line"></span><br><span class="line">session.begin_nested()</span><br><span class="line">session.add(u3)</span><br><span class="line">session.rollback() <span class="comment"># rolls back u3, keeps u1 and u2</span></span><br><span class="line"></span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
-
-<p>或者使用上下文对象:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> record <span class="keyword">in</span> records:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">with</span> session.begin_nested():</span><br><span class="line">            session.merge(record)</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="built_in">print</span> <span class="string">&quot;Skipped record %s&quot;</span> % record</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
-
-<p>嵌套的事务的一个效果, 是最外层事务提交整个变更才会生效.</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">user = User(name=<span class="string">&#x27;2&#x27;</span>)</span><br><span class="line"></span><br><span class="line">session.begin_nested()</span><br><span class="line">session.add(user)</span><br><span class="line">session.commit()</span><br><span class="line"></span><br><span class="line">session.rollback()</span><br></pre></td></tr></table></figure>
-
-<p>于是, 前面说的第二种情况有一种应用方式, 就是在<code>connection</code>上做一个事务, 最终也在<code>connection</code>上回滚这个事务, 如果<code>session</code>是<code>bind</code>到这个连接上的, 那么 <code>session</code>上所做的更改全部不会生效:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">conn = Engine.connect()</span><br><span class="line">session = Session(bind=conn)</span><br><span class="line">trans = conn.begin()</span><br><span class="line"></span><br><span class="line">user = User(name=<span class="string">&#x27;2&#x27;</span>)</span><br><span class="line">session.begin_nested()</span><br><span class="line">session.add(user)</span><br><span class="line">session.commit()</span><br><span class="line"></span><br><span class="line">session.commit()</span><br><span class="line"></span><br><span class="line">trans.rollback()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>在测试中这种方式可能会有用.</p>
-<h3 id="二段式提交"><a href="#二段式提交" class="headerlink" title="二段式提交"></a>二段式提交</h3><p>二段式提交, <code>Two-Phase</code>, 是为解决分布式环境下多点事务控制的一套协议.<br>与一般事务控制的不同是, 一般事务是 <code>begin</code>, 之后 <code>commit</code> 结束.<br>而二段式提交的流程上, <code>begin</code> 之后, 是 <code>prepare transaction</code> <code>transaction_id</code> , 这时相关事务数据已经持久化了. 之后, 再在任何时候(哪怕重启服务), 作 <code>commit prepared</code> <code>transaction_id</code> 或者 <code>rollback prepared</code> <code>transaction_id</code> .<br>从多点事务的控制来看, 应用层要做的事是, 先把任务分发出去, 然后收集”事务准备”的状态(prepare transaction 的结果). 根据收集的结果决定最后是<code>commit</code>还是<code>rollback</code>.<br>简单来说, 就是事务先保存, 再说提交的事.<br>SQLAlchemy 中对这个机制的支持, 是在构建会话类是加入<code>twophase</code>参数:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Session = sessionmaker(twophase=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
-<p>然后会话类可以根据一些策略, 绑定多个<code>Engine</code>, 可以是多个数据库连接, 比如:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Session = sessionmaker(twophase=<span class="literal">True</span>)</span><br><span class="line">Session.configure(binds=&#123;User: Engine, Blog: Engine2&#125;)</span><br></pre></td></tr></table></figure>
-<p>这样, 在获取一个会话实例之后, 就处在二段式提交机制的支持之下, SQLAlchemy 自己会作多点的协调了. 完整的流程:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Engine = create_engine(<span class="string">&#x27;postgresql://test@localhost:5432/test&#x27;</span>, echo=<span class="literal">True</span>)</span><br><span class="line">Engine2 = create_engine(<span class="string">&#x27;postgresql://test@localhost:5432/test2&#x27;</span>, echo=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">Session = sessionmaker(twophase=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">Session.configure(binds=&#123;User: Engine, Blog: Engine2&#125;)</span><br><span class="line">session = Session()</span><br><span class="line"></span><br><span class="line">user = User(name=<span class="string">u&#x27;名字&#x27;</span>)</span><br><span class="line">session.add(user)</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
-
-<p>对应的<code>SQL</code>大概就是:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">begin;</span><br><span class="line">insert into <span class="string">&quot;user&quot;</span> (name) values (?);</span><br><span class="line">prepare transaction <span class="string">&#x27;xx&#x27;</span>;</span><br><span class="line">commit prepared <span class="string">&#x27;xx&#x27;</span>;</span><br></pre></td></tr></table></figure>
-<p>使用时, <code>Postgresql</code>数据库需要把 <code>max_prepared_transactions</code>这个配置项的值改成大于 <code>0</code></p>
-<h3 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h3><h4 id="如何正确使用事务？"><a href="#如何正确使用事务？" class="headerlink" title="如何正确使用事务？"></a>如何正确使用事务？</h4><p>假设有一个简单的银行系统，一共两名用户：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">User</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;user&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    money = Column(DECIMAL(<span class="number">10</span>, <span class="number">2</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TanseferLog</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;tansefer_log&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    from_user = Column(Integer, ForeignKey(<span class="string">&#x27;user.id&#x27;</span>, ondelete=<span class="string">&#x27;CASCADE&#x27;</span>, onupdate=<span class="string">&#x27;CASCADE&#x27;</span>))</span><br><span class="line">    to_user = Column(Integer, ForeignKey(<span class="string">&#x27;user.id&#x27;</span>, ondelete=<span class="string">&#x27;CASCADE&#x27;</span>, onupdate=<span class="string">&#x27;CASCADE&#x27;</span>))</span><br><span class="line">    amount = Column(DECIMAL(<span class="number">10</span>, <span class="number">2</span>))</span><br><span class="line"></span><br><span class="line">user = User(money=<span class="number">100</span>)</span><br><span class="line">session.add(user)</span><br><span class="line">user = User(money=<span class="number">0</span>)</span><br><span class="line">session.add(user)</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
-
-<p>然后开两个 session，同时进行两次转账操作：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">session1 = DB_Session()</span><br><span class="line">session2 = DB_Session()</span><br><span class="line"></span><br><span class="line">user1 = session1.query(User).get(<span class="number">1</span>)</span><br><span class="line">user2 = session1.query(User).get(<span class="number">2</span>)</span><br><span class="line"><span class="keyword">if</span> user1.money &gt;= <span class="number">100</span>:</span><br><span class="line">    user1.money -= <span class="number">100</span></span><br><span class="line">    user2.money += <span class="number">100</span></span><br><span class="line">    session1.add(TanseferLog(from_user=<span class="number">1</span>, to_user=<span class="number">2</span>, amount=<span class="number">100</span>))</span><br><span class="line"></span><br><span class="line">user1 = session2.query(User).get(<span class="number">1</span>)</span><br><span class="line">user2 = session2.query(User).get(<span class="number">2</span>)</span><br><span class="line"><span class="keyword">if</span> user1.money &gt;= <span class="number">100</span>:</span><br><span class="line">    user1.money -= <span class="number">100</span></span><br><span class="line">    user2.money += <span class="number">100</span></span><br><span class="line">    session2.add(TanseferLog(from_user=<span class="number">1</span>, to_user=<span class="number">2</span>, amount=<span class="number">100</span>))</span><br><span class="line"></span><br><span class="line">session1.commit()</span><br><span class="line">session2.commit()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>现在看看结果：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>user1.money</span><br><span class="line">Decimal(<span class="string">&#x27;0.00&#x27;</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>user2.money</span><br><span class="line">Decimal(<span class="string">&#x27;100.00&#x27;</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>session.query(TanseferLog).count()</span><br><span class="line"><span class="number">2L</span></span><br></pre></td></tr></table></figure>
-
-
-<p>两次转账都成功了，但是只转走了一笔钱，这明显不科学。</p>
-<p>可见 MySQL InnoDB 虽然支持事务，但并不是那么简单的，还需要手动加锁。<br>首先来试试读锁：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">user1 = session1.query(User).with_lockmode(<span class="string">&#x27;read&#x27;</span>).get(<span class="number">1</span>)</span><br><span class="line">user2 = session1.query(User).with_lockmode(<span class="string">&#x27;read&#x27;</span>).get(<span class="number">2</span>)</span><br><span class="line"><span class="keyword">if</span> user1.money &gt;= <span class="number">100</span>:</span><br><span class="line">    user1.money -= <span class="number">100</span></span><br><span class="line">    user2.money += <span class="number">100</span></span><br><span class="line">    session1.add(TanseferLog(from_user=<span class="number">1</span>, to_user=<span class="number">2</span>, amount=<span class="number">100</span>))</span><br><span class="line"></span><br><span class="line">user1 = session2.query(User).with_lockmode(<span class="string">&#x27;read&#x27;</span>).get(<span class="number">1</span>)</span><br><span class="line">user2 = session2.query(User).with_lockmode(<span class="string">&#x27;read&#x27;</span>).get(<span class="number">2</span>)</span><br><span class="line"><span class="keyword">if</span> user1.money &gt;= <span class="number">100</span>:</span><br><span class="line">    user1.money -= <span class="number">100</span></span><br><span class="line">    user2.money += <span class="number">100</span></span><br><span class="line">    session2.add(TanseferLog(from_user=<span class="number">1</span>, to_user=<span class="number">2</span>, amount=<span class="number">100</span>))</span><br><span class="line">session1.commit()</span><br><span class="line">session2.commit()</span><br></pre></td></tr></table></figure>
-
-
-<p>现在在执行 session1.commit() 的时候，因为 user1 和 user2 都被 session2 加了读锁，所以会等待锁被释放。超时以后，session1.commit() 会抛出个超时的异常，如果捕捉了的话，或者 session2 在另一个进程，那么 session2.commit() 还是能正常提交的。这种情况下，有一个事务是肯定会提交失败的，所以那些更改等于白做了。</p>
-<p>接下来看看写锁，把上段代码中的 ‘read’ 改成 ‘update’ 即可。这次在执行 select 的时候就会被阻塞了：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user1 = session2.query(User).with_lockmode(<span class="string">&#x27;update&#x27;</span>).get(<span class="number">1</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<p>这样只要在超时期间内，session1 完成了提交或回滚，那么 session2 就能正常判断 user1.money &gt;&#x3D; 100 是否成立了。<br>由此可见，如果需要更改数据，最好加写锁。</p>
-<p>那么什么时候用读锁呢？如果要保证事务运行期间内，被读取的数据不被修改，自己也不去修改，加读锁即可。<br>举例来说，假设我查询一个用户的开支记录（同时包含余额和转账记录），可以直接把 user 和 tansefer_log 做个内连接。<br>但如果用户的转账记录特别多，我在查询前想先验证用户的密码（假设在 user 表中），确认相符后才查询转账记录。而这两次查询的期间内，用户可能收到了一笔转账，导致他的 money 字段被修改了，但我在展示给用户时，用户的余额仍然没变，这就不正常了。<br>而如果我在读取 user 时加了读锁，用户是无法收到转账的（因为无法被另一个事务加写锁来修改 money 字段），这就保证了不会查出额外的 tansefer_log 记录。等我查询完两张表，释放了读锁后，转账就可以继续进行了，不过我显示的数据在当时的确是正确和一致的。</p>
-<p>另外要注意的是，如果被查询的字段没有加索引的话，就会变成锁整张表了：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">session1.query(User).<span class="built_in">filter</span>(User.<span class="built_in">id</span> &gt; <span class="number">50</span>).with_lockmode(<span class="string">&#x27;update&#x27;</span>).<span class="built_in">all</span>()</span><br><span class="line">session2.query(User).<span class="built_in">filter</span>(User.<span class="built_in">id</span> &lt; <span class="number">40</span>).with_lockmode(<span class="string">&#x27;update&#x27;</span>).<span class="built_in">all</span>() <span class="comment"># 不会被锁，因为 id 是主键</span></span><br><span class="line"></span><br><span class="line">session1.rollback()</span><br><span class="line">session2.rollback()</span><br><span class="line"></span><br><span class="line">session1.query(User).<span class="built_in">filter</span>(User.money == <span class="number">50</span>).with_lockmode(<span class="string">&#x27;update&#x27;</span>).<span class="built_in">all</span>()</span><br><span class="line">session2.query(User).<span class="built_in">filter</span>(User.money == <span class="number">40</span>).with_lockmode(<span class="string">&#x27;update&#x27;</span>).<span class="built_in">all</span>() <span class="comment"># 会等待解锁，因为 money 上没有索引</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>要避免的话，可以这样：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">money = Column(DECIMAL(<span class="number">10</span>, <span class="number">2</span>), index=<span class="literal">True</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<p>另一个注意点是子事务。<br>InnoDB 支持子事务（savepoint 语句），可以简化一些逻辑。<br>例如有的方法是用于改写数据库的，它执行时可能提交了事务，但在后续的流程中却执行失败了，却没法回滚那个方法中已经提交的事务。这时就可以把那个方法当成子事务来运行了：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">step1</span>():</span><br><span class="line">    <span class="comment"># ...</span></span><br><span class="line">    <span class="keyword">if</span> success:</span><br><span class="line">        session.commit()</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">    session.rollback()</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">step2</span>():</span><br><span class="line">    <span class="comment"># ...</span></span><br><span class="line">    <span class="keyword">if</span> success:</span><br><span class="line">        session.commit()</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">    session.rollback()</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">session.begin_nested()</span><br><span class="line"><span class="keyword">if</span> step1():</span><br><span class="line">    session.begin_nested()</span><br><span class="line">    <span class="keyword">if</span> step2():</span><br><span class="line">        session.commit()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        session.rollback()</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    session.rollback()</span><br></pre></td></tr></table></figure>
-
-<p>此外，rollback 一个子事务，可以释放这个子事务中获得的锁，提高并发性和降低死锁概率。</p>
-<h4 id="如何对一个字段进行自增操作？"><a href="#如何对一个字段进行自增操作？" class="headerlink" title="如何对一个字段进行自增操作？"></a>如何对一个字段进行自增操作？</h4><p>最简单的办法就是获取时加上写锁：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">user = session.query(User).with_lockmode(<span class="string">&#x27;update&#x27;</span>).get(<span class="number">1</span>)</span><br><span class="line">user.age += <span class="number">1</span></span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
-
-<p>如果不想多一次读的话，这样写也是可以的：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">session.query(User).<span class="built_in">filter</span>(User.<span class="built_in">id</span> == <span class="number">1</span>).update(&#123;</span><br><span class="line">    User.age: User.age + <span class="number">1</span></span><br><span class="line">&#125;)</span><br><span class="line">session.commit()</span><br><span class="line"><span class="comment"># 其实字段之间也可以做运算：</span></span><br><span class="line">session.query(User).<span class="built_in">filter</span>(User.<span class="built_in">id</span> == <span class="number">1</span>).update(&#123;</span><br><span class="line">    User.age: User.age + User.<span class="built_in">id</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">SQLAlchemy</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/SQLAlchemy//" class="article-tag-list-link color1">SQLAlchemy</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/04/06/SQLAlchemy%E4%BC%9A%E8%AF%9D%E4%B8%8E%E4%BA%8B%E5%8A%A1%E6%8E%A7%E5%88%B6/">展开全文 >></a>
         </p>
       
 

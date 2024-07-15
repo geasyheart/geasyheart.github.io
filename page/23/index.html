@@ -206,6 +206,102 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-18-01加密类型及其相关算法" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/03/27/18-01%E5%8A%A0%E5%AF%86%E7%B1%BB%E5%9E%8B%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95/">18_01加密类型及其相关算法</a>
+    </h1>
+  
+
+        
+        <a href="/2015/03/27/18-01%E5%8A%A0%E5%AF%86%E7%B1%BB%E5%9E%8B%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95/" class="archive-article-date">
+  	<time datetime="2015-03-27T14:51:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-27</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>TCP&#x2F;IP：安全<br> A–&gt;B<br> 机密性：明文传输(ftp&#x2F;http&#x2F;smtp&#x2F;telent)<br> 完整性:<br> 身份验证: </p>
+<p>机密性:<br>      plaintext–&gt;转换规则–&gt;ciphertext<br>      ciphertext–&gt;转换规则–&gt;plaintext<br>  <br>      转换算法:密钥<br>      对称加密:算法（加密和解密密钥是同一个）<br> 优点：加密解密快<br> 缺点：无法对密钥有效管理 </p>
+<p>完整性:<br>      单向加密算法:提取数据特征码<br>      输入一样:输出必然一样<br>      雪崩效应:输入的微小改变，将会引起结果的巨大改变<br>      定长输出:无论原始数据是多长，结果大小都是相同的<br>      不可逆:无法根据特征码还原原来的数据<br>      A:plaintext:footprint –&gt;B<br>      因为以明文进行传输，中间人获取内容后修改数据然后重新进行生成特征码传给B，B并不能知道数据被篡改过。<br>      中间人攻击:plaintext2:footprint2–&gt;B<br>      将特征码进行加密，就能完成数据的完整性。 </p>
+<p>  协商生成密码:互联网密钥交换 ( Internet Key Exchange)<br>    Diffie-Hellman协议:   <br> A:<br>  p,g(大素数，生成数)<br> A:x<br> B:y </p>
+<p> A:g^x%p –&gt;B<br> B:g^y%p –&gt;A<br>        <br> g,p,g^x%p,g^y%p<br>        <br> A:(g^y%p)^x&#x3D;g^yx%p<br> B:(g^x%p)^y&#x3D;g^xy%p </p>
+<p>   密钥交换算法<br> g&#x3D;2<br> p&#x3D;7<br> x&#x3D;2<br> y&#x3D;3<br> <br>   公钥加密算法:非对称加密算法<br> 密钥对:<br>   公钥:p<br>   私钥:s<br> 发送方用自己的私钥加密数据，可以实现身份验证<br> 发送方用对方的公钥加密数据，可以保证数据机密性 </p>
+<p> 公钥加密算法很少用来加密数据:速度太慢(至少3个数量级) </p>
+<p>身份验证:<br>   第三方机构(当然不止一个):<br> 对公钥进行公正，发证机关先去计算特征码，并用自己的私钥加密特征码。<br> 收费的，人家给你认证，需要收费的。。而且不便宜<br> 很多只要单方面对身份验证即可；<br> 例如，在淘宝上买东西，只要验证淘宝是淘宝即可，淘宝不需要验证你的身份，(当然也难或者没必要)，<br>  既然不能验证你的身份，就无法保证交易是可靠的，所以出现了支付宝，你把钱存我这，然后我发货给你。<br> 自己的钱怎么转到支付宝上，那怎么保证是你把钱转到支付宝，银行保证，银行通过U盾等工具验证是你<br>        进行的交易。<br>         <br>a和b进行通信，先拿到对方的公钥，通过ike协议来实现，a发送b一段数据，生成校验码，然后通过对称加密对数据和校验码进行加密，然后a生成一个随机密码，然后a利用b的公钥来加密a的随机密码；<br>b收到时，利用b自身的私钥来解密a的随机密码，然后通过对称加密来解密数据；<br>但是这样能保证数据的保密性和完整性，但是无法保证身份验证；<br>所以引入证书，来确保你是你；<br>但是这里又有一个问题，证书的颁发机构就要确保证书是有效的； </p>
+<p>如果证书丢了，意味着私钥丢了，私钥要机密存放。<br>密钥管理工具。 </p>
+<p>PKI（Public Key Infrastructure）<br><a target="_blank" rel="noopener" href="http://baike.baidu.com/link?url=1gQ7_WjM25DCN2V0o5D6zo7GySukl2QpGbJYjIXbRh9GSQXm1DvFr_Y3i3-oEnF9yysmVClCFxJZQQrIGrTlda">http://baike.baidu.com/link?url=1gQ7_WjM25DCN2V0o5D6zo7GySukl2QpGbJYjIXbRh9GSQXm1DvFr_Y3i3-oEnF9yysmVClCFxJZQQrIGrTlda</a><br>为解决这些Internet 的安全问题，世界各国对其进行了多年的研究，初步形成了一套完整的Internet 安全解决方案，即时下被广泛采用的PKI 技术(Public Key Infrastructure-公钥基础设施)，PKI（公钥基础设施）技术采用证书管理公钥，通过第三方的可信任机构–认证中心CA(Certificate Authority)，把用户的公钥和用户的其他标识信息(如名称、e-mail、身份 证号等）捆绑在一起，在Internet 网上验证用户的身份。眼下，通用的办法是采用基于PKI 结构结合数字证书，通过把要传输的数字信息进行加密，保证信息传输的保密性、完整性，签名保证身份的真实性和抗抵赖。 </p>
+<p>IKE(Internet Key Exchange): </p>
+<p>Internet密钥交换协议(IKE)是用于交换和管理在VPN中使用的加密密钥的.到目前为止,它依然存在安全缺陷.基于该协议的重要的现实意义,简单地介绍了它的工作机制,并对它进行了安全性分析;对于抵御中间人攻击和DoS攻击,给出了相应的修正方法;还对主模式下预共享密钥验证方法提出了新的建议;最后给出了它的两个发展趋势:JFK和IKEv2.<br><a target="_blank" rel="noopener" href="http://baike.baidu.com/link?url=8aRGYrrnt0-rlxlCmJJumAMAouhOYE4ml369SRLANQwdzmcptVBN95VBPgsR9C8dEGCCE6ViaHMKf6yfzs4QHa">http://baike.baidu.com/link?url=8aRGYrrnt0-rlxlCmJJumAMAouhOYE4ml369SRLANQwdzmcptVBN95VBPgsR9C8dEGCCE6ViaHMKf6yfzs4QHa</a><br><a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/%E7%B6%B2%E9%9A%9B%E7%B6%B2%E8%B7%AF%E9%87%91%E9%91%B0%E4%BA%A4%E6%8F%9B">http://zh.wikipedia.org/wiki/%E7%B6%B2%E9%9A%9B%E7%B6%B2%E8%B7%AF%E9%87%91%E9%91%B0%E4%BA%A4%E6%8F%9B</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/03/27/18-01%E5%8A%A0%E5%AF%86%E7%B1%BB%E5%9E%8B%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-37-03Linux集群系列之六-LVS持久连接" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1314,151 +1410,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/03/22/29-04samba%E4%B9%8B%E4%BA%8C/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-03-bash特性讲解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/22/03-bash%E7%89%B9%E6%80%A7%E8%AE%B2%E8%A7%A3/">03_bash特性讲解</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/22/03-bash%E7%89%B9%E6%80%A7%E8%AE%B2%E8%A7%A3/" class="archive-article-date">
-  	<time datetime="2015-03-22T09:24:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="cut命令"><a href="#cut命令" class="headerlink" title="cut命令"></a>cut命令</h2><p>cut：<br>   -d：指定字段分隔符，默认是空格<br>   -f：指定要显示的字段<br>    <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">     cut -d: -f 1,3 /etc/passwd </span><br><span class="line">     cut -d: -f 1-3 /etc/passwd </span><br></pre></td></tr></table></figure>
-  
-  
-  </p>
-<h2 id="sort命令"><a href="#sort命令" class="headerlink" title="sort命令"></a>sort命令</h2><p> <br>sort命令是以首字母的大小进行升序排列 <br>    sort sort.txt<br>   -n:以大小顺序进行升序排列<br>   -r:以首字母的大小进行降序排列<br>   -u：去除多余的重复的 <br>   -f：排列时忽略字符大小写<br>sort -n -r:以大小顺序进行降序排列 
- </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sort /etc/passwd </span><br><span class="line"></span><br><span class="line">sort -t: -k3 -n /etc/passwd </span><br></pre></td></tr></table></figure>
-<p>-t： 指明字段以：为分隔符进行排序<br>-k以哪个字段为关键字进行排序<br>（一般这个可以和uniq进行结合） 
-  
-  
-  </p>
-<h2 id="uniq命令"><a href="#uniq命令" class="headerlink" title="uniq命令"></a>uniq命令</h2><p>uniq：<br>    -d：指出相邻重复的行<br>    -D：指出相邻重复的行并列出重复次数<br>    -c：指出相邻的某一行重复的次数 
-      
-  
-      </p>
-<h2 id="wc命令"><a href="#wc命令" class="headerlink" title="wc命令"></a>wc命令</h2><p> <br>wc：<br>   wc test1.txt<br>   4  4 44 test1.txt<br>   行数  单词数   字节数<br>   <br>   -l:只显示行数 
-      
-      </p>
-<h2 id="tr命令"><a href="#tr命令" class="headerlink" title="tr命令"></a>tr命令</h2><p>     转换或删除字符<br>     <br>    such as:<br>    <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">    tr a A </span><br></pre></td></tr></table></figure></p>
-<p>      abababab  (回车)<br>      AbAbAbAb </p>
-<pre><code><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">     tr ab AB </span><br></pre></td></tr></table></figure>
-</code></pre>
-<p>       acBdd<br>       AcBBd<br>      (即把所有要大小写的字符进行替换)<br>    如要将&#x2F;etc&#x2F;passwd中的ad字符大小写: </p>
-<pre><code>    <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">        tr ad AD &lt; /etc/passwd </span><br></pre></td></tr></table></figure>
-</code></pre>
-<p>    如果所有都大小写转换: </p>
-<pre><code>    <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">        tr a-z A-Z </span><br></pre></td></tr></table></figure>
-</code></pre>
-<p>         <br>    -d 删除 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">    <span class="built_in">tr</span> -d abcd  &lt; test2.txt </span><br></pre></td></tr></table></figure>
-<p>    会删除所有有a&#x2F;b&#x2F;c&#x2F;d的 
-      
-  
-      
-      </p>
-<h2 id="type命令"><a href="#type命令" class="headerlink" title="type命令"></a>type命令</h2><p>  判断一个名字当前是否是alias、keyword、function、builtin、file或者什么都不是： 
- </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> type ls 的输出是 ls 是 `ls --color=auto&#x27; 的别名</span><br><span class="line"> type if 的输出是 if 是 shell 关键字 </span><br><span class="line"> type type 的输出是 type 是 shell 内嵌 </span><br><span class="line"> type gedit 的输出是 gedit 是 /usr/bin/gedit </span><br><span class="line"> type frydsh 的输出是 bash: type: frydsh: 未找到 </span><br></pre></td></tr></table></figure>
-
-<p>  <br>bash及其特性:<br>shell:外壳<br> <br>进程:在每个进程看来，当前主机只存在内核和当前进程<br>进程是程序的副本，进程是程序执行实例<br>     <br>     <br>shell,子shell<br> <br>举例:<br>#csh<br>这个时候就转为csh了，ctrl+d就回到原shell了。<br>     <br>bash:<br>1&#x2F;命令历史<br>2&#x2F;管道&#x2F;重定向<br>3&#x2F;命令别名<br>4&#x2F;命令行编辑<br>5&#x2F;命令行展开<br>6&#x2F;文件名通配<br>7&#x2F;变量<br>8&#x2F;编程<br> <br>命令行编辑：<br>光标跳转：<br>        ctrl+a:跳到命令行首<br>        ctrl+e：跳到命令行尾<br>        ctrl+u:删除光标至命令行首的内容<br>        ctrl+k：删除光标至命令行尾的内容<br> <br>命令历史：  ~&#x2F;.bash_history存放history执行的命令<br>    history -c :清空命令历史<br>    history -d 500删除第500个命令<br>    history -d 500 10 删除第500个起后10个命令<br>    !n：执行第n条命令<br>    !-n：执行倒数第n条命令<br>    !!:执行上一条命令<br>    !+string:<br>     如果命令历史里面执行过ls &#x2F; cd &#x2F; ps -aux 命令，则可以直接!l 来执行ls，不过这个有技巧，即能够和所有已执行命令区分开来的string来进行表示；<br>    ! $:引用前一条命令的参数<br>环境变量:<br>    PATH:命令搜索路径<br>    HISTSIZE:指定命令历史大小（红帽系列默认为1000） echo $HISTSIZE<br>     <br>     <br>命令别名：<br>        alias  cls ‘clear’<br> 只在当前的shell的生命周期内有效     <br>    撤销别名<br>    unalias + 别名<br>     unalias cls<br>     <br>     <br>#命令替换： $(command) <code>反引号</code><br>    把执行的结果 </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">    echo &quot;The current directory is $(pwd).&quot; </span><br><span class="line">```   </span><br><span class="line">  </span><br><span class="line">比如创建一个文件并包括当前日期： </span><br></pre></td></tr></table></figure>
-<p>     touch a_$(date +%F).txt     <br>     touch a_$(date +%F-%H-%M-%S).txt <br>     <br>     touch b_<code>date +%F</code>.txt </p>
-<pre><code>bash支持的引号: 
-  
-``:命令替换 
-&quot;&quot;:弱作用，可以实现变量替换 
-&#39;&#39;:强引用，不完成变量替换 
-  
-  
-文件名通配: 
-  
-*:任意长度的任意字符 
-?:任意单个字符 
-[]:匹配指定范围内的任意单个字符: 
-    [abc],[a-m],[a-z],[A-Z],[0-9],[a-zA-Z] 
-        ls [a-zA-Z]*[0-9] 
-[^]:匹配指定范围外的所有字符： 
-    ls [^0-9]* 
-      
-     
-</code></pre>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/22/03-bash%E7%89%B9%E6%80%A7%E8%AE%B2%E8%A7%A3/">展开全文 >></a>
         </p>
       
 
