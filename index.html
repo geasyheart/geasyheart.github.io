@@ -206,6 +206,88 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-多模态-繁体不同排版" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2024/08/19/%E5%A4%9A%E6%A8%A1%E6%80%81-%E7%B9%81%E4%BD%93%E4%B8%8D%E5%90%8C%E6%8E%92%E7%89%88/">多模态-繁体不同排版</a>
+    </h1>
+  
+
+        
+        <a href="/2024/08/19/%E5%A4%9A%E6%A8%A1%E6%80%81-%E7%B9%81%E4%BD%93%E4%B8%8D%E5%90%8C%E6%8E%92%E7%89%88/" class="archive-article-date">
+  	<time datetime="2024-08-19T01:39:44.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-08-19</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近有个需求，能够对不同排版格式的繁体信息进行抽取，所以从传统的版面分析+文字识别+阅读顺序+NLP到现在发展的多模态大模型综合调研。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
+<li>LVLM(large vision language model)相比LLM至少落后一代。</li>
+<li>LVLM整体比LLM更难。1）多模态信息融合。2）从结果上看，训练时长与loss下降速度。</li>
+<li>存在更为明显重复生成问题。之前在试字节豆包时，在一个问答中涉及批量工作场景时遇到过重复生成，即模型“宕机”了，不断重复一段文本。其他LLM也有这类问题，只是相比LVLM更少些。在未见过的或者说更为复杂排版场景时，出错的概率更高。</li>
+<li>推理速度。不过这个也是跟随业界大环境走吧，第一代的LLM其实速度也不是很快，后面VLLM等加速推理框架、其他技术出现等。</li>
+<li>场景贴和。区域检测和文字识别，例如Qwen-VL-Chat甚至生成式来做就不是很贴和。不过这里想强调的是，随着LLM技术的发展，不难看出LVLM后续会有更为出色、理想的结果。</li>
+<li>工程方面。在选择一个比较理想LVLM模型的前提下，还要看下其他适配工作是否完善。例如微调、推理速度优化等，这点例如GLM-4v-chat、MiniCPM-V-2_6做的还不太完善。当然也有可能是接触新的技术过快，也需要业界沉淀总结。</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2024/08/19/%E5%A4%9A%E6%A8%A1%E6%80%81-%E7%B9%81%E4%BD%93%E4%B8%8D%E5%90%8C%E6%8E%92%E7%89%88/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-graphviz-networkx-画图" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1045,95 +1127,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2023/12/21/qwen1-8B%E8%AF%95%E7%8E%A9/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-lora原理与实现" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2023/11/29/lora%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E7%8E%B0/">lora原理与实现</a>
-    </h1>
-  
-
-        
-        <a href="/2023/11/29/lora%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E7%8E%B0/" class="archive-article-date">
-  	<time datetime="2023-11-29T07:59:56.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-11-29</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>Lora,是微软出的一种在低资源场景下进行微调大模型的实现方式，在transformers里有peft这个包进行调用，它通过固定预训练模型权重并只训练新增lora层来实现微调，目前其在比如Baichuan2、ChatGLM上都有相关资料，更多介绍可自行搜索了解。</p>
-<h3 id="简单理解"><a href="#简单理解" class="headerlink" title="简单理解"></a>简单理解</h3><p>其简单理解实现方式为，比如qkv的linear为768*768（更大模型可能会更大），那lora通过新增两个linear（lora_A和lora_B），引入一个超参<code>r</code>来降低训练参数量，其伪代码如下:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">in_feature, out_feature = <span class="number">768</span>, <span class="number">768</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># old</span></span><br><span class="line">self.q = nn.Linear(in_feature, out_feature)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Lora</span></span><br><span class="line"></span><br><span class="line">self.lora_A = nn.Linear(in_feature, r)</span><br><span class="line">self.lora_B = nn.Linear(r, out_feature)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>比如当r设置为1时，是否可以明显感受到训练参数量的变化。</p>
-<p>注意：Lora本质只有在微调阶段生效，其加速了微调，但是对于推理阶段不会加速，而且因引入了新的计算会导致推理速度略有下降。</p>
-<h3 id="paddle实现"><a href="#paddle实现" class="headerlink" title="paddle实现"></a>paddle实现</h3><p>注意，此篇文章通过介绍LoraLinear的实现，来说明Lora的工作原理。</p>
-<p>其实现在<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/5eb2eae1c73e983bbaa8302573a985ebdfa19801/paddlenlp/peft/lora/lora_layers.py#L28">这里</a>。</p>
-<h4 id="注意点1"><a href="#注意点1" class="headerlink" title="注意点1"></a>注意点1</h4><p>LoraLinear继承自nn.Linear，所以是在Linear的基础上进行改动。</p>
-<h4 id="注意点2"><a href="#注意点2" class="headerlink" title="注意点2"></a>注意点2</h4><p>Linear的<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/5eb2eae1c73e983bbaa8302573a985ebdfa19801/paddlenlp/peft/lora/lora_layers.py#L70">weight不进行训练</a>，这也符合Lora的原理说明。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">self.weight.stop_gradient=<span class="literal">True</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="注意点3"><a href="#注意点3" class="headerlink" title="注意点3"></a>注意点3</h4><p>forward部分，代码如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, <span class="built_in">input</span>: paddle.Tensor</span>):</span><br><span class="line">        result = F.linear(x=<span class="built_in">input</span>, weight=self.weight, bias=self.bias, name=self.name)</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> self.merged:</span><br><span class="line">            result += (self.lora_dropout(<span class="built_in">input</span>) @ self.lora_A @ self.lora_B) * self.scaling</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>我们看如果pretrained model和lora不进行merge的时候，其推理是pretrained model先计算，拿到result，然后和lora计算结果进行相加获取最终结果。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>对于Parameter Efficient fine-tune，Lora是其中一个实现方式，其他还有比如p-tuning等。但是通过Lora，我们大致理解了从原来直接对pretrained model fine-tune到现在的引入新的参数（比如）来使得我们能用低资源来使用LLM的能力。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2023/11/29/lora%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E7%8E%B0/">展开全文 >></a>
         </p>
       
 

@@ -206,6 +206,104 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-SQLAlchemy字段类型" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/10/SQLAlchemy%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/">SQLAlchemy字段类型</a>
+    </h1>
+  
+
+        
+        <a href="/2018/04/10/SQLAlchemy%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/" class="archive-article-date">
+  	<time datetime="2018-04-10T02:31:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-10</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="基本类型"><a href="#基本类型" class="headerlink" title="基本类型"></a>基本类型</h3><p>字段类型是在定义模型时, 对每个<code>Column</code>的类型约定. 不同类型的字段类型在输入输出上, 及支持的操作方面, 有所区别.<br>这里只介绍<code>sqlalchemy.types.*</code>中的类型, SQL 标准类型方面, 是写什么最后生成的<code>DDL</code>语句就是什么, 比如 <code>BIGINT</code>, <code>BLOG</code> 这些, 但是这些类型并不一定在所有数据库中都有支持. 除此而外, <code>SQLAlchemy</code> 也支持一些特定数据库的特定类型, 这些需要从具体的 <code>dialects</code> 实现里导入.</p>
+<h4 id="Integer-BigInteger-SmallInteger"><a href="#Integer-BigInteger-SmallInteger" class="headerlink" title="Integer&#x2F;BigInteger&#x2F;SmallInteger"></a>Integer&#x2F;BigInteger&#x2F;SmallInteger</h4><p>整形.</p>
+<h4 id="Boolean"><a href="#Boolean" class="headerlink" title="Boolean"></a>Boolean</h4><p>布尔类型. Python 中表现为 True&#x2F;False , 数据库根据支持情况, 表现为 BOOLEAN 或SMALLINT . 实例化时可以指定是否创建约束(默认创建).</p>
+<h4 id="Date-DateTime-Time-timezone-False"><a href="#Date-DateTime-Time-timezone-False" class="headerlink" title="Date&#x2F;DateTime&#x2F;Time (timezone&#x3D;False)"></a>Date&#x2F;DateTime&#x2F;Time (timezone&#x3D;False)</h4><p>日期类型, Time 和 DateTime 实例化时可以指定是否带时区信息.</p>
+<h4 id="Interval"><a href="#Interval" class="headerlink" title="Interval"></a>Interval</h4><p>时间偏差类型. 在 Python 中表现为 datetime.timedelta() , 数据库不支持此类型则存为日期.</p>
+<h4 id="Enum-enums-kw"><a href="#Enum-enums-kw" class="headerlink" title="Enum (*enums, **kw)"></a>Enum (*enums, **kw)</h4><p>枚举类型, 根据数据库支持情况, SQLAlchemy 会使用原生支持或者使用 VARCHAR 类型附加约束的方式实现. 原生支持中涉及新类型创建, 细节在实例化时控制.</p>
+<h4 id="Float"><a href="#Float" class="headerlink" title="Float"></a>Float</h4><p>浮点小数.</p>
+<h4 id="Numeric-precision-None-scale-None-decimal-return-scale-None-…"><a href="#Numeric-precision-None-scale-None-decimal-return-scale-None-…" class="headerlink" title="Numeric (precision&#x3D;None, scale&#x3D;None, decimal_return_scale&#x3D;None, …)"></a>Numeric (precision&#x3D;None, scale&#x3D;None, decimal_return_scale&#x3D;None, …)</h4><p>定点小数, Python 中表现为 Decimal .</p>
+<h4 id="LargeBinary-length-None"><a href="#LargeBinary-length-None" class="headerlink" title="LargeBinary (length&#x3D;None)"></a>LargeBinary (length&#x3D;None)</h4><p>字节数据. 根据数据库实现, 在实例化时可能需要指定大小.</p>
+<h4 id="PickleType"><a href="#PickleType" class="headerlink" title="PickleType"></a>PickleType</h4><p>Python 对象的序列化类型.</p>
+<h4 id="String-length-None-collation-None-…"><a href="#String-length-None-collation-None-…" class="headerlink" title="String (length&#x3D;None, collation&#x3D;None, …)"></a>String (length&#x3D;None, collation&#x3D;None, …)</h4><p>字符串类型, Python 中表现为 Unicode , 数据库表现为 VARCHAR , 通常都需要指定长度.</p>
+<h4 id="Unicode"><a href="#Unicode" class="headerlink" title="Unicode"></a>Unicode</h4><p>类似与字符串类型, 在某些数据库实现下, 会明确表示支持非 ASCII 字符. 同时输入输出也强制是 Unicode 类型.</p>
+<h4 id="Text"><a href="#Text" class="headerlink" title="Text"></a>Text</h4><p>长文本类型, Python 表现为 Unicode , 数据库表现为 TEXT .</p>
+<h4 id="UnicodeText"><a href="#UnicodeText" class="headerlink" title="UnicodeText"></a>UnicodeText</h4><p>参考 Unicode .</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">SQLAlchemy</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/SQLAlchemy//" class="article-tag-list-link color1">SQLAlchemy</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/04/10/SQLAlchemy%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-SQLAlchemy会话与事务控制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1327,91 +1425,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2018/01/22/django-migrate%E8%BF%90%E8%A1%8Cpython%E5%87%BD%E6%95%B0/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-2017年终总结" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/12/26/2017%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/">2017年终总结</a>
-    </h1>
-  
-
-        
-        <a href="/2017/12/26/2017%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/" class="archive-article-date">
-  	<time datetime="2017-12-26T14:21:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-12-26</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>来到公司已经半年了，经历了蛮多的事情，慢慢的从陌生到熟悉到被信任，从部分开发到主力开发，这个过程是非常艰难但又非常开心但又非常有责任的。从与项目经理交流获取业务流程、细节到脑中大致出现业务模型然后到数据库的表结构设计到提供api到测试到文档的编写，每一步都亲力亲为，很多时候又会特地放慢脚步，生怕出现哪个地方没有想到，哪个地方设计的不合理。程序写完并且走完单元测试后，还要写文档给客户端以及Web端，要有分组，哪些给客户端的，哪些给Web端的，哪些接口应该放在一起，怎么将接口排序，哪些接口需不需要验证，需不需要授权，参数怎么传，格式，校验……<br>最后主要还要在客户端以及Web端看不太明白时还要过去跟他解释、示范，整个过程都是非常的费力以及也是被逐渐熟悉并信任的过程。如果客户端或者web端说某个接口是不是有问题或者测试说这里表现的有些问题，自己还有点心惊胆战以及半信半疑，当发现是他们没有填写对或者没读懂文档或者其它问题导致时，这个过程就慢慢的被人所信任，一旦出现了问题，你的能力就会被怀疑，也许这个责任是比较有压力的，也是感受的比较深的。<br>目前的我觉得后端担负的责任以及压力还是蛮大的，所有的上层建筑均踩在后端的基础上，想起之前公司总监说后端最终展示出来的可能只是冰山一角。也许这句话有些夸大，但是慢慢的我感觉是对的，所有人都在等你接口，都在等你的实现，虽然我很喜欢后端，但是这个有些倾斜的天平让我觉得有些不适应。<br>但是我还是很喜欢这个角色，也很喜欢接受更多的挑战，不仅仅是技术方面的，还有在整个团队中的挑战，以前觉得接触更多新的技术可以让自己觉得更具有挑战性，现在有些觉得把事情做好并被认可可能更具备挑战性。我觉得我可以做的更好，也可以担负起更多的责任，慢慢努力，慢慢走！</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技术</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/技术//" class="article-tag-list-link color3">技术</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2017/12/26/2017%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/">展开全文 >></a>
         </p>
       
 

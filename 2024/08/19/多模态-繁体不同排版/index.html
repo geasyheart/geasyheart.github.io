@@ -7,17 +7,17 @@
   <meta name="baidu-site-verification" content="code-Wz3hIIlkFx" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://geasyheart.github.io">
-  <title>graphviz-networkx-画图 | 博客</title>
+  <title>多模态-繁体不同排版 | 博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="1. graphviz docker12345678910FROM ubuntu:18.04ENV LANG C.UTF-8WORKDIR &#x2F;codeCOPY . .RUN sed -i s@&#x2F;deb.debian.org&#x2F;@&#x2F;mirrors.aliyun.com&#x2F;@g &#x2F;etc&#x2F;apt&#x2F;sources.list &amp;&amp; \ sed -i s@&#x2F;security.debian.org">
+  <meta name="description" content="前言最近有个需求，能够对不同排版格式的繁体信息进行抽取，所以从传统的版面分析+文字识别+阅读顺序+NLP到现在发展的多模态大模型综合调研。 总结 LVLM(large vision language model)相比LLM至少落后一代。 LVLM整体比LLM更难。1）多模态信息融合。2）从结果上看，训练时长与loss下降速度。 存在更为明显重复生成问题。之前在试字节豆包时，在一个问答中涉及批量工作">
 <meta property="og:type" content="article">
-<meta property="og:title" content="graphviz-networkx-画图">
-<meta property="og:url" content="https://geasyheart.github.io/2024/07/15/graphviz-networkx-%E7%94%BB%E5%9B%BE/index.html">
+<meta property="og:title" content="多模态-繁体不同排版">
+<meta property="og:url" content="https://geasyheart.github.io/2024/08/19/%E5%A4%9A%E6%A8%A1%E6%80%81-%E7%B9%81%E4%BD%93%E4%B8%8D%E5%90%8C%E6%8E%92%E7%89%88/index.html">
 <meta property="og:site_name" content="博客">
-<meta property="og:description" content="1. graphviz docker12345678910FROM ubuntu:18.04ENV LANG C.UTF-8WORKDIR &#x2F;codeCOPY . .RUN sed -i s@&#x2F;deb.debian.org&#x2F;@&#x2F;mirrors.aliyun.com&#x2F;@g &#x2F;etc&#x2F;apt&#x2F;sources.list &amp;&amp; \ sed -i s@&#x2F;security.debian.org">
+<meta property="og:description" content="前言最近有个需求，能够对不同排版格式的繁体信息进行抽取，所以从传统的版面分析+文字识别+阅读顺序+NLP到现在发展的多模态大模型综合调研。 总结 LVLM(large vision language model)相比LLM至少落后一代。 LVLM整体比LLM更难。1）多模态信息融合。2）从结果上看，训练时长与loss下降速度。 存在更为明显重复生成问题。之前在试字节豆包时，在一个问答中涉及批量工作">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2024-07-15T00:51:56.000Z">
-<meta property="article:modified_time" content="2024-07-15T00:53:30.154Z">
+<meta property="article:published_time" content="2024-08-19T01:39:44.000Z">
+<meta property="article:modified_time" content="2024-08-19T02:14:32.872Z">
 <meta property="article:author" content="张宇">
 <meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
@@ -207,32 +207,35 @@ var _hmt = _hmt || [];
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-graphviz-networkx-画图" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-多模态-繁体不同排版" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      graphviz-networkx-画图
+      多模态-繁体不同排版
     </h1>
   
 
         
-        <a href="/2024/07/15/graphviz-networkx-%E7%94%BB%E5%9B%BE/" class="archive-article-date">
-  	<time datetime="2024-07-15T00:51:56.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-07-15</time>
+        <a href="/2024/08/19/%E5%A4%9A%E6%A8%A1%E6%80%81-%E7%B9%81%E4%BD%93%E4%B8%8D%E5%90%8C%E6%8E%92%E7%89%88/" class="archive-article-date">
+  	<time datetime="2024-08-19T01:39:44.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-08-19</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="1-graphviz-docker"><a href="#1-graphviz-docker" class="headerlink" title="1. graphviz docker"></a>1. graphviz docker</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">FROM ubuntu:18.04</span><br><span class="line"></span><br><span class="line">ENV LANG C.UTF-8</span><br><span class="line">WORKDIR /code</span><br><span class="line">COPY . .</span><br><span class="line"></span><br><span class="line">RUN sed -i s@/deb.debian.org/@/mirrors.aliyun.com/@g /etc/apt/sources.list &amp;&amp; \</span><br><span class="line"> sed -i s@/security.debian.org/@/mirrors.aliyun.com/@g /etc/apt/sources.list &amp;&amp; \</span><br><span class="line"> apt-get clean &amp;&amp; apt-get update &amp;&amp; apt-get install -y python3-pip python3-dev build-essential git graphviz fonts-arphic-ukai</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="2-networkx"><a href="#2-networkx" class="headerlink" title="2. networkx"></a>2. networkx</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pprint <span class="keyword">import</span> pprint</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> networkx <span class="keyword">as</span> nx</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">list_fonts</span>():</span><br><span class="line">    <span class="keyword">from</span> matplotlib.font_manager <span class="keyword">import</span> FontManager</span><br><span class="line">    fm = FontManager()</span><br><span class="line">    pprint(<span class="built_in">set</span>([f.name <span class="keyword">for</span> f <span class="keyword">in</span> fm.ttflist]))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">draw</span>():</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    列出系统的字体，然后找一个支持中文的</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    plt.rcParams[<span class="string">&#x27;font.sans-serif&#x27;</span>] = [<span class="string">&#x27;AR PL UKai CN&#x27;</span>]</span><br><span class="line">    <span class="comment"># 创建一个NetworkX图</span></span><br><span class="line">    G = nx.Graph()</span><br><span class="line">    G.add_edges_from([(<span class="string">&#x27;你呀你呀&#x27;</span>, <span class="number">2</span>), (<span class="number">2</span>, <span class="number">3</span>), (<span class="number">3</span>, <span class="number">1</span>)])</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 绘制图形</span></span><br><span class="line">    pos = nx.spring_layout(G)  <span class="comment"># 选择布局算法</span></span><br><span class="line">    nx.draw(G, pos, with_labels=<span class="literal">True</span>)  <span class="comment"># , node_color=&#x27;lightblue&#x27;, edge_color=&#x27;gray&#x27;)  # 绘制图形</span></span><br><span class="line">    plt.savefig(<span class="string">&#x27;graph.png&#x27;</span>)  <span class="comment"># 保存为PNG图像文件</span></span><br><span class="line">    plt.show()  <span class="comment"># 显示图形（可选）</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    <span class="comment"># list_fonts()</span></span><br><span class="line">    draw()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近有个需求，能够对不同排版格式的繁体信息进行抽取，所以从传统的版面分析+文字识别+阅读顺序+NLP到现在发展的多模态大模型综合调研。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
+<li>LVLM(large vision language model)相比LLM至少落后一代。</li>
+<li>LVLM整体比LLM更难。1）多模态信息融合。2）从结果上看，训练时长与loss下降速度。</li>
+<li>存在更为明显重复生成问题。之前在试字节豆包时，在一个问答中涉及批量工作场景时遇到过重复生成，即模型“宕机”了，不断重复一段文本。其他LLM也有这类问题，只是相比LVLM更少些。在未见过的或者说更为复杂排版场景时，出错的概率更高。</li>
+<li>推理速度。不过这个也是跟随业界大环境走吧，第一代的LLM其实速度也不是很快，后面VLLM等加速推理框架、其他技术出现等。</li>
+<li>场景贴和。区域检测和文字识别，例如Qwen-VL-Chat甚至生成式来做就不是很贴和。不过这里想强调的是，随着LLM技术的发展，不难看出LVLM后续会有更为出色、理想的结果。</li>
+<li>工程方面。在选择一个比较理想LVLM模型的前提下，还要看下其他适配工作是否完善。例如微调、推理速度优化等，这点例如GLM-4v-chat、MiniCPM-V-2_6做的还不太完善。当然也有可能是接触新的技术过快，也需要业界沉淀总结。</li>
+</ol>
 
       
 
@@ -328,7 +331,7 @@ var _hmt = _hmt || [];
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=https://geasyheart.github.io/2024/07/15/graphviz-networkx-%E7%94%BB%E5%9B%BE/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=https://geasyheart.github.io/2024/08/19/%E5%A4%9A%E6%A8%A1%E6%80%81-%E7%B9%81%E4%BD%93%E4%B8%8D%E5%90%8C%E6%8E%92%E7%89%88/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -342,18 +345,9 @@ var _hmt = _hmt || [];
   
 <nav id="article-nav">
   
-    <a href="/2024/08/19/%E5%A4%9A%E6%A8%A1%E6%80%81-%E7%B9%81%E4%BD%93%E4%B8%8D%E5%90%8C%E6%8E%92%E7%89%88/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          多模态-繁体不同排版
-        
-      </div>
-    </a>
   
-  
-    <a href="/2024/06/20/%E5%A4%9A%E6%A8%A1%E6%80%81-ViLT/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">多模态-ViLT</div>
+    <a href="/2024/07/15/graphviz-networkx-%E7%94%BB%E5%9B%BE/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">graphviz-networkx-画图</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -380,7 +374,7 @@ var _hmt = _hmt || [];
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-graphviz-docker"><span class="toc-number">1.</span> <span class="toc-text">1. graphviz docker</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-networkx"><span class="toc-number">2.</span> <span class="toc-text">2. networkx</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">2.</span> <span class="toc-text">总结</span></a></li></ol>
                     </div>
                 </span>
             </div>

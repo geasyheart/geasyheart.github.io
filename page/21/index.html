@@ -206,6 +206,123 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-24-04编译安装LAMP之配置httpd以FastCGI方式与PHP整合" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/22/24-04%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85LAMP%E4%B9%8B%E9%85%8D%E7%BD%AEhttpd%E4%BB%A5FastCGI%E6%96%B9%E5%BC%8F%E4%B8%8EPHP%E6%95%B4%E5%90%88/">24_04编译安装LAMP之配置httpd以FastCGI方式与PHP整合</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/22/24-04%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85LAMP%E4%B9%8B%E9%85%8D%E7%BD%AEhttpd%E4%BB%A5FastCGI%E6%96%B9%E5%BC%8F%E4%B8%8EPHP%E6%95%B4%E5%90%88/" class="archive-article-date">
+  	<time datetime="2015-04-22T03:16:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>##以FastCGI来编译php</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#./configure --prefix=/usr/local/php --with-config-file-path=/etc  --with-openssl --with-mysql=/usr/local/mysql   --with-mysqli=/usr/local/mysql/bin/mysql_config </span></span><br><span class="line">--enable-mbstring --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr/local/libxml --enable-xml --enable-sockets </span><br><span class="line">--with-apxs2=/usr/local/apache/bin/apxs （注意：这个地方去掉改为--enable-fpm）--with-mcrypt=/usr/local/mycrypt  --with-config-file-scan-dir=/etc/php.dir </span><br><span class="line">--with-bz2 --enable-maintainer-zts(既然不是以模块化来使用线程，所以这项去掉)； </span><br><span class="line">make &amp;&amp; make install </span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> php.ini-production /etc/php.ini </span><br></pre></td></tr></table></figure>
+
+<p>配置php-fpm, 为php-fpm提供sysv.init脚本，并将其添加到服务列表: </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> sapi/fpm/init.d.php-fpm /etc/rc.d/init.d/php-fpm </span><br><span class="line"><span class="built_in">chmod</span> +x /etc/rc.d/init.d/php-fpm </span><br><span class="line">chkconfig --add php-fpm </span><br><span class="line">chkconfig php-fpm on </span><br></pre></td></tr></table></figure>
+<p>为php-fpm提供配置文件： </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf </span><br></pre></td></tr></table></figure>
+<p>编辑php-fpm的配置文件： </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vi /usr/local/php/etc/php-fpm.conf </span></span><br></pre></td></tr></table></figure>
+<p>配置fpm的相关选项为你所需要的值，并启用pid文件： </p>
+<blockquote>
+<p>pm.max_children &#x3D; 50<br>pm.start_servers &#x3D; 5<br>pm.min_space_servers &#x3D; 2<br>pm.max_space_servers &#x3D; 8<br>pid &#x3D; &#x2F;usr&#x2F;lcoal&#x2F;php&#x2F;var&#x2F;run&#x2F;php-fpm.pid </p>
+</blockquote>
+<p>接下来就可以启动php-fpm了： </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service php-fpm start </span><br></pre></td></tr></table></figure>
+<p>php-fpm 监听端口为9000； </p>
+<p>3、启用httpd的相关模块 </p>
+<blockquote>
+<p>LoadModule proxy_module modules&#x2F;mod_proxy.so<br>LoadModule proxy_fcgi_module modules&#x2F;mod_proxy_fcgi.so </p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vi /etc/httpd/httpd.conf </span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>AddType application&#x2F;x-httpd-php .php<br>Addtype application&#x2F;x-httpd-php-source .phps<br>还有DirectoryIndex index.html改为index.php<br>(或者DirectoryIndex index.html index.php)<br>（二）、<br>    配置虚拟主机支持使用fcgi<br>        在相应的虚拟主机中添加类似如下两行：<br>        ProxyRequests Off<br>        ProxyPassMatch ^&#x2F;(.*.php)$ fcgi:&#x2F;&#x2F;127.0.0.1:9000&#x2F;PATH&#x2F;TO&#x2F;DOCUMENT.ROOT&#x2F;$1<br>        如：<br>        ProxyPassMatch ^&#x2F;(.*.php)$ fcgi:&#x2F;&#x2F;127.0.0.1:9000&#x2F;www&#x2F;meiyun.com&#x2F;$1<br>       <br>        ProxyRequests Off:关闭正向代理；<br>        ProxyPassMatch：把以.php结尾的文件请求发送到php-fpm进程，php-fpm至少需要知道<br>        运行的目录和URL，所以这里直接在fcgi:&#x2F;&#x2F;127.0.0.1:9000后指明了<br>        这两个参数，其他的参数的传递已经被mod_proxy_fcgi.so进行了封装，不需要手动指定； </p>
+</blockquote>
+<p>例如: </p>
+<blockquote>
+<p>&lt;VirtualHost *:80&gt;<br>    DocumentRoot “www&#x2F;unravel.com”<br>    ServerName <a target="_blank" rel="noopener" href="http://www.unravel.com/">www.unravel.com</a><br>    ProxyRequests Off<br>    ProxyPassMatch ^&#x2F;(.*.php)$ fcgi:127.0.0.1:9000&#x2F;www&#x2F;unravel.com&#x2F;$1<br>    <br>    &lt;Directory “www&#x2F;unravel.com”&gt;<br>        Options none<br>        AllowOverride none<br>        Require all granted<br>    </Directory> </p>
+</blockquote>
+<p>如果以FastCGI方式安装xcache，在安装上后service php-fpm restart即可。 </p>
+<p>最后说明: </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> phpMyAdmin-version-all-language pma </span><br><span class="line"><span class="built_in">cd</span> pma/ </span><br><span class="line"><span class="built_in">cp</span> config.sample.inc.php config.inc.php </span><br><span class="line">vim config.inc.php </span><br></pre></td></tr></table></figure>
+<p>修改其中的随机数，可保证安全性。 </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/22/24-04%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85LAMP%E4%B9%8B%E9%85%8D%E7%BD%AEhttpd%E4%BB%A5FastCGI%E6%96%B9%E5%BC%8F%E4%B8%8EPHP%E6%95%B4%E5%90%88/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-24-03-2-实验-完成LAMP模块化搭建" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1332,140 +1449,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/04/22/22-01Httpd%E8%99%9A%E6%8B%9F%E4%B8%BB%E6%9C%BA/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-21-02Httpd安装及配置文件简介" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/22/21-02Httpd%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%AE%80%E4%BB%8B/">21_02Httpd安装及配置文件简介</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/22/21-02Httpd%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%AE%80%E4%BB%8B/" class="archive-article-date">
-  	<time datetime="2015-04-22T02:26:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><ul>
-<li>比较著名的基金会:</li>
-</ul>
-<ul>
-<li>FSF:GNU,GPL </li>
-<li>ASF:Apache Software Foundation<br>    web:httpd<br>    Tomcat<br>    Hadoop<br>    …</li>
-</ul>
-<ul>
-<li>httpd: <blockquote>
-<p>    事先创建进程<br>    按需维持适当的进程<br>    模块设计，核心比较小，各种功能都模块添加<br>        支持运行时配置，支持单独编译模块<br>    支持多种方式的虚拟主机配置<br>        虚拟主机:<br>            基于IP的虚拟主机<br>            基于端口的虚拟主机<br>            基于域名的虚拟主机<br>    支持https协议<br>    支持用户认证<br>    支持基于IP或主机名的ACL<br>    支持每目录的访问控制<br>    支持URL重写</p>
-</blockquote>
-</li>
-</ul>
-<p>安装:<br>    rpm包<br>    源码编译 </p>
-<p>Port:(80&#x2F;tcp),(ssl:443&#x2F;tcp) </p>
-<h2 id="httpd的主要目录"><a href="#httpd的主要目录" class="headerlink" title="httpd的主要目录"></a>httpd的主要目录</h2><ul>
-<li>httpd</li>
-</ul>
-<ol>
-<li><p>&#x2F;usr&#x2F;sbin&#x2F;httpd(MPM:prefork)<br>    httpd:root root (master process)<br>    httpd:apache,apache (worker process) </p>
-</li>
-<li><p>&#x2F;etc&#x2F;rc.d&#x2F;init.d&#x2F;httpd 
-  </p>
-</li>
-<li><p>&#x2F;etc&#x2F;httpd:<br>    conf:配置文件目录<br>        主配置文件:httpd.conf<br>    conf.d<br>    modules:模块目录<br>    logs–&gt;&#x2F;var&#x2F;log&#x2F;httpd<br>        日志有两类:访问日志access_log，错误日志error_log </p>
-</li>
-<li><p>&#x2F;var&#x2F;www<br>    html<br>    cgi-bin<br>        cgi(Common Gateway Interface)<br>        Client–&gt;httpd(index.cgi)–&gt;spawn Process(index.cgi)–&gt;httpd–&gt;client<br>        perl,python,java(Servlet,JSP),PHP</p>
-</li>
-</ol>
-<p>        fastcgi:动态内容的创建和回收不需要web服务器控制，有专门的进程完成， 然后通过socket返回给httpd，这种方式称为fastcgi。(静态和动态的分离) </p>
-<p>elinks     -dump:显示网页的内容然后直接退出<br>        -source：显示网页的源代码 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#service httpd start </span></span><br><span class="line"><span class="comment">#mv /etc/httpd/conf.d/welcome.conf /etc/httpd/conf.d/welcome.conf.bak(移除欢迎信息) </span></span><br><span class="line"><span class="comment">#yum install httpd-manual     </span></span><br><span class="line"><span class="comment">#service httpd reload </span></span><br><span class="line">如果想看帮助文档，可以安装httpd-manual，然后http:IP/manual </span><br><span class="line"><span class="comment">#cp /etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf.bak </span></span><br><span class="line"><span class="comment">#grep &quot;Section&quot; httpd.conf    可查看几部分 </span></span><br></pre></td></tr></table></figure>
-<p>MPM:(Multi Path Module 多道处理模块) </p>
-<blockquote>
-<p>    mpm_winnt：windows上<br>    prefork(一个请求用一个进程响应)<br>    worker (一个请求用一个线程响应,启动多个进程，每个进程生成多个线程)<br>    event  (一个进程处理多个请求，基于事务的)<br>        可参考21_01。。 </p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#httpd -t 显示httpd的配置文件的语法是否正确 </span></span><br><span class="line"><span class="comment">#httpd -l 显示httpd正在使用的核心模块 </span></span><br><span class="line"><span class="comment">#httpd -M 显示所有支持的模块 </span></span><br><span class="line"><span class="comment">#httpd -S 显示虚拟主机的配置语法出错与否 </span></span><br></pre></td></tr></table></figure>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">系统默认的是prefork,可通过下面命令查看: </span><br><span class="line"><span class="comment">#httpd -l </span></span><br><span class="line">当然，系统也支持worker和event: </span><br><span class="line">/usr/sbin/httpd.worker </span><br><span class="line">/usr/sbin/httpd.event </span><br><span class="line">这是相应的启动命令，当然也可以通过 </span><br><span class="line"><span class="comment">#vim /etc/sysconfig/httpd </span></span><br><span class="line">把HTTPD=/usr/sbin/httpd.worker改为相应的选项。 </span><br><span class="line"> </span><br><span class="line">httpd2.2建议不要使用event，默认在2.4使用event </span><br></pre></td></tr></table></figure>
-<h2 id="httpd-conf文件配置默认涉及"><a href="#httpd-conf文件配置默认涉及" class="headerlink" title="httpd.conf文件配置默认涉及"></a>httpd.conf文件配置默认涉及</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#grep &quot;Section&quot; /etc/httpd/conf/httpd.conf </span><br><span class="line"> </span><br><span class="line">###Section 1:Global Environment </span><br><span class="line">###Section 2:&#x27;Main&#x27; server configurationn </span><br><span class="line">###Section 3:Virtual Hosts </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#vim /etc/httpd/conf/httpd.conf </span></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">###Section 1:Global Environment </span><br><span class="line"> </span><br><span class="line">ServerTokerns OS     Apache/2.2.15 (CentOS) Server at 172.17.13.90 Port 80 </span><br><span class="line">          Prod    Apache Server at 172.17.13.90 Port 80 </span><br><span class="line">          Full      Apache/2.2.15 (CentOS) DAV/2 Server at 172.17.13.90 Port 80 </span><br><span class="line">    更多可参考:http://fuzhong1983.blog.163.com/blog/static/1684705201071951321787/ </span><br><span class="line"> </span><br><span class="line">ServerRoot &quot;/etc/httpd&quot;        服务的根目录 </span><br><span class="line">PidFile        run/httpd.pid    进程Pid </span><br><span class="line">Timeout        60            例如在进行TCP连接时客户端主动断开，服务器等待重新连接的时长 </span><br><span class="line">KeepAlive   Off            是否允许长连接 </span><br><span class="line">MaxKeepAliveRequests 100    最多保持长连接的数目 </span><br><span class="line">KeepAliveTimeout     15        在请求下一个时保持的时长，如果大于15s，就断开 </span><br><span class="line"> </span><br><span class="line">&lt;IfModule prefork.c&gt; </span><br><span class="line">StartServers     8:默认生成8个进程 </span><br><span class="line">MinSpaceServers 5:最少保持的空进程的数目 </span><br><span class="line">MaxSpaceServers 20:最多保持的空进程的数目    （100个断开50个，剩下的30个进程会被杀死，保留20个） </span><br><span class="line">ServerLimit    256:对MaxClints最大值的上限(如果MaxClints改动，ServerLimit必须改动，服务器必须停掉然后再改动) </span><br><span class="line">MaxClints    256:最大允许有多少个进程被连接 </span><br><span class="line">MaxRequestRerChild 4000:一个进程最多被使用多少次（一个连接断开后下一个连接，最多保持使用多少次） </span><br><span class="line">&lt;/IfModule&gt; </span><br><span class="line"> </span><br><span class="line">&lt;IfModule worker.c&gt; </span><br><span class="line">StartServers    4:默认生成4个进程 </span><br><span class="line">MaxClients    300:最大允许有多少个进程被连接 </span><br><span class="line">MinSpaceThreads 25:最少保持的空线程的数目 </span><br><span class="line">MaxSpaceThreads 75:最多保持的空线程的数目 </span><br><span class="line">ThreadsPerChild 25:每个服务器进程中的线程数量恒定数目 </span><br><span class="line">MaxRequestPerChild 0:一个线程最多使用次数 </span><br><span class="line"> </span><br><span class="line">说明:这两段应根据实际需求测定!!!! </span><br><span class="line"> </span><br><span class="line">Listen 80 :监听80段口 </span><br><span class="line"> </span><br><span class="line">LoadModule :加载的模块(这个和DSO有关，后续补充) </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">Include conf.d/*.conf :包含conf.d/目录下的所有配置文件 </span><br><span class="line"> </span><br><span class="line">User apache </span><br><span class="line">Group apache </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line">###Section 2:&#x27;Main&#x27; server configuration </span><br><span class="line"> </span><br><span class="line">ServerAdmin root@localhost </span><br><span class="line">#ServerName www.example.com:80 </span><br><span class="line">UseCannonicalName Off </span><br><span class="line">DocumentRoot &quot;/var/www/html&quot;   URL路径跟本地文件系统路径不是一码事，可自行定义，不过和下面这些属性要相连接 </span><br><span class="line">&lt;Directory /&gt; </span><br><span class="line">    Options FollowSymLinks </span><br><span class="line">    AllowOverride None </span><br><span class="line">&lt;/Directory&gt; </span><br><span class="line"> </span><br><span class="line">&lt;Directory &quot;/var/www/html&quot;&gt; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">Options Indexes FollowSymLinks </span><br><span class="line"> </span><br><span class="line">AllowOverride None </span><br><span class="line"> </span><br><span class="line">    Order allow,deny </span><br><span class="line">    Allow from all </span><br><span class="line"> </span><br><span class="line">&lt;/Directory&gt; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">&lt;IfModule mod_userdir.c&gt; </span><br><span class="line">    UserDir disabled </span><br><span class="line">    #UserDir public_html </span><br><span class="line">&lt;/IfModule&gt; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">DirectoryIndex index.html index.html.var 默认的主页 </span><br><span class="line"> </span><br><span class="line">AccessFileName .htaccess </span><br><span class="line"> </span><br><span class="line">&lt;Files ~ &quot;^\.ht&quot;&gt; </span><br><span class="line">    Order allow,deny </span><br><span class="line">    Deny fron all </span><br><span class="line">    Satisfy All </span><br><span class="line">&lt;/Files&gt; </span><br><span class="line"> </span><br><span class="line">TypesConfig /etc/mime.types       让http支持传输多媒体文件，非ASCII类的信息。 </span><br><span class="line">DefaultType test/plain             默认纯文本信息 </span><br><span class="line"> </span><br><span class="line">HostnameLookups Off                 </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">ErrorLog logs/error_log </span><br><span class="line"> </span><br><span class="line">LogLevel warn </span><br><span class="line"> </span><br><span class="line">LogFormat ****        combined:混合模式 </span><br><span class="line">          ****        common:普通模式 </span><br><span class="line">                    referer:只记录客户端浏览来源 </span><br><span class="line">                    agent:只记录客户端浏览器类型 </span><br><span class="line">h:客户端地址 </span><br><span class="line">l:客户端的登录名称(因为这个关系到安全，所以是-) </span><br><span class="line">u:登录网站使用的用户名 </span><br><span class="line">t:日志事件产生时间 </span><br><span class="line">b:响应报文的大小，内容大小 </span><br><span class="line">User-agent:用户浏览器的类型 </span><br><span class="line"> </span><br><span class="line">PV:Page View,每天的页面访问量 </span><br><span class="line">UV:User View,每天的独立IP访问量 </span><br><span class="line"> </span><br><span class="line">CustomLog logs/access_log combined </span><br><span class="line"> </span><br><span class="line">ServerSignature On </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">  </span><br><span class="line">Alias </span><br><span class="line">*** </span><br><span class="line">*** </span><br><span class="line">*** </span><br><span class="line">    #mkdir /bbs/forum </span><br><span class="line">Alias /luntan &quot;/bbs/forum&quot; </span><br><span class="line">        注意:/luntan后面如果加/,则/bbs/forum后面一定要加上/,否则会出错 </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">默认是关闭的，可启用：显示httpd的服务状态 </span><br><span class="line">&lt;Location &quot;/server-status&quot;&gt; </span><br><span class="line">    setHandler server-status </span><br><span class="line">    Order Deny,Allow </span><br><span class="line">    Deny from all </span><br><span class="line">    Allow from .foo.com </span><br><span class="line">&lt;/Location&gt; </span><br></pre></td></tr></table></figure>
-
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">###Section 3:Virtual Hosts </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
-<p>强烈建议:<br>    自行阅读官方配置文档<br><a target="_blank" rel="noopener" href="http://httpd.apache.org/docs/2.4/vhosts/">http://httpd.apache.org/docs/2.4/vhosts/</a> </p>
-<p>ab<br>LoadRuner(接近于真实的测试)</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/22/21-02Httpd%E5%AE%89%E8%A3%85%E5%8F%8A%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%AE%80%E4%BB%8B/">展开全文 >></a>
         </p>
       
 

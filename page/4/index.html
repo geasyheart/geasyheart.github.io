@@ -206,6 +206,105 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-UIE-情感分类" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/08/17/UIE-%E6%83%85%E6%84%9F%E5%88%86%E7%B1%BB/">UIE-情感分类</a>
+    </h1>
+  
+
+        
+        <a href="/2022/08/17/UIE-%E6%83%85%E6%84%9F%E5%88%86%E7%B1%BB/" class="archive-article-date">
+  	<time datetime="2022-08-17T08:09:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-17</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>在上一篇文章<a href="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/" title="UIE-事件提取">UIE-事件提取</a>中，介绍了doccano的用法，也介绍了基于prompt事件提取的做法。本篇文章继续介绍基于prompt情感分类的做法。</p>
+<h2 id="数据标注"><a href="#数据标注" class="headerlink" title="数据标注"></a>数据标注</h2><p>关于doccano使用，请看<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/develop/model_zoo/uie/doccano.md#42-%E6%9E%84%E5%BB%BA%E5%88%86%E7%B1%BB%E5%BC%8F%E4%BB%BB%E5%8A%A1%E6%A0%87%E7%AD%BE">构建分类式任务标签</a>和<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/develop/model_zoo/uie/doccano.md#55-%E5%8F%A5%E5%AD%90%E7%BA%A7%E5%88%86%E7%B1%BB%E4%BB%BB%E5%8A%A1">句子级分类任务</a>。标注完成后生成下面文件。</p>
+<blockquote>
+<p>doccano_txt.json</p>
+</blockquote>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">7</span><span class="punctuation">,</span> <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这个产品用起来真的很流畅，我非常喜欢&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;正向&quot;</span><span class="punctuation">]</span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">8</span><span class="punctuation">,</span> <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这个产品非常low&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;负向&quot;</span><span class="punctuation">]</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>使用<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/develop/model_zoo/uie/doccano.md#72-%E5%8F%A5%E5%AD%90%E7%BA%A7%E5%88%86%E7%B1%BB%E4%BB%BB%E5%8A%A1%E6%95%B0%E6%8D%AE%E8%BD%AC%E6%8D%A2">句子级分类任务数据转换</a>转换后，生成的样本如下所示：</p>
+<blockquote>
+<p>train.txt</p>
+</blockquote>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这个产品用起来真的很流畅，我非常喜欢&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;result_list&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;正向&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;start&quot;</span><span class="punctuation">:</span> <span class="number">-7</span><span class="punctuation">,</span> <span class="attr">&quot;end&quot;</span><span class="punctuation">:</span> <span class="number">-5</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="attr">&quot;prompt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;情感倾向[正向,负向]&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>test.txt</p>
+</blockquote>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这个产品非常low&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;result_list&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;负向&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;start&quot;</span><span class="punctuation">:</span> <span class="number">-7</span><span class="punctuation">,</span> <span class="attr">&quot;end&quot;</span><span class="punctuation">:</span> <span class="number">-5</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="attr">&quot;prompt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;情感倾向[负向,正向]&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="训练"><a href="#训练" class="headerlink" title="训练"></a>训练</h2><p>注意，输入到模型的prompt是固定的，每个句子的prompt都是固定的，比如：</p>
+<blockquote>
+<p><code>[cls]</code>情感倾向[负向,正向]<code>[SEP]</code>这个产品用起来真的很流畅，我非常喜欢[SEP]<br><code>[cls]</code>情感倾向[负向,正向]<code>[SEP]</code>这个产品非常low[SEP]</p>
+</blockquote>
+<p>** 这里你会好奇一个问题了，正向和负向这个label怎么表示呢，貌似原句中也没有这俩词？**<br>注意：模型结构都是固定的（这里不知道的请看上篇文章）</p>
+<p>请看训练样本，其中的start和end都是负值，这个经过<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/493dc101ebf0ba5065bfc115f3b07b8e4c28e9da/model_zoo/uie/utils.py#L153">convert_example</a>转换后，就变成了prompt中对应的<code>正向</code>和<code>负向</code>所对应的index，即答案来自prompt中。</p>
+<h2 id="推理"><a href="#推理" class="headerlink" title="推理"></a>推理</h2><p>prompt是固定的，即<code>情感倾向[负向,正向]</code>，其他没有什么特殊需要注意的了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>对于prompt learning，模板的构造是比较关键的，百度这种做法值得借鉴！</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/08/17/UIE-%E6%83%85%E6%84%9F%E5%88%86%E7%B1%BB/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-UIE-事件提取" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1449,202 +1548,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-macbert4csc纠错" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/04/01/macbert4csc%E7%BA%A0%E9%94%99/">macbert4csc纠错</a>
-    </h1>
-  
-
-        
-        <a href="/2022/04/01/macbert4csc%E7%BA%A0%E9%94%99/" class="archive-article-date">
-  	<time datetime="2022-04-01T00:52:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-04-01</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>此篇文章是对macbert4csc模型的一次尝试与思考，废话不多说，看内容。<br>[x180&#x2F;macbert4csc-scalarmix-base-chinese]<a target="_blank" rel="noopener" href="https://huggingface.co/x180/macbert4csc-scalarmix-base-chinese)%E3%80%82">https://huggingface.co/x180/macbert4csc-scalarmix-base-chinese)。</a></p>
-<h2 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h2><img src="/2022/04/01/macbert4csc%E7%BA%A0%E9%94%99/%E7%BB%93%E6%9E%84%E5%9B%BE.svg" class="" title="模型结构">
-
-
-<p>这个模型分成两部分：</p>
-<ol>
-<li>使用BertForMaskedLM对预训练模型做mask训练。</li>
-<li>对预测的结果输入linear，判断预测的结果和真实的结果是否相同，即二分类。</li>
-</ol>
-<p>举例：<br>比如错句为<code>我和你在一其</code>，正确的句子为<code>我和你在一起</code>，错句输入MLM，得到的结果假设为<code>我和你在一器</code>。然后输入linear判别器，判断和正确的句子做二分类。最后两个loss进行相加。</p>
-<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><h3 id="为什么选择macbert"><a href="#为什么选择macbert" class="headerlink" title="为什么选择macbert"></a>为什么选择macbert</h3><p>首先看看什么是macbert,全称是(MLM as corrector)，它是哈工大和讯飞一起训练的模型。主要做的内容有两点：</p>
-<ol>
-<li>修改bert mask预处理代码，将bert做[mask]的地方用同义词来替代。同时引入全词mask。</li>
-<li>替换NSP任务，使用SOP来替代。</li>
-</ol>
-<p>第一条的做法好处是下游任务一般不会有[mask]，那么就不会带来预训练模型和下游任务不匹配的问题。<br>第二条的做法好处是简单来讲就是更能理解句子的语义性（合理以及通顺）。</p>
-<h3 id="为什么代码没有在错字地方做mask"><a href="#为什么代码没有在错字地方做mask" class="headerlink" title="为什么代码没有在错字地方做mask"></a>为什么代码没有在错字地方做mask</h3><p>这个问题就是为什么选择macbert做微调，因为macbert对mlm中做mask替代的地方用了同义词替换。</p>
-<h3 id="和electra有什么关系"><a href="#和electra有什么关系" class="headerlink" title="和electra有什么关系"></a>和electra有什么关系</h3><p>这个问题是我自己强行加进来的，哈哈。。</p>
-<p>先来看下electra的结构图。</p>
-<img src="/2022/04/01/macbert4csc%E7%BA%A0%E9%94%99/electra%E7%BB%93%E6%9E%84.jpg" class="" title="electra模型结构">
-
-<p>electra模型分成两部分：</p>
-<ol>
-<li>生成器。例如上图，对<code>the</code>和<code>painting</code>做<code>[MASK]</code>，然后使用生成器进行训练获取结果, 其中<code>the</code>对了，<code>painting</code>对应了<code>car</code>。</li>
-<li>将生成的结果送入判别器，和原句做二分类，发现<code>painting</code>生成错了。</li>
-</ol>
-<p>其loss计算方式如下所示：</p>
-<img src="/2022/04/01/macbert4csc%E7%BA%A0%E9%94%99/electra_loss.svg" class="" title="electra_loss">
-
-
-<p>有木有发现，两者其实还蛮像的，哈哈。</p>
-<p>下面是正经思考：</p>
-<ol>
-<li>错字识别是否可以使用electra模型来训练？</li>
-<li>其中 λ是否可以进行借鉴？</li>
-</ol>
-<p>回答1：我觉得阔以，甚者我觉得结果要比macbert4csc更好，为什么？</p>
-<ol>
-<li>实验结果，macbert4csc的训练结果没有electra的结果好，你可以说不是同一类型的任务。</li>
-<li>macbert做同义词替换，如果没有对应的同义词呢，或者说同义词替换更关注实体词呢，错字是有可能哪里都可能错的。<br>但是，这些想法都是有些牵强的，只有自己跑出来才知道结果。</li>
-</ol>
-<p>回答2：我觉得阔以，因为对于多loss，一般没有好的解决方法，明明超参数，只能实验呗。作者在这里选择了50，因为他认为<br>二分类相比mlm的交叉熵更容易一些，所以给予了更大的权重。</p>
-<p>但是我觉得还可以有另外一种思路来参考，即<code>灾难性遗忘</code>，它是说下游任务对预训练模型进行fine-tune，会对预训练模型造成干扰，那么loss计算时可以分成两部分，pretrained loss和fine-tune loss，一般按经验fine-tune loss权重为0.5。</p>
-<h2 id="改进"><a href="#改进" class="headerlink" title="改进"></a>改进</h2><h3 id="一-调整λ值"><a href="#一-调整λ值" class="headerlink" title="一. 调整λ值"></a>一. 调整λ值</h3><p>作者这里使用0.7&#x2F;0.3的权重分配给MLM和sigmoid二分类，这里我对其做了如下调整：</p>
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>MLM weight</th>
-<th>sigmoid二分类 weight</th>
-<th>dev metric</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1</td>
-<td>1</td>
-<td>0.5</td>
-<td>epoch26:0.9168</td>
-</tr>
-<tr>
-<td>2</td>
-<td>1</td>
-<td>5</td>
-<td>epoch35:0.914</td>
-</tr>
-<tr>
-<td>3</td>
-<td>1</td>
-<td>50</td>
-<td></td>
-</tr>
-</tbody></table>
-<h4 id="1-ID（1）"><a href="#1-ID（1）" class="headerlink" title="1. ID（1）"></a>1. ID（1）</h4><p>以<a target="_blank" rel="noopener" href="https://github.com/shibing624/pycorrector/blob/master/pycorrector/utils/eval.py">macbert eval.py</a>为准进行测试，记得把macbert_model_dir改成自己的。</p>
-<p>以epoch 26的模型为准：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Sentence Level: acc:0.7040, precision:0.8545, recall:0.6087, f1:0.7109, cost time:5.35 s</span><br><span class="line">Sentence Level: acc:0.7955, precision:0.8093, recall:0.7661, f1:0.7871, cost time:10.53 s</span><br></pre></td></tr></table></figure>
-
-<p>和”shibing624&#x2F;macbert4csc-base-chinese”进行对比，发现recall要高了不少，结果效果更好了些～。</p>
-<h4 id="2-ID（2）"><a href="#2-ID（2）" class="headerlink" title="2. ID（2）"></a>2. ID（2）</h4><p>dev metric 在epoch 35的时候为0.914，相比ID（1）在epoch 26 0.9168的结果，发现收敛速度变的慢了。<br>故这个忽略。</p>
-<img src="/2022/04/01/macbert4csc%E7%BA%A0%E9%94%99/%E8%B6%85%E5%8F%825.png" class="" title="超参5">
-
-
-<h4 id="3-ID（3）"><a href="#3-ID（3）" class="headerlink" title="3. ID（3）"></a>3. ID（3）</h4><p>dev metric 在epoch 35的时候为0.9112，虽说还有小量上涨可能，但是train metric已经过拟合了，这个结果让我觉得…，emmmm，这些超参没有达到想象中的区别哇。</p>
-<img src="/2022/04/01/macbert4csc%E7%BA%A0%E9%94%99/%E8%B6%85%E5%8F%8250.png" class="" title="超参50">
-
-<h3 id="2-对hidden-states分配权重"><a href="#2-对hidden-states分配权重" class="headerlink" title="2. 对hidden_states分配权重"></a>2. 对hidden_states分配权重</h3><p>作者在进行二分类的时候使用了最后一层的hidden_states，那么是否可以对所有的hiddeen_states分配不同的权重。为什么？前面的layer更偏向浅层语义信息，比如词法，句法等，越往后代表的含义可能更深层次，本来就是预测词对不对，搞那么深不一定适合。<br>所以下面对其进行尝试。</p>
-<p>添加scalarmix层，代码如下:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ScalarMix</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, n_layers, dropout=<span class="number">0.</span></span>):</span><br><span class="line">        <span class="built_in">super</span>(ScalarMix, self).__init__()</span><br><span class="line">        self.n_layers = n_layers</span><br><span class="line"></span><br><span class="line">        self.weights = nn.Parameter(torch.zeros(n_layers))</span><br><span class="line">        self.gamma = nn.Parameter(torch.tensor([<span class="number">1.0</span>]))</span><br><span class="line">        self.dropout = nn.Dropout(dropout)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__repr__</span>(<span class="params">self</span>):</span><br><span class="line">        s = <span class="string">f&quot;n_layers=<span class="subst">&#123;self.n_layers&#125;</span>&quot;</span></span><br><span class="line">        <span class="keyword">if</span> self.dropout.p &gt; <span class="number">0</span>:</span><br><span class="line">            s += <span class="string">f&quot;, dropout=<span class="subst">&#123;self.dropout.p&#125;</span>&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="string">f&quot;<span class="subst">&#123;self.__class__.__name__&#125;</span>(<span class="subst">&#123;s&#125;</span>)&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, tensors</span>):</span><br><span class="line">        <span class="string">r&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            tensors (list[~torch.Tensor]):</span></span><br><span class="line"><span class="string">                :math:`N` tensors to be mixed.</span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            The mixture of :math:`N` tensors.</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        normed_weights = self.dropout(self.weights.softmax(-<span class="number">1</span>))</span><br><span class="line">        weighted_sum = <span class="built_in">sum</span>(w * h <span class="keyword">for</span> w, h <span class="keyword">in</span> <span class="built_in">zip</span>(normed_weights, tensors))</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> self.gamma * weighted_sum</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<p>结果如下：</p>
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>MLM weight</th>
-<th>sigmoid二分类 weight</th>
-<th>dev metric</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1</td>
-<td>1</td>
-<td>0.5</td>
-<td>epoch12：0.9118</td>
-</tr>
-</tbody></table>
-<img src="/2022/04/01/macbert4csc%E7%BA%A0%E9%94%99/scalar_1.png" class="" title="scalar_1">
-
-
-<p>为啥epoch 12就停了，因为train metric基本已经达到1了。。。</p>
-<p>由此可见，整个准确率的提升，更多是在mlm这个任务上，加了二分类判断其对不对，整体影响并没那个大。。。</p>
-<blockquote>
-<p>后来我发现了一个地方，mlm weight和二分类weight我给的是1和0.5，压缩到1之内就分别是0.6666和0.3333，我嘞个去，这不基本和作者的0.7和0.3很相近了么。。下次需要提前注意下。</p>
-</blockquote>
-<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>当我对mlm loss weight分配了更高的权重，结果发现效果有提升。</p>
-<img src="/2022/04/01/macbert4csc%E7%BA%A0%E9%94%99/9173.png" class="" width="9173">
-
-
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
-<li>对mlm和二分类分配不同权重发现，mlm的权重应该更高一些。这个和electra中那个50稍微有点偏差。不过我觉得又可以理解，因为它上游是生成器，任务不同～。</li>
-<li>添加了ScalarMix层给hidden_states分配不同的权重，其对结果并没有产生有效影响，其本质问题还是在于mlm loss还是应该占据更大的比例。</li>
-<li>至于为什么不尝试<a target="_blank" rel="noopener" href="https://github.com/ymcui/Chinese-BERT-wwm">Chinese-BERT-wwm</a>，因为<a target="_blank" rel="noopener" href="https://github.com/ymcui/MacBERT">MacBERT</a>在其个任务效果对比中比前者整体表现会偏更好一些，另外都是做wwm，所以本质没有区别。</li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/04/01/macbert4csc%E7%BA%A0%E9%94%99/">展开全文 >></a>
         </p>
       
 

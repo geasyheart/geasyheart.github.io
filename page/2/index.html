@@ -206,6 +206,95 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-lora原理与实现" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2023/11/29/lora%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E7%8E%B0/">lora原理与实现</a>
+    </h1>
+  
+
+        
+        <a href="/2023/11/29/lora%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E7%8E%B0/" class="archive-article-date">
+  	<time datetime="2023-11-29T07:59:56.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-11-29</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>Lora,是微软出的一种在低资源场景下进行微调大模型的实现方式，在transformers里有peft这个包进行调用，它通过固定预训练模型权重并只训练新增lora层来实现微调，目前其在比如Baichuan2、ChatGLM上都有相关资料，更多介绍可自行搜索了解。</p>
+<h3 id="简单理解"><a href="#简单理解" class="headerlink" title="简单理解"></a>简单理解</h3><p>其简单理解实现方式为，比如qkv的linear为768*768（更大模型可能会更大），那lora通过新增两个linear（lora_A和lora_B），引入一个超参<code>r</code>来降低训练参数量，其伪代码如下:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">in_feature, out_feature = <span class="number">768</span>, <span class="number">768</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># old</span></span><br><span class="line">self.q = nn.Linear(in_feature, out_feature)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Lora</span></span><br><span class="line"></span><br><span class="line">self.lora_A = nn.Linear(in_feature, r)</span><br><span class="line">self.lora_B = nn.Linear(r, out_feature)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>比如当r设置为1时，是否可以明显感受到训练参数量的变化。</p>
+<p>注意：Lora本质只有在微调阶段生效，其加速了微调，但是对于推理阶段不会加速，而且因引入了新的计算会导致推理速度略有下降。</p>
+<h3 id="paddle实现"><a href="#paddle实现" class="headerlink" title="paddle实现"></a>paddle实现</h3><p>注意，此篇文章通过介绍LoraLinear的实现，来说明Lora的工作原理。</p>
+<p>其实现在<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/5eb2eae1c73e983bbaa8302573a985ebdfa19801/paddlenlp/peft/lora/lora_layers.py#L28">这里</a>。</p>
+<h4 id="注意点1"><a href="#注意点1" class="headerlink" title="注意点1"></a>注意点1</h4><p>LoraLinear继承自nn.Linear，所以是在Linear的基础上进行改动。</p>
+<h4 id="注意点2"><a href="#注意点2" class="headerlink" title="注意点2"></a>注意点2</h4><p>Linear的<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/5eb2eae1c73e983bbaa8302573a985ebdfa19801/paddlenlp/peft/lora/lora_layers.py#L70">weight不进行训练</a>，这也符合Lora的原理说明。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">self.weight.stop_gradient=<span class="literal">True</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="注意点3"><a href="#注意点3" class="headerlink" title="注意点3"></a>注意点3</h4><p>forward部分，代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, <span class="built_in">input</span>: paddle.Tensor</span>):</span><br><span class="line">        result = F.linear(x=<span class="built_in">input</span>, weight=self.weight, bias=self.bias, name=self.name)</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> self.merged:</span><br><span class="line">            result += (self.lora_dropout(<span class="built_in">input</span>) @ self.lora_A @ self.lora_B) * self.scaling</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>我们看如果pretrained model和lora不进行merge的时候，其推理是pretrained model先计算，拿到result，然后和lora计算结果进行相加获取最终结果。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>对于Parameter Efficient fine-tune，Lora是其中一个实现方式，其他还有比如p-tuning等。但是通过Lora，我们大致理解了从原来直接对pretrained model fine-tune到现在的引入新的参数（比如）来使得我们能用低资源来使用LLM的能力。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2023/11/29/lora%E5%8E%9F%E7%90%86%E4%B8%8E%E5%AE%9E%E7%8E%B0/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-document-QA-layoutLMv2" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1160,81 +1249,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2023/03/07/in-batch-negative%E6%95%B0%E6%8D%AE%E5%A2%9E%E5%BC%BA/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-bert向量加权" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2023/02/13/bert%E5%90%91%E9%87%8F%E5%8A%A0%E6%9D%83/">bert向量加权</a>
-    </h1>
-  
-
-        
-        <a href="/2023/02/13/bert%E5%90%91%E9%87%8F%E5%8A%A0%E6%9D%83/" class="archive-article-date">
-  	<time datetime="2023-02-13T02:39:58.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-02-13</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>这个是对<a href="/2021/06/25/bert%E4%BB%A5%E9%A6%96%E5%AD%97%E8%A1%A8%E7%A4%BA%E8%AF%8D%E5%90%91%E9%87%8F(2)/" title="bert以首字表示词向量(2)">bert以首字表示词向量(2)</a>文章的扩充，是对指定span index进行加权。</p>
-<p>整体思想来自<a href="/2021/12/17/coreference-resolution/" title="coreference resolution">coreference resolution</a>中<code>#word-level实现demo</code>部分。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">WordEncoder</span>(torch.nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, n_in, p=<span class="number">0.1</span></span>):</span><br><span class="line">        <span class="built_in">super</span>(WordEncoder, self).__init__()</span><br><span class="line">        self.n_in = n_in</span><br><span class="line">        self.p = p</span><br><span class="line">        self.linear = torch.nn.Linear(in_features=n_in, out_features=<span class="number">1</span>)</span><br><span class="line">        self.dp = torch.nn.Dropout(p)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x, indices</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        如果indices中为padding，那么就(0, bert_out.size(1))</span></span><br><span class="line"><span class="string">        :param x:</span></span><br><span class="line"><span class="string">        :param indices:</span></span><br><span class="line"><span class="string">        :return:</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="comment"># x: BS, SL, HS</span></span><br><span class="line">        <span class="comment"># indices: BS, L</span></span><br><span class="line">        start_end_indices_to_tensor = torch.tensor(indices).to(x.device)</span><br><span class="line">        start_indices = start_end_indices_to_tensor[:, :, <span class="number">0</span>]</span><br><span class="line">        end_indices = start_end_indices_to_tensor[:, :, <span class="number">1</span>]</span><br><span class="line">        mask = torch.arange(x.shape[<span class="number">1</span>]).expand(x.shape[<span class="number">0</span>], <span class="built_in">len</span>(indices[<span class="number">0</span>]), x.shape[<span class="number">1</span>]).to(x.device)</span><br><span class="line">        attn_mask = (mask &gt;= start_indices.unsqueeze(<span class="number">2</span>)) * (mask &lt; end_indices.unsqueeze(<span class="number">2</span>))</span><br><span class="line">        attn_mask = torch.log(attn_mask.to(torch.<span class="built_in">float</span>))</span><br><span class="line"></span><br><span class="line">        attn_scores = self.linear(x).permute(<span class="number">0</span>, <span class="number">2</span>, <span class="number">1</span>)</span><br><span class="line">        attn_scores = attn_scores.expand(x.shape[<span class="number">0</span>], <span class="built_in">len</span>(indices[<span class="number">0</span>]), x.shape[<span class="number">1</span>])</span><br><span class="line">        attn_scores = attn_scores + attn_mask</span><br><span class="line">        output = torch.softmax(attn_scores, dim=<span class="number">2</span>).bmm(x)</span><br><span class="line">        <span class="keyword">return</span> self.dp(output)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    <span class="comment"># 我 是 中国人</span></span><br><span class="line">    <span class="comment"># 我 中国人 null</span></span><br><span class="line">    word_feature = torch.arange(<span class="number">60</span>, dtype=torch.<span class="built_in">float</span>).view(<span class="number">2</span>, <span class="number">5</span>, <span class="number">6</span>)</span><br><span class="line">    start_end_indices = [</span><br><span class="line">        [(<span class="number">0</span>, <span class="number">1</span>), (<span class="number">1</span>, <span class="number">2</span>), (<span class="number">2</span>, <span class="number">5</span>)],</span><br><span class="line">        [(<span class="number">0</span>, <span class="number">1</span>), (<span class="number">1</span>, <span class="number">4</span>), (<span class="number">0</span>, <span class="number">0</span>)]</span><br><span class="line">    ]</span><br><span class="line">    w = WordEncoder(<span class="number">6</span>)</span><br><span class="line">    w(word_feature, start_end_indices)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># single</span></span><br><span class="line">    <span class="comment"># word_feature = torch.arange(50, dtype=torch.float).view(1, 5, 10)</span></span><br><span class="line">    <span class="comment"># # 那么index是：</span></span><br><span class="line">    <span class="comment"># start_end_indices = [[(0, 1), (1, 2), (2, 5)]]</span></span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    <span class="comment"># we = WordEncoder(n_in=10, p=0.1)</span></span><br><span class="line">    <span class="comment"># output = we.forward(word_feature, start_end_indices)</span></span><br><span class="line">    <span class="comment"># print(output)</span></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2023/02/13/bert%E5%90%91%E9%87%8F%E5%8A%A0%E6%9D%83/">展开全文 >></a>
         </p>
       
 

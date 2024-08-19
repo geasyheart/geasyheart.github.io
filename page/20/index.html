@@ -206,6 +206,98 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-32-01MySQL系列之一关系型数据库基础理论" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/07/06/32-01MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%80%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/">32_01MySQL系列之一关系型数据库基础理论</a>
+    </h1>
+  
+
+        
+        <a href="/2015/07/06/32-01MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%80%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/" class="archive-article-date">
+  	<time datetime="2015-07-06T01:05:06.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-07-06</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>数据库系统阶段管理数据的特点有如下方面:<br>(1)数据结构化<br>    数据库中的数据不再仅仅针对某个应用，而是面向全组织；这句话的意思指早期的文件基本上对应一个application,即文件仍然是面向应用的，那么当不同的应用程序所使用的数据具有共同部分时，也必须建立自己的数据文件，数据不能共享，同时，由于相同数据的重复存储、各自管理，在对数据进行更新操作时，不但浪费磁盘空间，同时也容易造成数据的不一致性。<br>    由于数据库系统不仅描述数据本身，还描述数据之间的联系，记录之间的联系可以用参照完整性来表述，进行多表查询时可以很容易的实现。<br>(2)数据共享性高、冗余度低<br>    所谓的数据共享是指数据库中的一组数据集合可为多个应用和多个用户共同使用。由于同一组数据可供多个用户或应用共享，这样便避免了同一数据在数据库中重复出现并具有不同值的现象。<br>(3)数据独立性高<br>    所以数据的独立性是指数据库中的数据与应用程序间相互独立，即数据的逻辑结构、存储结构以及存取方式的改变不影响应用程序<br>(4)有统一的数据控制功能<br>    1、数据的安全(Security)控制<br>    2、数据的完整性(Integrity)控制<br>    3、并发(Concurrency)控制<br>    4、数据恢复(Recovery)<br>    <br>那么可以看出，一个文件所可能具有的问题，如下所示:    <br>文件:<br>    数据冗余和不一致性<br>    数据访问困难<br>    数据孤立<br>    完整性问题<br>    原子性问题<br>    并发访问异常<br>    安全性问题<br>DBMS<br>    层次模型<br>    网状模型<br>    关系模型<br>    面向对象模型 </p>
+<p>关系模型(结构化数据模型)    <br>    关系模型<br>    E-R:实体-关系模型(基本成分:实体型 属性 联系(一对一、一对多、多对多))<br>    对象关系模型:基于对象的数据模型<br>    半结构化数据模型<a href="XML:扩展标记语言">XML:扩展标记语言</a> </p>
+<p>关系性数据:<br>    表示层:表<br>    逻辑层:存储引擎<br>    物理层:数据文件<br>        如果这个放在操作系统概念上来讲:表示层就是文件，逻辑层就是文件系统，物理层就是数据块。<br>RDB对象:<br>    约束(例如，更多可自行查看23_03)<br>        域约束:数据类型约束<br>        外键约束:引用完整性约束<br>        主键约束:某字段能唯一标识此字段所属的实体，并且不允许为空<br>            一张表只允许有一个主键<br>        唯一性约束:每一行的某字段不允许出现相同值，可以为空<br>            一张表中可以有多个<br>        检查性约束:age:int<br>    <br>数据存储和查询:<br>    存储管理器:<br>        权限及完整性管理器<br>        事务管理器<br>        文件管理器<br>        缓冲区管理器<br>    查询管理器:<br>        DML解释器<br>        DDL解释器<br>        查询执行引擎 
+         </p>
+<p>MySQL:<br>   单进程<br>    多线程<br>       守护线程<br>       应用线程    <br>thread reuse(线程重用):数据查询时，为了避免更多的性能降低，在查询完成以后，线程并不会销毁，下一个查询可直接重用这个线程进行查询。 </p>
+<p>MySQL最大内存使用:32bit:2.7G ； 64bit:不好说~~，所以生产环境中一定要使用64bit。<br>        <br>MySQL对smp(对称多处理器)的支持不好，意味着一条语句查询时只能使用一颗CPU，<br>这个是一个非常大的缺陷。<br>        <br>关系运算:        <br>    投影:只输出指定属性<br>    选择:只输出符合条件的行<br>    自然连接:具有相同名字的所有属性上取值相同的行<br>    笛卡尔积:(a+b)*(c+d)&#x3D;ac+ad+bc+bd      多表查询时非常有用<br>    并:集合运算<br>        <br>        <br>自然连接:<br>    例如:<br>        user.shellid&#x3D;shell.shellid<br>    有两张表，其中一张表记录了如下内容：<br>    marry  1<br>    tom       2<br>    jerry  3<br>    另外一张表:<br>    1        bash<br>    2        csh<br>    3        zsh    <br>    4        ksh<br>    5        tcsh<br>    那么，<br>    marry 1&#x3D;1    bash<br>    tom      2&#x3D;2    csh<br>    jerry 3&#x3D;3    zsh<br>这种具有等值关系的运算叫做自然连接。 
+         </p>
+<p>        <br>        <br>这篇文章部分参考《数据库原理及应用》，由于没有更为结构化、全面的认知，所以这篇文章会有很多缺陷，更多可自行参考其他书籍，以获得详细的解答，这篇文章仅作为最最低下的个人认知，<br>可完全不看。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/07/06/32-01MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%80%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-31-02bash脚本编程之在bash脚本中使用选项" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1055,123 +1147,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/04/23/22-02%E5%9F%BA%E4%BA%8EOpenSSL%E7%9A%84https%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-24-04编译安装LAMP之配置httpd以FastCGI方式与PHP整合" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/22/24-04%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85LAMP%E4%B9%8B%E9%85%8D%E7%BD%AEhttpd%E4%BB%A5FastCGI%E6%96%B9%E5%BC%8F%E4%B8%8EPHP%E6%95%B4%E5%90%88/">24_04编译安装LAMP之配置httpd以FastCGI方式与PHP整合</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/22/24-04%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85LAMP%E4%B9%8B%E9%85%8D%E7%BD%AEhttpd%E4%BB%A5FastCGI%E6%96%B9%E5%BC%8F%E4%B8%8EPHP%E6%95%B4%E5%90%88/" class="archive-article-date">
-  	<time datetime="2015-04-22T03:16:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>##以FastCGI来编译php</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#./configure --prefix=/usr/local/php --with-config-file-path=/etc  --with-openssl --with-mysql=/usr/local/mysql   --with-mysqli=/usr/local/mysql/bin/mysql_config </span></span><br><span class="line">--enable-mbstring --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr/local/libxml --enable-xml --enable-sockets </span><br><span class="line">--with-apxs2=/usr/local/apache/bin/apxs （注意：这个地方去掉改为--enable-fpm）--with-mcrypt=/usr/local/mycrypt  --with-config-file-scan-dir=/etc/php.dir </span><br><span class="line">--with-bz2 --enable-maintainer-zts(既然不是以模块化来使用线程，所以这项去掉)； </span><br><span class="line">make &amp;&amp; make install </span><br></pre></td></tr></table></figure>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> php.ini-production /etc/php.ini </span><br></pre></td></tr></table></figure>
-
-<p>配置php-fpm, 为php-fpm提供sysv.init脚本，并将其添加到服务列表: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> sapi/fpm/init.d.php-fpm /etc/rc.d/init.d/php-fpm </span><br><span class="line"><span class="built_in">chmod</span> +x /etc/rc.d/init.d/php-fpm </span><br><span class="line">chkconfig --add php-fpm </span><br><span class="line">chkconfig php-fpm on </span><br></pre></td></tr></table></figure>
-<p>为php-fpm提供配置文件： </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf </span><br></pre></td></tr></table></figure>
-<p>编辑php-fpm的配置文件： </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vi /usr/local/php/etc/php-fpm.conf </span></span><br></pre></td></tr></table></figure>
-<p>配置fpm的相关选项为你所需要的值，并启用pid文件： </p>
-<blockquote>
-<p>pm.max_children &#x3D; 50<br>pm.start_servers &#x3D; 5<br>pm.min_space_servers &#x3D; 2<br>pm.max_space_servers &#x3D; 8<br>pid &#x3D; &#x2F;usr&#x2F;lcoal&#x2F;php&#x2F;var&#x2F;run&#x2F;php-fpm.pid </p>
-</blockquote>
-<p>接下来就可以启动php-fpm了： </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service php-fpm start </span><br></pre></td></tr></table></figure>
-<p>php-fpm 监听端口为9000； </p>
-<p>3、启用httpd的相关模块 </p>
-<blockquote>
-<p>LoadModule proxy_module modules&#x2F;mod_proxy.so<br>LoadModule proxy_fcgi_module modules&#x2F;mod_proxy_fcgi.so </p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vi /etc/httpd/httpd.conf </span></span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>AddType application&#x2F;x-httpd-php .php<br>Addtype application&#x2F;x-httpd-php-source .phps<br>还有DirectoryIndex index.html改为index.php<br>(或者DirectoryIndex index.html index.php)<br>（二）、<br>    配置虚拟主机支持使用fcgi<br>        在相应的虚拟主机中添加类似如下两行：<br>        ProxyRequests Off<br>        ProxyPassMatch ^&#x2F;(.*.php)$ fcgi:&#x2F;&#x2F;127.0.0.1:9000&#x2F;PATH&#x2F;TO&#x2F;DOCUMENT.ROOT&#x2F;$1<br>        如：<br>        ProxyPassMatch ^&#x2F;(.*.php)$ fcgi:&#x2F;&#x2F;127.0.0.1:9000&#x2F;www&#x2F;meiyun.com&#x2F;$1<br>       <br>        ProxyRequests Off:关闭正向代理；<br>        ProxyPassMatch：把以.php结尾的文件请求发送到php-fpm进程，php-fpm至少需要知道<br>        运行的目录和URL，所以这里直接在fcgi:&#x2F;&#x2F;127.0.0.1:9000后指明了<br>        这两个参数，其他的参数的传递已经被mod_proxy_fcgi.so进行了封装，不需要手动指定； </p>
-</blockquote>
-<p>例如: </p>
-<blockquote>
-<p>&lt;VirtualHost *:80&gt;<br>    DocumentRoot “www&#x2F;unravel.com”<br>    ServerName <a target="_blank" rel="noopener" href="http://www.unravel.com/">www.unravel.com</a><br>    ProxyRequests Off<br>    ProxyPassMatch ^&#x2F;(.*.php)$ fcgi:127.0.0.1:9000&#x2F;www&#x2F;unravel.com&#x2F;$1<br>    <br>    &lt;Directory “www&#x2F;unravel.com”&gt;<br>        Options none<br>        AllowOverride none<br>        Require all granted<br>    </Directory> </p>
-</blockquote>
-<p>如果以FastCGI方式安装xcache，在安装上后service php-fpm restart即可。 </p>
-<p>最后说明: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> phpMyAdmin-version-all-language pma </span><br><span class="line"><span class="built_in">cd</span> pma/ </span><br><span class="line"><span class="built_in">cp</span> config.sample.inc.php config.inc.php </span><br><span class="line">vim config.inc.php </span><br></pre></td></tr></table></figure>
-<p>修改其中的随机数，可保证安全性。 </p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/22/24-04%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85LAMP%E4%B9%8B%E9%85%8D%E7%BD%AEhttpd%E4%BB%A5FastCGI%E6%96%B9%E5%BC%8F%E4%B8%8EPHP%E6%95%B4%E5%90%88/">展开全文 >></a>
         </p>
       
 
