@@ -226,15 +226,53 @@ var _hmt = _hmt || [];
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近有个需求，能够对不同排版格式的繁体信息进行抽取，所以从传统的版面分析+文字识别+阅读顺序+NLP到现在发展的多模态大模型综合调研。</p>
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近有个需求，能够对不同排版格式的繁体信息进行抽取，所以从传统的版面分析+文字检测、识别+阅读顺序+NLP到现在发展的多模态大模型综合调研。</p>
+<p>此处以文字区域检测+识别做个demo,来直观感受多模态大模型的结果。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
 <li>LVLM(large vision language model)相比LLM至少落后一代。</li>
-<li>LVLM整体比LLM更难。1）多模态信息融合。2）从结果上看，训练时长与loss下降速度。</li>
+<li>LVLM相比LLM更具有挑战性。1）多模态信息融合。2）从结果上看，训练时长与loss下降速度。3）高清图片，针对不同尺寸的图片，原来例如CLIP使用固长224*224像素来patch,Qwen-VL-Chat使用448,MiniCPM-V-2_6采用动态计算切分方式，来更好贴近原始visual model的输入尺寸,减少缩放后图片质量的损失。以及引入query embed来减少高清图片输入长度过长问题，看LlaVA-UHD。</li>
 <li>存在更为明显重复生成问题。之前在试字节豆包时，在一个问答中涉及批量工作场景时遇到过重复生成，即模型“宕机”了，不断重复一段文本。其他LLM也有这类问题，只是相比LVLM更少些。在未见过的或者说更为复杂排版场景时，出错的概率更高。</li>
 <li>推理速度。不过这个也是跟随业界大环境走吧，第一代的LLM其实速度也不是很快，后面VLLM等加速推理框架、其他技术出现等。</li>
-<li>场景贴和。区域检测和文字识别，例如Qwen-VL-Chat甚至生成式来做就不是很贴和。不过这里想强调的是，随着LLM技术的发展，不难看出LVLM后续会有更为出色、理想的结果。</li>
-<li>工程方面。在选择一个比较理想LVLM模型的前提下，还要看下其他适配工作是否完善。例如微调、推理速度优化等，这点例如GLM-4v-chat、MiniCPM-V-2_6做的还不太完善。当然也有可能是接触新的技术过快，也需要业界沉淀总结。</li>
 </ol>
+<h2 id="附件"><a href="#附件" class="headerlink" title="附件"></a>附件</h2><p>注：实际比下面还复杂些，此处只做简单demo展示。</p>
+<p>简体横排（没有这样训练语料仍能泛化，模型本身具备OCR能力）：</p>
+<table>
+<thead>
+<tr>
+<th><img src="/2024/08/19/%E5%A4%9A%E6%A8%A1%E6%80%81-%E7%B9%81%E4%BD%93%E4%B8%8D%E5%90%8C%E6%8E%92%E7%89%88/pred-0.png" class="pred-0"></th>
+<th><img src="/2024/08/19/%E5%A4%9A%E6%A8%A1%E6%80%81-%E7%B9%81%E4%BD%93%E4%B8%8D%E5%90%8C%E6%8E%92%E7%89%88/pred-1.png" class="pred-1"></th>
+</tr>
+</thead>
+</table>
+<table>
+<thead>
+<tr>
+<th><img src="/2024/08/19/%E5%A4%9A%E6%A8%A1%E6%80%81-%E7%B9%81%E4%BD%93%E4%B8%8D%E5%90%8C%E6%8E%92%E7%89%88/pred-2.png" class="pred-2"></th>
+<th><img src="/2024/08/19/%E5%A4%9A%E6%A8%A1%E6%80%81-%E7%B9%81%E4%BD%93%E4%B8%8D%E5%90%8C%E6%8E%92%E7%89%88/pred-3.png" class="pred-3"></th>
+</tr>
+</thead>
+</table>
+<p>手写体（基本仍符合横排）：</p>
+<img src="/2024/08/19/%E5%A4%9A%E6%A8%A1%E6%80%81-%E7%B9%81%E4%BD%93%E4%B8%8D%E5%90%8C%E6%8E%92%E7%89%88/pred-103.png" class="pred-103"> 
+
+<p>繁体竖排：</p>
+<table>
+<thead>
+<tr>
+<th><img src="/2024/08/19/%E5%A4%9A%E6%A8%A1%E6%80%81-%E7%B9%81%E4%BD%93%E4%B8%8D%E5%90%8C%E6%8E%92%E7%89%88/pred-110.png" class="pred-110"></th>
+<th><img src="/2024/08/19/%E5%A4%9A%E6%A8%A1%E6%80%81-%E7%B9%81%E4%BD%93%E4%B8%8D%E5%90%8C%E6%8E%92%E7%89%88/pred-111.png" class="pred-111"></th>
+</tr>
+</thead>
+</table>
+<table>
+<thead>
+<tr>
+<th><img src="/2024/08/19/%E5%A4%9A%E6%A8%A1%E6%80%81-%E7%B9%81%E4%BD%93%E4%B8%8D%E5%90%8C%E6%8E%92%E7%89%88/pred-112.png" class="pred-112"></th>
+<th></th>
+</tr>
+</thead>
+</table>
+<p>对于更复杂场景的排版，泛化效果不理想，官方解释是原始训练语料包含少。</p>
 
       
 
