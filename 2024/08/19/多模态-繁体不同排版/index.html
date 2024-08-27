@@ -25,7 +25,7 @@
 <meta property="og:image" content="https://geasyheart.github.io/2024/08/19/%E5%A4%9A%E6%A8%A1%E6%80%81-%E7%B9%81%E4%BD%93%E4%B8%8D%E5%90%8C%E6%8E%92%E7%89%88/pred-111.png">
 <meta property="og:image" content="https://geasyheart.github.io/2024/08/19/%E5%A4%9A%E6%A8%A1%E6%80%81-%E7%B9%81%E4%BD%93%E4%B8%8D%E5%90%8C%E6%8E%92%E7%89%88/pred-112.png">
 <meta property="article:published_time" content="2024-08-19T01:39:44.000Z">
-<meta property="article:modified_time" content="2024-08-26T08:50:27.883Z">
+<meta property="article:modified_time" content="2024-08-27T02:18:01.590Z">
 <meta property="article:author" content="张宇">
 <meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
@@ -240,7 +240,7 @@ var _hmt = _hmt || [];
 <p>此处以文字区域检测+识别做个demo,来直观感受多模态大模型的结果。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
 <li>LVLM(large vision language model)相比LLM至少落后一代。</li>
-<li>LVLM相比LLM更具有挑战性。1）多模态信息融合。2）从结果上看，训练时长与loss下降速度。3）高清图片，针对不同尺寸的图片，原来例如CLIP使用固长224*224像素来patch,Qwen-VL-Chat使用448,MiniCPM-V-2_6采用动态计算切分方式，来更好贴近原始SigLIP的输入尺寸,减少缩放后图片质量的损失。以及引入query embed来减少高清图片输入长度过长问题，看LlaVA-UHD。</li>
+<li>LVLM相比LLM更具有挑战性。1）多模态信息融合。2）从结果上看，训练时长与loss下降速度。3）高清图片，针对不同尺寸的图片，原来例如CLIP使用固长224*224像素来patch,Qwen-VL-Chat使用448,MiniCPM-V-2_6采用动态计算切分方式，来更好贴近原始SigLIP的输入尺寸,减少缩放后图片质量的损失。以及引入query embed来减少高清图片输入长度过长问题，看Perceiver Sampler和LlaVA-UHD。</li>
 <li>存在更为明显重复生成问题。之前在试字节豆包时，在一个问答中涉及批量工作场景时遇到过重复生成，即模型“宕机”了，不断重复一段文本。其他LLM也有这类问题，只是相比LVLM更少些。在未见过的或者说更为复杂排版场景时，出错的概率更高。</li>
 <li>推理速度。不过这个也是跟随业界大环境走吧，第一代的LLM其实速度也不是很快，后面VLLM等加速推理框架、其他技术出现等。</li>
 </ol>
