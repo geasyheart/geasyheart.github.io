@@ -206,6 +206,95 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-07-04特殊权限SUID等详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/13/07-04%E7%89%B9%E6%AE%8A%E6%9D%83%E9%99%90SUID%E7%AD%89%E8%AF%A6%E8%A7%A3/">07_04特殊权限SUID等详解</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/13/07-04%E7%89%B9%E6%AE%8A%E6%9D%83%E9%99%90SUID%E7%AD%89%E8%AF%A6%E8%A7%A3/" class="archive-article-date">
+  	<time datetime="2015-02-12T17:07:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>特殊权限:<br> SUID:运行某程序时，相应进程的属主是程序文件自身的属主，而不是启动者；<br> chmod u+s FILE<br> 如果FILE本身原来就有执行权限，则SUID显示为s；否则为S；<br> 一般这个可以认为以root用户的权限运行这个程序；<br> 如：getfacl &#x2F;bin&#x2F;cat ，可以看到owner:root group:root<br> SGID:运行某程序时，相应进程的属组是程序文件自身的属组，而不是启动者所属的基本组；<br> chmod g+s FILE<br> 如果一个目录设置了SGID位，那么如果任何一个用户对这个目录有写权限的话，<br> 他在这个目录所建立的文件的组都会自动转为这个目录的属主所在的组，<br> 而文件所有者不变，还是属于建立这个文件的用户。 </p>
+<p> 如:<br> 在&#x2F;tmp目录下创建一个目录progrem, </p>
+ <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#mkdir /tmp/progrem </span><br><span class="line">#chmod 770 /tmp/progrem </span><br><span class="line">#groupadd develop 创建一个新组 </span><br><span class="line">#创建三个用户.user1,user2,user3 </span><br><span class="line">#usermod -a -G develop user1,2,3 </span><br></pre></td></tr></table></figure>
+<p> 当user1在&#x2F;tmp&#x2F;progrem创建文件时，文件的所有者和所属组都是user1,即其他的组成员没法编辑这个文件，只能看，，所以为了<br> 其他组成员可以参与编辑这个文件，可以:: chmod 2770 &#x2F;tmp&#x2F;progrem,这样再创建文件的所属组就属于文件的所属组了；<br> （而这个也是平常使用最多的一个）<br> Sticky:<br> chmod o+t DIR<br> t的作用在于每个人都可以使用这个目录，但是没法删除这个目录以及这个目录下的任何东西，即使给w权限，也只是可以修改内容，也同样没法删除文件。 </p>
+<p> 1755 2755 4755 </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/13/07-04%E7%89%B9%E6%AE%8A%E6%9D%83%E9%99%90SUID%E7%AD%89%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-07-03Linux文件查找详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1251,158 +1340,9 @@ else
 
 
   
-    <article id="post-04-01Linux用户管理命令详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/05/04-01Linux%E7%94%A8%E6%88%B7%E7%AE%A1%E7%90%86%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/">04-01Linux用户管理命令详解</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/05/04-01Linux%E7%94%A8%E6%88%B7%E7%AE%A1%E7%90%86%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/" class="archive-article-date">
-  	<time datetime="2015-02-05T10:52:39.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-05</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="etc-shadow"><a href="#etc-shadow" class="headerlink" title="&#x2F;etc&#x2F;shadow"></a>&#x2F;etc&#x2F;shadow</h2><p>用户名:密码:最近一次修改密码的时间:最短使用期限:最长使用期限:警告时间:非活动时间:过期时间 </p>
-<blockquote>
-<p>–用户名<br>–密码<br>–从1970年1月1日起到上次修改密码所经过的天数<br>–密码再过几天可以被变更(0表示随时可以改变)<br>–密码再过几天必须被变更(99999表示永不过期)<br>–密码过期前几天提醒用户(默认为一周)<br>–密码过期几天后帐号被禁用<br>–从1970年1月1日算起，多少天后账号失效 </p>
-</blockquote>
-<p>  </p>
-<h2 id="useradd"><a href="#useradd" class="headerlink" title="useradd"></a>useradd</h2><blockquote>
-<p>-u UID(&gt;&#x3D;500)<br>-g GID<br>-G　附加组１，附加组２　<br>-c　注释信息<br>-d &#x2F;path&#x2F;to&#x2F;somedirectory (可以自定义家目录名称)<br>-s 指定shell cat &#x2F;etc&#x2F;shells 可查看所有支持的shell<br>-m 创建家目录（强制创建，如果不存在）<br>不过一般要结合-k使用，-k：当创建用户的时候，用户的基本配置信息存放在&#x2F;etc&#x2F;skel目录下，会自动copy到你创建的目录里；<br>即使不指定，也是创建，不过使用，就会确保创建；；<br>-M 不创建家目录 &#x2F;<br>-r 创建一个系统账号<br>useradd -c “Tony” -d &#x2F;home&#x2F;tony -s &#x2F;sbin&#x2F;nologin user4 </p>
-</blockquote>
-<p>所有默认的配置信息的配置方式，都保存&#x2F;etc&#x2F;login.defs </p>
-<h2 id="userdel"><a href="#userdel" class="headerlink" title="userdel"></a>userdel</h2><p> 如果直接userdel,不会删除家目录<br> -r 删除家目录 </p>
-<h2 id="finger-username"><a href="#finger-username" class="headerlink" title="finger username:"></a>finger username:</h2><p> 查看用户的账号信息还有登陆时间；；； </p>
-<h2 id="usermod"><a href="#usermod" class="headerlink" title="usermod:"></a>usermod:</h2><blockquote>
-<p>-u UID<br>-g GID<br>-G  -a GID 不使用 -a 选项，会覆盖此前的附加组，就是去除了此前的组；；<br>-d -m  指定新的家目录，并移动此前家目录下的内容至新家目录<br>-s  shell<br>-l 改变登陆名称<br>-L 锁定账号<br>-U 解锁账号<br>-e 修改账号的有效时间 usermod -e 20150202 easyheart<br>-f 修改账号过期后多少天即关闭账号<br>usermod -e 20150202 -f 0 easyheart </p>
-</blockquote>
-<h2 id="chsh"><a href="#chsh" class="headerlink" title="chsh"></a>chsh</h2><p> 改变用户的shell </p>
-<blockquote>
-<p>chsh -s shell username </p>
-</blockquote>
-<h2 id="chfn"><a href="#chfn" class="headerlink" title="chfn"></a>chfn</h2><p> 修改注释信息<br> 比如会提示办公室、办公室号码等；； </p>
-<h2 id="passwd"><a href="#passwd" class="headerlink" title="passwd"></a>passwd</h2><blockquote>
-<p>–stdin (可以用于脚本自动执行)  echo “redhat” | passwd –stdin xiaoming  (小明的密码就自动设置好了)<br>-l 锁定账号<br>-u 解锁账号<br>-d 删除密码 </p>
-</blockquote>
-<h2 id="pwck"><a href="#pwck" class="headerlink" title="pwck"></a>pwck</h2><p> 可以用来检查密码文件的完整性 </p>
-<h2 id="groupadd"><a href="#groupadd" class="headerlink" title="groupadd"></a>groupadd</h2><blockquote>
-<p>-g 指定GID<br>-r 添加一个系统组 </p>
-</blockquote>
-<h2 id="groupmod"><a href="#groupmod" class="headerlink" title="groupmod"></a>groupmod</h2><blockquote>
-<p>-g GID<br>-n GRNAME </p>
-</blockquote>
-<h2 id="groupdel"><a href="#groupdel" class="headerlink" title="groupdel"></a>groupdel</h2><h2 id="newgrp：切换到另外一个组"><a href="#newgrp：切换到另外一个组" class="headerlink" title="newgrp：切换到另外一个组"></a>newgrp：切换到另外一个组</h2><blockquote>
-<p>可以创建一个文件可以查看切换组了；；；<br>输入exit可以退出转换的组；；； </p>
-</blockquote>
-<h2 id="gpasswd"><a href="#gpasswd" class="headerlink" title="gpasswd"></a>gpasswd</h2><blockquote>
-<p>给组加密码<br>这个命令一般可用于当用户使用newgrp进行切换到其他组的时候，会提示输入密码，这个密码就是gpasswd<br>设定的密码，如果为空，自动切换，可以设定好密码进行切换 </p>
-</blockquote>
-<h2 id="chage"><a href="#chage" class="headerlink" title="chage"></a>chage</h2><blockquote>
-<p>-d 指定密码最近一次的修改时间<br>-E：过期时间<br>-r：非活动时间<br>-m：最短使用期限<br>-M：最长使用期限<br>-W：警告时间 </p>
-</blockquote>
-<p>练习： </p>
-<ol>
-<li>创建一个用户mandriva,其ID号为2002，基本组为distro（GID&#x3D;3003），附加组为linux <blockquote>
-<p>groupadd -g 3003 distro<br>groupadd linux<br> useradd -u 2002 -g distro -G linux mandriva </p>
-</blockquote>
-</li>
-<li>创建一个用户fedora,其全名为Fedora Community,默认shell为tcsh <blockquote>
-<p>useradd -c “Fedora Community” -s &#x2F;bin&#x2F;tcsh fedora </p>
-</blockquote>
-</li>
-<li>修改mandriva的ID号为4004，基本组为linux，附加组为distro和fedora <blockquote>
-<p>usermod -u 4004 -g linux -G distro,fedora mandriva </p>
-</blockquote>
-</li>
-<li>给fedora加密码，并设密码最短使用期限为2天，最长为50天： <blockquote>
-<p>passwd -n 2 -x 50 fedora </p>
-</blockquote>
-</li>
-<li>将mamdriva的默认shell改为&#x2F;bin&#x2F;bash <blockquote>
-<p>usermod -s &#x2F;bin&#x2F;bash mandriva<br>chsh &#x2F;bin&#x2F;bash mndriva </p>
-</blockquote>
-</li>
-<li>添加系统用户hbase,并不允许其登陆系统 <blockquote>
-<p>useradd -s &#x2F;sbin&#x2F;nologin hbase</p>
-</blockquote>
-</li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/05/04-01Linux%E7%94%A8%E6%88%B7%E7%AE%A1%E7%90%86%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/26/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/25/">25</a><a class="page-number" href="/page/26/">26</a><span class="page-number current">27</span>
+      <a class="extend prev" rel="prev" href="/page/26/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/25/">25</a><a class="page-number" href="/page/26/">26</a><span class="page-number current">27</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/28/">Next &amp;raquo;</a>
     </nav>
   
 

@@ -206,6 +206,120 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-Llava简述" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2024/09/02/Llava%E7%AE%80%E8%BF%B0/">Llava简述</a>
+    </h1>
+  
+
+        
+        <a href="/2024/09/02/Llava%E7%AE%80%E8%BF%B0/" class="archive-article-date">
+  	<time datetime="2024-09-02T06:40:52.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-09-02</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>Llava是一个多模态大模型，本文以如下代码大致介绍下。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line">os.environ[<span class="string">&#x27;HF_ENDPOINT&#x27;</span>] = <span class="string">&#x27;https://hf-mirror.com&#x27;</span>  <span class="comment"># noqa</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> AutoProcessor, LlavaForConditionalGeneration, LlavaConfig</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">config = LlavaConfig.from_pretrained(<span class="string">&quot;llava-hf/llava-1.5-7b-hf&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">model = LlavaForConditionalGeneration(config=config)</span><br><span class="line"></span><br><span class="line">processor = AutoProcessor.from_pretrained(<span class="string">&quot;llava-hf/llava-1.5-7b-hf&quot;</span>)</span><br><span class="line">prompt = <span class="string">&quot;USER: &lt;image&gt;\nWhat&#x27;s the content of the image? ASSISTANT:&quot;</span></span><br><span class="line">url = <span class="string">&quot;https://www.ilankelman.org/stopsigns/australia.jpg&quot;</span></span><br><span class="line">image = Image.<span class="built_in">open</span>(requests.get(url, stream=<span class="literal">True</span>).raw)</span><br><span class="line">inputs = processor(text=prompt, images=image, return_tensors=<span class="string">&quot;pt&quot;</span>)</span><br><span class="line"></span><br><span class="line">generate_ids = model.generate(**inputs, max_new_tokens=<span class="number">15</span>)</span><br><span class="line">processor.batch_decode(generate_ids, skip_special_tokens=<span class="literal">True</span>,</span><br><span class="line">                       clean_up_tokenization_spaces=<span class="literal">False</span>)[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>()</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h2><figure class="highlight md"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">LlavaForConditionalGeneration(</span><br><span class="line">  (vision<span class="emphasis">_tower): CLIPVisionModel(</span></span><br><span class="line"><span class="emphasis">    (vision_</span>model): CLIPVisionTransformer(</span><br><span class="line"><span class="code">      (embeddings): CLIPVisionEmbeddings(</span></span><br><span class="line"><span class="code">        (patch_embedding): Conv2d(3, 1024, kernel_size=(14, 14), stride=(14, 14), bias=False)</span></span><br><span class="line"><span class="code">        (position_embedding): Embedding(577, 1024)</span></span><br><span class="line"><span class="code">      )</span></span><br><span class="line"><span class="code">      (pre_layrnorm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)</span></span><br><span class="line"><span class="code">      (encoder): CLIPEncoder(</span></span><br><span class="line"><span class="code">        (layers): ModuleList(</span></span><br><span class="line"><span class="code">          (0-23): 24 x CLIPEncoderLayer(</span></span><br><span class="line"><span class="code">            (self_attn): CLIPAttention(</span></span><br><span class="line"><span class="code">              (k_proj): Linear(in_features=1024, out_features=1024, bias=True)</span></span><br><span class="line"><span class="code">              (v_proj): Linear(in_features=1024, out_features=1024, bias=True)</span></span><br><span class="line"><span class="code">              (q_proj): Linear(in_features=1024, out_features=1024, bias=True)</span></span><br><span class="line"><span class="code">              (out_proj): Linear(in_features=1024, out_features=1024, bias=True)</span></span><br><span class="line"><span class="code">            )</span></span><br><span class="line"><span class="code">            (layer_norm1): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)</span></span><br><span class="line"><span class="code">            (mlp): CLIPMLP(</span></span><br><span class="line"><span class="code">              (activation_fn): QuickGELUActivation()</span></span><br><span class="line"><span class="code">              (fc1): Linear(in_features=1024, out_features=4096, bias=True)</span></span><br><span class="line"><span class="code">              (fc2): Linear(in_features=4096, out_features=1024, bias=True)</span></span><br><span class="line"><span class="code">            )</span></span><br><span class="line"><span class="code">            (layer_norm2): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)</span></span><br><span class="line"><span class="code">          )</span></span><br><span class="line"><span class="code">        )</span></span><br><span class="line"><span class="code">      )</span></span><br><span class="line"><span class="code">      (post_layernorm): LayerNorm((1024,), eps=1e-05, elementwise_affine=True)</span></span><br><span class="line"><span class="code">    )</span></span><br><span class="line"><span class="code">  )</span></span><br><span class="line"><span class="code">  (multi_modal_projector): LlavaMultiModalProjector(</span></span><br><span class="line"><span class="code">    (linear_1): Linear(in_features=1024, out_features=4096, bias=True)</span></span><br><span class="line"><span class="code">    (act): GELUActivation()</span></span><br><span class="line"><span class="code">    (linear_2): Linear(in_features=4096, out_features=4096, bias=True)</span></span><br><span class="line"><span class="code">  )</span></span><br><span class="line"><span class="code">  (language_model): LlamaForCausalLM(</span></span><br><span class="line"><span class="code">    (model): LlamaModel(</span></span><br><span class="line"><span class="code">      (embed_tokens): Embedding(32064, 4096)</span></span><br><span class="line"><span class="code">      (layers): ModuleList(</span></span><br><span class="line"><span class="code">        (0-31): 32 x LlamaDecoderLayer(</span></span><br><span class="line"><span class="code">          (self_attn): LlamaSdpaAttention(</span></span><br><span class="line"><span class="code">            (q_proj): Linear(in_features=4096, out_features=4096, bias=False)</span></span><br><span class="line"><span class="code">            (k_proj): Linear(in_features=4096, out_features=4096, bias=False)</span></span><br><span class="line"><span class="code">            (v_proj): Linear(in_features=4096, out_features=4096, bias=False)</span></span><br><span class="line"><span class="code">            (o_proj): Linear(in_features=4096, out_features=4096, bias=False)</span></span><br><span class="line"><span class="code">            (rotary_emb): LlamaRotaryEmbedding()</span></span><br><span class="line"><span class="code">          )</span></span><br><span class="line"><span class="code">          (mlp): LlamaMLP(</span></span><br><span class="line"><span class="code">            (gate_proj): Linear(in_features=4096, out_features=11008, bias=False)</span></span><br><span class="line"><span class="code">            (up_proj): Linear(in_features=4096, out_features=11008, bias=False)</span></span><br><span class="line"><span class="code">            (down_proj): Linear(in_features=11008, out_features=4096, bias=False)</span></span><br><span class="line"><span class="code">            (act_fn): SiLU()</span></span><br><span class="line"><span class="code">          )</span></span><br><span class="line"><span class="code">          (input_layernorm): LlamaRMSNorm()</span></span><br><span class="line"><span class="code">          (post_attention_layernorm): LlamaRMSNorm()</span></span><br><span class="line"><span class="code">        )</span></span><br><span class="line"><span class="code">      )</span></span><br><span class="line"><span class="code">      (norm): LlamaRMSNorm()</span></span><br><span class="line"><span class="code">    )</span></span><br><span class="line"><span class="code">    (lm_head): Linear(in_features=4096, out_features=32064, bias=False)</span></span><br><span class="line"><span class="code">  )</span></span><br><span class="line"><span class="code">)</span></span><br></pre></td></tr></table></figure>
+
+
+<p>一共三部分：</p>
+<ol>
+<li>CLIPVision负责处理图像部分</li>
+<li>Llama负责文本部分</li>
+<li>multi_modal_projector负责将图像hidden_size投影到Llama一样维度。</li>
+</ol>
+<h2 id="数据处理"><a href="#数据处理" class="headerlink" title="数据处理"></a>数据处理</h2><p>图像部分走的是CLIP处理流程，resize到336*336,所以pixel_values shape为(3, 336, 336)，其他没啥特殊。文字部分走的是Llama,这个就很熟悉了。</p>
+<table>
+<thead>
+<tr>
+<th><img src="/2024/09/02/Llava%E7%AE%80%E8%BF%B0/image_process.png" class="image_process"></th>
+<th><img src="/2024/09/02/Llava%E7%AE%80%E8%BF%B0/text_process.png" class="text_process"></th>
+</tr>
+</thead>
+</table>
+<h2 id="visual和text对齐"><a href="#visual和text对齐" class="headerlink" title="visual和text对齐"></a>visual和text对齐</h2><p>image走ViT,kernel_size为14，所以计算过程和结果如下：</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">336</span>-<span class="number">14</span>)/<span class="number">14</span>+<span class="number">1</span> = <span class="number">24</span></span><br><span class="line"><span class="number">24</span> * <span class="number">24</span> = <span class="number">596</span></span><br><span class="line"><span class="comment"># 如果考虑CLIP CLS的话就是597。</span></span><br></pre></td></tr></table></figure>
+
+
+<img src="/2024/09/02/Llava%E7%AE%80%E8%BF%B0/visual_text_merge.png" class="visual_text_merge">
+
+
+<p>由于CLIP输出是1024,经过<code>multi_modal_projector</code>后维度为(1,576,4096)，这个也是下面image_features的维度。<br>至此同一个维度4096。</p>
+<img src="/2024/09/02/Llava%E7%AE%80%E8%BF%B0/visual_text_merge.png" class="visual_text_merge">
+
+<h2 id="image插入位置"><a href="#image插入位置" class="headerlink" title="image插入位置"></a>image插入位置</h2><p>原prompt如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">prompt = &quot;USER: &lt;image&gt;\nWhat&#x27;s the content of the image? ASSISTANT:&quot;</span><br></pre></td></tr></table></figure>
+
+<p><code>&lt;image&gt;</code>是插在指定位置的，那么这里图文对齐和之前的对齐就增添了另外一个含义：<code>不仅要能图文对齐，还要考虑图像插入位置</code>。</p>
+<img src="/2024/09/02/Llava%E7%AE%80%E8%BF%B0/s_info_1.png" class="s_info_1">
+<p>参考上图中<code>_merge_input_ids_with_image_features</code>函数以及结合上图中的信息，那么不难得出如下结论：</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(final_embedding[:, <span class="number">5</span>:<span class="number">576</span>+<span class="number">5</span>, :] == image_features[:, :, :]).<span class="built_in">all</span>()</span><br><span class="line"><span class="comment"># &gt; tensor(True)</span></span><br></pre></td></tr></table></figure>
+
+
+<p>由于后续target task为VQA、Image Caption之类的，先到此为止。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2024/09/02/Llava%E7%AE%80%E8%BF%B0/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-多模态-繁体不同排版" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1103,100 +1217,9 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-qwen1-8B试玩" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2023/12/21/qwen1-8B%E8%AF%95%E7%8E%A9/">qwen1.8B试玩</a>
-    </h1>
-  
-
-        
-        <a href="/2023/12/21/qwen1-8B%E8%AF%95%E7%8E%A9/" class="archive-article-date">
-  	<time datetime="2023-12-21T06:52:58.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-12-21</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>阿里出了个qwen1.8B，对于资源有所要求的场景或者需要支持长文本的场景，应该是目前国内在这个量级内最优的选择了吧。接下来以此来打通微调、部署各个流程，算是一次记录。</p>
-<h2 id="微调"><a href="#微调" class="headerlink" title="微调"></a>微调</h2><p>首先按照<a target="_blank" rel="noopener" href="https://github.com/QwenLM/Qwen/blob/main/README_CN.md#%E8%A6%81%E6%B1%82">要求</a>和<a target="_blank" rel="noopener" href="https://github.com/QwenLM/Qwen/blob/main/README_CN.md#%E5%BF%AB%E9%80%9F%E4%BD%BF%E7%94%A8">快速使用</a>来跑起来，安装flash-attn，先跑下推理，正常，接下来就进入微调阶段。</p>
-<p>按照<a target="_blank" rel="noopener" href="https://github.com/QwenLM/Qwen/blob/main/README_CN.md#%E5%BE%AE%E8%B0%83">微调流程</a>，这里采用LoRA进行微调，但是需要注意的是，虽然官方给出了<a target="_blank" rel="noopener" href="https://github.com/QwenLM/Qwen/blob/main/README_CN.md#%E6%98%BE%E5%AD%98%E5%8D%A0%E7%94%A8%E5%8F%8A%E8%AE%AD%E7%BB%83%E9%80%9F%E5%BA%A6">显存占用及训练速度</a>，但是我在1080Ti上得到的显存占用还是要更高一些，大家可以将这个指标理解成为运行起来至少需要的显存，在进行训练时，还是会有一些增高。</p>
-<p>训练的话采用<code>finetune_lora_single_gpu.sh</code>默认配置，幸亏我没有采用train，而是使用了dev数据集，7500条数据，8个多小时，，不过整个loss还是蛮正常的，没有出现issue里出现的各种问题。。。</p>
-<img src="/2023/12/21/qwen1-8B%E8%AF%95%E7%8E%A9/Figure_1.png" class="" title="loss">
-
-<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>我这里保存到了outout_qwen,下面为调用LoRA微调后的模型。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">path = <span class="string">&#x27;Qwen-1_8B-Chat&#x27;</span></span><br><span class="line">tokenizer = AutoTokenizer.from_pretrained(path, trust_remote_code=<span class="literal">True</span>)</span><br><span class="line">model = AutoPeftModelForCausalLM.from_pretrained(</span><br><span class="line">     <span class="string">&#x27;Qwen/output_qwen&#x27;</span>,</span><br><span class="line">     device_map=<span class="string">&#x27;auto&#x27;</span>,</span><br><span class="line">     trust_remote_code=<span class="literal">True</span></span><br><span class="line">)</span><br><span class="line">model.generation_config = GenerationConfig.from_pretrained(path, trust_remote_code=<span class="literal">True</span>)</span><br><span class="line">model.<span class="built_in">eval</span>()</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>注意的是，如果到此就打算部署的话，也要将<code>adapter_config.json</code>中的<code>base_model_name_or_path</code>正确引用，不过官方也给了合并代码，可以将LoRA和qwen合并到一起。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> peft <span class="keyword">import</span> AutoPeftModelForCausalLM</span><br><span class="line"></span><br><span class="line">model = AutoPeftModelForCausalLM.from_pretrained(</span><br><span class="line">    path_to_adapter, <span class="comment"># path to the output directory</span></span><br><span class="line">    device_map=<span class="string">&quot;auto&quot;</span>,</span><br><span class="line">    trust_remote_code=<span class="literal">True</span></span><br><span class="line">).<span class="built_in">eval</span>()</span><br><span class="line"></span><br><span class="line">merged_model = model.merge_and_unload()</span><br><span class="line"><span class="comment"># max_shard_size and safe serialization are not necessary. </span></span><br><span class="line"><span class="comment"># They respectively work for sharding checkpoint and save the model to safetensors</span></span><br><span class="line">merged_model.save_pretrained(new_model_directory, max_shard_size=<span class="string">&quot;2048MB&quot;</span>, safe_serialization=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
-
-<h2 id="llama-cpp"><a href="#llama-cpp" class="headerlink" title="llama.cpp"></a>llama.cpp</h2><p>如果需要使用<a target="_blank" rel="noopener" href="https://github.com/ggerganov/llama.cpp">llama.cpp</a>，这里还是建议进行上述步骤合并的，使用llama.cpp也不是很复杂，可按照官方README安装cmake编译安装，后续也不是很复杂，官方提供了非常清晰的使用说明。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> build</span><br><span class="line"><span class="built_in">cd</span> build</span><br><span class="line">cmake ..</span><br><span class="line">cmake --build . --config Release</span><br></pre></td></tr></table></figure>
-
-
-
-<p>不过需要注意的是，用不用量化或者说要不要做转换，本身上还是要根据转换后的效果和效率来决定的，由于目前我们直接跑在GPU上，后续有机会单独针对llama.cpp尝试深入一下～</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2023/12/21/qwen1-8B%E8%AF%95%E7%8E%A9/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
     </nav>
   
 

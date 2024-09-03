@@ -206,6 +206,130 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-in-batch-negative数据增强" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2023/03/07/in-batch-negative%E6%95%B0%E6%8D%AE%E5%A2%9E%E5%BC%BA/">in-batch-negative数据增强</a>
+    </h1>
+  
+
+        
+        <a href="/2023/03/07/in-batch-negative%E6%95%B0%E6%8D%AE%E5%A2%9E%E5%BC%BA/" class="archive-article-date">
+  	<time datetime="2023-03-07T05:55:56.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-03-07</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>这篇文章的思路来源自paddleNLP–&gt;语义检索–&gt;recall–&gt;<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/tree/develop/applications/neural_search/recall/in_batch_negative">paddleNLP In-batch negative</a>，它提供了一种非常有特点的数据增强，帮助提升模型训练效果。</p>
+<h2 id="任务介绍"><a href="#任务介绍" class="headerlink" title="任务介绍"></a>任务介绍</h2><p>它是一个语义检索召回阶段任务，输入两个句子s1和s2，判断这两个句子的相似度。</p>
+<h2 id="做法"><a href="#做法" class="headerlink" title="做法"></a>做法</h2><h3 id="0-数据格式"><a href="#0-数据格式" class="headerlink" title="0. 数据格式"></a>0. 数据格式</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">我手机丢了，我想换个手机     我想买个新手机，求推荐</span><br><span class="line">求秋色之空漫画全集          求秋色之空全集漫画</span><br><span class="line">学日语软件手机上的          手机学日语的软件</span><br><span class="line">侠盗飞车罪恶都市怎样改车     侠盗飞车罪恶都市怎么改车</span><br></pre></td></tr></table></figure>
+
+<p>注意，每一行的两句话都是相似的。</p>
+<h3 id="1-模型结构"><a href="#1-模型结构" class="headerlink" title="1. 模型结构"></a>1. 模型结构</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">SemanticIndex</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, ptm</span>):</span><br><span class="line">        self.ptm = ptm</span><br><span class="line">        self.reducer_linear = nn.Linear(<span class="number">768</span>, <span class="number">256</span>) <span class="comment"># 为了减少计算复杂度，降维</span></span><br><span class="line">        self.dp = nn.Dropout(<span class="number">0.1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_pooled_embedding</span>(<span class="params">self, input_ids, token_type_ids=<span class="literal">None</span>, position_ids=<span class="literal">None</span>, attention_mask=<span class="literal">None</span></span>):</span><br><span class="line">        _, cls_embedding = self.ptm(input_ids, token_type_ids, position_ids, attention_mask)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> self.output_emb_size &gt; <span class="number">0</span>:</span><br><span class="line">            cls_embedding = self.emb_reduce_linear(cls_embedding) <span class="comment"># 768维太大了，使用256进行降维</span></span><br><span class="line">        cls_embedding = self.dropout(cls_embedding)</span><br><span class="line">        cls_embedding = F.normalize(cls_embedding, p=<span class="number">2</span>, axis=-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> cls_embedding</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params"></span></span><br><span class="line"><span class="params">        self,</span></span><br><span class="line"><span class="params">        query_input_ids,</span></span><br><span class="line"><span class="params">        title_input_ids,</span></span><br><span class="line"><span class="params">        query_token_type_ids=<span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        query_position_ids=<span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        query_attention_mask=<span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        title_token_type_ids=<span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        title_position_ids=<span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        title_attention_mask=<span class="literal">None</span>,</span></span><br><span class="line"><span class="params">    </span>):</span><br><span class="line"></span><br><span class="line">        query_cls_embedding = self.get_pooled_embedding(</span><br><span class="line">            query_input_ids, query_token_type_ids, query_position_ids, query_attention_mask</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        title_cls_embedding = self.get_pooled_embedding(</span><br><span class="line">            title_input_ids, title_token_type_ids, title_position_ids, title_attention_mask</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        cosine_sim = paddle.matmul(query_cls_embedding, title_cls_embedding, transpose_y=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Substract margin from all positive samples cosine_sim()</span></span><br><span class="line">        margin_diag = paddle.full(</span><br><span class="line">            shape=[query_cls_embedding.shape[<span class="number">0</span>]], fill_value=self.margin, dtype=paddle.get_default_dtype()</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        cosine_sim = cosine_sim - paddle.diag(margin_diag)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Scale cosine to ease training converge</span></span><br><span class="line">        cosine_sim *= self.sacle</span><br><span class="line"></span><br><span class="line">        labels = paddle.arange(<span class="number">0</span>, query_cls_embedding.shape[<span class="number">0</span>], dtype=<span class="string">&quot;int64&quot;</span>)</span><br><span class="line">        labels = paddle.reshape(labels, shape=[-<span class="number">1</span>, <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">        loss = F.cross_entropy(<span class="built_in">input</span>=cosine_sim, label=labels)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> loss</span><br><span class="line"></span><br><span class="line">    <span class="comment"># def cosine_sim(</span></span><br><span class="line">    <span class="comment">#     self,</span></span><br><span class="line">    <span class="comment">#     query_input_ids,</span></span><br><span class="line">    <span class="comment">#     title_input_ids,</span></span><br><span class="line">    <span class="comment">#     query_token_type_ids=None,</span></span><br><span class="line">    <span class="comment">#     query_position_ids=None,</span></span><br><span class="line">    <span class="comment">#     query_attention_mask=None,</span></span><br><span class="line">    <span class="comment">#     title_token_type_ids=None,</span></span><br><span class="line">    <span class="comment">#     title_position_ids=None,</span></span><br><span class="line">    <span class="comment">#     title_attention_mask=None,</span></span><br><span class="line">    <span class="comment"># ):</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#     query_cls_embedding = self.get_pooled_embedding(</span></span><br><span class="line">    <span class="comment">#         query_input_ids, query_token_type_ids, query_position_ids, query_attention_mask</span></span><br><span class="line">    <span class="comment">#     )</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#     title_cls_embedding = self.get_pooled_embedding(</span></span><br><span class="line">    <span class="comment">#         title_input_ids, title_token_type_ids, title_position_ids, title_attention_mask</span></span><br><span class="line">    <span class="comment">#     )</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#     cosine_sim = paddle.sum(query_cls_embedding * title_cls_embedding, axis=-1)</span></span><br><span class="line">    <span class="comment">#     return cosine_sim</span></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="2-loss"><a href="#2-loss" class="headerlink" title="2. loss"></a>2. loss</h3><p>假设query_cls_embedding和title_cls_embedding的维度为(32,256)和(32,256)，经过forward.cosine_sim后，维度变成了(32,32)，这里作者有用到缩放等方式来加快模型收敛。</p>
+<blockquote>
+<p><strong>核心来了</strong>，label是什么呢？</p>
+</blockquote>
+<p>label就是torch.arange(0, 32)！！</p>
+<p>为什么呢，只有对角线上面的俩句子才是相似的，其余都不是相似的！<br>这个就叫做什么是in batch negative(在一个batch内构造负样本)</p>
+<h3 id="3-推理"><a href="#3-推理" class="headerlink" title="3. 推理"></a>3. 推理</h3><h4 id="3-1-建立知识库索引"><a href="#3-1-建立知识库索引" class="headerlink" title="3.1 建立知识库索引"></a>3.1 建立知识库索引</h4><p>比如有一个语料库corpus.txt，这个文件为一整个知识库，决定搜索的范围。<br>对corpus.txt建立语义索引，通过<code>self.get_pooled_embedding</code>方法跑出index，然后保存到类似faiss，milvus，hnswlib类ann库中。<br>build_index完后，剩下就是检索了。</p>
+<h4 id="3-2-召回"><a href="#3-2-召回" class="headerlink" title="3.2 召回"></a>3.2 召回</h4><p>这里以<a target="_blank" rel="noopener" href="https://github.com/nmslib/hnswlib">hnswlib</a>库进行说明，在支持的计算相似度算法上，选择ip.</p>
+<table>
+<thead>
+<tr>
+<th>Distance</th>
+<th align="center">parameter</th>
+<th align="right">Equation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Squared L2</td>
+<td align="center">‘l2’</td>
+<td align="right">d &#x3D; sum((Ai-Bi)^2)</td>
+</tr>
+<tr>
+<td>Inner product</td>
+<td align="center">‘ip’</td>
+<td align="right">d &#x3D; 1.0 - sum(Ai*Bi)</td>
+</tr>
+<tr>
+<td>Cosine similarity</td>
+<td align="center">‘cosine’</td>
+<td align="right">d &#x3D; 1.0 - sum(Ai*Bi) &#x2F; sqrt(sum(Ai*Ai) * sum(Bi*Bi))</td>
+</tr>
+</tbody></table>
+<p>拿到query embed后，调用hnswlib的<code>knn_query</code>函数进行计算，最终<code>d = 1 - cosine_sim</code>。</p>
+<h4 id="3-3-评估指标"><a href="#3-3-评估指标" class="headerlink" title="3.3 评估指标"></a>3.3 评估指标</h4><p>比如dev.txt如下面这个样子:</p>
+<p>第一列为query，第二列为doc</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">我喜欢张三    我李四喜欢张三</span><br></pre></td></tr></table></figure>
+
+<p>输入query，经过knn_query调整topK大小，比如10，代表选取10个相关集。</p>
+<p>如果doc在这10个相关集中，那么recall@10就为1</p>
+<p>那同理，如果topK为1，并且doc在这1个结果内，那么recall@1就为1</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>平时在构造负样本的时候，一般是在生成train和dev数据集的时候，而本文提出了in-batch negative，非常不同的实现角度。</p>
+<p>不过这个方法也有局限性，不同的任务，可能未必能使用这种方法来构造负样本，因为一个batch内，sample和sample之间会是相互独立的，没有关系的。</p>
+<p>不过本篇文章同时也讲明白了召回的实现思路，给大家进阶之路参考。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2023/03/07/in-batch-negative%E6%95%B0%E6%8D%AE%E5%A2%9E%E5%BC%BA/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-bert向量加权" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1211,106 +1335,9 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-UIE-实体识别" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/08/18/UIE-%E5%AE%9E%E4%BD%93%E8%AF%86%E5%88%AB/">UIE-实体识别</a>
-    </h1>
-  
-
-        
-        <a href="/2022/08/18/UIE-%E5%AE%9E%E4%BD%93%E8%AF%86%E5%88%AB/" class="archive-article-date">
-  	<time datetime="2022-08-18T02:10:17.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-18</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>这是关于UIE的第三篇文章，但是呢，我更倾向上一篇是<a href="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/" title="UIE-事件提取">UIE-事件提取</a>，因为<a href="/2022/08/17/UIE-%E6%83%85%E6%84%9F%E5%88%86%E7%B1%BB/" title="UIE-情感分类">UIE-情感分类</a>做法上和本篇关系不大。</p>
-<p>本篇文章继续介绍基于prompt实体识别的做法。</p>
-<h2 id="数据标注"><a href="#数据标注" class="headerlink" title="数据标注"></a>数据标注</h2><p>如果你看懂了<a href="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/" title="UIE-事件提取">UIE-事件提取</a>的做法，那这里也是同一类任务，都是属于<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/develop/model_zoo/uie/doccano.md#21-%E6%8A%BD%E5%8F%96%E5%BC%8F%E4%BB%BB%E5%8A%A1%E9%A1%B9%E7%9B%AE%E5%88%9B%E5%BB%BA">抽取式任务项目</a>。</p>
-<blockquote>
-<p>doccano_txt.json</p>
-</blockquote>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">11</span><span class="punctuation">,</span> <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2月8日上午北京冬奥会自由式滑雪女子大跳台决赛中中国选手谷爱凌以188.25分获得金牌！&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;entities&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">45</span><span class="punctuation">,</span> <span class="attr">&quot;start_offset&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span> <span class="attr">&quot;end_offset&quot;</span><span class="punctuation">:</span> <span class="number">6</span><span class="punctuation">,</span> <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="string">&quot;时间&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span> <span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">46</span><span class="punctuation">,</span> <span class="attr">&quot;start_offset&quot;</span><span class="punctuation">:</span> <span class="number">24</span><span class="punctuation">,</span> <span class="attr">&quot;end_offset&quot;</span><span class="punctuation">:</span> <span class="number">31</span><span class="punctuation">,</span> <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="string">&quot;人名&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">&#125;</span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">12</span><span class="punctuation">,</span> <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="string">&quot;3月6日下午张三获得金牌！&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;entities&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">47</span><span class="punctuation">,</span> <span class="attr">&quot;start_offset&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span> <span class="attr">&quot;end_offset&quot;</span><span class="punctuation">:</span> <span class="number">6</span><span class="punctuation">,</span> <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="string">&quot;时间&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span> <span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">48</span><span class="punctuation">,</span> <span class="attr">&quot;start_offset&quot;</span><span class="punctuation">:</span> <span class="number">6</span><span class="punctuation">,</span> <span class="attr">&quot;end_offset&quot;</span><span class="punctuation">:</span> <span class="number">8</span><span class="punctuation">,</span> <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="string">&quot;人名&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">&#125;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-
-
-<p>使用<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/develop/model_zoo/uie/doccano.md#71-%E6%8A%BD%E5%8F%96%E5%BC%8F%E4%BB%BB%E5%8A%A1%E6%95%B0%E6%8D%AE%E8%BD%AC%E6%8D%A2">抽取式任务数据转换</a>转换后，生成的样本如下所示：</p>
-<blockquote>
-<p>train.txt</p>
-</blockquote>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2月8日上午北京冬奥会自由式滑雪女子大跳台决赛中中国选手谷爱凌以188.25分获得金牌！&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;result_list&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2月8日上午&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;start&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span> <span class="attr">&quot;end&quot;</span><span class="punctuation">:</span> <span class="number">6</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="attr">&quot;prompt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;时间&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2月8日上午北京冬奥会自由式滑雪女子大跳台决赛中中国选手谷爱凌以188.25分获得金牌！&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;result_list&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;中国选手谷爱凌&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;start&quot;</span><span class="punctuation">:</span> <span class="number">24</span><span class="punctuation">,</span> <span class="attr">&quot;end&quot;</span><span class="punctuation">:</span> <span class="number">31</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="attr">&quot;prompt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;人名&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>test.txt</p>
-</blockquote>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;3月6日下午张三获得金牌！&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;result_list&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;3月6日下午&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;start&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span> <span class="attr">&quot;end&quot;</span><span class="punctuation">:</span> <span class="number">6</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="attr">&quot;prompt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;时间&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;3月6日下午张三获得金牌！&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;result_list&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;张三&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;start&quot;</span><span class="punctuation">:</span> <span class="number">6</span><span class="punctuation">,</span> <span class="attr">&quot;end&quot;</span><span class="punctuation">:</span> <span class="number">8</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="attr">&quot;prompt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;人名&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<h2 id="训练和推理"><a href="#训练和推理" class="headerlink" title="训练和推理"></a>训练和推理</h2><p>这部分没什么好说的了😂😂😂，以<code>时间</code>或<code>人名</code>作为prompt。</p>
-<a href="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/" title="UIE-事件提取">UIE-事件提取</a>包含了<a href="/2022/08/18/UIE-%E5%AE%9E%E4%BD%93%E8%AF%86%E5%88%AB/" title="UIE-实体识别">UIE-实体识别</a>，所以对于`抽取式任务`，一定要看懂<a href="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/" title="UIE-事件提取">UIE-事件提取</a>哦。
-
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/08/18/UIE-%E5%AE%9E%E4%BD%93%E8%AF%86%E5%88%AB/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/2/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/4/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/2/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/4/">Next &amp;raquo;</a>
     </nav>
   
 

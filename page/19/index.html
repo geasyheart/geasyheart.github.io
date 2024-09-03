@@ -206,6 +206,116 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-2015年08月31日" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/08/31/2015%E5%B9%B408%E6%9C%8831%E6%97%A5/">2015年08月31日</a>
+    </h1>
+  
+
+        
+        <a href="/2015/08/31/2015%E5%B9%B408%E6%9C%8831%E6%97%A5/" class="archive-article-date">
+  	<time datetime="2015-08-31T03:26:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-08-31</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>实验:<br> CentOS 6.5 &#x2F; DHCP Server 4.1.1-P1 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#yum -y install dhcp </span><br><span class="line">#cp /usr/share/doc/dhcp-4.1.1/dhcpd.conf.sample /etc/dhcp/dhcpd.conf  </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">ddns-update-style interim; </span><br><span class="line">log-facility local7; </span><br><span class="line">subnet 192.168.0.0 netmask 255.255.255.0 &#123; </span><br><span class="line">  range 192.168.0.111 192.168.0.200;     #分配IP与DHCP服务器要在同一个网段 </span><br><span class="line">  option domain-name-servers 192.168.0.12;       #DNS的ip地址 </span><br><span class="line">  option domain-name &quot;unravel.com&quot;;      #DNS域名 </span><br><span class="line">  option routers 192.168.0.1; </span><br><span class="line">  option broadcast-address 192.168.0.255; </span><br><span class="line">  default-lease-time 21600; </span><br><span class="line">  max-lease-time 43200; </span><br><span class="line">&#125; </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="指定主机给其分配ip"><a href="#指定主机给其分配ip" class="headerlink" title="指定主机给其分配ip"></a>指定主机给其分配ip</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">host boss &#123;                                     boss为主机名，随便取； </span><br><span class="line">  hardware ethernet 00:0C:29:6D:A7:F2;        主机网卡的mac地址； </span><br><span class="line">  fixed-address 192.168.0.10;                   给其分配的ip； </span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<p>可能出现的状况:(不过一般出错，就是配置不正确，另外就是dhcpd.conf没放正确位置) </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#service dhcpd start </span><br></pre></td></tr></table></figure>
+
+<p> [failure] </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#tail -n 25 /var/log/messages </span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Can’t chown new lease file: Operation not permitted </p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#vim /etc/rc.d/init.d/dhcpd </span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>user&#x3D;dhcpd<br>group&#x3D;dhcpd<br>改为<br>user&#x3D;root<br>group&#x3D;root </p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#service dhcpd start即可； </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#netstat -ntulp </span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>udp        0      0 0.0.0.0:67                  0.0.0.0:*                    5346&#x2F;dhcpd </p>
+</blockquote>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/08/31/2015%E5%B9%B408%E6%9C%8831%E6%97%A5/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-35-04MySQL系列之十六－使用xtrabackup进行数据库备份" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1272,100 +1382,9 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-32-02MySQL系列之二关系型数据库基础理论" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/07/06/32-02MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%8C%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/">32_02MySQL系列之二关系型数据库基础理论</a>
-    </h1>
-  
-
-        
-        <a href="/2015/07/06/32-02MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%8C%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/" class="archive-article-date">
-  	<time datetime="2015-07-06T01:07:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-07-06</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>SQL语言的组成部分:<br>    DDL<br>    DML<br>    完整性定义语言:DDL的一部分功能<br>    视图定义<br>    事务控制<br>    嵌入式SQL和动态SQL<br>    授权:DCL<br>   <br>使用程序设计语言如果跟RDBMS交互:<br>    嵌入式SQL:比动态SQL更底层;与动态SQL类似，但其语言必须程序编译时完全确定下来；<br>        如ODBC<br>    动态SQL:程序设计语言中使用函数(mysql_connect()或者方法与RDBMS服务器建立连接，并进行交互；通过建立连接SQL服务器发送查询语句，并将结果保存至变量中而后进行处理)<br>        如JDBC<br>   <br>MySQL插件式存储引擎<br>  5.5.8:MyLSAM<br>  5.5.8:InnoDB<br>  <a target="_blank" rel="noopener" href="http://www.php100.com/html/webkaifa/database/Mysql/2011/0326/7789.html">http://www.php100.com/html/webkaifa/database/Mysql/2011/0326/7789.html</a><br> <br>表管理器:负责创建、读取或修改表定义文件；维护表描述符高速缓存；管理表锁；<br>    表结构定义文件<br>   <br>表修改模块:表创建、删除、重命名、移除、更新或插入之类的操作；<br>表维护模块:检查、修改、备份、恢复、优化(碎片整理)及解析； </p>
-<p>行:定长；变长 </p>
-<p>文件中记录组织:<br>    堆文件组织:一条记录可以放在文件中的任何地方；<br>    顺序文件组织:根据”搜索码”值顺序存放；<br>    散列文件组织；<br>   <br>表结构定义文件，表数据文件 </p>
-<p>表空间:table space </p>
-<p>数据字典:Data Diretionary<br>    关系的元数据<br>        关系的名字<br>        字段名字<br>        字段的类型和长度<br>        视图<br>        约束<br>       <br>        用户名字:授权，密码<br>       <br>缓冲区管理器:<br>    缓存置换策略<br>    被钉住的块 </p>
-<p>访问路径的选择性:一个访问路径的选择性是所有获取的页面数(如果使用这个访问路径去获取所有想要的元组)，如果一个表包含一个给定条件相匹配的索引，就至少存在两条访问路径；使用索引和扫描整个数据文件 </p>
-<p>最有选择性的路径是检索最少页数的路径，使用最有选择性的路径将使用获取数据的代价降到最小，而一个访问路径的选择性依赖于选择条件中的主合取体(与涉及的索引有关)，每个合取体就好比表上的一个过滤器，满足一个给丁合取的元组在表中所占的百分比称为缩减因子。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/07/06/32-02MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%8C%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/18/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="page-number" href="/page/18/">18</a><span class="page-number current">19</span><a class="page-number" href="/page/20/">20</a><a class="page-number" href="/page/21/">21</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/20/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/18/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="page-number" href="/page/18/">18</a><span class="page-number current">19</span><a class="page-number" href="/page/20/">20</a><a class="page-number" href="/page/21/">21</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/20/">Next &amp;raquo;</a>
     </nav>
   
 

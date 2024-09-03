@@ -206,6 +206,98 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-关于tornado-rabbitmq" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/06/30/%E5%85%B3%E4%BA%8Etornado-rabbitmq/">关于tornado+rabbitmq</a>
+    </h1>
+  
+
+        
+        <a href="/2017/06/30/%E5%85%B3%E4%BA%8Etornado-rabbitmq/" class="archive-article-date">
+  	<time datetime="2017-06-30T07:36:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-06-30</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="接触到的文章"><a href="#接触到的文章" class="headerlink" title="接触到的文章:"></a>接触到的文章:</h3><ul>
+<li><a target="_blank" rel="noopener" href="http://blog.csdn.net/weiyang7545/article/details/51742290">http://blog.csdn.net/weiyang7545/article/details/51742290</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/geasyheart/swift_rpc">https://github.com/geasyheart/swift_rpc</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/zetaops/websocket-tornado-rabbitmq-example">https://github.com/zetaops/websocket-tornado-rabbitmq-example</a></li>
+</ul>
+<p>今天开始测试发送工作..</p>
+<p>rabbitmq pub:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> pika</span><br><span class="line"><span class="keyword">import</span> tornado.ioloop</span><br><span class="line"><span class="keyword">from</span> tornado.web <span class="keyword">import</span> Application</span><br><span class="line"><span class="keyword">from</span> tornado.websocket <span class="keyword">import</span> WebSocketHandler</span><br><span class="line"></span><br><span class="line">LOG_FORMAT = (<span class="string">&#x27;%(levelname) -10s %(asctime)s %(name) -30s %(funcName) &#x27;</span></span><br><span class="line">              <span class="string">&#x27;-35s %(lineno) -5d: %(message)s&#x27;</span>)</span><br><span class="line">LOGGER = logging.Logger(__name__)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Publisher</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    EXCHANGE = <span class="string">&#x27;logs&#x27;</span></span><br><span class="line">    EXCHANGE_TYPE = <span class="string">&#x27;fanout&#x27;</span></span><br><span class="line">    ROUTING_KEY = <span class="string">&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, amqp_url</span>):</span><br><span class="line">        self._connection = <span class="literal">None</span></span><br><span class="line">        self._channel = <span class="literal">None</span></span><br><span class="line">        self._stopping = <span class="literal">False</span></span><br><span class="line">        self._url = amqp_url</span><br><span class="line">        self._closing = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">connect</span>(<span class="params">self</span>):</span><br><span class="line">        LOGGER.info(<span class="string">&#x27;Connecting to %s&#x27;</span>, self._url)</span><br><span class="line">        self._connection = pika.adapters.TornadoConnection(pika.URLParameters(self._url),</span><br><span class="line">                                                           self.on_connection_open)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_connection_open</span>(<span class="params">self, unused_connection</span>):</span><br><span class="line">        LOGGER.info(<span class="string">&#x27;Connection opened&#x27;</span>)</span><br><span class="line">        self.open_channel()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">open_channel</span>(<span class="params">self</span>):</span><br><span class="line">        LOGGER.info(<span class="string">&#x27;Creating a new channel&#x27;</span>)</span><br><span class="line">        self._connection.channel(on_open_callback=self.on_channel_open)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_channel_open</span>(<span class="params">self, channel</span>):</span><br><span class="line">        LOGGER.info(<span class="string">&#x27;Channel opened&#x27;</span>)</span><br><span class="line">        self._channel = channel</span><br><span class="line">        self.setup_exchange(self.EXCHANGE)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">setup_exchange</span>(<span class="params">self, exchange_name</span>):</span><br><span class="line">        LOGGER.info(<span class="string">&#x27;Declaring exchange %s&#x27;</span>, exchange_name)</span><br><span class="line">        self._channel.exchange_declare(self.on_exchange_declareok,</span><br><span class="line">                                       exchange_name,</span><br><span class="line">                                       self.EXCHANGE_TYPE)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_exchange_declareok</span>(<span class="params">self, unused_frame</span>):</span><br><span class="line">        LOGGER.info(<span class="string">&#x27;Exchange declared&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">publish_message</span>(<span class="params">self, message</span>):</span><br><span class="line">        properties = pika.BasicProperties(delivery_mode=<span class="number">2</span>, )</span><br><span class="line"></span><br><span class="line">        self._channel.basic_publish(self.EXCHANGE, self.ROUTING_KEY,</span><br><span class="line">                                    json.dumps(message, ensure_ascii=<span class="literal">False</span>),</span><br><span class="line">                                    properties)</span><br><span class="line"></span><br><span class="line">        LOGGER.info(<span class="string">&#x27;Published message&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">IndexHandler</span>(<span class="title class_ inherited__">WebSocketHandler</span>):</span><br><span class="line">    links = []</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">open</span>(<span class="params">self</span>):</span><br><span class="line">        self.links.append(self)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_message</span>(<span class="params">self, message</span>):</span><br><span class="line">        app.pika.publish_message(message)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">app = Application([</span><br><span class="line">    (<span class="string">r&#x27;/&#x27;</span>, IndexHandler)</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">url = <span class="string">&quot;amqp://zy:123456@192.168.1.158:5672/%2F?connection_attempts=3&amp;heartbeat_interval=3600&quot;</span></span><br><span class="line">app.pika = Publisher(url)</span><br><span class="line">app.listen(<span class="number">80</span>)</span><br><span class="line">ioloop = tornado.ioloop.IOLoop.current()</span><br><span class="line">ioloop.add_timeout(<span class="number">500</span>, app.pika.connect)</span><br><span class="line">ioloop.start()</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/06/30/%E5%85%B3%E4%BA%8Etornado-rabbitmq/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-flask跨域" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1232,111 +1324,9 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-45-02-2-实验-1-haproxy的简单使用" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/01/29/45-02-2-%E5%AE%9E%E9%AA%8C-1-haproxy%E7%9A%84%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8/">45_02_2_实验_1_:haproxy的简单使用</a>
-    </h1>
-  
-
-        
-        <a href="/2016/01/29/45-02-2-%E5%AE%9E%E9%AA%8C-1-haproxy%E7%9A%84%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8/" class="archive-article-date">
-  	<time datetime="2016-01-29T12:59:01.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-01-29</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <ul>
-<li>Director:192.168.122.46 </li>
-<li>Realserver 192.168.122.102 httpd </li>
-<li>Realserver 192.168.122.116 nginx</li>
-</ul>
-<h2 id="Director"><a href="#Director" class="headerlink" title="Director"></a>Director</h2><ul>
-<li>安装依赖包</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># yum -y install haproxy </span></span><br><span class="line"><span class="comment">#cp /etc/haproxy/haproxy.conf /root/ </span></span><br><span class="line"><span class="comment">#vim /etc/sysconfig/rsyslog </span></span><br><span class="line">改为: </span><br><span class="line">SYSLOGD_OPTIONS=<span class="string">&quot;-c 2 -r&quot;</span> </span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>配置文件</li>
-</ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">global </span><br><span class="line">    log 127.0.0.1 local2 </span><br><span class="line">    chroot /var/lib/haproxy </span><br><span class="line">    pidfile /var/run/haproxy.pid </span><br><span class="line">    maxconn 4000 </span><br><span class="line">    user haproxy </span><br><span class="line">    group haproxy </span><br><span class="line">    daemon </span><br><span class="line"> </span><br><span class="line">defaults </span><br><span class="line">    mode http </span><br><span class="line">    log global </span><br><span class="line">    option httplog </span><br><span class="line">    option dontlognull </span><br><span class="line">    option http-server-close </span><br><span class="line">    option forwardfor except 127.0.0.0/8 </span><br><span class="line">    option redispatch </span><br><span class="line">    retries 3 </span><br><span class="line">    timeout http-request 10s </span><br><span class="line">    timeout queue 1m </span><br><span class="line">    timeout connect 10s </span><br><span class="line">    timeout client 1m </span><br><span class="line">    timeout server 1m </span><br><span class="line">    timeout http-keep-alive 10s </span><br><span class="line">    timeout check 10s </span><br><span class="line">    maxconn 3000 </span><br><span class="line">    stats uri /haproxy?stats # http://192.168.122.46/haproxy?stats </span><br><span class="line">    stats auth admin:admin </span><br><span class="line"> </span><br><span class="line">frontend HAProxy </span><br><span class="line">    bind *:80 </span><br><span class="line">    mode http </span><br><span class="line">    option httplog </span><br><span class="line">    acl cache_domain path_end .css .js .gif .png .swf .jpg .jpeg .ico </span><br><span class="line">    acl cache_dir path_reg /apping #这个地方需要注意，这个apping,是指varnish.test.com/apping/,例如varnish.test.com的根目录是/apping,那么是指/apping/apping/这个目录；； </span><br><span class="line">    </span><br><span class="line">    use_backend varnish.test.com if cache_domain #例如a.jpg,他会定义到/apping/a.jpg这个地方 </span><br><span class="line">    use_backend varnish.test.com if cache_dir </span><br><span class="line">    </span><br><span class="line">    default_backend www.test.com #这个是默认的backend服务器 </span><br><span class="line"> </span><br><span class="line">backend varnish.test.com </span><br><span class="line">    server varnish 192.168.122.102:81 weight 2 check inter 2000 rise 2 fall 3 </span><br><span class="line"> </span><br><span class="line">backend www.test.com </span><br><span class="line">    server web1 192.168.122.102 cookie check inter 2000 rise 2 fall 5 </span><br><span class="line">    server web2 192.168.122.116 cookie check inter 2000 rise 2 fall 5 </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line">httpd服务器： </span><br><span class="line">&lt;VirtualHost 192.168.122.102:80&gt; </span><br><span class="line"> Servername localhost; </span><br><span class="line"> DocumentRoot &quot;/var/www/html&quot; </span><br><span class="line"> ErrorLog /var/log/httpd/error_log </span><br><span class="line"> CustomLog /var/log/httpd/access_log combined </span><br><span class="line">&lt;/VirtualHost&gt; </span><br><span class="line">&lt;VirtualHost 192.168.122.102:81&gt; </span><br><span class="line"> Servername varnish.test.com; </span><br><span class="line"> DocumentRoot &quot;/apping&quot; </span><br><span class="line"> ErrorLog /var/log/httpd/error_log </span><br><span class="line"> CustomLog /var/log/httpd/access_log combined </span><br><span class="line">&lt;/VirtualHost&gt; </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mkdir -pv /apping/apping </span></span><br><span class="line"><span class="comment"># echo &quot;this is httpd server,and this is apping document..&quot; &gt; /apping/apping/index.html </span></span><br></pre></td></tr></table></figure>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2016/01/29/45-02-2-%E5%AE%9E%E9%AA%8C-1-haproxy%E7%9A%84%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/14/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="page-number current">15</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/16/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/14/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="page-number current">15</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/16/">Next &amp;raquo;</a>
     </nav>
   
 

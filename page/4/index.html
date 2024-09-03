@@ -206,6 +206,103 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-UIE-实体识别" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/08/18/UIE-%E5%AE%9E%E4%BD%93%E8%AF%86%E5%88%AB/">UIE-实体识别</a>
+    </h1>
+  
+
+        
+        <a href="/2022/08/18/UIE-%E5%AE%9E%E4%BD%93%E8%AF%86%E5%88%AB/" class="archive-article-date">
+  	<time datetime="2022-08-18T02:10:17.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-18</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>这是关于UIE的第三篇文章，但是呢，我更倾向上一篇是<a href="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/" title="UIE-事件提取">UIE-事件提取</a>，因为<a href="/2022/08/17/UIE-%E6%83%85%E6%84%9F%E5%88%86%E7%B1%BB/" title="UIE-情感分类">UIE-情感分类</a>做法上和本篇关系不大。</p>
+<p>本篇文章继续介绍基于prompt实体识别的做法。</p>
+<h2 id="数据标注"><a href="#数据标注" class="headerlink" title="数据标注"></a>数据标注</h2><p>如果你看懂了<a href="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/" title="UIE-事件提取">UIE-事件提取</a>的做法，那这里也是同一类任务，都是属于<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/develop/model_zoo/uie/doccano.md#21-%E6%8A%BD%E5%8F%96%E5%BC%8F%E4%BB%BB%E5%8A%A1%E9%A1%B9%E7%9B%AE%E5%88%9B%E5%BB%BA">抽取式任务项目</a>。</p>
+<blockquote>
+<p>doccano_txt.json</p>
+</blockquote>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">11</span><span class="punctuation">,</span> <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2月8日上午北京冬奥会自由式滑雪女子大跳台决赛中中国选手谷爱凌以188.25分获得金牌！&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;entities&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">45</span><span class="punctuation">,</span> <span class="attr">&quot;start_offset&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span> <span class="attr">&quot;end_offset&quot;</span><span class="punctuation">:</span> <span class="number">6</span><span class="punctuation">,</span> <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="string">&quot;时间&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span> <span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">46</span><span class="punctuation">,</span> <span class="attr">&quot;start_offset&quot;</span><span class="punctuation">:</span> <span class="number">24</span><span class="punctuation">,</span> <span class="attr">&quot;end_offset&quot;</span><span class="punctuation">:</span> <span class="number">31</span><span class="punctuation">,</span> <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="string">&quot;人名&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">&#125;</span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">12</span><span class="punctuation">,</span> <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="string">&quot;3月6日下午张三获得金牌！&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;entities&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">47</span><span class="punctuation">,</span> <span class="attr">&quot;start_offset&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span> <span class="attr">&quot;end_offset&quot;</span><span class="punctuation">:</span> <span class="number">6</span><span class="punctuation">,</span> <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="string">&quot;时间&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">,</span> <span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">48</span><span class="punctuation">,</span> <span class="attr">&quot;start_offset&quot;</span><span class="punctuation">:</span> <span class="number">6</span><span class="punctuation">,</span> <span class="attr">&quot;end_offset&quot;</span><span class="punctuation">:</span> <span class="number">8</span><span class="punctuation">,</span> <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="string">&quot;人名&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">&#125;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+
+<p>使用<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/develop/model_zoo/uie/doccano.md#71-%E6%8A%BD%E5%8F%96%E5%BC%8F%E4%BB%BB%E5%8A%A1%E6%95%B0%E6%8D%AE%E8%BD%AC%E6%8D%A2">抽取式任务数据转换</a>转换后，生成的样本如下所示：</p>
+<blockquote>
+<p>train.txt</p>
+</blockquote>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2月8日上午北京冬奥会自由式滑雪女子大跳台决赛中中国选手谷爱凌以188.25分获得金牌！&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;result_list&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2月8日上午&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;start&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span> <span class="attr">&quot;end&quot;</span><span class="punctuation">:</span> <span class="number">6</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="attr">&quot;prompt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;时间&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2月8日上午北京冬奥会自由式滑雪女子大跳台决赛中中国选手谷爱凌以188.25分获得金牌！&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;result_list&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;中国选手谷爱凌&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;start&quot;</span><span class="punctuation">:</span> <span class="number">24</span><span class="punctuation">,</span> <span class="attr">&quot;end&quot;</span><span class="punctuation">:</span> <span class="number">31</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="attr">&quot;prompt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;人名&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>test.txt</p>
+</blockquote>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;3月6日下午张三获得金牌！&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;result_list&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;3月6日下午&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;start&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span> <span class="attr">&quot;end&quot;</span><span class="punctuation">:</span> <span class="number">6</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="attr">&quot;prompt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;时间&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;content&quot;</span><span class="punctuation">:</span> <span class="string">&quot;3月6日下午张三获得金牌！&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;result_list&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;text&quot;</span><span class="punctuation">:</span> <span class="string">&quot;张三&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;start&quot;</span><span class="punctuation">:</span> <span class="number">6</span><span class="punctuation">,</span> <span class="attr">&quot;end&quot;</span><span class="punctuation">:</span> <span class="number">8</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="attr">&quot;prompt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;人名&quot;</span><span class="punctuation">&#125;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h2 id="训练和推理"><a href="#训练和推理" class="headerlink" title="训练和推理"></a>训练和推理</h2><p>这部分没什么好说的了😂😂😂，以<code>时间</code>或<code>人名</code>作为prompt。</p>
+<a href="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/" title="UIE-事件提取">UIE-事件提取</a>包含了<a href="/2022/08/18/UIE-%E5%AE%9E%E4%BD%93%E8%AF%86%E5%88%AB/" title="UIE-实体识别">UIE-实体识别</a>，所以对于`抽取式任务`，一定要看懂<a href="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/" title="UIE-事件提取">UIE-事件提取</a>哦。
+
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/08/18/UIE-%E5%AE%9E%E4%BD%93%E8%AF%86%E5%88%AB/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-UIE-情感分类" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1382,204 +1479,9 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-使用GAN思想进行纠错" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/">使用GAN思想进行纠错</a>
-    </h1>
-  
-
-        
-        <a href="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/" class="archive-article-date">
-  	<time datetime="2022-04-21T00:34:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-04-21</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>书接<a href="/2022/04/01/macbert4csc%E7%BA%A0%E9%94%99/">上文</a>，上文在计算loss时一共分为两个。</p>
-<ol>
-<li>mlm loss(即macbert预测的loss)</li>
-<li>二分类loss(即hidden states降维到1后与原始数据集的loss，即原始文本和正确文本相比，不同为1,相同为0)。</li>
-</ol>
-<p>例如：</p>
-<img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/desc1.svg" class="" title="模型结构">
-
-
-<table>
-<thead>
-<tr>
-<th>训练数据集</th>
-<th>样本</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>original_text</td>
-<td>我和你在一其</td>
-</tr>
-<tr>
-<td>correct_text</td>
-<td>我和你在一起</td>
-</tr>
-<tr>
-<td>det_labels</td>
-<td>0 0 0 0 0 1</td>
-</tr>
-</tbody></table>
-<ol>
-<li>将original_text输入到bert后，获得mlm_result，即<code>我和你在一器</code>。此为mlm loss。</li>
-<li>在获得mlm_result同时，也可以获取hidden_states，将hidden_states输入到linear，再与det_labels做二分类。此为二分类loss。</li>
-<li>分配两个loss不同的weight，作为最终loss，此为上篇文章的实现思路。</li>
-</ol>
-<blockquote>
-<p>那这篇文章改动了什么？</p>
-</blockquote>
-<h2 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h2><p>det_labels的获取方式更改了，怎么更改的？以mlm_result和correct_text进行对比进行获取。<br>如上例：即mlm_result输出<code>我和你在一器</code>，和correct_text<code>我和你在一起</code>进行对比。</p>
-<p>即用GAN的思想来进行corrector!</p>
-<h2 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h2><p>此处我将mlm预测称为<code>generator</code>（<code>G</code>）,二分类判别称为<code>discriminator</code>(<code>D</code>)。</p>
-<p>分配<code>G</code>和<code>D</code>两者loss不同的weight。</p>
-<h3 id="1-当weight分配是1和50"><a href="#1-当weight分配是1和50" class="headerlink" title="1. 当weight分配是1和50"></a>1. 当weight分配是<code>1</code>和<code>50</code></h3><table>
-<thead>
-<tr>
-<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_50_dev.png" class="" title="50_dev"></th>
-<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_50_train.png" class="" title="d_50_train"></th>
-</tr>
-</thead>
-</table>
-<p>可以看到一个现象，不管dev_metric还是train_metric，在epoch2和epoch3的时候，它的准确度很突然下降，对应的loss也会比刚开始的大的许多。随后效果才会慢慢的提升。</p>
-<h3 id="2-当weight分配是0-9和0-1"><a href="#2-当weight分配是0-9和0-1" class="headerlink" title="2. 当weight分配是0.9和0.1"></a>2. 当weight分配是<code>0.9</code>和<code>0.1</code></h3><table>
-<thead>
-<tr>
-<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_0.1_dev.png" class="" title="d_0.1_dev"></th>
-<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_0.1_train.png" class="" title="d_0.1_train"></th>
-</tr>
-</thead>
-</table>
-<p>如果我把上图dev_metric展开下再和train_metric放到一起对比：</p>
-<table>
-<thead>
-<tr>
-<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_0.1_dev_2.png" class="" title="d_0.1_dev_2"></th>
-<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_0.1_train.png" class="" title="d_0.1_train"></th>
-</tr>
-</thead>
-</table>
-<p>可以看到效果：</p>
-<ol>
-<li>在epoch1出来时，效果基本就已经非常不错了。</li>
-<li>在随后的epochs里，准确度的提升非常缓慢。</li>
-</ol>
-<h3 id="3-当weight分配是0-1和0-9"><a href="#3-当weight分配是0-1和0-9" class="headerlink" title="3. 当weight分配是0.1和0.9"></a>3. 当weight分配是<code>0.1</code>和<code>0.9</code></h3><table>
-<thead>
-<tr>
-<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_0.9_dev.png" class="" title="d_0.9_dev"></th>
-<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_0.9_train.png" class="" title="d_0.9_train"></th>
-</tr>
-</thead>
-</table>
-<h3 id="4-当weight分配是0-1和0-9，并且判别器添加GELU"><a href="#4-当weight分配是0-1和0-9，并且判别器添加GELU" class="headerlink" title="4. 当weight分配是0.1和0.9，并且判别器添加GELU"></a>4. 当weight分配是<code>0.1</code>和<code>0.9</code>，并且判别器添加GELU</h3><table>
-<thead>
-<tr>
-<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_0.9_dev_gelu.png" class="" title="d_0.9_dev_gelu"></th>
-<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_0.9_train_gelu.png" class="" title="d_0.9_train_gelu"></th>
-</tr>
-</thead>
-</table>
-<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>上面这些实验例子都有一个共同的现象：</p>
-<ol>
-<li>epoch1时准确率就已经不错了，相比上文。</li>
-<li>都有抖动现象，就是在某个epoch时不管dev还是train都有抖动，随后再回到正常。</li>
-</ol>
-<h3 id="1-当weight分配是1和50-1"><a href="#1-当weight分配是1和50-1" class="headerlink" title="1. 当weight分配是1和50"></a>1. 当weight分配是<code>1</code>和<code>50</code></h3><p>首先解释为什么选择1和50,这个地方来自electra地方的思想，可看上文。</p>
-<h3 id="2-当weight分配是0-9和0-1-1"><a href="#2-当weight分配是0-9和0-1-1" class="headerlink" title="2. 当weight分配是0.9和0.1"></a>2. 当weight分配是<code>0.9</code>和<code>0.1</code></h3><p>整体很平滑，仿佛判别器没有起到作用似的或者作用很小。</p>
-<h3 id="3-当weight分配是0-1和0-9-1"><a href="#3-当weight分配是0-1和0-9-1" class="headerlink" title="3. 当weight分配是0.1和0.9"></a>3. 当weight分配是<code>0.1</code>和<code>0.9</code></h3><p>没什么大的意外。</p>
-<p>但是让我意外的是下面4情况。</p>
-<h3 id="4-当weight分配是0-1和0-9，并且判别器添加GELU-1"><a href="#4-当weight分配是0-1和0-9，并且判别器添加GELU-1" class="headerlink" title="4. 当weight分配是0.1和0.9，并且判别器添加GELU"></a>4. 当weight分配是<code>0.1</code>和<code>0.9</code>，并且判别器添加GELU</h3><p>我在看《机器学习实战：基于Scikit-Learn和TensorFlow》第二版 时里面讲到训练GAN有些小trick，比如可以给判别器添加一个激活函数。</p>
-<p>但是当添加后，发现其抖动的更为严重。。。</p>
-<h3 id="5-为什么我选择0-1和0-9"><a href="#5-为什么我选择0-1和0-9" class="headerlink" title="5. 为什么我选择0.1和0.9"></a>5. 为什么我选择0.1和0.9</h3><p>这个是个实验值，没有具体理论依据哈，本身就是超参。看下图：</p>
-<table>
-<thead>
-<tr>
-<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/d_loss_0.9.png" class="" title="d_loss_0.9"></th>
-<th><img src="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/g_loss_0.9.png" class="" title="g_loss_0.9"></th>
-</tr>
-</thead>
-</table>
-<p>d_loss和g_loss分别是判别器和生成器各自的loss。</p>
-<p>从上图可以看出，d_loss比g_loss小大概9~10倍，所以依据来源在此。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>当然还有一些其他的小技巧，就不做实验了，gan本来就难搞。。。</p>
-<p>比如：</p>
-<ol>
-<li>生成器的网络空间大小相比判别器调到1&#x2F;4 ~ 1&#x2F;2（来自electra）。具体做法就是减少层数或者降低每层的空间大小。</li>
-<li>使用不一样的优化器。</li>
-<li>改变训练技巧。生成器和判别器分别训练，当训练一个时，另外一个trainable&#x3D;False。使其达到一个均衡。。</li>
-</ol>
-<p>啥是模式崩溃？<br>就是当生成器学会苹果后，那判别器就会判别苹果。当生成器转头学会橘子后，那判别器会对橘子判别更准。<br>而对苹果和橘子共同存在的情况下效果不好。而达到一个纳什均衡。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E7%BA%B3%E4%BB%80%E5%9D%87%E8%A1%A1">纳什均衡</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/319540757">模式崩溃</a></li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/04/21/%E4%BD%BF%E7%94%A8GAN%E6%80%9D%E6%83%B3%E8%BF%9B%E8%A1%8C%E7%BA%A0%E9%94%99/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/3/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/5/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/3/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/5/">Next &amp;raquo;</a>
     </nav>
   
 

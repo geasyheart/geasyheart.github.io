@@ -206,6 +206,95 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-22-02基于OpenSSL的https服务配置" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/23/22-02%E5%9F%BA%E4%BA%8EOpenSSL%E7%9A%84https%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE/">22_02基于OpenSSL的https服务配置</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/23/22-02%E5%9F%BA%E4%BA%8EOpenSSL%E7%9A%84https%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE/" class="archive-article-date">
+  	<time datetime="2015-04-23T02:29:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-23</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>192.168.100.8(CA) </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#cd /etc/pki/CA </span></span><br><span class="line"><span class="comment">#(umask 077;openssl genrsa -out private/cakey.pem 2048) </span></span><br><span class="line"><span class="comment">#vim ../tls/openssl.conf </span></span><br><span class="line"><span class="comment">#openssl req -new -x509 -key private/cakey.pem -out cacert.pem 3655 </span></span><br><span class="line">    ca.unravel.com </span><br><span class="line"><span class="built_in">dir</span>  =/etc/pki/CA </span><br><span class="line"><span class="comment">#mkdir certs crl newcerts </span></span><br><span class="line"><span class="comment">#touch index.txt </span></span><br><span class="line"><span class="comment">#echo 01 &gt;serial </span></span><br><span class="line"> </span><br><span class="line">192.168.100.1 </span><br><span class="line"><span class="comment">#yum install mod_ssl </span></span><br><span class="line"><span class="comment">#cd /etc/httpd &amp;&amp; mkdir ssl &amp;&amp;cd ssl/ </span></span><br><span class="line"><span class="comment">#(umask 077;openssl genrsa 1024 &gt; httpd.key) </span></span><br><span class="line"><span class="comment">#openssl  req -new -key httpd.key -out httpd.csr </span></span><br><span class="line">    www.test.com </span><br><span class="line"> </span><br><span class="line">192.168.100.8 </span><br><span class="line">openssl ca -<span class="keyword">in</span> /tmp/httpd.csr -out /tmp/httpd.crt -days 3650 </span><br><span class="line"> </span><br><span class="line">192.168.100.1 </span><br><span class="line"><span class="comment">#cd /etc/httpd/conf.d/ &amp;&amp; cp ssl.conf ssl.conf.bak </span></span><br><span class="line"><span class="comment">#vim ssl.conf </span></span><br><span class="line"> </span><br><span class="line">&lt;VirtualHost (www.test.com)IP:443&gt; </span><br><span class="line">ServerName www.test.com </span><br><span class="line">DocumentRoot <span class="string">&quot;/var/www/test.com&quot;</span> </span><br><span class="line">SSLEngine ON </span><br><span class="line">SSLCertificateFile /etc/httpd/ssl/httpd.crt </span><br><span class="line">SSLCertificateKeyFile /etc/httpd/ssl/httpd.key </span><br><span class="line">即可。 </span><br></pre></td></tr></table></figure>
+<p>浏览器会提示这个证书不可靠<br>把CA的证书安装到客户端的主机上即可，并且把名字改为cacert.crt…. </p>
+<p>#加密傳輸:<br>更多強烈建議閱讀官方文檔 </p>
+<p>高級別加密 </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/23/22-02%E5%9F%BA%E4%BA%8EOpenSSL%E7%9A%84https%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-24-04编译安装LAMP之配置httpd以FastCGI方式与PHP整合" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1356,131 +1445,9 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-22-01Httpd虚拟主机" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/22/22-01Httpd%E8%99%9A%E6%8B%9F%E4%B8%BB%E6%9C%BA/">22_01Httpd虚拟主机</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/22/22-01Httpd%E8%99%9A%E6%8B%9F%E4%B8%BB%E6%9C%BA/" class="archive-article-date">
-  	<time datetime="2015-04-22T02:29:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h2><ul>
-<li>apache</li>
-</ul>
-<ul>
-<li>中心主机 </li>
-<li>虚拟主机</li>
-</ul>
-<ul>
-<li>基于IP<br>            IP1:80<br>            IP2:80 </li>
-<li>基于端口<br>            IP:80<br>            IP:8080 </li>
-<li>基于域名:<br>            IP:80<br>                主机名不同<br>                <a target="_blank" rel="noopener" href="http://www.abc.com/">www.abc.com</a><br>                <a target="_blank" rel="noopener" href="http://www.def.com/">www.def.com</a></li>
-</ul>
-<h2 id="Virtual-Hosts"><a href="#Virtual-Hosts" class="headerlink" title="Virtual Hosts"></a>Virtual Hosts</h2><p>一个完整的配置文件应该具有的选项: </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">ServerName  定义web名称 </span><br><span class="line">ServerAlias:主机别名也可定义 </span><br><span class="line">DocumentRoot /www/a.org/ </span><br><span class="line">&lt;Directory &quot;/www/a.org&quot;&gt; </span><br><span class="line">    Option </span><br><span class="line">    AllowOverride </span><br><span class="line">&lt;/Directory&gt; </span><br><span class="line">Alias </span><br><span class="line">ErrorLog </span><br><span class="line">CustomLog </span><br></pre></td></tr></table></figure>
-
-<p>虚拟主机的定义: </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">&lt;VirtualHost&gt; </span><br><span class="line"> </span><br><span class="line">&lt;/VirtualHost&gt; </span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>httpd -S 检查虚拟主机配置 </p>
-</blockquote>
-<p>得先取消中心主机，注释中心主机的DocumentRoot即可； </p>
-<h2 id="基于IP的虚拟主机"><a href="#基于IP的虚拟主机" class="headerlink" title="基于IP的虚拟主机"></a>基于IP的虚拟主机</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim ../conf.d/virtual.conf </span></span><br></pre></td></tr></table></figure>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&lt;VirtualHost 172.17.12.31:80&gt; </span><br><span class="line">    ServerName www.hello.com </span><br><span class="line">    DocumentRoot &quot;/www/hello.com&quot; </span><br><span class="line">    ErrorLog /www/logs/hello.com/error_log </span><br><span class="line">    CustomLog /www/logs/hello.com/access_log combined </span><br><span class="line">&lt;/VirtualHost&gt; </span><br><span class="line"> </span><br><span class="line">&lt;VirtualHost 172.16.12.32:80&gt; </span><br><span class="line">    ServerName www.hello.org </span><br><span class="line">    DocumentRoot &quot;/www/hello.org&quot; </span><br><span class="line">    ErrorLog /www/logs/hello.org/error_log </span><br><span class="line">    CustomLog /www/logs/hello.org/access_log combined </span><br><span class="line">&lt;/VirtualHost&gt; </span><br></pre></td></tr></table></figure>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#mkdir -pv /www/&#123;hello.org,hello.com&#125; </span></span><br><span class="line"><span class="comment">#mkdir -pv /www/logs/&#123;hello.com,hello.org&#125; </span></span><br></pre></td></tr></table></figure>
-<p>添加主页面 </p>
-<p>ip addr add 172.17.12.32 dev eth0 </p>
-<p>如果虚拟主机中设置不同端口，如: </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;VirtualHost 172.17.12.31:8080&gt; </span><br><span class="line">    ServerName www.hello.net </span><br><span class="line">    DocumentRoot &quot;/www/hello.net&quot; </span><br><span class="line">&lt;/VirtualHost&gt; </span><br></pre></td></tr></table></figure>
-<p>需在主配置文件中:<br>Listen 8080 </p>
-<h2 id="基于名称的虚拟主机"><a href="#基于名称的虚拟主机" class="headerlink" title="基于名称的虚拟主机"></a>基于名称的虚拟主机</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">NameVirtualHost 172.17.12.33:80 </span><br><span class="line"> </span><br><span class="line">&lt;VirtualHost 172.16.12.33:80&gt; </span><br><span class="line">    ServerName www.a.org </span><br><span class="line">    DocumentRoot &quot;/www/a.org&quot; </span><br><span class="line">&lt;/VirtualHost&gt; </span><br><span class="line"> </span><br><span class="line">&lt;VirtualHost 172.16.12.33:80&gt; </span><br><span class="line">    ServerName www.a.com </span><br><span class="line">    DocumentRoot &quot;/www/a.com&quot; </span><br><span class="line">&lt;/VirtualHost&gt; </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>基于IP访问,将会返回第一个 </p>
-<p>添加访问日志和错误日志 </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">CustomLog  /var/log/httpd/a.com/access_log combined </span><br><span class="line">ErrorLog   /var/log/http/a.com/error_log </span><br><span class="line">        注意:ErrorLog后面一定不要加选项 </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">&lt;VirtualHost 172.16.100.2:80&gt; </span><br><span class="line">    ServerName www.a.org </span><br><span class="line">    DocumentRoot &quot;/www/a.org&quot; </span><br><span class="line">    CustomLog /var/log/httpd/a.org/access_log combined </span><br><span class="line">    &lt;Directory &quot;/www/a.org&quot;&gt; </span><br><span class="line">        Option none </span><br><span class="line">        AllowOverride none </span><br><span class="line">        Order deny,allow </span><br><span class="line">        Deny from 172.16.100.177 </span><br><span class="line">    &lt;/Directory&gt; </span><br><span class="line">&lt;/VirtualHost&gt; </span><br></pre></td></tr></table></figure>
-<p>可自定义访问权限 </p>
- <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;VirtualHost 172.16.100.2:80&gt; </span><br><span class="line">    ServerName _default_ </span><br><span class="line">    DocumentRoot &quot;/www/default&quot; </span><br><span class="line">&lt;/VirtualHost&gt; </span><br><span class="line">这个应该放在最上面,也可根据官网写法: </span><br><span class="line">&lt;VirtualHost _default_:*&gt; </span><br><span class="line">    DocumentRoot &quot;/www/default&quot; </span><br><span class="line">&lt;/VirtualHost&gt; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">默认是关闭的，可启用：显示httpd的服务状态 </span><br><span class="line">&lt;Location &quot;/server-status&quot;&gt; </span><br><span class="line">    setHandler server-status </span><br><span class="line">    Order Deny,Allow </span><br><span class="line">    Deny from all </span><br><span class="line">    Allow from .foo.com </span><br><span class="line">&lt;/Location&gt; </span><br></pre></td></tr></table></figure>
-<p>强烈建议:<br><a target="_blank" rel="noopener" href="http://httpd.apache.org/docs/2.4/vhosts/examples.html">http://httpd.apache.org/docs/2.4/vhosts/examples.html</a> </p>
-<p>另外需要着重知道:<br>httpd 2.4版本: </p>
-<p>基于域名的虚拟主机不再需要NameVirtualHost指令；</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/22/22-01Httpd%E8%99%9A%E6%8B%9F%E4%B8%BB%E6%9C%BA/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/20/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="page-number" href="/page/20/">20</a><span class="page-number current">21</span><a class="page-number" href="/page/22/">22</a><a class="page-number" href="/page/23/">23</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/22/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/20/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="page-number" href="/page/20/">20</a><span class="page-number current">21</span><a class="page-number" href="/page/22/">22</a><a class="page-number" href="/page/23/">23</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/22/">Next &amp;raquo;</a>
     </nav>
   
 

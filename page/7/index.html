@@ -206,6 +206,121 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-语义依存分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/11/15/%E8%AF%AD%E4%B9%89%E4%BE%9D%E5%AD%98%E5%88%86%E6%9E%90/">语义依存分析</a>
+    </h1>
+  
+
+        
+        <a href="/2021/11/15/%E8%AF%AD%E4%B9%89%E4%BE%9D%E5%AD%98%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2021-11-15T15:41:54.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-11-15</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="定义-ltp"><a href="#定义-ltp" class="headerlink" title="定义(ltp)"></a>定义(<a target="_blank" rel="noopener" href="https://www.ltp-cloud.com/intro#sdp_how">ltp</a>)</h2><p>语义依存分析 (Semantic Dependency Parsing, SDP)，分析句子各个语言单位之间的语义关联，并将语义关联以依存结构呈现。<br>使用语义依存刻画句子语义，好处在于不需要去抽象词汇本身，而是通过词汇所承受的语义框架来描述该词汇，而论元的数目相对词汇来说数量总是少了很多的。<br>语义依存分析目标是跨越句子表层句法结构的束缚，直接获取深层的语义信息。<br>例如以下三个句子，用不同的表达方式表达了同一个语义信息，即张三实施了一个吃的动作，吃的动作是对苹果实施的。</p>
+<img src="/2021/11/15/%E8%AF%AD%E4%B9%89%E4%BE%9D%E5%AD%98%E5%88%86%E6%9E%90/intro_how_sdp.1.jpg" class="" title="intro_how_sdp.1">
+<br>
+<img src="/2021/11/15/%E8%AF%AD%E4%B9%89%E4%BE%9D%E5%AD%98%E5%88%86%E6%9E%90/intro_how_sdp.2.jpg" class="" title="intro_how_sdp.2">
+<br>
+<img src="/2021/11/15/%E8%AF%AD%E4%B9%89%E4%BE%9D%E5%AD%98%E5%88%86%E6%9E%90/intro_how_sdp.3.jpg" class="" title="intro_how_sdp.3">
+
+<p>语义依存分析不受句法结构的影响，将具有直接语义关联的语言单元直接连接依存弧并标记上相应的语义关系。这也是语义依存分析与句法依存分析的重要区别。</p>
+<img src="/2021/11/15/%E8%AF%AD%E4%B9%89%E4%BE%9D%E5%AD%98%E5%88%86%E6%9E%90/intro_dp_vs_sdp.jpg" class="" title="intro_dp_vs_sdp">
+
+<p>如上例对比了句法依存和语义分析的结果，可以看到两者存在两个显著差别。<br>第一，句法依存某种程度上更重视非实词（如介词）在句子结构分析中的作用，而语义依存更倾向在具有直接语义关联的实词之间建立直接依存弧，非实词作为辅助标记存在。<br>第二，两者依存弧上标记的语义关系完全不同，语义依存关系是由论元关系引申归纳而来，可以用于回答问题，如我在哪里喝汤，我在用什么喝汤，谁在喝汤，我在喝什么。但是句法依存却没有这个能力。<br>第三，句法依存为树结构，语义依存为图结构，即是说当前词的依存弧可以有多个。</p>
+<p>语义依存与语义角色标注之间也存在关联，语义角色标注只关注句子主要谓词的论元及谓词与论元之间的关系，而语义依存不仅关注谓词与论元的关系，还关注谓词与谓词之间、论元与论元之间、论元内部的语义关系。语义依存对句子语义信息的刻画更加完整全面。</p>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p><a target="_blank" rel="noopener" href="https://github.com/geasyheart/semantic-dependency-parser">https://github.com/geasyheart/semantic-dependency-parser</a></p>
+<p>欢迎Star!</p>
+<h3 id="1-数据集"><a href="#1-数据集" class="headerlink" title="1. 数据集"></a>1. 数据集</h3><p>目前貌似公开的只有SEMEVAL2016数据集，地址在：<a target="_blank" rel="noopener" href="https://github.com/HIT-SCIR/SemEval-2016">HIT-SCIR&#x2F;SemEval-2016</a>，代码仓库中的数据集是将text和news两类合并而来。</p>
+<blockquote>
+<p>额外插一句，对于一个算法项目来讲，不仅仅是算法部分，还要有数据，即使不能公开，也可以造一些例子，能够跑通算法，HanLP在这方面真的是无敌存在！</p>
+</blockquote>
+<h3 id="2-模型结构"><a href="#2-模型结构" class="headerlink" title="2. 模型结构"></a>2. 模型结构</h3><ul>
+<li>这里使用到的模型结构：</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">semantic_dependency_parser.py [line:<span class="number">34</span>] INFO SemanticDependencyModel(</span><br><span class="line">  (encoder): TransformerEmbedding(hfl/chinese-electra-180g-small-discriminator, n_layers=<span class="number">4</span>, n_out=<span class="number">256</span>, stride=<span class="number">256</span>, pooling=mean, pad_index=<span class="number">0</span>, dropout=<span class="number">0.33</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line">  (tag_embedding): Embedding(<span class="number">41</span>, <span class="number">64</span>)</span><br><span class="line">  (edge_mlp_d): MLP(n_in=<span class="number">320</span>, n_out=<span class="number">600</span>, dropout=<span class="number">0.33</span>)</span><br><span class="line">  (edge_mlp_h): MLP(n_in=<span class="number">320</span>, n_out=<span class="number">600</span>, dropout=<span class="number">0.33</span>)</span><br><span class="line">  (label_mlp_d): MLP(n_in=<span class="number">320</span>, n_out=<span class="number">600</span>, dropout=<span class="number">0.33</span>)</span><br><span class="line">  (label_mlp_h): MLP(n_in=<span class="number">320</span>, n_out=<span class="number">600</span>, dropout=<span class="number">0.33</span>)</span><br><span class="line">  (edge_attn): Biaffine(n_in=<span class="number">600</span>, n_out=<span class="number">2</span>, bias_x=<span class="literal">True</span>, bias_y=<span class="literal">True</span>)</span><br><span class="line">  (label_attn): Biaffine(n_in=<span class="number">600</span>, n_out=<span class="number">158</span>, bias_x=<span class="literal">True</span>, bias_y=<span class="literal">True</span>)</span><br><span class="line">  (criterion): CrossEntropyLoss()</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>HanLP使用的模型结构:</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">BiaffineDependencyModel(</span><br><span class="line">    (encoder): EncoderWithContextualLayer()</span><br><span class="line">    (biaffine_decoder): BiaffineDecoder(</span><br><span class="line">    (mlp_arc_h): MLP(n_in=<span class="number">256</span>, n_out=<span class="number">500</span>, dropout=<span class="number">0.33</span>)</span><br><span class="line">    (mlp_arc_d): MLP(n_in=<span class="number">256</span>, n_out=<span class="number">500</span>, dropout=<span class="number">0.33</span>)</span><br><span class="line">    (mlp_rel_h): MLP(n_in=<span class="number">256</span>, n_out=<span class="number">100</span>, dropout=<span class="number">0.33</span>)</span><br><span class="line">    (mlp_rel_d): MLP(n_in=<span class="number">256</span>, n_out=<span class="number">100</span>, dropout=<span class="number">0.33</span>)</span><br><span class="line">    (arc_attn): Biaffine(n_in=<span class="number">500</span>, n_out=<span class="number">1</span>, bias_x=<span class="literal">True</span>)</span><br><span class="line">    (rel_attn): Biaffine(n_in=<span class="number">100</span>, n_out=<span class="number">136</span>, bias_x=<span class="literal">True</span>, bias_y=<span class="literal">True</span>)</span><br><span class="line">  )</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>和dependency parser结构相同，但是loss计算和解码部分不同。</p>
+<p>区别点在于，举个例子:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pred_arcs.shape</span></span><br><span class="line">(<span class="number">32</span>, <span class="number">49</span>, <span class="number">49</span>)</span><br><span class="line"><span class="comment"># true_arcs.shape</span></span><br><span class="line">(<span class="number">32</span>, <span class="number">49</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>因为dependency parser有一个限制，即当前词只可能依存其他一个词，那么argmax(-1)即是在49那里获取最大的，表示和这49个词中最大的作为依存关系，使用交叉熵。</p>
+<p>而semantic dependency parser没有这个限制，当前词可能和多个词存在依存关系，那么他的pred_arcs和true_arcs的维度是一样的，都是(32, 49, 49)，所以使用BCELoss。</p>
+<p>当然也可以用交叉熵，只需要将pred_arcs的维度转换成(32, 49, 49, 2)即可，也是我下面的做法。</p>
+<h3 id="3-loss计算和解码"><a href="#3-loss计算和解码" class="headerlink" title="3. loss计算和解码"></a>3. loss计算和解码</h3><p>在<a target="_blank" rel="noopener" href="https://github.com/geasyheart/semantic-dependency-parser/blob/17a2e08f1a8d1d6f022c3e8f9ca959bbf09572f1/src/model.py#L65">这里计算loss</a>时，采用的是交叉熵，也就是说s_edge.size(-1) &#x3D;&#x3D; 2，表示当前词和句子所有词之间<code>是</code>或者<code>否</code>，然后argmax(-1)进行解码。</p>
+<p>在<a target="_blank" rel="noopener" href="https://github.com/hankcs/HanLP/blob/b555dbbb5b0b18ee7459bc46508b085bfa10d960/hanlp/components/parsers/biaffine/biaffine_sdp.py#L64">HanLP计算loss</a>时，对于arc(即edge)的shape为(batch_size, seq_length, seq_length)，因为biaffine的输出维度为1,所以这里计算loss时使用BCELoss，表示当前词和句子所有词之间是否存在关系。</p>
+<p>另外一个两者的区别点在于计算rel时，HanLP采取的方式是各自计算各自的loss（即arc和rel），然后loss相加。<br>这里计算rel loss时融合了arc的信息进来，好处就在于能够快速收敛和提升准确度吧。</p>
+<h2 id="各模块技术指标"><a href="#各模块技术指标" class="headerlink" title="各模块技术指标"></a>各模块技术指标</h2><p><a target="_blank" rel="noopener" href="https://www.ltp-cloud.com/intro#benchmark">https://www.ltp-cloud.com/intro#benchmark</a></p>
+<h2 id="ltp关系类型"><a href="#ltp关系类型" class="headerlink" title="ltp关系类型"></a>ltp关系类型</h2>
+<table class="table"> <thead><tr> <th>关系类型</th> <th>Tag</th> <th>Description</th> <th>Example</th> </tr></thead> <tbody> <tr> <td>施事关系</td> <td>Agt</td> <td>Agent</td> <td>我送她一束花 (我 &lt;-- 送)</td> </tr> <tr> <td>当事关系</td> <td>Exp</td> <td>Experiencer</td> <td>我跑得快 (跑 --&gt; 我)</td> </tr> <tr> <td>感事关系</td> <td>Aft</td> <td>Affection</td> <td>我思念家乡 (思念 --&gt; 我)</td> </tr> <tr> <td>领事关系</td> <td>Poss</td> <td>Possessor</td> <td>他有一本好读 (他 &lt;-- 有)</td> </tr> <tr> <td>受事关系</td> <td>Pat</td> <td>Patient</td> <td>他打了小明 (打 --&gt; 小明)</td> </tr> <tr> <td>客事关系</td> <td>Cont</td> <td>Content</td> <td>他听到鞭炮声 (听 --&gt; 鞭炮声)</td> </tr> <tr> <td>成事关系</td> <td>Prod</td> <td>Product</td> <td>他写了本小说 (写 --&gt; 小说)</td> </tr> <tr> <td>源事关系</td> <td>Orig</td> <td>Origin</td> <td>我军缴获敌人四辆坦克 (缴获 --&gt; 坦克)</td> </tr> <tr> <td>涉事关系</td> <td>Datv</td> <td>Dative</td> <td>他告诉我个秘密 ( 告诉 --&gt; 我 )</td> </tr> <tr> <td>比较角色</td> <td>Comp</td> <td>Comitative</td> <td>他成绩比我好 (他 --&gt; 我)</td> </tr> <tr> <td>属事角色</td> <td>Belg</td> <td>Belongings</td> <td>老赵有俩女儿 (老赵 &lt;-- 有)</td> </tr> <tr> <td>类事角色</td> <td>Clas</td> <td>Classification</td> <td>他是中学生 (是 --&gt; 中学生)</td> </tr> <tr> <td>依据角色</td> <td>Accd</td> <td>According</td> <td>本庭依法宣判 (依法 &lt;-- 宣判)</td> </tr> <tr> <td>缘故角色</td> <td>Reas</td> <td>Reason</td> <td>他在愁女儿婚事 (愁 --&gt; 婚事)</td> </tr> <tr> <td>意图角色</td> <td>Int</td> <td>Intention</td> <td>为了金牌他拼命努力 (金牌 &lt;-- 努力)</td> </tr> <tr> <td>结局角色</td> <td>Cons</td> <td>Consequence</td> <td>他跑了满头大汗 (跑 --&gt; 满头大汗)</td> </tr> <tr> <td>方式角色</td> <td>Mann</td> <td>Manner</td> <td>球慢慢滚进空门 (慢慢 &lt;-- 滚)</td> </tr> <tr> <td>工具角色</td> <td>Tool</td> <td>Tool</td> <td>她用砂锅熬粥 (砂锅 &lt;-- 熬粥)</td> </tr> <tr> <td>材料角色</td> <td>Malt</td> <td>Material</td> <td>她用小米熬粥 (小米 &lt;-- 熬粥)</td> </tr> <!--<tr> <td>状态角色</td> <td>Stat</td> <td></td> <td></td> </tr> <tr> <td>起始状态</td> <td>Sini</td> <td></td> <td></td> </tr> <tr> <td>终止状态</td> <td>Sfin</td> <td></td> <td></td> </tr> <tr> <td>状态历程</td> <td>Sproc</td> <td></td> <td></td> </tr>--> <tr> <td>时间角色</td> <td>Time</td> <td>Time</td> <td>唐朝有个李白 (唐朝 &lt;-- 有)</td> </tr> <!--<tr> <td>时间起点</td> <td>Tini</td> <td></td> <td></td> </tr> <tr> <td>时间终点</td> <td>Tfni</td> <td></td> <td></td> </tr> <tr> <td>时段角色</td> <td>TDur</td> <td></td> <td></td> </tr> <tr> <td>时距角色</td> <td>Trang</td> <td></td> <td></td> </tr>--> <tr> <td>空间角色</td> <td>Loc</td> <td>Location</td> <td>这房子朝南 (朝 --&gt; 南)</td> </tr> <!--<tr> <td>原处所</td> <td>Lini</td> <td></td> <td></td> </tr> <tr> <td>终处所</td> <td>Lfin</td> <td></td> <td></td> </tr> <tr> <td>通过处所</td> <td>Lthru</td> <td></td> <td></td> </tr>--> <tr> <td>历程角色</td> <td>Proc</td> <td>Process</td> <td>火车正在过长江大桥 (过 --&gt; 大桥)</td> </tr> <tr> <td>趋向角色</td> <td>Dir</td> <td>Direction</td> <td>部队奔向南方 (奔 --&gt; 南)</td> </tr> <tr> <td>范围角色</td> <td>Sco</td> <td>Scope</td> <td>产品应该比质量 (比 --&gt; 质量)</td> </tr> <tr> <td>数量角色</td> <td>Quan</td> <td>Quantity</td> <td>一年有365天 (有 --&gt; 天)</td> </tr> <tr> <td>数量数组</td> <td>Qp</td> <td>Quantity-phrase</td> <td>三本书 (三 --&gt; 本)</td> </tr> <tr> <td>频率角色</td> <td>Freq</td> <td>Frequency</td> <td>他每天看书 (每天 &lt;-- 看)</td> </tr> <tr> <td>顺序角色</td> <td>Seq</td> <td>Sequence</td> <td>他跑第一 (跑 --&gt; 第一)</td> </tr> <!--<tr> <td>变化量角色</td> <td>Nvar</td> <td></td> <td></td> </tr> <tr> <td>起始量</td> <td>Nini</td> <td></td> <td></td> </tr> <tr> <td>终止量</td> <td>Nfin</td> <td></td> <td></td> </tr>--> <tr> <td>描写角色</td> <td>Desc(Feat)</td> <td>Description</td> <td>他长得胖 (长 --&gt; 胖)</td> </tr> <tr> <td>宿主角色</td> <td>Host</td> <td>Host</td> <td>住房面积 (住房 &lt;-- 面积)</td> </tr> <tr> <td>名字修饰角色</td> <td>Nmod</td> <td>Name-modifier</td> <td>果戈里大街 (果戈里 &lt;-- 大街)</td> </tr> <tr> <td>时间修饰角色</td> <td>Tmod</td> <td>Time-modifier</td> <td>星期一上午 (星期一 &lt;-- 上午)</td> </tr>
+<tr> <td>反角色</td> <td>r + main role</td> <td></td> <td>打篮球的小姑娘 (打篮球 &lt;-- 姑娘)</td> </tr> <tr> <td>嵌套角色</td> <td>d + main role</td> <td></td> <td>爷爷看见孙子在跑 (看见 --&gt; 跑)</td> </tr> <tr> <td>并列关系</td> <td>eCoo</td> <td>event Coordination</td> <td>我喜欢唱歌和跳舞 (唱歌 --&gt; 跳舞)</td> </tr> <tr> <td>选择关系</td> <td>eSelt</td> <td>event Selection</td> <td>您是喝茶还是喝咖啡 (茶 --&gt; 咖啡)</td> </tr> <tr> <td>等同关系</td> <td>eEqu</td> <td>event Equivalent</td> <td>他们三个人一起走 (他们 --&gt; 三个人)</td> </tr> <tr> <td>先行关系</td> <td>ePrec</td> <td>event Precedent</td> <td>首先，先</td> </tr> <tr> <td>顺承关系</td> <td>eSucc</td> <td>event Successor</td> <td>随后，然后</td> </tr> <tr> <td>递进关系</td> <td>eProg</td> <td>event Progression</td> <td>况且，并且</td> </tr> <tr> <td>转折关系</td> <td>eAdvt</td> <td>event adversative</td> <td>却，然而</td> </tr> <tr> <td>原因关系</td> <td>eCau</td> <td>event Cause</td> <td>因为，既然</td> </tr> <tr> <td>结果关系</td> <td>eResu</td> <td>event Result</td> <td>因此，以致</td> </tr> <tr> <td>推论关系</td> <td>eInf</td> <td>event Inference</td> <td>才，则</td> </tr> <tr> <td>条件关系</td> <td>eCond</td> <td>event Condition</td> <td>只要，除非</td> </tr> <tr> <td>假设关系</td> <td>eSupp</td> <td>event Supposition</td> <td>如果，要是</td> </tr> <tr> <td>让步关系</td> <td>eConc</td> <td>event Concession</td> <td>纵使，哪怕</td> </tr> <tr> <td>手段关系</td> <td>eMetd</td> <td>event Method</td> <td></td> </tr> <tr> <td>目的关系</td> <td>ePurp</td> <td>event Purpose</td> <td>为了，以便</td> </tr> <tr> <td>割舍关系</td> <td>eAban</td> <td>event Abandonment</td> <td>与其，也不</td> </tr> <tr> <td>选取关系</td> <td>ePref</td> <td>event Preference</td> <td>不如，宁愿</td> </tr> <tr> <td>总括关系</td> <td>eSum</td> <td>event Summary</td> <td>总而言之</td> </tr> <tr> <td>分叙关系</td> <td>eRect</td> <td>event Recount</td> <td>例如，比方说</td> </tr> <tr> <td>连词标记</td> <td>mConj</td> <td>Recount Marker</td> <td>和，或</td> </tr> <tr> <td>的字标记</td> <td>mAux</td> <td>Auxiliary </td> <td>的，地，得</td> </tr> <tr> <td>介词标记</td> <td>mPrep</td> <td>Preposition </td> <td>把，被</td> </tr> <tr> <td>语气标记</td> <td>mTone</td> <td>Tone </td> <td>吗，呢</td> </tr> <tr> <td>时间标记</td> <td>mTime</td> <td>Time </td> <td>才，曾经</td> </tr> <tr> <td>范围标记</td> <td>mRang</td> <td>Range </td> <td>都，到处</td> </tr> <tr> <td>程度标记</td> <td>mDegr</td> <td>Degree </td> <td>很，稍微</td> </tr> <tr> <td>频率标记</td> <td>mFreq</td> <td>Frequency Marker </td> <td>再，常常</td> </tr> <tr> <td>趋向标记</td> <td>mDir</td> <td>Direction Marker </td> <td>上去，下来</td> </tr> <tr> <td>插入语标记</td> <td>mPars</td> <td>Parenthesis Marker</td> <td>总的来说，众所周知</td> </tr> <tr> <td>否定标记</td> <td>mNeg</td> <td>Negation Marker</td> <td>不，没，未</td> </tr> <tr> <td>情态标记</td> <td>mMod</td> <td>Modal Marker</td> <td>幸亏，会，能</td> </tr> <tr> <td>标点标记</td> <td>mPunc</td> <td>Punctuation Marker</td> <td>，。！</td> </tr> <tr> <td>重复标记</td> <td>mPept</td> <td>Repetition Marker</td> <td>走啊走 (走 --&gt; 走)</td> </tr> <tr> <td>多数标记</td> <td>mMaj</td> <td>Majority Marker</td> <td>们，等</td> </tr><tr> <td>实词虚化标记</td> <td>mVain</td> <td>Vain Marker </td> <td></td> </tr> <tr> <td>离合标记</td> <td>mSepa</td> <td>Seperation Marker </td> <td>吃了个饭 (吃 --&gt; 饭) 洗了个澡 (洗 --&gt; 澡)</td> </tr> <tr> <td>根节点</td> <td>Root</td> <td>Root </td> <td>全句核心节点</td> </tr> </tbody> </table>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/11/15/%E8%AF%AD%E4%B9%89%E4%BE%9D%E5%AD%98%E5%88%86%E6%9E%90/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-bio-based语义角色标注" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -2635,112 +2750,9 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-激活函数以及损失函数" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/10/05/%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E4%BB%A5%E5%8F%8A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/">激活函数以及损失函数</a>
-    </h1>
-  
-
-        
-        <a href="/2021/10/05/%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E4%BB%A5%E5%8F%8A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/" class="archive-article-date">
-  	<time datetime="2021-10-05T12:58:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-05</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="sigmoid"><a href="#sigmoid" class="headerlink" title="sigmoid"></a>sigmoid</h2><blockquote>
-<p> sigmoid函数和tanh函数是研究早期被广泛使用的2种激活函数。两者都为S型饱和函数。 </p>
-</blockquote>
-<ol>
-<li><code>当sigmoid 函数输入的值趋于正无穷或负无穷时，梯度会趋近零，从而发生梯度弥散现象</code>。</li>
-<li><code>sigmoid函数的输出恒为正值，不是以零为中心的，这会导致权值更新时只能朝一个方向更新，从而影响收敛速度。</code></li>
-</ol>
-<blockquote>
-<p>tanh激活函数是sigmoid 函数的改进版，是以零为中心的对称函数，收敛速度快，不容易出现 loss 值晃动，<code>但是无法解决梯度弥散的问题</code>。</p>
-</blockquote>
-<p>2个函数的计算量都是指数级的，计算相对复杂。softsign 函数是 tanh 函数的改进版，为 S 型饱和函数，以零为中心，值域为（−1，1）。</p>
-<h2 id="公式"><a href="#公式" class="headerlink" title="公式"></a>公式</h2><p><a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/blob/m2/python/forward_examples">更多可以直接看</a></p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="keyword">import</span> math</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch.functional <span class="keyword">import</span> F</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;sigmoid&#x27;</span>.center(<span class="number">60</span>, <span class="string">&#x27;-&#x27;</span>))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">sigmoid</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span> / (<span class="number">1</span> + math.exp(-x))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(torch.sigmoid(torch.tensor([<span class="number">1.</span>, <span class="number">2.</span>])))</span><br><span class="line"><span class="built_in">print</span>([sigmoid(<span class="number">1.</span>), sigmoid(<span class="number">2.</span>)])</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;softmax&#x27;</span>.center(<span class="number">60</span>, <span class="string">&#x27;-&#x27;</span>))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">softmax</span>(<span class="params">xs</span>):</span><br><span class="line">    z_exp = [math.exp(x) <span class="keyword">for</span> x <span class="keyword">in</span> xs]</span><br><span class="line">    sum_z_exp = <span class="built_in">sum</span>(z_exp)</span><br><span class="line">    <span class="keyword">return</span> [_z_exp / sum_z_exp <span class="keyword">for</span> _z_exp <span class="keyword">in</span> z_exp]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(torch.softmax(torch.tensor([<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">7.</span>]), dim=-<span class="number">1</span>))</span><br><span class="line"><span class="built_in">print</span>(softmax([<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">7.</span>]))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;tanh&#x27;</span>.center(<span class="number">60</span>, <span class="string">&#x27;-&#x27;</span>))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">tanh</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> (math.exp(x) - math.exp(-x)) / (math.exp(x) + math.exp(-x))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(torch.tanh(torch.tensor([<span class="number">1.</span>, <span class="number">2.</span>])))</span><br><span class="line"><span class="built_in">print</span>([tanh(<span class="number">1.</span>), tanh(<span class="number">2.</span>)])</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;cross_entropy&#x27;</span>.center(<span class="number">60</span>, <span class="string">&#x27;-&#x27;</span>))</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">my_cross_entropy</span>(<span class="params"><span class="built_in">input</span>, target, reduction=<span class="string">&quot;mean&quot;</span></span>):</span><br><span class="line">    <span class="comment"># input.shape: torch.size([-1, class])</span></span><br><span class="line">    <span class="comment"># target.shape: torch.size([-1])</span></span><br><span class="line">    <span class="comment"># reduction = &quot;mean&quot; or &quot;sum&quot;</span></span><br><span class="line">    <span class="comment"># input是模型输出的结果，与target求loss</span></span><br><span class="line">    <span class="comment"># target的长度和input第一维的长度一致</span></span><br><span class="line">    <span class="comment"># target的元素值为目标class</span></span><br><span class="line">    <span class="comment"># reduction默认为mean，即对loss求均值</span></span><br><span class="line">    <span class="comment"># 还有另一种为sum，对loss求和</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 这里对input所有元素求exp</span></span><br><span class="line">    exp = torch.exp(<span class="built_in">input</span>)</span><br><span class="line">    <span class="comment"># 根据target的索引，在exp第一维取出元素值，这是softmax的分子</span></span><br><span class="line">    tmp1 = exp.gather(<span class="number">1</span>, target.unsqueeze(-<span class="number">1</span>)).squeeze()</span><br><span class="line">    <span class="comment"># 在exp第一维求和，这是softmax的分母</span></span><br><span class="line">    tmp2 = exp.<span class="built_in">sum</span>(<span class="number">1</span>)</span><br><span class="line">    <span class="comment"># softmax公式：ei / sum(ej)</span></span><br><span class="line">    softmax = tmp1 / tmp2</span><br><span class="line">    <span class="comment"># cross-entropy公式： -yi * log(pi)</span></span><br><span class="line">    <span class="comment"># 因为target的yi为1，其余为0，所以在tmp1直接把目标拿出来，</span></span><br><span class="line">    <span class="comment"># 公式中的pi就是softmax的结果</span></span><br><span class="line">    log = -torch.log(softmax)</span><br><span class="line">    <span class="comment"># 官方实现中，reduction有mean/sum及none</span></span><br><span class="line">    <span class="comment"># 只是对交叉熵后处理的差别</span></span><br><span class="line">    <span class="keyword">if</span> reduction == <span class="string">&quot;mean&quot;</span>:</span><br><span class="line">        <span class="keyword">return</span> log.mean()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> log.<span class="built_in">sum</span>()</span><br><span class="line"></span><br><span class="line"><span class="comment"># example1</span></span><br><span class="line"><span class="comment"># input = torch.randn(3, 5,)</span></span><br><span class="line"><span class="comment"># target = torch.randint(5, (3,), dtype=torch.int64)</span></span><br><span class="line"><span class="comment"># example2</span></span><br><span class="line"><span class="built_in">input</span> = torch.tensor([[<span class="number">0.1</span>, <span class="number">0.9</span>], [<span class="number">0.9</span>, <span class="number">0.1</span>]])</span><br><span class="line">target = torch.tensor([<span class="number">1</span>, <span class="number">0</span>])</span><br><span class="line"><span class="comment"># example3</span></span><br><span class="line"><span class="comment"># input = torch.tensor([[0., 1.], [1., 0.]])</span></span><br><span class="line"><span class="comment"># target = torch.tensor([1, 0])</span></span><br><span class="line">loss1_mean = F.cross_entropy(<span class="built_in">input</span>, target)</span><br><span class="line">loss2_mean = my_cross_entropy(<span class="built_in">input</span>, target)</span><br><span class="line"><span class="built_in">print</span>(loss1_mean)</span><br><span class="line"><span class="built_in">print</span>(loss2_mean)</span><br><span class="line"></span><br><span class="line">loss1_sum = F.cross_entropy(<span class="built_in">input</span>, target, reduction=<span class="string">&quot;sum&quot;</span>)</span><br><span class="line">loss2_sum = my_cross_entropy(<span class="built_in">input</span>, target, reduction=<span class="string">&quot;sum&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(loss1_sum)</span><br><span class="line"><span class="built_in">print</span>(loss2_sum)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">bce_loss_with_logit</span>(<span class="params">y_pred, y_true, reduction=<span class="string">&#x27;mean&#x27;</span></span>):</span><br><span class="line">    y_pred = sigmoid(y_pred)</span><br><span class="line"></span><br><span class="line">    loss = -y_true * torch.log(y_pred) - (<span class="number">1</span> - y_true) * torch.log(<span class="number">1</span> - y_pred)</span><br><span class="line">    <span class="keyword">if</span> reduction == <span class="string">&#x27;mean&#x27;</span>:</span><br><span class="line">        <span class="keyword">return</span> torch.mean(loss)</span><br><span class="line">    <span class="keyword">raise</span> NotImplementedError</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="交叉熵"><a href="#交叉熵" class="headerlink" title="交叉熵"></a>交叉熵</h2><p>有木有发现，<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E4%BC%AF%E5%8A%AA%E5%88%A9%E5%88%86%E5%B8%83">伯努利分布</a>加上log就是交叉熵。</p>
-<p>另外其实可以理解交叉熵就是极大似然估计加上log。</p>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/pjfnMgAnnIk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-
-<h2 id="如何解释梯度消失呢？"><a href="#如何解释梯度消失呢？" class="headerlink" title="如何解释梯度消失呢？"></a>如何解释梯度消失呢？</h2><blockquote>
-<p>描述</p>
-</blockquote>
-<p>梯度消失是指模型在反向传播的过程中，更上层模型获取到的梯度值越来越小，导致更上层的权重基本保持不变，导致整个模型无法正常收敛以及训练。</p>
-<blockquote>
-<p>原因？<br>其出现原因在Xavier Glorot和Yoshua Bengio在2010年的一篇论文中阐述了一些观点，包含像当时流行的sigmoid激活函数以及均值为0标准差为1的权重初始化方案，每层输出的方差远大于输入的方差，随着网络的延伸，方差在每一层之后都会增加，直到激活函数在顶层达到饱和为止。而实际像simoid这种激活函数随x的增大其导数值趋向于0,导致在反向传播的过程中，基本没有什么可以传播回去。</p>
-</blockquote>
-<blockquote>
-<p>解决方式？</p>
-</blockquote>
-<p>他提出应该在每一层网络的输出的方差等于其输入的方差。但是除非该层具有相等数量的输入和神经元，否则这条条件无法满足，故提出一些这种方案，像Xavier初始化或者Glorot初始化。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/10/05/%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E4%BB%A5%E5%8F%8A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/6/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/8/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/6/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/8/">Next &amp;raquo;</a>
     </nav>
   
 

@@ -206,6 +206,104 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-内容推荐调研" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/06/10/%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%90%E8%B0%83%E7%A0%94/">内容推荐调研</a>
+    </h1>
+  
+
+        
+        <a href="/2020/06/10/%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%90%E8%B0%83%E7%A0%94/" class="archive-article-date">
+  	<time datetime="2020-06-10T06:37:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-10</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>下派一个任务,研究下推荐系统,貌似后面和电信搞一个类似电视视频内容推荐之类的项目.</p>
+<h2 id="基于流行度的推荐"><a href="#基于流行度的推荐" class="headerlink" title="基于流行度的推荐"></a>基于流行度的推荐</h2><p>这个推荐比较简单些,就是根据视频的得分来进行排序,排除掉当前用户已经看过的,剩下的再排序返回给用户就行.</p>
+<p>好处是这是一个非常简单但是非常有效的算法,基本来说我们看视频都是根据播放量高、得分高进行播放。<br>坏处是有一个长尾效应，过于小众的基本不会推荐出来，看看京东，其实也有点类似这样～</p>
+<p>关于视频的打分，这个可以根据一些特征工程来获得，比如用户点赞，收藏，喜欢，浏览，基于不同权重进行得分。<br>如果没有这些特征，可以手动构造这些视频的得分（不行可以抓豆瓣。。。）甚者直接根据用户的浏览记录进行排序就能上线。</p>
+<p>对于长尾效应，可以运营分出几大类，根据类别再进行排序也是可以一定程度多了新的选择。<br>对于冷启动，这个咋说呢，一开始肯定都是没有数据的，可以先按照热度排个序上了线后续优化。</p>
+<h2 id="基于内容的推荐"><a href="#基于内容的推荐" class="headerlink" title="基于内容的推荐"></a>基于内容的推荐</h2><p>这是一个基于内容特征进行推荐的方式。</p>
+<p>比如说，张三看过言情、虐心电影A，那如果电影B也具有这种feature，就可以计算这些feature的相似度进行排序推荐给A。<br>至于特征有多少，emmm，可以打标签，比如导演，演员，简介tfidf，小清新，狗血之类。</p>
+<p>另外如果基于深度学习的话，就要获得视频的向量，根据向量来进行排序推荐给A。</p>
+<h2 id="协同过滤的推荐"><a href="#协同过滤的推荐" class="headerlink" title="协同过滤的推荐"></a>协同过滤的推荐</h2><p>协同过滤推荐重点在于协同。这里可以分成两类：</p>
+<ol>
+<li>基于用户的协同过滤</li>
+<li>基于内容的协同过滤</li>
+</ol>
+<p>啥意思呢，用户张三喜欢看A，B，D电视剧，用户李四喜欢看A，D，那么张三和李四是挺相似的，那么就可以推荐给李四用户B电视剧。这个就叫基于用户的协同过滤。</p>
+<p>至于特征，也可以说张三和李四有其他特征，比如都是男的，年龄相仿，兴趣相仿，那就可以认为是同一类人，那推荐的内容也是可以类似的。</p>
+<p>基于内容的呢，其实和上面的基于内容的推荐是挺类似的。</p>
+<p>核心点是<strong>基于历史的数据</strong>进行来预测用户的相似程度来进行推荐内容，将<strong>人和人</strong>也关联到一起。</p>
+<p>一种做法通过SVD（奇异值分解）来实现。<br>比如下面例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">from</span> scipy.sparse <span class="keyword">import</span> csc_matrix</span><br><span class="line"><span class="keyword">from</span> scipy.sparse.linalg <span class="keyword">import</span> svds</span><br><span class="line"></span><br><span class="line"><span class="comment"># value为用户对不同的item的喜欢程度</span></span><br><span class="line">df = pd.DataFrame(&#123;<span class="string">&quot;军事&quot;</span>: [<span class="number">0</span>, <span class="number">10</span>, <span class="number">7</span>], <span class="string">&#x27;言情&#x27;</span>: [<span class="number">10</span>, <span class="number">3</span>, <span class="number">0</span>], <span class="string">&#x27;动漫&#x27;</span>: [<span class="number">5</span>, <span class="number">3</span>, <span class="number">0</span>], <span class="string">&#x27;小说&#x27;</span>: [<span class="number">3</span>, <span class="number">5</span>, <span class="number">0</span>]&#125;, dtype=<span class="string">&#x27;float64&#x27;</span>)</span><br><span class="line"><span class="comment">#    军事    言情   动漫   小说</span></span><br><span class="line"><span class="comment"># 0   0.0  10.0  5.0  3.0</span></span><br><span class="line"><span class="comment"># 1  10.0   3.0  3.0  5.0</span></span><br><span class="line"><span class="comment"># 2   7.0   0.0  0.0  0.0</span></span><br><span class="line"><span class="comment"># 可以看到user0喜欢言情和动漫，用户1、2喜欢军事</span></span><br><span class="line"></span><br><span class="line">U, s, Vt = svds(csc_matrix(df), k=<span class="number">2</span>) <span class="comment"># K可以理解成用多少feature来进行表示，主要用于降维和减少稀疏性，超参数</span></span><br><span class="line"></span><br><span class="line">matrix_new = U.dot(np.diag(s)).dot(Vt)</span><br><span class="line"><span class="built_in">print</span>(matrix_new)</span><br><span class="line"><span class="comment"># [[-0.1314746 ,  9.7949323 ,  5.08515349,  3.45149176],</span></span><br><span class="line"><span class="comment"># [10.28341738,  3.44206066,  2.81643619,  4.02672754],</span></span><br><span class="line"><span class="comment"># [ 6.55257518, -0.6978715 ,  0.28978818,  1.53648395]] # 推荐顺序-&gt; 军事,小说,动漫</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ################################ 推荐</span></span><br><span class="line">item_user_matrix = matrix_new.transpose()</span><br><span class="line">svd_df = pd.DataFrame(item_user_matrix, columns=[<span class="string">&#x27;user0&#x27;</span>, <span class="string">&#x27;user1&#x27;</span>, <span class="string">&#x27;user2&#x27;</span>], index=df.columns)</span><br><span class="line">svd_df[<span class="string">&#x27;user2&#x27;</span>].sort_values(ascending=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Out[18]:</span></span><br><span class="line"><span class="comment"># 军事    6.552575</span></span><br><span class="line"><span class="comment"># 小说    1.536484</span></span><br><span class="line"><span class="comment"># 动漫    0.289788</span></span><br><span class="line"><span class="comment"># 言情   -0.697871</span></span><br><span class="line"><span class="comment"># Name: 2, dtype: float64</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ###################################### 计算用户喜好相似度</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">cos</span>(<span class="params">vec1, vec2</span>):</span><br><span class="line">    <span class="keyword">return</span> vec1.dot(vec2) / np.linalg.norm(vec1) * np.linalg.norm(vec2)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(U.shape[<span class="number">0</span>]):</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(i + <span class="number">1</span>, U.shape[<span class="number">0</span>]):</span><br><span class="line">        vec1 = U[i, :]</span><br><span class="line">        vec2 = U[j, :]</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&#x27;User<span class="subst">&#123;i&#125;</span>和User<span class="subst">&#123;j&#125;</span>的相似度:<span class="subst">&#123;cos(vec1, vec2)&#125;</span>&#x27;</span>)</span><br><span class="line"><span class="comment"># User0和User1的相似度:0.11017178104828797</span></span><br><span class="line"><span class="comment"># User0和User2的相似度:-0.11652231240752381</span></span><br><span class="line"><span class="comment"># User1和User2的相似度:0.28527719555421444</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 那同理，item之间的相似度也可以简单通过这种方式进行计算</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h2><p>啦啦啦，现在也可以尝试其他做法，比如wide&amp;deep，DSSM，DeepFM，pairwise,pointwise，具体看业务。</p>
+<p>以后再有机会更新。</p>
+<h2 id="再次更新"><a href="#再次更新" class="headerlink" title="再次更新"></a>再次更新</h2><p>前段时间面试了一个大佬，他之前在腾讯做过腾讯新闻个性化推荐，在2016～2019年期间，他的做法是这样的，<br>一共有三个graph，user，tag，article，将这三个进行关联到一起形成user-tag-article网络，基于这个网络进行随机游走，然后使用word2vec进行向量化，进行推荐。</p>
+<p>虽然这种技术可能放到现在来说有点落伍了，但是对这种做法挺感兴趣，整体实现思路也并不难，所以尝试了下。</p>
+<p>我将代码放到了<a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/tree/m2/python/graph_rank_walk_rs">graph word2vec embedding</a>，感兴趣的话可以看看～</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2020/06/10/%E5%86%85%E5%AE%B9%E6%8E%A8%E8%8D%90%E8%B0%83%E7%A0%94/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-django-migration的工作机制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1572,88 +1670,9 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-APP首页框架搭建" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/06/08/APP%E9%A6%96%E9%A1%B5%E6%A1%86%E6%9E%B6%E6%90%AD%E5%BB%BA/">APP首页框架搭建</a>
-    </h1>
-  
-
-        
-        <a href="/2019/06/08/APP%E9%A6%96%E9%A1%B5%E6%A1%86%E6%9E%B6%E6%90%AD%E5%BB%BA/" class="archive-article-date">
-  	<time datetime="2019-06-08T07:33:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-06-08</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="项目开源了，欢迎star～"><a href="#项目开源了，欢迎star～" class="headerlink" title="项目开源了，欢迎star～"></a>项目开源了，欢迎star～</h2><blockquote>
-<p><a target="_blank" rel="noopener" href="https://github.com/geasyheart/voice_change">https://github.com/geasyheart/voice_change</a></p>
-</blockquote>
-<h2 id="顶部导航栏"><a href="#顶部导航栏" class="headerlink" title="顶部导航栏"></a>顶部导航栏</h2><figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&#x27;package:flutter/material.dart&#x27;</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TabbedAppBarSample</span> <span class="keyword">extends</span> <span class="title">StatelessWidget</span></span>&#123;</span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  Widget build(BuildContext context) &#123;</span><br><span class="line">    <span class="keyword">return</span> MaterialApp(</span><br><span class="line">      home: DefaultTabController(</span><br><span class="line">          length: choices.length,</span><br><span class="line">          child: Scaffold(</span><br><span class="line">            appBar: AppBar(</span><br><span class="line">              title: <span class="keyword">const</span> Text(<span class="string">&#x27;Tabbed AppBar&#x27;</span>),</span><br><span class="line">              bottom: TabBar(</span><br><span class="line">                  isScrollable: <span class="keyword">true</span>,</span><br><span class="line">                  tabs: choices.map((Choice choice)&#123;</span><br><span class="line">                    <span class="keyword">return</span> Tab(</span><br><span class="line">                      text: choice.title,</span><br><span class="line">                      icon: Icon(choice.icon)</span><br><span class="line">                    );</span><br><span class="line">                  &#125;).toList()</span><br><span class="line">              ),</span><br><span class="line">            ),</span><br><span class="line">            body: TabBarView(children: choices.map((Choice choice)&#123;</span><br><span class="line">              <span class="keyword">return</span> Padding(</span><br><span class="line">                padding: <span class="keyword">const</span> EdgeInsets.all(<span class="number">16.0</span>),</span><br><span class="line">                child: ChoiceCard(choice: choice),</span><br><span class="line">              );</span><br><span class="line">            &#125;).toList()),</span><br><span class="line">          )</span><br><span class="line">      ),</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Choice</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> Choice(&#123;<span class="keyword">this</span>.title, <span class="keyword">this</span>.icon&#125;);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">final</span> <span class="built_in">String</span> title;</span><br><span class="line">  <span class="keyword">final</span> IconData icon;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="built_in">List</span>&lt;Choice&gt; choices = <span class="keyword">const</span> &lt;Choice&gt;[</span><br><span class="line">  <span class="keyword">const</span> Choice(title: <span class="string">&#x27;CAR&#x27;</span>, icon: Icons.directions_car),</span><br><span class="line">  <span class="keyword">const</span> Choice(title: <span class="string">&#x27;BICYCLE&#x27;</span>, icon: Icons.directions_bike),</span><br><span class="line">  <span class="keyword">const</span> Choice(title: <span class="string">&#x27;BOAT&#x27;</span>, icon: Icons.directions_boat),</span><br><span class="line">  <span class="keyword">const</span> Choice(title: <span class="string">&#x27;TRAIN&#x27;</span>, icon: Icons.directions_railway),</span><br><span class="line">  <span class="keyword">const</span> Choice(title: <span class="string">&#x27;WALK&#x27;</span>, icon: Icons.directions_walk)</span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ChoiceCard</span> <span class="keyword">extends</span> <span class="title">StatelessWidget</span></span>&#123;</span><br><span class="line">  <span class="keyword">const</span> ChoiceCard(&#123;Key key, <span class="keyword">this</span>.choice&#125;): <span class="keyword">super</span>(key: key);</span><br><span class="line">  <span class="keyword">final</span> Choice choice;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  Widget build(BuildContext context) &#123;</span><br><span class="line">    <span class="keyword">final</span> TextStyle textStyle = Theme.of(context).textTheme.display1;</span><br><span class="line">    <span class="keyword">return</span> Card(</span><br><span class="line">      color: Colors.white,</span><br><span class="line">      child: Center(</span><br><span class="line">        child: Column(</span><br><span class="line">          mainAxisSize: MainAxisSize.min,</span><br><span class="line">          crossAxisAlignment: CrossAxisAlignment.center,</span><br><span class="line">          children: &lt;Widget&gt;[</span><br><span class="line">            Icon(choice.icon, size: <span class="number">128.0</span>, color: textStyle.color),</span><br><span class="line">            Text(choice.title, style: textStyle,)</span><br><span class="line">          ],</span><br><span class="line">        ),</span><br><span class="line">      )</span><br><span class="line"></span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> main() =&gt; runApp(TabbedAppBarSample());</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>示例图：</p>
-<img src="/2019/06/08/APP%E9%A6%96%E9%A1%B5%E6%A1%86%E6%9E%B6%E6%90%AD%E5%BB%BA/flutter-1.png" class="" title="顶部导航图">
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">flutter</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/06/08/APP%E9%A6%96%E9%A1%B5%E6%A1%86%E6%9E%B6%E6%90%AD%E5%BB%BA/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/9/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><a class="page-number" href="/page/12/">12</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/11/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/9/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><a class="page-number" href="/page/12/">12</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/11/">Next &amp;raquo;</a>
     </nav>
   
 

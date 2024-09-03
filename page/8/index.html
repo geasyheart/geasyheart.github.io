@@ -206,6 +206,109 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-激活函数以及损失函数" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/10/05/%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E4%BB%A5%E5%8F%8A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/">激活函数以及损失函数</a>
+    </h1>
+  
+
+        
+        <a href="/2021/10/05/%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E4%BB%A5%E5%8F%8A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/" class="archive-article-date">
+  	<time datetime="2021-10-05T12:58:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-05</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="sigmoid"><a href="#sigmoid" class="headerlink" title="sigmoid"></a>sigmoid</h2><blockquote>
+<p> sigmoid函数和tanh函数是研究早期被广泛使用的2种激活函数。两者都为S型饱和函数。 </p>
+</blockquote>
+<ol>
+<li><code>当sigmoid 函数输入的值趋于正无穷或负无穷时，梯度会趋近零，从而发生梯度弥散现象</code>。</li>
+<li><code>sigmoid函数的输出恒为正值，不是以零为中心的，这会导致权值更新时只能朝一个方向更新，从而影响收敛速度。</code></li>
+</ol>
+<blockquote>
+<p>tanh激活函数是sigmoid 函数的改进版，是以零为中心的对称函数，收敛速度快，不容易出现 loss 值晃动，<code>但是无法解决梯度弥散的问题</code>。</p>
+</blockquote>
+<p>2个函数的计算量都是指数级的，计算相对复杂。softsign 函数是 tanh 函数的改进版，为 S 型饱和函数，以零为中心，值域为（−1，1）。</p>
+<h2 id="公式"><a href="#公式" class="headerlink" title="公式"></a>公式</h2><p><a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/blob/m2/python/forward_examples">更多可以直接看</a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="keyword">import</span> math</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch.functional <span class="keyword">import</span> F</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;sigmoid&#x27;</span>.center(<span class="number">60</span>, <span class="string">&#x27;-&#x27;</span>))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">sigmoid</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span> / (<span class="number">1</span> + math.exp(-x))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(torch.sigmoid(torch.tensor([<span class="number">1.</span>, <span class="number">2.</span>])))</span><br><span class="line"><span class="built_in">print</span>([sigmoid(<span class="number">1.</span>), sigmoid(<span class="number">2.</span>)])</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;softmax&#x27;</span>.center(<span class="number">60</span>, <span class="string">&#x27;-&#x27;</span>))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">softmax</span>(<span class="params">xs</span>):</span><br><span class="line">    z_exp = [math.exp(x) <span class="keyword">for</span> x <span class="keyword">in</span> xs]</span><br><span class="line">    sum_z_exp = <span class="built_in">sum</span>(z_exp)</span><br><span class="line">    <span class="keyword">return</span> [_z_exp / sum_z_exp <span class="keyword">for</span> _z_exp <span class="keyword">in</span> z_exp]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(torch.softmax(torch.tensor([<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">7.</span>]), dim=-<span class="number">1</span>))</span><br><span class="line"><span class="built_in">print</span>(softmax([<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">7.</span>]))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;tanh&#x27;</span>.center(<span class="number">60</span>, <span class="string">&#x27;-&#x27;</span>))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">tanh</span>(<span class="params">x</span>):</span><br><span class="line">    <span class="keyword">return</span> (math.exp(x) - math.exp(-x)) / (math.exp(x) + math.exp(-x))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(torch.tanh(torch.tensor([<span class="number">1.</span>, <span class="number">2.</span>])))</span><br><span class="line"><span class="built_in">print</span>([tanh(<span class="number">1.</span>), tanh(<span class="number">2.</span>)])</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;cross_entropy&#x27;</span>.center(<span class="number">60</span>, <span class="string">&#x27;-&#x27;</span>))</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">my_cross_entropy</span>(<span class="params"><span class="built_in">input</span>, target, reduction=<span class="string">&quot;mean&quot;</span></span>):</span><br><span class="line">    <span class="comment"># input.shape: torch.size([-1, class])</span></span><br><span class="line">    <span class="comment"># target.shape: torch.size([-1])</span></span><br><span class="line">    <span class="comment"># reduction = &quot;mean&quot; or &quot;sum&quot;</span></span><br><span class="line">    <span class="comment"># input是模型输出的结果，与target求loss</span></span><br><span class="line">    <span class="comment"># target的长度和input第一维的长度一致</span></span><br><span class="line">    <span class="comment"># target的元素值为目标class</span></span><br><span class="line">    <span class="comment"># reduction默认为mean，即对loss求均值</span></span><br><span class="line">    <span class="comment"># 还有另一种为sum，对loss求和</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 这里对input所有元素求exp</span></span><br><span class="line">    exp = torch.exp(<span class="built_in">input</span>)</span><br><span class="line">    <span class="comment"># 根据target的索引，在exp第一维取出元素值，这是softmax的分子</span></span><br><span class="line">    tmp1 = exp.gather(<span class="number">1</span>, target.unsqueeze(-<span class="number">1</span>)).squeeze()</span><br><span class="line">    <span class="comment"># 在exp第一维求和，这是softmax的分母</span></span><br><span class="line">    tmp2 = exp.<span class="built_in">sum</span>(<span class="number">1</span>)</span><br><span class="line">    <span class="comment"># softmax公式：ei / sum(ej)</span></span><br><span class="line">    softmax = tmp1 / tmp2</span><br><span class="line">    <span class="comment"># cross-entropy公式： -yi * log(pi)</span></span><br><span class="line">    <span class="comment"># 因为target的yi为1，其余为0，所以在tmp1直接把目标拿出来，</span></span><br><span class="line">    <span class="comment"># 公式中的pi就是softmax的结果</span></span><br><span class="line">    log = -torch.log(softmax)</span><br><span class="line">    <span class="comment"># 官方实现中，reduction有mean/sum及none</span></span><br><span class="line">    <span class="comment"># 只是对交叉熵后处理的差别</span></span><br><span class="line">    <span class="keyword">if</span> reduction == <span class="string">&quot;mean&quot;</span>:</span><br><span class="line">        <span class="keyword">return</span> log.mean()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> log.<span class="built_in">sum</span>()</span><br><span class="line"></span><br><span class="line"><span class="comment"># example1</span></span><br><span class="line"><span class="comment"># input = torch.randn(3, 5,)</span></span><br><span class="line"><span class="comment"># target = torch.randint(5, (3,), dtype=torch.int64)</span></span><br><span class="line"><span class="comment"># example2</span></span><br><span class="line"><span class="built_in">input</span> = torch.tensor([[<span class="number">0.1</span>, <span class="number">0.9</span>], [<span class="number">0.9</span>, <span class="number">0.1</span>]])</span><br><span class="line">target = torch.tensor([<span class="number">1</span>, <span class="number">0</span>])</span><br><span class="line"><span class="comment"># example3</span></span><br><span class="line"><span class="comment"># input = torch.tensor([[0., 1.], [1., 0.]])</span></span><br><span class="line"><span class="comment"># target = torch.tensor([1, 0])</span></span><br><span class="line">loss1_mean = F.cross_entropy(<span class="built_in">input</span>, target)</span><br><span class="line">loss2_mean = my_cross_entropy(<span class="built_in">input</span>, target)</span><br><span class="line"><span class="built_in">print</span>(loss1_mean)</span><br><span class="line"><span class="built_in">print</span>(loss2_mean)</span><br><span class="line"></span><br><span class="line">loss1_sum = F.cross_entropy(<span class="built_in">input</span>, target, reduction=<span class="string">&quot;sum&quot;</span>)</span><br><span class="line">loss2_sum = my_cross_entropy(<span class="built_in">input</span>, target, reduction=<span class="string">&quot;sum&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(loss1_sum)</span><br><span class="line"><span class="built_in">print</span>(loss2_sum)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">bce_loss_with_logit</span>(<span class="params">y_pred, y_true, reduction=<span class="string">&#x27;mean&#x27;</span></span>):</span><br><span class="line">    y_pred = sigmoid(y_pred)</span><br><span class="line"></span><br><span class="line">    loss = -y_true * torch.log(y_pred) - (<span class="number">1</span> - y_true) * torch.log(<span class="number">1</span> - y_pred)</span><br><span class="line">    <span class="keyword">if</span> reduction == <span class="string">&#x27;mean&#x27;</span>:</span><br><span class="line">        <span class="keyword">return</span> torch.mean(loss)</span><br><span class="line">    <span class="keyword">raise</span> NotImplementedError</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="交叉熵"><a href="#交叉熵" class="headerlink" title="交叉熵"></a>交叉熵</h2><p>有木有发现，<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E4%BC%AF%E5%8A%AA%E5%88%A9%E5%88%86%E5%B8%83">伯努利分布</a>加上log就是交叉熵。</p>
+<p>另外其实可以理解交叉熵就是极大似然估计加上log。</p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/pjfnMgAnnIk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+
+<h2 id="如何解释梯度消失呢？"><a href="#如何解释梯度消失呢？" class="headerlink" title="如何解释梯度消失呢？"></a>如何解释梯度消失呢？</h2><blockquote>
+<p>描述</p>
+</blockquote>
+<p>梯度消失是指模型在反向传播的过程中，更上层模型获取到的梯度值越来越小，导致更上层的权重基本保持不变，导致整个模型无法正常收敛以及训练。</p>
+<blockquote>
+<p>原因？<br>其出现原因在Xavier Glorot和Yoshua Bengio在2010年的一篇论文中阐述了一些观点，包含像当时流行的sigmoid激活函数以及均值为0标准差为1的权重初始化方案，每层输出的方差远大于输入的方差，随着网络的延伸，方差在每一层之后都会增加，直到激活函数在顶层达到饱和为止。而实际像simoid这种激活函数随x的增大其导数值趋向于0,导致在反向传播的过程中，基本没有什么可以传播回去。</p>
+</blockquote>
+<blockquote>
+<p>解决方式？</p>
+</blockquote>
+<p>他提出应该在每一层网络的输出的方差等于其输入的方差。但是除非该层具有相等数量的输入和神经元，否则这条条件无法满足，故提出一些这种方案，像Xavier初始化或者Glorot初始化。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/10/05/%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E4%BB%A5%E5%8F%8A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-一些mask的操作理解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1135,94 +1238,9 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-批次数据处理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/06/28/%E6%89%B9%E6%AC%A1%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86/">批次数据处理</a>
-    </h1>
-  
-
-        
-        <a href="/2021/06/28/%E6%89%B9%E6%AC%A1%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86/" class="archive-article-date">
-  	<time datetime="2021-06-28T01:54:08.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-28</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>在数据处理里，常使用DataSet和DataLoader，关于具体使用此处不介绍，对于每一个batch_size里的数据来讲，<br>一般数据是<code>shuffle=True</code>，即表示打乱顺序，能够使数据更无规律和更为随机。但是如果对于数据样本不定长的情况或者说分布不均匀的情况下，<br>要使其定长，做法就是pad到一个固定长度，如果长短分布差距大呢？？</p>
-<p>比如：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">example1: 我有一个小摩托，我从来也不急，骑着我的小摩托，从此把它骑。</span><br><span class="line">example2: 我爱南京。</span><br></pre></td></tr></table></figure>
-
-<p>如果将<code>example2</code>和<code>example1</code>pad到一个固定长度，pad太多。（虽然你可以扯进来mask，但是要在model的每一layer都要设置mask,关于mask此处忽略。）</p>
-<p>如何在一个batch_size样本里面使数据分布更为接近？</p>
-<p>kmean algo for clustering the feature by length.</p>
-<p>kmeans等聚类算法就可以辅助解决，以每条数据的长度为依据。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">kmeans</span>(<span class="params">x, k, max_it=<span class="number">32</span></span>):</span><br><span class="line">    <span class="string">r&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    KMeans algorithm for clustering the sentences by length.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        x (list[int]):</span></span><br><span class="line"><span class="string">            The list of sentence lengths.</span></span><br><span class="line"><span class="string">        k (int):</span></span><br><span class="line"><span class="string">            The number of clusters.</span></span><br><span class="line"><span class="string">            This is an approximate value. The final number of clusters can be less or equal to `k`.</span></span><br><span class="line"><span class="string">        max_it (int):</span></span><br><span class="line"><span class="string">            Maximum number of iterations.</span></span><br><span class="line"><span class="string">            If centroids does not converge after several iterations, the algorithm will be early stopped.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        list[float], list[list[int]]:</span></span><br><span class="line"><span class="string">            The first list contains average lengths of sentences in each cluster.</span></span><br><span class="line"><span class="string">            The second is the list of clusters holding indices of data points.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Examples:</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; x = torch.randint(10,20,(10,)).tolist()</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; x</span></span><br><span class="line"><span class="string">        [15, 10, 17, 11, 18, 13, 17, 19, 18, 14]</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; centroids, clusters = kmeans(x, 3)</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; centroids</span></span><br><span class="line"><span class="string">        [10.5, 14.0, 17.799999237060547]</span></span><br><span class="line"><span class="string">        &gt;&gt;&gt; clusters</span></span><br><span class="line"><span class="string">        [[1, 3], [0, 5, 9], [2, 4, 6, 7, 8]]</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># the number of clusters must not be greater than the number of datapoints</span></span><br><span class="line">    x, k = torch.tensor(x, dtype=torch.<span class="built_in">float</span>), <span class="built_in">min</span>(<span class="built_in">len</span>(x), k)</span><br><span class="line">    <span class="comment"># collect unique datapoints</span></span><br><span class="line">    d = x.unique()</span><br><span class="line">    <span class="comment"># initialize k centroids randomly</span></span><br><span class="line">    c = d[torch.randperm(<span class="built_in">len</span>(d))[:k]]</span><br><span class="line">    <span class="comment"># assign each datapoint to the cluster with the closest centroid</span></span><br><span class="line">    dists, y = torch.abs_(x.unsqueeze(-<span class="number">1</span>) - c).<span class="built_in">min</span>(-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(max_it):</span><br><span class="line">        <span class="comment"># if an empty cluster is encountered,</span></span><br><span class="line">        <span class="comment"># choose the farthest datapoint from the biggest cluster and move that the empty one</span></span><br><span class="line">        mask = torch.arange(k).unsqueeze(-<span class="number">1</span>).eq(y)</span><br><span class="line">        none = torch.where(~mask.<span class="built_in">any</span>(-<span class="number">1</span>))[<span class="number">0</span>].tolist()</span><br><span class="line">        <span class="keyword">while</span> <span class="built_in">len</span>(none) &gt; <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> none:</span><br><span class="line">                <span class="comment"># the biggest cluster</span></span><br><span class="line">                b = torch.where(mask[mask.<span class="built_in">sum</span>(-<span class="number">1</span>).argmax()])[<span class="number">0</span>]</span><br><span class="line">                <span class="comment"># the datapoint farthest from the centroid of cluster b</span></span><br><span class="line">                f = dists[b].argmax()</span><br><span class="line">                <span class="comment"># update the assigned cluster of f</span></span><br><span class="line">                y[b[f]] = i</span><br><span class="line">                <span class="comment"># re-calculate the mask</span></span><br><span class="line">                mask = torch.arange(k).unsqueeze(-<span class="number">1</span>).eq(y)</span><br><span class="line">            none = torch.where(~mask.<span class="built_in">any</span>(-<span class="number">1</span>))[<span class="number">0</span>].tolist()</span><br><span class="line">        <span class="comment"># update the centroids</span></span><br><span class="line">        c, old = (x * mask).<span class="built_in">sum</span>(-<span class="number">1</span>) / mask.<span class="built_in">sum</span>(-<span class="number">1</span>), c</span><br><span class="line">        <span class="comment"># re-assign all datapoints to clusters</span></span><br><span class="line">        dists, y = torch.abs_(x.unsqueeze(-<span class="number">1</span>) - c).<span class="built_in">min</span>(-<span class="number">1</span>)</span><br><span class="line">        <span class="comment"># stop iteration early if the centroids converge</span></span><br><span class="line">        <span class="keyword">if</span> c.equal(old):</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    <span class="comment"># assign all datapoints to the new-generated clusters</span></span><br><span class="line">    <span class="comment"># the empty ones are discarded</span></span><br><span class="line">    assigned = y.unique().tolist()</span><br><span class="line">    <span class="comment"># get the centroids of the assigned clusters</span></span><br><span class="line">    centroids = c[assigned].tolist()</span><br><span class="line">    <span class="comment"># map all values of datapoints to buckets</span></span><br><span class="line">    clusters = [torch.where(y.eq(i))[<span class="number">0</span>].tolist() <span class="keyword">for</span> i <span class="keyword">in</span> assigned]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> centroids, clusters</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>这样使用的话，那么batch_size就木有啥子用处了，有可能一个batch样本量为1,也有可能为设置的上限。</p>
-<p>但是转念一想，其实也可以不用如此复杂，直接sorted by length也是可以的嘛，具体解释就忽略了。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/06/28/%E6%89%B9%E6%AC%A1%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/7/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/9/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/7/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/9/">Next &amp;raquo;</a>
     </nav>
   
 

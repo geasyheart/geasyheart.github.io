@@ -206,6 +206,123 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-10-03LVM实作流程" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/21/10-03LVM%E5%AE%9E%E4%BD%9C%E6%B5%81%E7%A8%8B/">10_03LVM实作流程</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/21/10-03LVM%E5%AE%9E%E4%BD%9C%E6%B5%81%E7%A8%8B/" class="archive-article-date">
+  	<time datetime="2015-02-21T13:33:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-21</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="LVM实作流程"><a href="#LVM实作流程" class="headerlink" title="LVM实作流程#"></a>LVM实作流程#</h2><ol>
+<li>分区 <blockquote>
+<p>类型为8E<br>fdisk-l &#x2F;dev&#x2F;sdb{1,2,3} </p>
+</blockquote>
+</li>
+<li>创建pv <blockquote>
+<p>pvcreate<br>pvmove<br>pvscan<br>pvdisplay<br>pvremove<br>pvcreate &#x2F;dev&#x2F;sdb{1,2,3}<br>这个时候所有分区为pv，即分区为一个个的PV； </p>
+</blockquote>
+</li>
+<li>创建VG <blockquote>
+<p>vgcreate<br>vgscan<br>vgdisplay<br>vgextend 在vg内增加额外pv such as: vgextend meiyunvg &#x2F;dev&#x2F;sdc <br>vgreduce 在vg内删除pv vgreduce meuyun &#x2F;dev&#x2F;sdb2<br>vgchange 设置vg是否启动（active）<br>vgremove 删除一个vg<br>vgcreate -s 16M meiyunvg &#x2F;dev&#x2F;sdb{1,2,3} -s指定PE大小，默认4M，最大容量即：4M*65534&#x3D;256G ，meiyunvg为卷组的名称，后加vg容易查看；<br>这样就合并成一个大的vg了； </p>
+</blockquote>
+</li>
+<li>创建LV <blockquote>
+<p>-L 后面接容量 最好为PE的倍数<br>-l 后面接PE的数量<br>-n 后面接LV的名称<br>lvcreate -l 356 -n meiyunlv meiyunvg<br>即增加到356*PE,而添加+号，如下所示，表示在原来的基础上再进行增加。 </p>
+</blockquote>
+</li>
+<li>格式 <blockquote>
+<p>mkfs.ext4 &#x2F;dev&#x2F;meiyunvg&#x2F;meiyunlv </p>
+</blockquote>
+</li>
+<li>挂载 <blockquote>
+<p>mkdir &#x2F;mnt&#x2F;lvm<br>mount &#x2F;dev&#x2F;meiyunvg&#x2F;meiyunlv &#x2F;mnt&#x2F;lvm<br>修改&#x2F;etc&#x2F;fstab</p>
+</blockquote>
+</li>
+</ol>
+<p>实际的名称在&#x2F;dev&#x2F;mapper下，不能有-。 </p>
+<h2 id="放大LV容量"><a href="#放大LV容量" class="headerlink" title="放大LV容量"></a>放大LV容量</h2><blockquote>
+<p>lvresize -l +179 &#x2F;dev&#x2F;meiyunvg&#x2F;meiyunlv<br>lvdisplay 查看下lv有多大；比如有6.11G<br>然后增加文件系统的容量：<br>resize2fs &#x2F;dev&#x2F;meiyunvg&#x2F;meiyunlv  6110M<br>或者使用:<br>resize2fs -p  &#x2F;dev&#x2F;meiyunvg&#x2F;meiyunlv (即自动扩展)<br>df -h </p>
+</blockquote>
+<h2 id="减少LV容量"><a href="#减少LV容量" class="headerlink" title="减少LV容量"></a>减少LV容量</h2><blockquote>
+<p>直接执行会提示无法在线减少，先卸载umount &#x2F;mnt&#x2F;lvm<br>resize2fs &#x2F;dev&#x2F;meiyunvg&#x2F;meiyunlv 4900M <br>e2fsck -f &#x2F;dev&#x2F;meiyunvg&#x2F;meiyunlv<br>resize2fs &#x2F;dev&#x2F;meiyunvg&#x2F;meiyunlv 4900M<br> 如果提示resizing…to …block，表明执行成功；<br>lvresize -L (-){(6.1G-4.9G)&#x2F;16m}&#x2F;dev&#x2F;meiyunvg&#x2F;meiyunlv<br> 不过这样可能会损失数据 </p>
+</blockquote>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/21/10-03LVM%E5%AE%9E%E4%BD%9C%E6%B5%81%E7%A8%8B/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-10-02Raid及mdadm命令之二" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1142,98 +1259,9 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-07-04特殊权限SUID等详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/13/07-04%E7%89%B9%E6%AE%8A%E6%9D%83%E9%99%90SUID%E7%AD%89%E8%AF%A6%E8%A7%A3/">07_04特殊权限SUID等详解</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/13/07-04%E7%89%B9%E6%AE%8A%E6%9D%83%E9%99%90SUID%E7%AD%89%E8%AF%A6%E8%A7%A3/" class="archive-article-date">
-  	<time datetime="2015-02-12T17:07:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-13</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>特殊权限:<br> SUID:运行某程序时，相应进程的属主是程序文件自身的属主，而不是启动者；<br> chmod u+s FILE<br> 如果FILE本身原来就有执行权限，则SUID显示为s；否则为S；<br> 一般这个可以认为以root用户的权限运行这个程序；<br> 如：getfacl &#x2F;bin&#x2F;cat ，可以看到owner:root group:root<br> SGID:运行某程序时，相应进程的属组是程序文件自身的属组，而不是启动者所属的基本组；<br> chmod g+s FILE<br> 如果一个目录设置了SGID位，那么如果任何一个用户对这个目录有写权限的话，<br> 他在这个目录所建立的文件的组都会自动转为这个目录的属主所在的组，<br> 而文件所有者不变，还是属于建立这个文件的用户。 </p>
-<p> 如:<br> 在&#x2F;tmp目录下创建一个目录progrem, </p>
- <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#mkdir /tmp/progrem </span><br><span class="line">#chmod 770 /tmp/progrem </span><br><span class="line">#groupadd develop 创建一个新组 </span><br><span class="line">#创建三个用户.user1,user2,user3 </span><br><span class="line">#usermod -a -G develop user1,2,3 </span><br></pre></td></tr></table></figure>
-<p> 当user1在&#x2F;tmp&#x2F;progrem创建文件时，文件的所有者和所属组都是user1,即其他的组成员没法编辑这个文件，只能看，，所以为了<br> 其他组成员可以参与编辑这个文件，可以:: chmod 2770 &#x2F;tmp&#x2F;progrem,这样再创建文件的所属组就属于文件的所属组了；<br> （而这个也是平常使用最多的一个）<br> Sticky:<br> chmod o+t DIR<br> t的作用在于每个人都可以使用这个目录，但是没法删除这个目录以及这个目录下的任何东西，即使给w权限，也只是可以修改内容，也同样没法删除文件。 </p>
-<p> 1755 2755 4755 </p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/13/07-04%E7%89%B9%E6%AE%8A%E6%9D%83%E9%99%90SUID%E7%AD%89%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/25/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/24/">24</a><a class="page-number" href="/page/25/">25</a><span class="page-number current">26</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/27/">Next &amp;raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/25/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/24/">24</a><a class="page-number" href="/page/25/">25</a><span class="page-number current">26</span><a class="page-number" href="/page/27/">27</a><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/27/">Next &amp;raquo;</a>
     </nav>
   
 
