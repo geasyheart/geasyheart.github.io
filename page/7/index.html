@@ -206,6 +206,90 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-活到老学到老之index操作" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/12/16/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81%E4%B9%8Bindex%E6%93%8D%E4%BD%9C/">活到老学到老之index操作</a>
+    </h1>
+  
+
+        
+        <a href="/2021/12/16/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81%E4%B9%8Bindex%E6%93%8D%E4%BD%9C/" class="archive-article-date">
+  	<time datetime="2021-12-16T02:20:21.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-16</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>快速想一想，你能想到torch有哪些常见的index操作？？</p>
+<h2 id="1-gather"><a href="#1-gather" class="headerlink" title="1. gather"></a>1. gather</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>a = torch.tensor([[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>],</span><br><span class="line">        [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]])</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a.gather(dim=<span class="number">1</span>, index=torch.tensor([[<span class="number">0</span>,<span class="number">1</span>], [<span class="number">1</span>,<span class="number">2</span>]]))</span><br><span class="line">tensor([[<span class="number">1</span>, <span class="number">2</span>],</span><br><span class="line">        [<span class="number">5</span>, <span class="number">6</span>]])</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="2-index-select"><a href="#2-index-select" class="headerlink" title="2. index_select"></a>2. index_select</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>a</span><br><span class="line">tensor([[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>],</span><br><span class="line">        [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]])</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a.index_select(dim=<span class="number">1</span>, index=torch.tensor([<span class="number">1</span>,<span class="number">2</span>]))</span><br><span class="line">tensor([[<span class="number">2</span>, <span class="number">3</span>],</span><br><span class="line">        [<span class="number">5</span>, <span class="number">6</span>]])</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="3-骚气的来了哦"><a href="#3-骚气的来了哦" class="headerlink" title="3. 骚气的来了哦"></a>3. 骚气的来了哦</h2><p>根据上面例子可以看到，<code>a</code>为矩阵，选择<code>a</code>中的index，但是下面介绍一个map操作.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>index</span><br><span class="line">tensor([[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>],</span><br><span class="line">        [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]])</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a = torch.tensor([<span class="number">11</span>, <span class="number">22</span>, <span class="number">33</span>, <span class="number">44</span>, <span class="number">55</span>, <span class="number">66</span>, <span class="number">77</span>])</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a</span><br><span class="line">tensor([<span class="number">11</span>, <span class="number">22</span>, <span class="number">33</span>, <span class="number">44</span>, <span class="number">55</span>, <span class="number">66</span>, <span class="number">77</span>])</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>index</span><br><span class="line">tensor([[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>],</span><br><span class="line">        [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]])</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a[index]</span><br><span class="line">tensor([[<span class="number">22</span>, <span class="number">33</span>, <span class="number">44</span>],</span><br><span class="line">        [<span class="number">55</span>, <span class="number">66</span>, <span class="number">77</span>]])</span><br></pre></td></tr></table></figure>
+
+<p>这种操作有一个真实场景，比如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 这是两个特征</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>words = [<span class="string">&#x27;我&#x27;</span>, <span class="string">&#x27;爱&#x27;</span>, <span class="string">&#x27;中&#x27;</span>, <span class="string">&#x27;国&#x27;</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>pos = [<span class="string">&#x27;n&#x27;</span>, <span class="string">&#x27;v&#x27;</span>, <span class="string">&#x27;n&#x27;</span>, <span class="string">&#x27;n&#x27;</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 假设words变成了一个4 * 4的临接矩阵，用于表示每个token和其他token的一个关联重要程度</span></span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>words_attn = torch.rand(<span class="number">4</span>,<span class="number">4</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>words_attn</span><br><span class="line">tensor([[<span class="number">0.6279</span>, <span class="number">0.6234</span>, <span class="number">0.9831</span>, <span class="number">0.5267</span>],</span><br><span class="line">        [<span class="number">0.2265</span>, <span class="number">0.8453</span>, <span class="number">0.5740</span>, <span class="number">0.4772</span>],</span><br><span class="line">        [<span class="number">0.7759</span>, <span class="number">0.6952</span>, <span class="number">0.1758</span>, <span class="number">0.3800</span>],</span><br><span class="line">        [<span class="number">0.9998</span>, <span class="number">0.3138</span>, <span class="number">0.5078</span>, <span class="number">0.5565</span>]])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>scores, indices = words_attn.topk(k=<span class="number">2</span>, dim=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>indices</span><br><span class="line">tensor([[<span class="number">2</span>, <span class="number">0</span>],</span><br><span class="line">        [<span class="number">1</span>, <span class="number">2</span>],</span><br><span class="line">        [<span class="number">0</span>, <span class="number">1</span>],</span><br><span class="line">        [<span class="number">0</span>, <span class="number">3</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 假设pos转为了</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>pos_tensor = torch.tensor([<span class="number">111</span>, <span class="number">222</span>, <span class="number">333</span>, <span class="number">444</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. map操作</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>pos_tensor[indices]</span><br><span class="line">tensor([[<span class="number">333</span>, <span class="number">111</span>],</span><br><span class="line">        [<span class="number">222</span>, <span class="number">333</span>],</span><br><span class="line">        [<span class="number">111</span>, <span class="number">222</span>],</span><br><span class="line">        [<span class="number">111</span>, <span class="number">444</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5. 随后就可以接一个embedding搞事情了</span></span><br><span class="line">pos_embedding(pos_tensor[indices])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 6. 总结，这个示例的优点可以看出是快速计算，取topK然后再结合其他的特征进行操作。</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="4-batch-gather"><a href="#4-batch-gather" class="headerlink" title="4. batch_gather"></a>4. batch_gather</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">batch_gather</span>(<span class="params">data: torch.Tensor, index: torch.Tensor</span>):</span><br><span class="line">    index = index.unsqueeze(-<span class="number">1</span>).repeat_interleave(data.size()[-<span class="number">1</span>], dim=-<span class="number">1</span>)  <span class="comment"># (bs, n, hidden)</span></span><br><span class="line">    <span class="comment"># index = index.unsqueeze(-1).expand(*(*index.shape, data.shape[-1]))</span></span><br><span class="line">    <span class="keyword">return</span> torch.gather(data, <span class="number">1</span>, index)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    a = torch.randn(<span class="number">3</span>, <span class="number">128</span>, <span class="number">312</span>)</span><br><span class="line">    indices = torch.tensor([</span><br><span class="line">        [<span class="number">1</span>, <span class="number">2</span>],</span><br><span class="line">        [<span class="number">5</span>, <span class="number">6</span>],</span><br><span class="line">        [<span class="number">7</span>, <span class="number">7</span>]</span><br><span class="line">    ])</span><br><span class="line">    output = batch_gather(a, indices)</span><br><span class="line">    <span class="built_in">print</span>(output.shape)</span><br><span class="line">    <span class="built_in">print</span>((output[<span class="number">0</span>][<span class="number">0</span>] == a[<span class="number">0</span>][<span class="number">1</span>]).<span class="built_in">all</span>())</span><br><span class="line">    <span class="built_in">print</span>((output[<span class="number">0</span>][<span class="number">1</span>] == a[<span class="number">0</span>][<span class="number">2</span>]).<span class="built_in">all</span>())</span><br><span class="line">    <span class="built_in">print</span>((output[<span class="number">1</span>][<span class="number">0</span>] == a[<span class="number">1</span>][<span class="number">5</span>]).<span class="built_in">all</span>())</span><br><span class="line">    <span class="built_in">print</span>((output[<span class="number">1</span>][<span class="number">1</span>] == a[<span class="number">1</span>][<span class="number">6</span>]).<span class="built_in">all</span>())</span><br><span class="line">    <span class="built_in">print</span>((output[<span class="number">2</span>][<span class="number">0</span>] == a[<span class="number">2</span>][<span class="number">7</span>]).<span class="built_in">all</span>())</span><br><span class="line">    <span class="built_in">print</span>((output[<span class="number">2</span>][<span class="number">1</span>] == a[<span class="number">2</span>][<span class="number">7</span>]).<span class="built_in">all</span>())</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/12/16/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81%E4%B9%8Bindex%E6%93%8D%E4%BD%9C/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-语义依存分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -2615,141 +2699,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-依存句法分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/10/15/%E4%BE%9D%E5%AD%98%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/">依存句法分析</a>
-    </h1>
-  
-
-        
-        <a href="/2021/10/15/%E4%BE%9D%E5%AD%98%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-10-15T12:45:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-15</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="捂脸"><a href="#捂脸" class="headerlink" title="捂脸"></a>捂脸</h2><p><a target="_blank" rel="noopener" href="https://github.com/geasyheart/biaffine_dep">欢迎star ^_^</a></p>
-<h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><h3 id="HanLP的定义"><a href="#HanLP的定义" class="headerlink" title="HanLP的定义"></a>HanLP的定义</h3><p>依存句法分析，是指识别语句中词与词之间的依存关系，并揭示其句法结构，包括主谓关系、动宾关系、核心关系等。用依存语言学来理解语义，精准掌握用户意图</p>
-<h3 id="百度ddparser的定义"><a href="#百度ddparser的定义" class="headerlink" title="百度ddparser的定义"></a>百度ddparser的定义</h3><p>依存句法分析是自然语言处理核心技术之一，旨在通过分析句子中词语之间的依存关系来确定句子的句法结构。<br>依存句法分析作为底层技术，可直接用于提升其他NLP任务的效果，这些任务包括但不限于语义角色标注、语义匹配、事件抽取等。</p>
-<h3 id="LTP的定义"><a href="#LTP的定义" class="headerlink" title="LTP的定义"></a>LTP的定义</h3><p>依存语法 (Dependency Parsing, DP) 通过分析语言单位内成分之间的依存关系揭示其句法结构。 直观来讲，依存句法分析识别句子中的“主谓宾”、“定状补”这些语法成分，并分析各成分之间的关系。</p>
-<p><img src="https://www.ltp-cloud.com/static/img/intro_how_dp.jpg" alt="示例图"></p>
-<blockquote>
-<p>小插曲，这些项目中的依存句法实现均来自<a target="_blank" rel="noopener" href="https://github.com/yzhangcs/parser">yzhangcs&#x2F;parser</a>。</p>
-</blockquote>
-<h2 id="数据集解释"><a href="#数据集解释" class="headerlink" title="数据集解释"></a>数据集解释</h2><p>标注数据集分成两种格式(conllu和ocnllx)，其中一种是以conllx结尾，标注示例如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">1	新华社	_	NN	NN	_	7	dep	_	_</span><br><span class="line">2	兰州	_	NR	NR	_	7	dep	_	_</span><br><span class="line">3	二月	_	NT	NT	_	7	dep	_	_</span><br><span class="line">4	十五日	_	NT	NT	_	7	dep	_	_</span><br><span class="line">5	电	_	NN	NN	_	7	dep	_	_</span><br><span class="line">6	（	_	PU	PU	_	7	punct	_	_</span><br><span class="line">7	记者	_	NN	NN	_	0	root	_	_</span><br><span class="line">8	曲直	_	NR	NR	_	7	dep	_	_</span><br><span class="line">9	）	_	PU	PU	_	7	punct	_	_</span><br></pre></td></tr></table></figure>
-
-<p>其中第二列表示分词，第四或者第五表示词性，第七列表示当前词和第几个位置的词是有依存关系的，第八列表示其对应的依存关系是什么。</p>
-<p>dataset for ctb8 in Stanford Dependencies 3.3.0 standard.</p>
-<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><blockquote>
-<p>注意:本文的实现是采用biaffine的方式实现。另外以<a target="_blank" rel="noopener" href="https://github.com/geasyheart/biaffine_dep">biaffine_dep</a>进行讲解。</p>
-</blockquote>
-<blockquote>
-<p>我一共使用两种方式进行实现，一个是一个biaffine，和<a target="_blank" rel="noopener" href="https://aclanthology.org/2020.acl-main.577.pdf">biaffine_ner</a>任务做法一致。第二种就是<code>yzhangcs</code>的做法。</p>
-</blockquote>
-<h3 id="biaffine-ner实现方式"><a href="#biaffine-ner实现方式" class="headerlink" title="biaffine_ner实现方式"></a>biaffine_ner实现方式</h3><p>这种方式是将其变成一个n * n 的矩阵问题，在这个矩阵中预测哪些span为词和词构成依存关系，以及对应的关系是什么，所以这里是一个纯粹的分类问题。</p>
-<p>数据处理代码可参考<a target="_blank" rel="noopener" href="https://github.com/geasyheart/biaffine_dep/blob/1f3b35d7f482599ad929b3629d95b2c40f26c152/src/transform.py#L89">这里</a></p>
-<img src="/2021/10/15/%E4%BE%9D%E5%AD%98%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/t1.png" class="" title="临接矩阵">
-
-<p>按照依存句法的定义：</p>
-<ol>
-<li>当前词只能依存一个其他词，但是可以被多个其他词所组成依存关系。</li>
-<li>如果A依存D，B或者C都在A和D中间，那么B和C都只能在A和D之内进行依存。</li>
-</ol>
-<p>所以根据上图所示，每一行只会有一个值不为0.</p>
-<blockquote>
-<p>这里额外插一句哈，与biaffine_ner一样，作者是使用这种临接矩阵的方式来解决嵌套ner的问题，不过与依存句法相比，可能存在的问题就是过于稀疏。但是与依存句法相比有一个特征，就是只会上三角(triu&#x2F;tril)为1,下三角不会为1,这里可以做mask，具体可看<a target="_blank" rel="noopener" href="https://github.com/geasyheart/biaffine_ner/blob/6f8c877347a3a4f479365a156547172ad2c19bce/src/transform.py#L106">biaffine_ner</a>。</p>
-</blockquote>
-<p>模型结构为:</p>
-<img src="/2021/10/15/%E4%BE%9D%E5%AD%98%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/t2.png" class="" title="模型结构">
-
-<p>从下往上看，第一层可以使用lstm或者bert进行提取特征，特征有两部分，一是词，二是词性。第二层为FFNN_Start和FFNN_End，为啥子叫这个名字，俺也不清楚，反正你就知道是两个MLP，分别接收第一层的输入。第三层是BIaffine classifiner，BIaffine classifiner的代码如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 假设768是mlp出来的hidden_size.</span></span><br><span class="line"><span class="comment"># batch_size, sequence_length, hidden_size = 32, 128,768</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Biaffine</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, n_in=<span class="number">768</span>, n_out=<span class="number">2</span>, bias_x=<span class="literal">True</span>, bias_y=<span class="literal">True</span></span>):</span><br><span class="line">        self.n_in = n_in</span><br><span class="line">        self.n_out = n_out</span><br><span class="line">        self.bias_x = bias_x</span><br><span class="line">        self.bias_y = bias_y</span><br><span class="line"></span><br><span class="line">        self.weight = nn.Parameter(torch.Tensor(n_out, n_in + bias_x, n_in + bias_y))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x, y</span>):</span><br><span class="line">        <span class="keyword">if</span> self.bias_x:</span><br><span class="line">            x = torch.cat((x, torch.ones_like(x[..., :<span class="number">1</span>])), -<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">if</span> self.bias_y:</span><br><span class="line">            y = torch.cat((y, torch.ones_like(y[..., :<span class="number">1</span>])), -<span class="number">1</span>)</span><br><span class="line">        </span><br><span class="line">        b = x.shape[<span class="number">0</span>] <span class="comment"># 32</span></span><br><span class="line">        o = self.weight.shape[<span class="number">0</span>] <span class="comment"># 2</span></span><br><span class="line"></span><br><span class="line">        x = x.unsqueeze(<span class="number">1</span>).expand(-<span class="number">1</span>, o, -<span class="number">1</span>, -<span class="number">1</span>) <span class="comment"># torch.Size([32, 2, 128, 769])</span></span><br><span class="line">        weight = self.weight.unsqueeze(<span class="number">0</span>).expand(b, -<span class="number">1</span>, -<span class="number">1</span>, -<span class="number">1</span>)  <span class="comment"># torch.Size([32, 2, 769, 769])</span></span><br><span class="line">        y = y.unsqueeze(<span class="number">1</span>).expand(-<span class="number">1</span>, o, -<span class="number">1</span>, -<span class="number">1</span>)  <span class="comment"># torch.Size([32, 2, 128, 769])</span></span><br><span class="line">        <span class="comment"># torch.matmul(x, weight): torch.Size([32, 2, 128, 769])</span></span><br><span class="line">        <span class="comment"># y.permute((0, 1, 3, 2)).shape: torch.Size([32, 2, 769, 128])</span></span><br><span class="line">        s = torch.matmul(torch.matmul(x, weight), y.permute((<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">2</span>)))</span><br><span class="line">        <span class="keyword">if</span> s.shape[<span class="number">1</span>] == <span class="number">1</span>:</span><br><span class="line">            s = s.squeeze(dim=<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> s <span class="comment"># torch.Size([32, 2, 128, 128])</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    biaffine = Biaffine()</span><br><span class="line">    x = torch.rand(<span class="number">32</span>, <span class="number">128</span>, <span class="number">768</span>)</span><br><span class="line">    y = torch.rand(<span class="number">32</span>, <span class="number">128</span>, <span class="number">768</span>)</span><br><span class="line">    <span class="built_in">print</span>(biaffine.forward(x, y).shape)</span><br></pre></td></tr></table></figure>
-
-<p>关于biaffine的解释，当然还有triaffine，这个后面有机会再看。总之这里将其变成了batch_size * seq_length * seq_length * n_label的矩阵。<br>那如何理解biaffine呢，我觉得下图说的非常在理。</p>
-<img src="/2021/10/15/%E4%BE%9D%E5%AD%98%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/t3.png" class="" title="理解">
-
-<p>关于bilinear，也可以看<a target="_blank" rel="noopener" href="https://github.com/HIT-SCIR/ltp/blob/master/ltp/nn/bilinear.py">ltp bilinear</a>。</p>
-<p>当然，这里不止这一种方式，你也可以参考<a target="_blank" rel="noopener" href="https://github.com/ShannonAI/mrc-for-flat-nested-ner">ShannonAI&#x2F;mrc-for-flat-nested-ner</a>的实现方式，他的方式<br>更为直接，<a target="_blank" rel="noopener" href="https://github.com/ShannonAI/mrc-for-flat-nested-ner/blob/457b0759f7fd462d0abd0a23441726352716fff9/models/bert_query_ner.py#L54">这里</a>：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, input_ids, token_type_ids=<span class="literal">None</span>, attention_mask=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        input_ids: bert input tokens, tensor of shape [seq_len]</span></span><br><span class="line"><span class="string">        token_type_ids: 0 for query, 1 for context, tensor of shape [seq_len]</span></span><br><span class="line"><span class="string">        attention_mask: attention mask, tensor of shape [seq_len]</span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        start_logits: start/non-start probs of shape [seq_len]</span></span><br><span class="line"><span class="string">        end_logits: end/non-end probs of shape [seq_len]</span></span><br><span class="line"><span class="string">        match_logits: start-end-match probs of shape [seq_len, 1]</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    bert_outputs = self.bert(input_ids, token_type_ids=token_type_ids, attention_mask=attention_mask)</span><br><span class="line"></span><br><span class="line">    sequence_heatmap = bert_outputs[<span class="number">0</span>]  <span class="comment"># [batch, seq_len, hidden]</span></span><br><span class="line">    batch_size, seq_len, hid_size = sequence_heatmap.size()</span><br><span class="line"></span><br><span class="line">    start_logits = self.start_outputs(sequence_heatmap).squeeze(-<span class="number">1</span>)  <span class="comment"># [batch, seq_len, 1]</span></span><br><span class="line">    end_logits = self.end_outputs(sequence_heatmap).squeeze(-<span class="number">1</span>)  <span class="comment"># [batch, seq_len, 1]</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># for every position $i$ in sequence, should concate $j$ to</span></span><br><span class="line">    <span class="comment"># predict if $i$ and $j$ are start_pos and end_pos for an entity.</span></span><br><span class="line">    <span class="comment"># [batch, seq_len, seq_len, hidden]</span></span><br><span class="line">    start_extend = sequence_heatmap.unsqueeze(<span class="number">2</span>).expand(-<span class="number">1</span>, -<span class="number">1</span>, seq_len, -<span class="number">1</span>)</span><br><span class="line">    <span class="comment"># [batch, seq_len, seq_len, hidden]</span></span><br><span class="line">    end_extend = sequence_heatmap.unsqueeze(<span class="number">1</span>).expand(-<span class="number">1</span>, seq_len, -<span class="number">1</span>, -<span class="number">1</span>)</span><br><span class="line">    <span class="comment"># [batch, seq_len, seq_len, hidden*2]</span></span><br><span class="line">    span_matrix = torch.cat([start_extend, end_extend], <span class="number">3</span>)</span><br><span class="line">    <span class="comment"># [batch, seq_len, seq_len]</span></span><br><span class="line">    span_logits = self.span_embedding(span_matrix).squeeze(-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> start_logits, end_logits, span_logits</span><br></pre></td></tr></table></figure>
-
-<p>两个mlp在不同的位置进行unsqueeze，然后进行concat，嘿嘿，这种方式挺骚气并容易理解的。</p>
-<p>至此模型结构以及整理流程说明基本已经结束，损失函数就是使用交叉熵。<br>我用这种方式验证了biaffine_ner和使用这种方式来做dependency parser任务，在对dependency parser结果中，效果不是很好，总结原因上述也提到了，临接矩阵太过稀疏，好歹ner还有一个上三角矩阵做mask。</p>
-<blockquote>
-<p>额外插一句，biaffine_ner这论文水的有点严重呀，妥妥的依存句法的思想呀。更多<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/145528722">吐槽</a>看这里。</p>
-</blockquote>
-<p>那么，有没有一种方式可以将这个任务分成两个部分，一是预测哪些词之间成依存关系，二是对应的标签是什么。然后分别计算各自的loss？？</p>
-<h3 id="yzhangcs实现方式"><a href="#yzhangcs实现方式" class="headerlink" title="yzhangcs实现方式"></a>yzhangcs实现方式</h3><p>这种数据处理并没有变成临接矩阵，而是简简单单的<a target="_blank" rel="noopener" href="https://github.com/geasyheart/biaffine_dep/blob/564925be257d21b563d6db91d9e736d627a7c36a/src/transform.py#L87">如这所示</a></p>
-<p>但是模型结构使用了四个MLP，一共分成两组，一组叫<code>arc_mlp_d</code>，<code>arc_mlp_h</code>，一组叫<code>rel_mlp_d</code>，<code>rel_mlp_h</code>，代码可参考<a target="_blank" rel="noopener" href="https://github.com/geasyheart/biaffine_dep/blob/564925be257d21b563d6db91d9e736d627a7c36a/src/model/__init__.py#L12">这里</a>，分别用来预测arc和rel，emmmm，就是哪些词成依存关系和对应的relation。</p>
-<p>然后各自经过各自的biaffine classfiner，<a target="_blank" rel="noopener" href="https://github.com/geasyheart/biaffine_dep/blob/f637266604e7c7f7deb39b7bbd0fc41f0b7303a7/src/model/__init__.py#L42">看这一行</a>，作者在非可能位置进行填充<code>-math.inf</code>，这也算是一个小技巧了吧，get到了。</p>
-<blockquote>
-<p>——————-重头戏来了，如何计算loss呢，这里手动分割—————————</p>
-</blockquote>
-<p>看<a target="_blank" rel="noopener" href="https://github.com/geasyheart/biaffine_dep/blob/f637266604e7c7f7deb39b7bbd0fc41f0b7303a7/src/biaffine_dep.py#L165">compute_loss函数</a>，在进行计算arc loss时，就是简单的套交叉熵即可，但是在进行计算relation的时候，<a target="_blank" rel="noopener" href="https://github.com/geasyheart/biaffine_dep/blob/564925be257d21b563d6db91d9e736d627a7c36a/src/biaffine_dep.py#L168">这一行</a>，<code>s_rel</code>根据真实的<code>arcs</code>所对应的位置索引降维的<code>s_rel</code>，简单来讲就是我直接获取真实的arcs那一维，从而利用了arcs的特征，然后后续接一个交叉熵进行计算loss，最终俩loss相加最为最终loss。</p>
-<p>相应在decode部分<a target="_blank" rel="noopener" href="https://github.com/geasyheart/biaffine_dep/blob/f637266604e7c7f7deb39b7bbd0fc41f0b7303a7/src/biaffine_dep.py#L154">这里</a>也能概述这行做法。</p>
-<p>不过后续关于生成最大树，emmm，为啥我这么叫，因为就是获取概率最大的那棵树嘛，这里作者提供了两种算法来实现，<code>eisner</code>和<code>mst</code>，具体实现就不讲了。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此可以看出，在biaffine那层获取词和词之间的关联程度，非常nice的做法，后面就是将其变成一个分类问题来解决，arc分类和rel分类是不同的，这个需要注意。</p>
-<p>再额外插一句，感觉目前的句法分析就是依存句法的天下了哇，像Constituency Parser感觉没有很宽广的发展了。更多可看<a target="_blank" rel="noopener" href="https://github.com/geasyheart/con-parser">我这</a>，手动狗头。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/10/15/%E4%BE%9D%E5%AD%98%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/6/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/8/">Next &amp;raquo;</a>
@@ -2764,7 +2713,7 @@ var _hmt = _hmt || [];
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2024 张宇
+    		&copy; 2025 张宇
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten

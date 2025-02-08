@@ -206,6 +206,115 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-15-all-暂时不更新" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/03/15/15-all-%E6%9A%82%E6%97%B6%E4%B8%8D%E6%9B%B4%E6%96%B0/">15__all_暂时不更新</a>
+    </h1>
+  
+
+        
+        <a href="/2015/03/15/15-all-%E6%9A%82%E6%97%B6%E4%B8%8D%E6%9B%B4%E6%96%B0/" class="archive-article-date">
+  	<time datetime="2015-03-15T10:01:13.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-15</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>说明:15系列将暂时不会更新<br>缘由: </p>
+<ol>
+<li>使用编译好的内核，没有讲到怎样配置内核编译选项。 </li>
+<li>主要原因:太他妈难了，如果说嵌入式是要先掌握内核的编译，但是这个，是如何把系统给弄起来，快崩溃了，不如直接上手gentoo，<br>稍微简单点，还能亲自锻炼动手能力。<br>系统启动流程: <blockquote>
+<p>POST–&gt;BIOS(Boot Sequence)–&gt;Bootloader–&gt;Kernel(initrd,initramfs)–&gt;init(&#x2F;etc&#x2F;inittab)<br>&#x2F;etc&#x2F;inittab<br>设定默认运行级别<br>系统初始化(&#x2F;etc&#x2F;rc.d&#x2F;rc.sysinit)<br>运行执行级别的服务脚本<br>&#x2F;etc&#x2F;rc.d&#x2F;init.d&#x2F;<br>&#x2F;etc&#x2F;rc.d&#x2F;rc#.d<br>rc0.d–rc6.d<br>K*<br>S*<br>00-99:运行次序<br>启动虚拟终端<br>启动图形终端</p>
+</blockquote>
+</li>
+</ol>
+<p>&#x2F;etc&#x2F;rc.d&#x2F;rc.sysinit<br> 检测并以读写方式重新挂载根文件系统<br> 设定主机名<br> 检测并挂载&#x2F;etc&#x2F;fstab中的其他文件系统<br> 启动swap分区<br> 初始化外围硬件设备的驱动<br> 根据&#x2F;etc&#x2F;sysctl.conf设定内核参数<br> 激活udev和selinux<br> 清理过期锁和PID文件<br> 装载键映射 </p>
+<p>busybox:一个命令模拟上百个命令 </p>
+<p>mingetty: </p>
+<p>PAM:Plugable Authentication Module<br>&#x2F;etc&#x2F;pam.d&#x2F;* </p>
+<p>nis:<br> &#x2F;etc&#x2F;nsswitch.conf </p>
+<p>busybox:<br><a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/BusyBox">http://zh.wikipedia.org/wiki/BusyBox</a><br>例如Android&#x2F;树莓派就是基于Linux内核和busybox。 </p>
+<p>可以使用下面这样组合来跑起来一个系统:<br> kernel+initramfs(busybox)–&gt;rootfs(busybox) </p>
+<ol>
+<li><p>如何实现部分编译:<br>make dir&#x2F;<br>make driver&#x2F;net&#x2F; </p>
+</li>
+<li><p>只编译某一模块:<br>make driver&#x2F;net&#x2F;pcnet32.ko </p>
+</li>
+<li><p>将编译完成的结果防止别的目录中:<br>make O&#x3D;&#x2F;tmp&#x2F;kernel</p>
+</li>
+</ol>
+<p>如何编译安装busybox: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">make menuconfig </span><br><span class="line">Busybox Setting--&gt;Build Options--&gt;Build BusyBox as static binrary(这个选上) </span><br><span class="line">make install </span><br><span class="line">安装好的在_install目录内。 </span><br><span class="line">cp _install /tmp/busybox </span><br><span class="line">cd /tmp/busybox </span><br><span class="line">mkdir dev proc etc sys lib/modules </span><br><span class="line">额。。。。。。。。。。。。。。。。。。 </span><br><span class="line">此处省略。。。。。。。。。。。。。。。。。。。。。。。 </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/03/15/15-all-%E6%9A%82%E6%97%B6%E4%B8%8D%E6%9B%B4%E6%96%B0/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-14-04-3-Linux启动和内核初涉" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1207,96 +1316,6 @@ traceroute:
 
 
   
-    <article id="post-10-04LVM快照" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/22/10-04LVM%E5%BF%AB%E7%85%A7/">10_04LVM快照</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/22/10-04LVM%E5%BF%AB%E7%85%A7/" class="archive-article-date">
-  	<time datetime="2015-02-22T02:22:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>快照卷:<br> 快照的作用主要是能够进行在线数据备份与恢复。 </p>
-<ol>
-<li>生命周期为整个数据时长，在这段时长内，数据的增长量不能超过快照卷大小。 </li>
-<li>快照卷应该是只读的。 </li>
-<li>跟原卷在同一个卷组内。</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">为testlv创建快照卷大小50M,(这个时候的快照，是当前testlv下的快照) </span><br><span class="line"><span class="comment"># lvcreate -L 50M -n testlv-snap -s -p r(只读) /dev/myvg/testlv </span></span><br><span class="line"><span class="comment"># mount /dev/myvg/testlv-snap /mnt </span></span><br><span class="line">当其没意义了，可进行删除此逻辑卷 </span><br><span class="line"><span class="comment"># lvremove /dev/myvg/testlv-snap</span></span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/22/10-04LVM%E5%BF%AB%E7%85%A7/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/24/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/23/">23</a><a class="page-number" href="/page/24/">24</a><span class="page-number current">25</span><a class="page-number" href="/page/26/">26</a><a class="page-number" href="/page/27/">27</a><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/26/">Next &amp;raquo;</a>
@@ -1311,7 +1330,7 @@ traceroute:
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2024 张宇
+    		&copy; 2025 张宇
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten

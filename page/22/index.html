@@ -206,6 +206,143 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-23-01PHP相关概念及配置" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/22/23-01PHP%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%E5%8F%8A%E9%85%8D%E7%BD%AE/">23_01PHP相关概念及配置</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/22/23-01PHP%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%E5%8F%8A%E9%85%8D%E7%BD%AE/" class="archive-article-date">
+  	<time datetime="2015-04-22T02:35:39.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="服务器端脚本管理器"><a href="#服务器端脚本管理器" class="headerlink" title="服务器端脚本管理器"></a>服务器端脚本管理器</h2><ol>
+<li>MIME(Multipurpose Internet Mail Extensions)<br>多用途互联网邮件扩展类型就是设定某种扩展名的文件用一种应用程序来打开的方式类型，<br>当该扩展名文件被访问的时候，浏览器会自动使用指定应用程序来打开。<br>多用于指定一些客户端自定义的文件名，以及一些媒体文件打开方式。 </li>
+<li>动态网站<br>客户端动态    服务器端动态<br>在windows平台下有Activex，可以在客户端编写动态程序； </li>
+<li>CGI（通用网关接口)<br>–&gt;可以认为它是webapp； </li>
+<li>编程语言<blockquote>
+<p>静态语言；编译型语言<br>    C , C++ ,JAVA<br>优点：性能好<br>    缺点：每次都需要编译；出现错误处理比较麻烦；开发周期长；维护成本大；<br>动态语言：解释性语言<br>    shell , perl , python<br>优点：便于维护；有众多模块可共享；开发周期短，成本低；<br>    缺点：性能差；<br>但是折中就是最好；如Facebook有工具可以把动态语言转换成静态语言；</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="PHP-hypertext-preprocessor超文本预处理器"><a href="#PHP-hypertext-preprocessor超文本预处理器" class="headerlink" title="PHP:hypertext preprocessor超文本预处理器"></a>PHP:hypertext preprocessor超文本预处理器</h2><blockquote>
+<p>两个以色列程序员在1997年重新php的分析器，<br>于1999年发布zend engine 1.0 ，并发布php4.0####这句很重要 </p>
+</blockquote>
+<h2 id="php-zend-engine"><a href="#php-zend-engine" class="headerlink" title="php zend engine"></a>php zend engine</h2><blockquote>
+<p>zend engine的出现将php的代码处理过程分成了两个阶段，首先是分析php代码并且将其转换为zend opcode的二进制格式，并将其储存在内存中；第二阶段是使用zend engine去执行这些转换后的opcode；（opcode：操作码）<br>php source code –&gt;编译成二进制–&gt;执行二进制格式<br>但是这种二进制只能在zend engine中运行； </p>
+</blockquote>
+<h2 id="提供加速的原理及相关软件（称为php加速器）"><a href="#提供加速的原理及相关软件（称为php加速器）" class="headerlink" title="提供加速的原理及相关软件（称为php加速器）"></a>提供加速的原理及相关软件（称为php加速器）</h2><blockquote>
+<p>用户在访问同一个php源程序时，通过zend engine编译，但是这个编译只在同一个进程内访问快，<br>例如两个用户在访问同一个php页面时，并不会整体上提高运行速度，所以这个时候把编译后的opcode<br>放在一个缓存中，不同的进程在访问这个时，就不会重新编译，大大提高性能；<br>XCache 是一个开源的 opcode 缓存器&#x2F;优化器, 这意味着他能够提高您服务器上的 PHP 性能. 他通过把编译 PHP 后的数据缓冲到共享内存从而避免重复的编译过程, 能够直接使用缓冲区已编译的代码从而提高速度. 通常能够提高您的页面生成速率 2 到5 倍, 降低服务器负载. –&gt;摘自百度百科 
+  </p>
+</blockquote>
+<h2 id="而提供这种缓存功能的软件有"><a href="#而提供这种缓存功能的软件有" class="headerlink" title="而提供这种缓存功能的软件有"></a>而提供这种缓存功能的软件有</h2><blockquote>
+<p>APC<br>eAccelerator<br>Xcache  快速而且稳定的PHP opcode缓存，经过严格测试而且被大量用于生产环境。<br>Nusphere PhpExpress<br>Zend Optimizer 并非opcode加速器，而是为php5.2及以前的免费、闭源的php扩展；当然目前还在发展；使用的也不少； 
+  </p>
+</blockquote>
+<h2 id="PHP源码目录结构"><a href="#PHP源码目录结构" class="headerlink" title="PHP源码目录结构"></a>PHP源码目录结构</h2><blockquote>
+<ol>
+<li>build </li>
+<li>ext </li>
+<li>main </li>
+<li>Zend </li>
+<li>pear </li>
+<li>sapi </li>
+<li>TSRM </li>
+<li>tests </li>
+<li>win32 这个windows平台的</li>
+</ol>
+</blockquote>
+<h2 id="HTML"><a href="#HTML" class="headerlink" title="HTML"></a>HTML</h2><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">head</span>&gt;</span> </span><br><span class="line">        <span class="tag">&lt;<span class="name">title</span>&gt;</span><span class="tag">&lt;/<span class="name">title</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">head</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span> <span class="tag">&lt;/<span class="name">h1</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;/<span class="name">body</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span> </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>例：如何在源代码中加入bash脚本：<br>在httpd.cnf中有ScriptAlias &#x2F;cgi-bin&#x2F; “&#x2F;usr&#x2F;local&#x2F;apache2&#x2F;cgi-bin&#x2F;“<br>然后到上面这个目录下，编写mytest.sh </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!bin/bash </span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="built_in">cat</span> &lt;&lt; <span class="string">EOF </span></span><br><span class="line"><span class="string">Content-Type: test/html </span></span><br><span class="line"><span class="string">&lt;pre&gt; </span></span><br><span class="line"><span class="string">$(/bin/date +%F) </span></span><br><span class="line"><span class="string">&lt;/pre&gt; </span></span><br><span class="line"><span class="string">EOF</span> </span><br></pre></td></tr></table></figure>
+<p>保存加可执行权限<br>然后在浏览器上访问ip&#x2F;cgi-bin&#x2F;mytest.sh ，即可看到时间<br>PHP可以成为嵌入式web开发语言 </p>
+<h2 id="软件架构模式"><a href="#软件架构模式" class="headerlink" title="软件架构模式"></a>软件架构模式</h2><blockquote>
+<p>（控制器Controller）- 负责转发请求，对请求进行处理。<br>（视图View） - 界面设计人员进行图形界面设计。<br>（模型Model） - 程序员编写程序应有的功能（实现算法等等）、数据库专家进行数据管理和数据库设计(可以实现具体的功能)。 </p>
+</blockquote>
+<h2 id="web如何和php交流"><a href="#web如何和php交流" class="headerlink" title="web如何和php交流"></a>web如何和php交流</h2><p>三种方式： </p>
+<ol>
+<li>CGI </li>
+<li>Module </li>
+<li>FastCGI这个最重要<br>如果通过CGI做Apache和php之间调用进行200个prefork下的进程访问200个php，就要消耗至少400个进程，消耗几个G的内存；<br>所以当大量用户访问的时候，CGI并不适合Apache和php之间调用；<br>所以把php做成一个apache的一个模块，当需要调用php的时候，只需要启用200个进程就可以；<br>但是这样apache就要同时处理静态和动态内容，对服务器要求高；<br>所以出现静态和动态相分离的：<br>出现php提供进程，当Apache提供请求时，php解释器创建进程完成响应；可以把php作为服务器，Apache作为前段客户端；<br>叫做FastCGI（这个相当重要）</li>
+</ol>
+<p> <br> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#yum install php (php-mbstring对于多字节支持的，这个会在编译时支持)php-mysql(自行选择) </span></span><br></pre></td></tr></table></figure><br>这种是以模块的方式存在 </p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> </span><br><span class="line"><span class="title function_ invoke__">phpinfo</span>(); </span><br><span class="line"><span class="meta">?&gt;</span> </span><br></pre></td></tr></table></figure>
+<p>  </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/22/23-01PHP%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%E5%8F%8A%E9%85%8D%E7%BD%AE/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-22-01Httpd虚拟主机" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1199,119 +1336,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-20-01DNS主从复制及区域传送" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/03/20-01DNS%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%8F%8A%E5%8C%BA%E5%9F%9F%E4%BC%A0%E9%80%81/">20_01DNS主从复制及区域传送</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/03/20-01DNS%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%8F%8A%E5%8C%BA%E5%9F%9F%E4%BC%A0%E9%80%81/" class="archive-article-date">
-  	<time datetime="2015-04-03T06:31:31.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-03</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>如何设置允许给其他主机提供一些定义 </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#vi /etc/named.conf </span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>options 中，<br>如果添加    recursion yes;表示给所有主机提供递归；<br>实际使用中，应该定义给谁递归：<br>allow-recursion {172.16.0.0&#x2F;16};表示给这个网段的主机提供递归；<br>allow-transfer {none；}定义区域不提供传送；<br>notify yes; 如果主DNS服务器发生序列号改变，从DNS服务器将会受到通知；<br>allow-query :允许那些客户机可以访问DNS服务<br>allow-transfer ：如果有辅助DNS，是否允许它可以同步zone文件。 </p>
-</blockquote>
-<p>安装从服务器172.16.100.2：     </p>
-<blockquote>
-<p>需要在主DNS开启allow-transfer{ 172.16.100.2; };<br>    option 添加 notify yes;<br>    zone “unravel.com” IN {<br>        type slave;这个地方改动；<br>        file “slaves&#x2F;unravel.com.zone”;<br>        masters { 172.16.100.1；};指明主DNS服务器是谁；<br>        allow-tranfer { none；};<br>    }；<br>    zone “100.16.172.in-addr.arpa” IN {<br>        type slave;<br>        file “slaves&#x2F;172.16.100.zone”;<br>        masters { 172.16.100.1; };<br>        allow-transfer {none;};<br>named-checkconf        检查一下是否错误；<br>如果遇到权限问题，tail &#x2F;var&#x2F;log&#x2F;messages<br>chgrp named &#x2F;etc&#x2F;named.conf(一般这个不会遇到)<br>不过我在实验时这个文件即使属于root.root也不会报错，也会把主DNS的区域文件更新至从DNS中； </p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service named start </span><br></pre></td></tr></table></figure>
-
-<p>就会进行（主从传送）； </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /var/named/salves/unravel,com.zone </span><br></pre></td></tr></table></figure>
-
-<p>可以看看信息；<br>现在进行区域传送：<br>在主DNS服务器上的&#x2F;var&#x2F;named.unravel.com.zone上添加：<br>imap    IN        A    172.168.100.5<br>然后把序列号往后加1；20141114（不要忘记）<br>tail &#x2F;var&#x2F;log&#x2F;messages会看到进行增量备份<br>然后从DNS服务器就会收到；<br>注意:<br>    1&#x2F;在主DNS服务器上options 添加 notify yes;<br>    2&#x2F;要添加从DNS服务器NS记录 </p>
-<p>使用rndc控制本地DNS服务器 </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#rndc-confgen &gt; /etc/rndc.conf </span><br><span class="line">#vi /etc/rndc.conf中提示Use with the folllowing in named.conf ,adjusting the allow list  as needed: </span><br></pre></td></tr></table></figure>
-
-<p>把这些copy到&#x2F;etc&#x2F;named.conf文件中： </p>
-<blockquote>
-<p>.,$-1w    &gt;&gt; &#x2F;etc&#x2F;named.conf  ，光标放在key “rndc.conf”上，追加保存到&#x2F;etc&#x2F;named.conf中；<br>然后编辑&#x2F;etc&#x2F;named.conf文件：<br>.,$&#x2F;s^# &#x2F;&#x2F;g 回车，即可去掉#号；<br>rndc -c &#x2F;etc&#x2F;rndc.conf status<br>如果提示the key is invaild.<br>rm &#x2F;etc&#x2F;rndc.key<br>如果还有错误，<br>service　named restart即可； </p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rndc -c /etc/rdnc.conf notify &quot;unravel.com&quot;对unravel.com这个域进行通知； </span><br><span class="line">rndc -c /etc/rdnc.conf flush 清除缓存； </span><br><span class="line">rndc -c /etc/rdnc.con stop 停止bind服务器； </span><br></pre></td></tr></table></figure>
-
-
-<p>使用rndc远程控制DNS服务器        但是注意一般不允许远程控制！！！！！！！！！！<br>    <br>如果允许其他主机进行控制，</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/named.conf </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">controls &#123; </span><br><span class="line">        inet ip（自己的IP) </span><br><span class="line">        allow &#123; 允许控制主机IP；&#125; </span><br><span class="line">        service named restart即可； </span><br><span class="line">        scp /etc/rndc.conf 172.168.100.2(假设改动的是这个Ip):/root/把密钥拷贝过去；注意千万不要把自己服务器上的rndc的密钥文件给覆盖掉了； </span><br><span class="line">        vi ~/rndc.conf </span><br><span class="line">            把options 中的default-server改为你要控制的那个主机的ip； </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">     </span><br><span class="line">    dig  （domain information groper域名信息搜索） </span><br><span class="line">            他可以用来从域名服务器中收集信息，Dig有两种模式：简单交互模式用于简单的查询，而批处理模式 </span><br><span class="line">            则可以对包含多个查询条目的列表执行查询，所有查询选项都可以从命令行输入； </span><br><span class="line">        dig -t NS . </span><br><span class="line">        这个会显示根服务器的地址信息；    保存在/var/named/named.ca </span><br><span class="line">        dig -t RT NAME @IP </span><br><span class="line">        dig -t NS/SOA unravel.com </span><br><span class="line">        dig -x IP; </span><br><span class="line">        host -t A/NS/MX/SOA www.unravel.com </span><br><span class="line">        dig +recurse -t A www.baidu.com @192.168.0.101(表示以递归的方式进行查询) </span><br><span class="line">            如果定义了不给任何人递归，则不会反馈任何信息 </span><br><span class="line">        dig +trace A www.baidu.com @192.168.0.101（本机）查看怎样解析的； </span><br><span class="line">        dig -t axfr unravel.com </span><br><span class="line">            将得到对方完全区域传送的所有信息 </span><br><span class="line">         </span><br><span class="line">    SOCKET：套接字 </span><br><span class="line">        IP+PORT    主要目的就是让两个不同主机通信，C/S，作为访问入口的；</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/03/20-01DNS%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%8F%8A%E5%8C%BA%E5%9F%9F%E4%BC%A0%E9%80%81/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/21/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/20/">20</a><a class="page-number" href="/page/21/">21</a><span class="page-number current">22</span><a class="page-number" href="/page/23/">23</a><a class="page-number" href="/page/24/">24</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/23/">Next &amp;raquo;</a>
@@ -1326,7 +1350,7 @@ var _hmt = _hmt || [];
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2024 张宇
+    		&copy; 2025 张宇
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten

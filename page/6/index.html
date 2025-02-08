@@ -206,6 +206,90 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-transformers-tokenizer备忘" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/12/29/transformers-tokenizer%E5%A4%87%E5%BF%98/">transformers-tokenizer备忘</a>
+    </h1>
+  
+
+        
+        <a href="/2021/12/29/transformers-tokenizer%E5%A4%87%E5%BF%98/" class="archive-article-date">
+  	<time datetime="2021-12-29T06:37:05.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-29</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>对transformers库不常用记录，方便回溯。</p>
+<h2 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h2><h3 id="1-fast的含义"><a href="#1-fast的含义" class="headerlink" title="1. fast的含义"></a>1. fast的含义</h3><p>比如<code>BertTokenizerFast</code>,<code>use_fast</code>, 示例如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AutoTokenizer.from_pretrained(&#x27;hfl/chinese-electra-180g-small-discriminator&#x27;, use_fast=True)</span><br></pre></td></tr></table></figure>
+
+<p>它的含义是使用rust加速速度。</p>
+<p>嘿嘿，rust现在要进入linux内核了，恭喜恭喜。</p>
+<h3 id="2-tokenizer"><a href="#2-tokenizer" class="headerlink" title="2. tokenizer"></a>2. tokenizer</h3><p>比如常见的<code>convert_ids_to_tokens</code>，<code>encode</code>, <code>encode_plus</code>等等，下面记录一种对句子对的使用方式.</p>
+<p>完整例子可参考<a target="_blank" rel="noopener" href="https://github.com/HIT-SCIR/plm-nlp-code/blob/main/chp7/finetune_bert_mrc.py">ne_bert_mrc.py</a>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> AutoTokenizer, BertTokenizerFast</span><br><span class="line"></span><br><span class="line">tokenizer = AutoTokenizer.from_pretrained(<span class="string">&#x27;hfl/chinese-electra-180g-small-discriminator&#x27;</span>, use_fast=<span class="literal">True</span>)</span><br><span class="line">question = <span class="string">&#x27;南京天气怎么样&#x27;</span>  <span class="comment"># 7</span></span><br><span class="line">context = <span class="string">&#x27;我今天早上站在阳台看天空，今天南京天气很好！&#x27;</span>  <span class="comment"># 22</span></span><br><span class="line"></span><br><span class="line">tokenized_examples = tokenizer(</span><br><span class="line">    question,  <span class="comment"># 问题文本</span></span><br><span class="line">    context,  <span class="comment"># 篇章文本</span></span><br><span class="line">    truncation=<span class="string">&quot;only_second&quot;</span>,  <span class="comment"># 截断只发生在第二部分，即篇章</span></span><br><span class="line">    max_length=<span class="number">20</span>,  <span class="comment"># 设定最大长度为384</span></span><br><span class="line">    <span class="comment"># stride=5,  # 设定篇章切片步长为128</span></span><br><span class="line">    return_overflowing_tokens=<span class="literal">True</span>,  <span class="comment"># 返回超出最大长度的标记，将篇章切成多片</span></span><br><span class="line">    return_offsets_mapping=<span class="literal">True</span>,  <span class="comment"># 返回偏置信息，用于对齐答案位置</span></span><br><span class="line">    padding=<span class="string">&quot;max_length&quot;</span>,  <span class="comment"># 按最大长度进行补齐</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(tokenized_examples)</span><br><span class="line">input_ids = tokenized_examples[<span class="string">&#x27;input_ids&#x27;</span>]</span><br><span class="line">token_type_ids = tokenized_examples[<span class="string">&#x27;token_type_ids&#x27;</span>]</span><br><span class="line">attention_masks = tokenized_examples[<span class="string">&#x27;attention_mask&#x27;</span>]</span><br><span class="line">offset_mappings = tokenized_examples[<span class="string">&#x27;offset_mapping&#x27;</span>]</span><br><span class="line">overflow_to_sample_mapping = tokenized_examples[<span class="string">&#x27;overflow_to_sample_mapping&#x27;</span>]</span><br><span class="line"><span class="keyword">for</span> index, _input_ids <span class="keyword">in</span> <span class="built_in">enumerate</span>(input_ids):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;input_ids -&gt; &#x27;</span>, tokenizer.convert_ids_to_tokens(_input_ids))</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;token_type_ids -&gt; &#x27;</span>, token_type_ids[index])</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;attention_masks -&gt; &#x27;</span>, attention_masks[index])</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;offset_mappings -&gt; &#x27;</span>, offset_mappings[index])</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;overflow_to_sample_mapping -&gt; &#x27;</span>, overflow_to_sample_mapping[index])</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>可以自行改动这个例子，其中stride默认注释掉了，默认为0。 </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/12/29/transformers-tokenizer%E5%A4%87%E5%BF%98/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-动态词向量之elmo" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1123,90 +1207,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-活到老学到老之index操作" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/12/16/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81%E4%B9%8Bindex%E6%93%8D%E4%BD%9C/">活到老学到老之index操作</a>
-    </h1>
-  
-
-        
-        <a href="/2021/12/16/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81%E4%B9%8Bindex%E6%93%8D%E4%BD%9C/" class="archive-article-date">
-  	<time datetime="2021-12-16T02:20:21.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-16</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>快速想一想，你能想到torch有哪些常见的index操作？？</p>
-<h2 id="1-gather"><a href="#1-gather" class="headerlink" title="1. gather"></a>1. gather</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>a = torch.tensor([[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>],</span><br><span class="line">        [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]])</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a.gather(dim=<span class="number">1</span>, index=torch.tensor([[<span class="number">0</span>,<span class="number">1</span>], [<span class="number">1</span>,<span class="number">2</span>]]))</span><br><span class="line">tensor([[<span class="number">1</span>, <span class="number">2</span>],</span><br><span class="line">        [<span class="number">5</span>, <span class="number">6</span>]])</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="2-index-select"><a href="#2-index-select" class="headerlink" title="2. index_select"></a>2. index_select</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>a</span><br><span class="line">tensor([[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>],</span><br><span class="line">        [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]])</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a.index_select(dim=<span class="number">1</span>, index=torch.tensor([<span class="number">1</span>,<span class="number">2</span>]))</span><br><span class="line">tensor([[<span class="number">2</span>, <span class="number">3</span>],</span><br><span class="line">        [<span class="number">5</span>, <span class="number">6</span>]])</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="3-骚气的来了哦"><a href="#3-骚气的来了哦" class="headerlink" title="3. 骚气的来了哦"></a>3. 骚气的来了哦</h2><p>根据上面例子可以看到，<code>a</code>为矩阵，选择<code>a</code>中的index，但是下面介绍一个map操作.</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>index</span><br><span class="line">tensor([[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>],</span><br><span class="line">        [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]])</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a = torch.tensor([<span class="number">11</span>, <span class="number">22</span>, <span class="number">33</span>, <span class="number">44</span>, <span class="number">55</span>, <span class="number">66</span>, <span class="number">77</span>])</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a</span><br><span class="line">tensor([<span class="number">11</span>, <span class="number">22</span>, <span class="number">33</span>, <span class="number">44</span>, <span class="number">55</span>, <span class="number">66</span>, <span class="number">77</span>])</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>index</span><br><span class="line">tensor([[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>],</span><br><span class="line">        [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]])</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a[index]</span><br><span class="line">tensor([[<span class="number">22</span>, <span class="number">33</span>, <span class="number">44</span>],</span><br><span class="line">        [<span class="number">55</span>, <span class="number">66</span>, <span class="number">77</span>]])</span><br></pre></td></tr></table></figure>
-
-<p>这种操作有一个真实场景，比如：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 这是两个特征</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>words = [<span class="string">&#x27;我&#x27;</span>, <span class="string">&#x27;爱&#x27;</span>, <span class="string">&#x27;中&#x27;</span>, <span class="string">&#x27;国&#x27;</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>pos = [<span class="string">&#x27;n&#x27;</span>, <span class="string">&#x27;v&#x27;</span>, <span class="string">&#x27;n&#x27;</span>, <span class="string">&#x27;n&#x27;</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 假设words变成了一个4 * 4的临接矩阵，用于表示每个token和其他token的一个关联重要程度</span></span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>words_attn = torch.rand(<span class="number">4</span>,<span class="number">4</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>words_attn</span><br><span class="line">tensor([[<span class="number">0.6279</span>, <span class="number">0.6234</span>, <span class="number">0.9831</span>, <span class="number">0.5267</span>],</span><br><span class="line">        [<span class="number">0.2265</span>, <span class="number">0.8453</span>, <span class="number">0.5740</span>, <span class="number">0.4772</span>],</span><br><span class="line">        [<span class="number">0.7759</span>, <span class="number">0.6952</span>, <span class="number">0.1758</span>, <span class="number">0.3800</span>],</span><br><span class="line">        [<span class="number">0.9998</span>, <span class="number">0.3138</span>, <span class="number">0.5078</span>, <span class="number">0.5565</span>]])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>scores, indices = words_attn.topk(k=<span class="number">2</span>, dim=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>indices</span><br><span class="line">tensor([[<span class="number">2</span>, <span class="number">0</span>],</span><br><span class="line">        [<span class="number">1</span>, <span class="number">2</span>],</span><br><span class="line">        [<span class="number">0</span>, <span class="number">1</span>],</span><br><span class="line">        [<span class="number">0</span>, <span class="number">3</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 假设pos转为了</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>pos_tensor = torch.tensor([<span class="number">111</span>, <span class="number">222</span>, <span class="number">333</span>, <span class="number">444</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. map操作</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>pos_tensor[indices]</span><br><span class="line">tensor([[<span class="number">333</span>, <span class="number">111</span>],</span><br><span class="line">        [<span class="number">222</span>, <span class="number">333</span>],</span><br><span class="line">        [<span class="number">111</span>, <span class="number">222</span>],</span><br><span class="line">        [<span class="number">111</span>, <span class="number">444</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5. 随后就可以接一个embedding搞事情了</span></span><br><span class="line">pos_embedding(pos_tensor[indices])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 6. 总结，这个示例的优点可以看出是快速计算，取topK然后再结合其他的特征进行操作。</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="4-batch-gather"><a href="#4-batch-gather" class="headerlink" title="4. batch_gather"></a>4. batch_gather</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">batch_gather</span>(<span class="params">data: torch.Tensor, index: torch.Tensor</span>):</span><br><span class="line">    index = index.unsqueeze(-<span class="number">1</span>).repeat_interleave(data.size()[-<span class="number">1</span>], dim=-<span class="number">1</span>)  <span class="comment"># (bs, n, hidden)</span></span><br><span class="line">    <span class="comment"># index = index.unsqueeze(-1).expand(*(*index.shape, data.shape[-1]))</span></span><br><span class="line">    <span class="keyword">return</span> torch.gather(data, <span class="number">1</span>, index)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    a = torch.randn(<span class="number">3</span>, <span class="number">128</span>, <span class="number">312</span>)</span><br><span class="line">    indices = torch.tensor([</span><br><span class="line">        [<span class="number">1</span>, <span class="number">2</span>],</span><br><span class="line">        [<span class="number">5</span>, <span class="number">6</span>],</span><br><span class="line">        [<span class="number">7</span>, <span class="number">7</span>]</span><br><span class="line">    ])</span><br><span class="line">    output = batch_gather(a, indices)</span><br><span class="line">    <span class="built_in">print</span>(output.shape)</span><br><span class="line">    <span class="built_in">print</span>((output[<span class="number">0</span>][<span class="number">0</span>] == a[<span class="number">0</span>][<span class="number">1</span>]).<span class="built_in">all</span>())</span><br><span class="line">    <span class="built_in">print</span>((output[<span class="number">0</span>][<span class="number">1</span>] == a[<span class="number">0</span>][<span class="number">2</span>]).<span class="built_in">all</span>())</span><br><span class="line">    <span class="built_in">print</span>((output[<span class="number">1</span>][<span class="number">0</span>] == a[<span class="number">1</span>][<span class="number">5</span>]).<span class="built_in">all</span>())</span><br><span class="line">    <span class="built_in">print</span>((output[<span class="number">1</span>][<span class="number">1</span>] == a[<span class="number">1</span>][<span class="number">6</span>]).<span class="built_in">all</span>())</span><br><span class="line">    <span class="built_in">print</span>((output[<span class="number">2</span>][<span class="number">0</span>] == a[<span class="number">2</span>][<span class="number">7</span>]).<span class="built_in">all</span>())</span><br><span class="line">    <span class="built_in">print</span>((output[<span class="number">2</span>][<span class="number">1</span>] == a[<span class="number">2</span>][<span class="number">7</span>]).<span class="built_in">all</span>())</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/12/16/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81%E4%B9%8Bindex%E6%93%8D%E4%BD%9C/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/5/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/7/">Next &amp;raquo;</a>
@@ -1221,7 +1221,7 @@ var _hmt = _hmt || [];
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2024 张宇
+    		&copy; 2025 张宇
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten

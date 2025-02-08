@@ -206,6 +206,113 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-pytorch学习率调整" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/07/02/pytorch%E5%AD%A6%E4%B9%A0%E7%8E%87%E8%B0%83%E6%95%B4/">pytorch学习率调整</a>
+    </h1>
+  
+
+        
+        <a href="/2021/07/02/pytorch%E5%AD%A6%E4%B9%A0%E7%8E%87%E8%B0%83%E6%95%B4/" class="archive-article-date">
+  	<time datetime="2021-07-02T07:03:41.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-02</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="keras"><a href="#keras" class="headerlink" title="keras"></a>keras</h2><p>在keras中，比如动态调整学习率，可以：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">step_decay</span>(<span class="params">epoch</span>):</span><br><span class="line">        <span class="keyword">if</span> epoch &lt; <span class="number">3</span>:</span><br><span class="line">            lr = <span class="number">1e-5</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            lr = <span class="number">1e-6</span></span><br><span class="line">        <span class="keyword">return</span> lr</span><br><span class="line"></span><br><span class="line">tf.keras.callbacks.LearningRateScheduler(step_decay, verbose=<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="lr-scheduler"><a href="#lr-scheduler" class="headerlink" title="lr_scheduler"></a>lr_scheduler</h2><p>在pytorch中，提供了<a target="_blank" rel="noopener" href="https://pytorch.org/docs/master/optim.html#how-to-adjust-learning-rate"><code>torch.optim.lr_scheduler</code></a></p>
+<h3 id="1-StepLR"><a href="#1-StepLR" class="headerlink" title="1. StepLR"></a>1. StepLR</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> pyecharts <span class="keyword">import</span> options</span><br><span class="line"><span class="keyword">from</span> pyecharts.charts <span class="keyword">import</span> Line</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> optim</span><br><span class="line"><span class="keyword">from</span> torch.nn <span class="keyword">import</span> Linear</span><br><span class="line"><span class="keyword">from</span> torch.optim <span class="keyword">import</span> lr_scheduler</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TestModel</span>(torch.nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">super</span>(TestModel, self).__init__()</span><br><span class="line">        self.linear = Linear(<span class="number">100</span>, <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        <span class="keyword">return</span> self.linear(x)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">line_graph</span>(<span class="params">xs, ys</span>):</span><br><span class="line">    line = Line()</span><br><span class="line">    line.add_xaxis(xs)</span><br><span class="line">    line.add_yaxis(series_name=<span class="string">&#x27;学习率&#x27;</span>, y_axis=ys, is_smooth=<span class="literal">True</span>)</span><br><span class="line">    line.set_global_opts(</span><br><span class="line">        title_opts=options.TitleOpts(title=<span class="string">&#x27;学习率调整图&#x27;</span>),</span><br><span class="line">        toolbox_opts=options.ToolboxOpts()</span><br><span class="line">    )</span><br><span class="line">    line.set_series_opts(</span><br><span class="line">        label_opts=options.LabelOpts(is_show=<span class="literal">False</span>),</span><br><span class="line">        <span class="comment"># markline_opts=options.MarkLineOpts(</span></span><br><span class="line">        <span class="comment">#     # 设置平均值的标记线</span></span><br><span class="line">        <span class="comment">#     data=[options.MarkLineItem(name=&#x27;平均值&#x27;, type_=&#x27;average&#x27;)],</span></span><br><span class="line">        <span class="comment">#     # 设置最大值的标记线</span></span><br><span class="line">        <span class="comment">#     # data = [options.MarkLineItem(name=&#x27;最大值&#x27;, type_=&#x27;max&#x27;)]</span></span><br><span class="line">        <span class="comment"># )</span></span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    line.render(<span class="string">&#x27;折线图.html&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">model = TestModel()</span><br><span class="line"></span><br><span class="line">optimizer = optim.Adam(params=model.parameters(), lr=<span class="number">0.05</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Assuming optimizer uses lr = 0.05 for all groups</span></span><br><span class="line"><span class="comment"># lr = 0.05     if epoch &lt; 30</span></span><br><span class="line"><span class="comment"># lr = 0.005    if 30 &lt;= epoch &lt; 60</span></span><br><span class="line"><span class="comment"># lr = 0.0005   if 60 &lt;= epoch &lt; 90</span></span><br><span class="line"></span><br><span class="line">scheduler = lr_scheduler.StepLR(optimizer, step_size=<span class="number">30</span>, gamma=<span class="number">0.1</span>)</span><br><span class="line"></span><br><span class="line">x = <span class="built_in">list</span>(<span class="built_in">range</span>(<span class="number">100</span>))</span><br><span class="line">y = []</span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">    optimizer.step()</span><br><span class="line">    scheduler.step()</span><br><span class="line">    lr = scheduler.get_lr()</span><br><span class="line">    y.append(scheduler.get_lr()[<span class="number">0</span>])</span><br><span class="line"></span><br><span class="line">line_graph(x, y)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<img src="/2021/07/02/pytorch%E5%AD%A6%E4%B9%A0%E7%8E%87%E8%B0%83%E6%95%B4/1.png" class="">
+
+
+<h3 id="2-MultiStepLR"><a href="#2-MultiStepLR" class="headerlink" title="2. MultiStepLR"></a>2. MultiStepLR</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">scheduler = lr_scheduler.MultiStepLR(optimizer, [<span class="number">30</span>, <span class="number">80</span>], <span class="number">0.1</span>)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这个可以设置区间，在<code>30 ~ 80</code> 为一个学习率</p>
+<img src="/2021/07/02/pytorch%E5%AD%A6%E4%B9%A0%E7%8E%87%E8%B0%83%E6%95%B4/2.png" class="">
+
+
+
+<h3 id="3-ExponentialLR"><a href="#3-ExponentialLR" class="headerlink" title="3. ExponentialLR"></a>3. ExponentialLR</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=<span class="number">0.9</span>)</span><br></pre></td></tr></table></figure>
+
+<p>指数衰减</p>
+<img src="/2021/07/02/pytorch%E5%AD%A6%E4%B9%A0%E7%8E%87%E8%B0%83%E6%95%B4/3.png" class="">
+
+
+<h2 id="transformers库"><a href="#transformers库" class="headerlink" title="transformers库"></a>transformers库</h2><p>在transformers库中，也提供了一些，比如：</p>
+<h3 id="1-get-linear-schedule-with-warmup"><a href="#1-get-linear-schedule-with-warmup" class="headerlink" title="1. get_linear_schedule_with_warmup"></a>1. get_linear_schedule_with_warmup</h3><p>学习率预热</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">num_warmup_steps = <span class="number">0.05</span> * <span class="built_in">len</span>(train_dataloader) * epochs</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">optimizer = optim.Adam(params=model.parameters(), lr=<span class="number">1e-3</span>)</span><br><span class="line"></span><br><span class="line">scheduler = get_linear_schedule_with_warmup(</span><br><span class="line">    optimizer=optimizer,</span><br><span class="line">    num_warmup_steps=<span class="number">10000</span>,</span><br><span class="line">    num_training_steps=<span class="number">100000</span>)</span><br></pre></td></tr></table></figure>
+
+<img src="/2021/07/02/pytorch%E5%AD%A6%E4%B9%A0%E7%8E%87%E8%B0%83%E6%95%B4/4_1.png" class="">
+
+<p>学习率先不断上升，然后再不断减小。</p>
+<p>在预热期间，学习率从0线性增加到优化器中的初始lr。随后线性降低到0</p>
+<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/338066667">理论</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/07/02/pytorch%E5%AD%A6%E4%B9%A0%E7%8E%87%E8%B0%83%E6%95%B4/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-批次数据处理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -979,130 +1086,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-介绍隐马尔可夫" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/06/16/%E4%BB%8B%E7%BB%8D%E9%9A%90%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB/">介绍隐马尔可夫</a>
-    </h1>
-  
-
-        
-        <a href="/2020/06/16/%E4%BB%8B%E7%BB%8D%E9%9A%90%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB/" class="archive-article-date">
-  	<time datetime="2020-06-16T08:48:02.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-16</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="什么是马尔可夫性质？"><a href="#什么是马尔可夫性质？" class="headerlink" title="什么是马尔可夫性质？"></a>什么是马尔可夫性质？</h2><blockquote>
-<p>“……一个随机过程，在这个过程中，鉴于现在，未来独立于过去。” </p>
-</blockquote>
-<p>假设一个带有公平硬币的简化抛硬币游戏。暂停怀疑并假设马尔可夫性质尚不清楚，我们想预测 10 次翻转后翻转正面的概率。在条件依赖的假设下（硬币具有过去状态的记忆，未来状态取决于过去状态的顺序），我们必须记录导致第 11 次翻转的特定顺序以及这些翻转的联合概率。所以想象在 10 次翻转后，我们有一个随机的正面和反面序列。该序列的联合概率为 0.5^10 &#x3D; 0.0009765625。在条件依赖下，下一次翻转的概率为 0.0009765625 * 0.5 &#x3D; 0.00048828125。 </p>
-<p>这是第 11 次翻转的真实概率吗？一定不行！</p>
-<p>我们知道，抛硬币的事件并不取决于之前抛硬币的结果。硬币没有记忆。连续翻转的过程不会对先前的结果进行编码。每次翻转都是一个独特的事件，正面或反面的概率相等，也就是有条件地独立于过去的状态。这就是马尔可夫性质。  </p>
-<h2 id="什么是马尔科夫模型？"><a href="#什么是马尔科夫模型？" class="headerlink" title="什么是马尔科夫模型？"></a>什么是马尔科夫模型？</h2><p>马尔可夫链（模型）描述了一个随机过程，其中未来状态的假设概率仅取决于当前过程状态，而不取决于它之前的任何状态（shocker）。</p>
-<p>让我们进入一个简单的例子。假设您想对给定当前状态的狗处于三种状态之一的未来概率进行建模。为此，我们需要指定状态空间、初始概率和转移概率。</p>
-<p>想象一下你有一只非常懒惰的胖狗，所以我们将状态空间定义为睡觉、吃饭或大便。我们将初始概率分别设置为 35%、35% 和 30%。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> networkx <span class="keyword">as</span> nx</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line">%matplotlib inline</span><br><span class="line"></span><br><span class="line"><span class="comment"># create state space and initial state probabilities</span></span><br><span class="line"></span><br><span class="line">states = [<span class="string">&#x27;sleeping&#x27;</span>, <span class="string">&#x27;eating&#x27;</span>, <span class="string">&#x27;pooping&#x27;</span>]</span><br><span class="line">pi = [<span class="number">0.35</span>, <span class="number">0.35</span>, <span class="number">0.3</span>]</span><br><span class="line">state_space = pd.Series(pi, index=states, name=<span class="string">&#x27;states&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(state_space)</span><br><span class="line"><span class="built_in">print</span>(state_space.<span class="built_in">sum</span>())</span><br></pre></td></tr></table></figure>
-
-<p>下一步是定义转移概率。它们只是在给定当前状态的情况下保持相同状态或移动到不同状态的概率。 </p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">q_df = pd.DataFrame(columns=states, index=states)</span><br><span class="line">q_df.loc[states[<span class="number">0</span>]] = [<span class="number">0.4</span>, <span class="number">0.2</span>, <span class="number">0.4</span>]</span><br><span class="line">q_df.loc[states[<span class="number">1</span>]] = [<span class="number">0.45</span>, <span class="number">0.45</span>, <span class="number">0.1</span>]</span><br><span class="line">q_df.loc[states[<span class="number">2</span>]] = [<span class="number">0.45</span>, <span class="number">0.25</span>, <span class="number">.3</span>]</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(q_df)</span><br><span class="line"></span><br><span class="line">q = q_df.values</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;\n&#x27;</span>, q, q.shape, <span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(q_df.<span class="built_in">sum</span>(axis=<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
-
-
-<img src="/2020/06/16/%E4%BB%8B%E7%BB%8D%E9%9A%90%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB/image-asset.png" class="" title="状态转移概率">
-
-
-<p>现在我们已经设置了初始和转移概率，我们可以使用Networkx 包创建一个马尔可夫图。</p>
-<p>要做到这一点，需要一点灵活的思维。Networkx 创建 由节点和边组成的图。在我们的玩具示例中，狗的可能状态是节点，边是连接节点的线。转移概率是权重。它们表示在给定当前状态的情况下转换到某个状态的概率。</p>
-<p>需要注意的是 networkx 主要处理字典对象。话虽如此，我们需要创建一个字典对象来保存我们的边及其权重。</p>
-<img src="/2020/06/16/%E4%BB%8B%E7%BB%8D%E9%9A%90%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB/image2.png" class="" title="状态转移概率">
-
-<p>不错。如果你沿着任何节点的边走，它会告诉你狗转换到另一个状态的概率。例如，如果狗在睡觉，我们可以看到狗有 40% 的机会继续睡觉，40% 的机会狗醒来并拉屎，20% 的机会狗醒来吃东西。 </p>
-<h2 id="什么是马克可夫隐藏状态"><a href="#什么是马克可夫隐藏状态" class="headerlink" title="什么是马克可夫隐藏状态"></a>什么是马克可夫隐藏状态</h2><p>考虑这样一种情况，您的狗行为异常，并且您想对狗的行为是由于疾病或其他方面健康时的古怪行为进行建模的可能性。</p>
-<p>在这种情况下，狗的真实状态是未知的，因此 对您隐藏。对此进行建模的一种方法是假设 狗具有 代表真实隐藏状态的可观察行为。让我们来看一个例子。</p>
-<p>首先，我们创建我们的状态空间——健康或生病。我们假设它们是等概率的。  </p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">hidden_states = [<span class="string">&#x27;healthy&#x27;</span>, <span class="string">&#x27;sick&#x27;</span>]</span><br><span class="line">pi = [<span class="number">0.5</span>, <span class="number">0.5</span>]</span><br><span class="line">state_space = pd.Series(pi, index=hidden_states, name=<span class="string">&#x27;states&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(state_space)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;\n&#x27;</span>, state_space.<span class="built_in">sum</span>())</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">a_df = pd.DataFrame(columns=hidden_states, index=hidden_states)</span><br><span class="line">a_df.loc[hidden_states[<span class="number">0</span>]] = [<span class="number">0.7</span>, <span class="number">0.3</span>]</span><br><span class="line">a_df.loc[hidden_states[<span class="number">1</span>]] = [<span class="number">0.4</span>, <span class="number">0.6</span>]</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(a_df)</span><br><span class="line"></span><br><span class="line">a = a_df.values</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;\n&#x27;</span>, a, a.shape, <span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(a_df.<span class="built_in">sum</span>(axis=<span class="number">1</span>))</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<img src="/2020/06/16/%E4%BB%8B%E7%BB%8D%E9%9A%90%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB/image3.png" class="" title="状态转移概率">
-
-
-<p>这是它变得更有趣的地方。现在我们创建发射或观测 概率矩阵。该矩阵的大小为 M x O，其中 M 是隐藏状态的数量，O 是可能的可观察状态的数量。 </p>
-<p>给定当前的可观察状态，发射矩阵告诉我们狗处于隐藏状态之一的概率。 </p>
-<p>让我们保持与上一个示例相同的可观察状态。狗可以睡觉、吃东西或大便。现在我们做出最好的猜测来填充概率。 </p>
-<img src="/2020/06/16/%E4%BB%8B%E7%BB%8D%E9%9A%90%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB/image4.png" class="" title="发射概率">
-
-<p>看这个图时，将healthy和sick作为同一level,从sleeping，pooping, eating到healthy和sick的边就是发射概率。</p>
-<p>隐马尔可夫图稍微复杂一些，但原理是相同的。例如，您会预期，如果您的狗正在进食，那么它健康的可能性很高 (60%)，而生病的可能性非常低 (10%)。</p>
-<p>现在，如果您需要根据一系列观察结果随着时间的推移辨别您的狗的健康状况怎么办？  </p>
-<p>使用Viterbi 算法，我们可以根据观察序列确定最可能的隐藏状态序列。</p>
-<p>高的水平，在每个时间步长Viterbi算法的增量，寻找最大 的是得到陈述的任何路径的概率我在时间牛逼，那也 有序列最多时间正确的观察牛逼。</p>
-<p>该算法还跟踪每个阶段概率最高的状态。在序列的末尾，算法将向后迭代，选择每个时间步“获胜”的状态，从而创建最可能的路径，或可能导致观察序列的隐藏状态序列。</p>
-<p>最终代码：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">viterbi</span>(<span class="params">pi, a, b, obs</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Viterbi algorithm for solving the uncovering problem</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Notebook: C5/C5S3_Viterbi.ipynb</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        a (np.ndarray): State transition probability matrix of dimension I x I</span></span><br><span class="line"><span class="string">        pi (np.ndarray): Initial state distribution  of dimension I</span></span><br><span class="line"><span class="string">        b (np.ndarray): Output probability matrix of dimension I x K</span></span><br><span class="line"><span class="string">        obs (np.ndarray): Observation sequence of length N</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        path (np.ndarray): Optimal state sequence of length N</span></span><br><span class="line"><span class="string">        delta (np.ndarray): Accumulated probability matrix</span></span><br><span class="line"><span class="string">        E (np.ndarray): Backtracking matrix</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    n_states = a.shape[<span class="number">0</span>]  <span class="comment"># Number of states</span></span><br><span class="line">    T = <span class="built_in">len</span>(obs)  <span class="comment"># Length of observation sequence</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># Initialize D and E matrices</span></span><br><span class="line">    delta = np.zeros((n_states, T))</span><br><span class="line">    E = np.zeros((n_states, T - <span class="number">1</span>)).astype(np.int32)</span><br><span class="line">    delta[:, <span class="number">0</span>] = np.multiply(pi, b[:, obs[<span class="number">0</span>]])</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Compute D and E in a nested loop</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;start walk forward&#x27;</span>.center(<span class="number">30</span>, <span class="string">&#x27;-&#x27;</span>))</span><br><span class="line">    <span class="keyword">for</span> n <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, T):</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(n_states):</span><br><span class="line">            temp_product = np.multiply(a[:, i], delta[:, n - <span class="number">1</span>])</span><br><span class="line">            delta[i, n] = np.<span class="built_in">max</span>(temp_product) * b[i, obs[n]]</span><br><span class="line">            E[i, n - <span class="number">1</span>] = np.argmax(temp_product)</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&#x27;s=&#123;s&#125; and t=&#123;t&#125;: phi[&#123;s&#125;, &#123;t&#125;] = &#123;phi&#125;&#x27;</span>.<span class="built_in">format</span>(s=i, t=n, phi=E[i, n - <span class="number">1</span>]))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Backtracking</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;start backtrace&#x27;</span>.center(<span class="number">30</span>, <span class="string">&#x27;-&#x27;</span>))</span><br><span class="line">    path = np.zeros(T).astype(np.int32)</span><br><span class="line">    path[-<span class="number">1</span>] = np.argmax(delta[:, -<span class="number">1</span>])</span><br><span class="line">    <span class="keyword">for</span> n <span class="keyword">in</span> <span class="built_in">range</span>(T - <span class="number">2</span>, -<span class="number">1</span>, -<span class="number">1</span>):</span><br><span class="line">        path[n] = E[<span class="built_in">int</span>(path[n + <span class="number">1</span>]), n]</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;path[&#123;&#125;] = &#123;&#125;&#x27;</span>.<span class="built_in">format</span>(n, path[n]))</span><br><span class="line">    <span class="keyword">return</span> path, delta, E</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">states = [<span class="string">&#x27;sleeping&#x27;</span>, <span class="string">&#x27;eating&#x27;</span>, <span class="string">&#x27;pooping&#x27;</span>]</span><br><span class="line">pi = [<span class="number">0.35</span>, <span class="number">0.35</span>, <span class="number">0.3</span>]</span><br><span class="line">state_space = pd.Series(pi, index=states, name=<span class="string">&#x27;states&#x27;</span>)</span><br><span class="line"></span><br><span class="line">q_df = pd.DataFrame(columns=states, index=states)</span><br><span class="line">q_df.loc[states[<span class="number">0</span>]] = [<span class="number">0.4</span>, <span class="number">0.2</span>, <span class="number">0.4</span>]</span><br><span class="line">q_df.loc[states[<span class="number">1</span>]] = [<span class="number">0.45</span>, <span class="number">0.45</span>, <span class="number">0.1</span>]</span><br><span class="line">q_df.loc[states[<span class="number">2</span>]] = [<span class="number">0.45</span>, <span class="number">0.25</span>, <span class="number">.3</span>]</span><br><span class="line"></span><br><span class="line">q = q_df.values</span><br><span class="line"></span><br><span class="line">hidden_states = [<span class="string">&#x27;healthy&#x27;</span>, <span class="string">&#x27;sick&#x27;</span>]</span><br><span class="line">pi = np.array([<span class="number">0.5</span>, <span class="number">0.5</span>])</span><br><span class="line">state_space = pd.Series(pi, index=hidden_states, name=<span class="string">&#x27;states&#x27;</span>)</span><br><span class="line"></span><br><span class="line">a_df = pd.DataFrame(columns=hidden_states, index=hidden_states)</span><br><span class="line">a_df.loc[hidden_states[<span class="number">0</span>]] = [<span class="number">0.7</span>, <span class="number">0.3</span>]</span><br><span class="line">a_df.loc[hidden_states[<span class="number">1</span>]] = [<span class="number">0.4</span>, <span class="number">0.6</span>]</span><br><span class="line"></span><br><span class="line">a = a_df.values</span><br><span class="line"></span><br><span class="line">observable_states = states</span><br><span class="line"></span><br><span class="line">b_df = pd.DataFrame(columns=observable_states, index=hidden_states)</span><br><span class="line">b_df.loc[hidden_states[<span class="number">0</span>]] = [<span class="number">0.2</span>, <span class="number">0.6</span>, <span class="number">0.2</span>]</span><br><span class="line">b_df.loc[hidden_states[<span class="number">1</span>]] = [<span class="number">0.4</span>, <span class="number">0.1</span>, <span class="number">0.5</span>]</span><br><span class="line"></span><br><span class="line">b = b_df.values</span><br><span class="line"></span><br><span class="line">obs_map = &#123;<span class="string">&#x27;sleeping&#x27;</span>: <span class="number">0</span>, <span class="string">&#x27;eating&#x27;</span>: <span class="number">1</span>, <span class="string">&#x27;pooping&#x27;</span>: <span class="number">2</span>&#125;</span><br><span class="line">obs = np.array([<span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>])</span><br><span class="line">inv_obs_map = <span class="built_in">dict</span>((v,k) <span class="keyword">for</span> k, v <span class="keyword">in</span> obs_map.items())</span><br><span class="line">obs_seq = [inv_obs_map[v] <span class="keyword">for</span> v <span class="keyword">in</span> <span class="built_in">list</span>(obs)]</span><br><span class="line"></span><br><span class="line">path, delta, phi = viterbi(pi, a, b, obs)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;\nsingle best state path: \n&#x27;</span>, path)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;delta:\n&#x27;</span>, delta)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;phi:\n&#x27;</span>, phi)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">state_map = &#123;<span class="number">0</span>:<span class="string">&#x27;healthy&#x27;</span>, <span class="number">1</span>:<span class="string">&#x27;sick&#x27;</span>&#125;</span><br><span class="line">state_path = [state_map[v] <span class="keyword">for</span> v <span class="keyword">in</span> path]</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(pd.DataFrame()</span><br><span class="line"> .assign(Observation=obs_seq)</span><br><span class="line"> .assign(Best_Path=state_path))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>结果：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">------start walk forward------</span><br><span class="line">s=0 and t=1: phi[0, 1] = 0</span><br><span class="line">s=1 and t=1: phi[1, 1] = 0</span><br><span class="line">s=0 and t=2: phi[0, 2] = 0</span><br><span class="line">s=1 and t=2: phi[1, 2] = 0</span><br><span class="line">s=0 and t=3: phi[0, 3] = 0</span><br><span class="line">s=1 and t=3: phi[1, 3] = 1</span><br><span class="line">s=0 and t=4: phi[0, 4] = 0</span><br><span class="line">s=1 and t=4: phi[1, 4] = 0</span><br><span class="line">s=0 and t=5: phi[0, 5] = 0</span><br><span class="line">s=1 and t=5: phi[1, 5] = 1</span><br><span class="line">s=0 and t=6: phi[0, 6] = 0</span><br><span class="line">s=1 and t=6: phi[1, 6] = 0</span><br><span class="line">s=0 and t=7: phi[0, 7] = 0</span><br><span class="line">s=1 and t=7: phi[1, 7] = 1</span><br><span class="line">s=0 and t=8: phi[0, 8] = 0</span><br><span class="line">s=1 and t=8: phi[1, 8] = 0</span><br><span class="line">s=0 and t=9: phi[0, 9] = 0</span><br><span class="line">s=1 and t=9: phi[1, 9] = 1</span><br><span class="line">s=0 and t=10: phi[0, 10] = 1</span><br><span class="line">s=1 and t=10: phi[1, 10] = 1</span><br><span class="line">s=0 and t=11: phi[0, 11] = 1</span><br><span class="line">s=1 and t=11: phi[1, 11] = 1</span><br><span class="line">s=0 and t=12: phi[0, 12] = 1</span><br><span class="line">s=1 and t=12: phi[1, 12] = 1</span><br><span class="line">s=0 and t=13: phi[0, 13] = 0</span><br><span class="line">s=1 and t=13: phi[1, 13] = 0</span><br><span class="line">s=0 and t=14: phi[0, 14] = 0</span><br><span class="line">s=1 and t=14: phi[1, 14] = 1</span><br><span class="line">-------start backtrace--------</span><br><span class="line">path[13] = 0</span><br><span class="line">path[12] = 0</span><br><span class="line">path[11] = 1</span><br><span class="line">path[10] = 1</span><br><span class="line">path[9] = 1</span><br><span class="line">path[8] = 1</span><br><span class="line">path[7] = 0</span><br><span class="line">path[6] = 0</span><br><span class="line">path[5] = 0</span><br><span class="line">path[4] = 0</span><br><span class="line">path[3] = 0</span><br><span class="line">path[2] = 0</span><br><span class="line">path[1] = 0</span><br><span class="line">path[0] = 0</span><br><span class="line"></span><br><span class="line">single best state path: </span><br><span class="line"> [0 0 0 0 0 0 0 0 1 1 1 1 0 0 0]</span><br><span class="line">delta:</span><br><span class="line"> [[3.00000000e-01 1.26000000e-01 1.76400000e-02 7.40880000e-03</span><br><span class="line">  1.03723200e-03 4.35637440e-04 6.09892416e-05 2.56154815e-05</span><br><span class="line">  3.58616741e-06 5.02063437e-07 7.37725866e-08 2.21317760e-08</span><br><span class="line">  1.59348787e-08 2.23088302e-09 9.36970868e-10]</span><br><span class="line"> [5.00000000e-02 9.00000000e-03 1.89000000e-02 1.13400000e-03</span><br><span class="line">  8.89056000e-04 5.33433600e-05 6.53456160e-05 3.92073696e-06</span><br><span class="line">  3.07385778e-06 9.22157333e-07 2.76647200e-07 6.63953280e-08</span><br><span class="line">  3.98371968e-09 1.91218545e-09 1.14731127e-10]]</span><br><span class="line">phi:</span><br><span class="line"> [[0 0 0 0 0 0 0 0 0 1 1 1 0 0]</span><br><span class="line"> [0 0 1 0 1 0 1 0 1 1 1 1 0 1]]</span><br><span class="line">   Observation Best_Path</span><br><span class="line">0       eating   healthy</span><br><span class="line">1       eating   healthy</span><br><span class="line">2      pooping   healthy</span><br><span class="line">3       eating   healthy</span><br><span class="line">4     sleeping   healthy</span><br><span class="line">5       eating   healthy</span><br><span class="line">6      pooping   healthy</span><br><span class="line">7       eating   healthy</span><br><span class="line">8     sleeping      sick</span><br><span class="line">9      pooping      sick</span><br><span class="line">10     pooping      sick</span><br><span class="line">11    sleeping      sick</span><br><span class="line">12      eating   healthy</span><br><span class="line">13    sleeping   healthy</span><br><span class="line">14      eating   healthy</span><br><span class="line"></span><br><span class="line">Process finished with <span class="built_in">exit</span> code 0</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>相关代码: <a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/commit/6cf0beca368d6c94f4a19c87f43b31e63306e0a3">https://github.com/geasyheart/algo/commit/6cf0beca368d6c94f4a19c87f43b31e63306e0a3</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/06/16/%E4%BB%8B%E7%BB%8D%E9%9A%90%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/8/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/10/">Next &amp;raquo;</a>
@@ -1117,7 +1100,7 @@ var _hmt = _hmt || [];
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2024 张宇
+    		&copy; 2025 张宇
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten

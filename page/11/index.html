@@ -206,6 +206,133 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-python-sub一次性替换" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/06/28/python-sub%E4%B8%80%E6%AC%A1%E6%80%A7%E6%9B%BF%E6%8D%A2/">python sub一次性替换</a>
+    </h1>
+  
+
+        
+        <a href="/2019/06/28/python-sub%E4%B8%80%E6%AC%A1%E6%80%A7%E6%9B%BF%E6%8D%A2/" class="archive-article-date">
+  	<time datetime="2019-06-28T02:01:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-06-28</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="问题来源"><a href="#问题来源" class="headerlink" title="问题来源"></a>问题来源</h2><p>字符串一次替换，为什么不能多次替换呢，例如</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">s = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">&lt;xml&gt;</span></span><br><span class="line"><span class="string">    &lt;field name=&quot;SALARYCATALOG_ID&quot;&gt;150&lt;/field&gt;</span></span><br><span class="line"><span class="string">    &lt;field name=&quot;SALARYCATALOG_ID&quot;&gt;170&lt;/field&gt;</span></span><br><span class="line"><span class="string">&lt;/xml&gt;</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>假设150要被替换成170，而170要被替换成190，如果for循环的话，</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">s.replace(<span class="string">&#x27;&lt;field name=&quot;SALARYCATALOG_ID&quot;&gt;150&lt;/field&gt;&#x27;</span>, <span class="string">&#x27;&lt;field name=&quot;SALARYCATALOG_ID&quot;&gt;170&lt;/field&gt;&#x27;</span>) <span class="comment"># 第一次</span></span><br><span class="line">s.replace(<span class="string">&#x27;&lt;field name=&quot;SALARYCATALOG_ID&quot;&gt;170&lt;/field&gt;&#x27;</span>, <span class="string">&#x27;&lt;field name=&quot;SALARYCATALOG_ID&quot;&gt;190&lt;/field&gt;&#x27;</span>) <span class="comment"># 第二次</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>就会导致结果出现偏差，整个字符串都会变成190，那么应该有种方法，可以一次性的匹配完并且返回结果。</p>
+<h2 id="解决方式"><a href="#解决方式" class="headerlink" title="解决方式"></a>解决方式</h2><p>关于re.sub.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Dict</span></span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">retrieve_formula</span>(<span class="params">old_formula: <span class="built_in">str</span>, field_mapping: <span class="type">Dict</span></span>):</span><br><span class="line">    regexp = re.<span class="built_in">compile</span>(</span><br><span class="line">                <span class="string">r&#x27;&lt;field name=&quot;(BUSINESSUNIT_ID|PAYVAR_ID|SALARYCATALOG_ID)&quot;&gt;(\d+)&lt;/field&gt;&#x27;</span></span><br><span class="line">            )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">rep</span>(<span class="params">match_data</span>):</span><br><span class="line">        <span class="comment"># 自定义的函数，匹配到每次都会走到，然后统一返回</span></span><br><span class="line">        <span class="comment"># import ipdb;ipdb.set_trace() # 自行加断点调试</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            field_name = match_data.group(<span class="number">1</span>)</span><br><span class="line">            replaced_id = field_mapping[field_name][match_data.group(<span class="number">2</span>)]</span><br><span class="line">        <span class="keyword">except</span> KeyError:</span><br><span class="line">            <span class="keyword">return</span> match_data.group(<span class="number">0</span>)</span><br><span class="line">        <span class="keyword">except</span> Exception:</span><br><span class="line">            <span class="keyword">return</span> match_data.group(<span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&#x27;&lt;field name=&quot;&#123;&#125;&quot;&gt;&#123;&#125;&lt;/field&gt;&#x27;</span>.<span class="built_in">format</span>(field_name, replaced_id)</span><br><span class="line">    <span class="keyword">return</span> re.sub(regexp, rep, old_formula)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="情况一"><a href="#情况一" class="headerlink" title="情况一"></a>情况一</h3><ol>
+<li>没有一处匹配的情况</li>
+</ol>
+<blockquote>
+<p>实际会被匹配到，但是替换值时会触发KeyError，所以返回group(0)</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">formula_1 = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">                &lt;xml&gt;</span></span><br><span class="line"><span class="string">                    &lt;field name=&quot;SALARYCATALOG_ID&quot;&gt;150&lt;/field&gt;</span></span><br><span class="line"><span class="string">                    &lt;field name=&quot;BUSINESSUNIT_ID&quot;&gt;973&lt;/field&gt;</span></span><br><span class="line"><span class="string">                    &lt;field name=&quot;PAYVAR_ID&quot;&gt;256&lt;/field&gt;</span></span><br><span class="line"><span class="string">                &lt;/xml&gt;</span></span><br><span class="line"><span class="string">                &quot;&quot;&quot;</span></span><br><span class="line">field_mapping = &#123;</span><br><span class="line">    <span class="string">&quot;SALARYCATALOG_ID&quot;</span>: &#123;&#125;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>匹配到一处的情况</li>
+</ol>
+<blockquote>
+<p>由于150会被160替换，所以只有此处不会触发KeyError</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">formula_2 = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        &lt;xml&gt;</span></span><br><span class="line"><span class="string">            &lt;field name=&quot;SALARYCATALOG_ID&quot;&gt;150&lt;/field&gt;</span></span><br><span class="line"><span class="string">            &lt;field name=&quot;BUSINESSUNIT_ID&quot;&gt;973&lt;/field&gt;</span></span><br><span class="line"><span class="string">            &lt;field name=&quot;PAYVAR_ID&quot;&gt;256&lt;/field&gt;</span></span><br><span class="line"><span class="string">        &lt;/xml&gt;</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">field_mapping = &#123;</span><br><span class="line">    <span class="string">&quot;SALARYCATALOG_ID&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;150&quot;</span>: <span class="string">&quot;160&quot;</span>,</span><br><span class="line">        <span class="string">&quot;170&quot;</span>: <span class="string">&quot;180&quot;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>匹配多处的情况，情况一：一个类别出现多次</li>
+</ol>
+<blockquote>
+<p>150会被160替换，170会被180替换，由于sub只走一次，而rep函数会被循环匹配</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">formula_3 = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        &lt;xml&gt;</span></span><br><span class="line"><span class="string">            &lt;field name=&quot;SALARYCATALOG_ID&quot;&gt;150&lt;/field&gt;</span></span><br><span class="line"><span class="string">            &lt;field name=&quot;BUSINESSUNIT_ID&quot;&gt;973&lt;/field&gt;</span></span><br><span class="line"><span class="string">            &lt;field name=&quot;PAYVAR_ID&quot;&gt;256&lt;/field&gt;</span></span><br><span class="line"><span class="string">            &lt;field name=&quot;SALARYCATALOG_ID&quot;&gt;170&lt;/field&gt;</span></span><br><span class="line"><span class="string">        &lt;/xml&gt;</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">field_mapping = &#123;</span><br><span class="line">    <span class="string">&quot;SALARYCATALOG_ID&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;150&quot;</span>: <span class="string">&quot;160&quot;</span>,</span><br><span class="line">        <span class="string">&quot;170&quot;</span>: <span class="string">&quot;180&quot;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>匹配多处的情况，情况二：多次匹配</li>
+</ol>
+<blockquote>
+<p>同理如上</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">formula_4 = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        &lt;xml&gt;</span></span><br><span class="line"><span class="string">            &lt;field name=&quot;SALARYCATALOG_ID&quot;&gt;150&lt;/field&gt;</span></span><br><span class="line"><span class="string">            &lt;field name=&quot;BUSINESSUNIT_ID&quot;&gt;973&lt;/field&gt;</span></span><br><span class="line"><span class="string">            &lt;field name=&quot;PAYVAR_ID&quot;&gt;256&lt;/field&gt;</span></span><br><span class="line"><span class="string">            &lt;field name=&quot;SALARYCATALOG_ID&quot;&gt;170&lt;/field&gt;</span></span><br><span class="line"><span class="string">        &lt;/xml&gt;</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">field_mapping = &#123;</span><br><span class="line">    <span class="string">&quot;SALARYCATALOG_ID&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;150&quot;</span>: <span class="string">&quot;160&quot;</span>,</span><br><span class="line">        <span class="string">&quot;170&quot;</span>: <span class="string">&quot;180&quot;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">&quot;BUSINESSUNIT_ID&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;973&quot;</span>: <span class="string">&quot;900&quot;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">&quot;PAYVAR_ID&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;256&quot;</span>: <span class="string">&quot;300&quot;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>sub可以传函数是一个非常有用的做法，其中rep函数会在sub匹配到多次调用，然后最终sub一次返回，这个非常有用。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2019/06/28/python-sub%E4%B8%80%E6%AC%A1%E6%80%A7%E6%9B%BF%E6%8D%A2/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-APP首页框架搭建" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1110,91 +1237,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-centos7安装docker" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/09/04/centos7%E5%AE%89%E8%A3%85docker/">centos7安装docker</a>
-    </h1>
-  
-
-        
-        <a href="/2018/09/04/centos7%E5%AE%89%E8%A3%85docker/" class="archive-article-date">
-  	<time datetime="2018-09-04T01:15:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-09-04</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><a target="_blank" rel="noopener" href="https://docs.docker.com/install/linux/docker-ce/centos/#install-docker-ce-1">官方文档</a><br><a target="_blank" rel="noopener" href="https://mirrors.tuna.tsinghua.edu.cn/help/docker-ce/">清华源</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/09/04/centos7%E5%AE%89%E8%A3%85docker/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/10/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><span class="page-number current">11</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/12/">Next &amp;raquo;</a>
@@ -1209,7 +1251,7 @@ var _hmt = _hmt || [];
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2024 张宇
+    		&copy; 2025 张宇
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten

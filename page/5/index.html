@@ -206,6 +206,94 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-获取全部路径以及最短路径" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/05/17/%E8%8E%B7%E5%8F%96%E5%85%A8%E9%83%A8%E8%B7%AF%E5%BE%84%E4%BB%A5%E5%8F%8A%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/">获取全部路径以及最短路径</a>
+    </h1>
+  
+
+        
+        <a href="/2022/05/17/%E8%8E%B7%E5%8F%96%E5%85%A8%E9%83%A8%E8%B7%AF%E5%BE%84%E4%BB%A5%E5%8F%8A%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/" class="archive-article-date">
+  	<time datetime="2022-05-17T03:19:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-05-17</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="keyword">import</span> math</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">List</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">trace_path</span>(<span class="params">vec, pathes</span>):</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> vec:</span><br><span class="line">        <span class="keyword">return</span> pathes</span><br><span class="line">    valid_pathes = []</span><br><span class="line">    <span class="keyword">for</span> item <span class="keyword">in</span> vec[<span class="number">0</span>]:</span><br><span class="line">        <span class="keyword">for</span> path <span class="keyword">in</span> pathes:</span><br><span class="line">            <span class="keyword">if</span> item &gt; path[-<span class="number">1</span>]:</span><br><span class="line">                valid_pathes.append([*path, item])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> trace_path(vec=vec[<span class="number">1</span>:], pathes=valid_pathes)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_all_valid_path</span>(<span class="params">vec: <span class="type">List</span>[<span class="type">List</span>[<span class="built_in">int</span>]]</span>) -&gt; <span class="type">List</span>[<span class="type">List</span>[<span class="built_in">int</span>]]:</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> vec: <span class="keyword">return</span> []</span><br><span class="line">    <span class="keyword">for</span> v <span class="keyword">in</span> vec:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> v:</span><br><span class="line">            <span class="keyword">return</span> []</span><br><span class="line">    <span class="keyword">return</span> trace_path(vec=vec[<span class="number">1</span>:], pathes=[[i] <span class="keyword">for</span> i <span class="keyword">in</span> vec[<span class="number">0</span>]])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_sub_sum</span>(<span class="params">path: <span class="type">List</span>[<span class="built_in">int</span>]</span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line">    _<span class="built_in">sum</span> = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> index, item <span class="keyword">in</span> <span class="built_in">enumerate</span>(path):</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            next_item = path[index + <span class="number">1</span>]</span><br><span class="line">            _<span class="built_in">sum</span> += (next_item - item)</span><br><span class="line">        <span class="keyword">except</span> IndexError:</span><br><span class="line">            <span class="keyword">pass</span></span><br><span class="line">    <span class="keyword">return</span> _<span class="built_in">sum</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_shortest_path</span>(<span class="params">vec: <span class="type">List</span>[<span class="type">List</span>[<span class="built_in">int</span>]]</span>) -&gt; <span class="type">List</span>[<span class="built_in">int</span>]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    输出最短的那个路径</span></span><br><span class="line"><span class="string">    :param vec:</span></span><br><span class="line"><span class="string">    :return:</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    pathes = get_all_valid_path(vec=vec)</span><br><span class="line">    short_path, short_sum = [], math.inf</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> path <span class="keyword">in</span> pathes:</span><br><span class="line">        _<span class="built_in">sum</span> = _sub_sum(path=path)</span><br><span class="line">        <span class="keyword">if</span> short_sum &gt; _<span class="built_in">sum</span>:</span><br><span class="line">            short_path = path</span><br><span class="line">            short_sum = _<span class="built_in">sum</span></span><br><span class="line">    <span class="keyword">return</span> short_path</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> unittest <span class="keyword">import</span> TestCase</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> path <span class="keyword">import</span> get_all_valid_path, get_shortest_path</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TestPath</span>(<span class="title class_ inherited__">TestCase</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">test_sample</span>(<span class="params">self</span>):</span><br><span class="line">        self.assertEqual(get_all_valid_path([]), [])</span><br><span class="line"></span><br><span class="line">        self.assertEqual(get_all_valid_path([[<span class="number">1</span>, <span class="number">3</span>], [<span class="number">2</span>, <span class="number">5</span>]]), [[<span class="number">1</span>, <span class="number">2</span>], [<span class="number">1</span>, <span class="number">5</span>], [<span class="number">3</span>, <span class="number">5</span>]])</span><br><span class="line"></span><br><span class="line">        self.assertEqual(get_shortest_path([[<span class="number">1</span>, <span class="number">3</span>], [<span class="number">2</span>, <span class="number">5</span>]]), [<span class="number">1</span>, <span class="number">2</span>])</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/05/17/%E8%8E%B7%E5%8F%96%E5%85%A8%E9%83%A8%E8%B7%AF%E5%BE%84%E4%BB%A5%E5%8F%8A%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-使用GAN思想进行纠错" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1523,90 +1611,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-transformers-tokenizer备忘" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/12/29/transformers-tokenizer%E5%A4%87%E5%BF%98/">transformers-tokenizer备忘</a>
-    </h1>
-  
-
-        
-        <a href="/2021/12/29/transformers-tokenizer%E5%A4%87%E5%BF%98/" class="archive-article-date">
-  	<time datetime="2021-12-29T06:37:05.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-29</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>对transformers库不常用记录，方便回溯。</p>
-<h2 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h2><h3 id="1-fast的含义"><a href="#1-fast的含义" class="headerlink" title="1. fast的含义"></a>1. fast的含义</h3><p>比如<code>BertTokenizerFast</code>,<code>use_fast</code>, 示例如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AutoTokenizer.from_pretrained(&#x27;hfl/chinese-electra-180g-small-discriminator&#x27;, use_fast=True)</span><br></pre></td></tr></table></figure>
-
-<p>它的含义是使用rust加速速度。</p>
-<p>嘿嘿，rust现在要进入linux内核了，恭喜恭喜。</p>
-<h3 id="2-tokenizer"><a href="#2-tokenizer" class="headerlink" title="2. tokenizer"></a>2. tokenizer</h3><p>比如常见的<code>convert_ids_to_tokens</code>，<code>encode</code>, <code>encode_plus</code>等等，下面记录一种对句子对的使用方式.</p>
-<p>完整例子可参考<a target="_blank" rel="noopener" href="https://github.com/HIT-SCIR/plm-nlp-code/blob/main/chp7/finetune_bert_mrc.py">ne_bert_mrc.py</a>。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> AutoTokenizer, BertTokenizerFast</span><br><span class="line"></span><br><span class="line">tokenizer = AutoTokenizer.from_pretrained(<span class="string">&#x27;hfl/chinese-electra-180g-small-discriminator&#x27;</span>, use_fast=<span class="literal">True</span>)</span><br><span class="line">question = <span class="string">&#x27;南京天气怎么样&#x27;</span>  <span class="comment"># 7</span></span><br><span class="line">context = <span class="string">&#x27;我今天早上站在阳台看天空，今天南京天气很好！&#x27;</span>  <span class="comment"># 22</span></span><br><span class="line"></span><br><span class="line">tokenized_examples = tokenizer(</span><br><span class="line">    question,  <span class="comment"># 问题文本</span></span><br><span class="line">    context,  <span class="comment"># 篇章文本</span></span><br><span class="line">    truncation=<span class="string">&quot;only_second&quot;</span>,  <span class="comment"># 截断只发生在第二部分，即篇章</span></span><br><span class="line">    max_length=<span class="number">20</span>,  <span class="comment"># 设定最大长度为384</span></span><br><span class="line">    <span class="comment"># stride=5,  # 设定篇章切片步长为128</span></span><br><span class="line">    return_overflowing_tokens=<span class="literal">True</span>,  <span class="comment"># 返回超出最大长度的标记，将篇章切成多片</span></span><br><span class="line">    return_offsets_mapping=<span class="literal">True</span>,  <span class="comment"># 返回偏置信息，用于对齐答案位置</span></span><br><span class="line">    padding=<span class="string">&quot;max_length&quot;</span>,  <span class="comment"># 按最大长度进行补齐</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(tokenized_examples)</span><br><span class="line">input_ids = tokenized_examples[<span class="string">&#x27;input_ids&#x27;</span>]</span><br><span class="line">token_type_ids = tokenized_examples[<span class="string">&#x27;token_type_ids&#x27;</span>]</span><br><span class="line">attention_masks = tokenized_examples[<span class="string">&#x27;attention_mask&#x27;</span>]</span><br><span class="line">offset_mappings = tokenized_examples[<span class="string">&#x27;offset_mapping&#x27;</span>]</span><br><span class="line">overflow_to_sample_mapping = tokenized_examples[<span class="string">&#x27;overflow_to_sample_mapping&#x27;</span>]</span><br><span class="line"><span class="keyword">for</span> index, _input_ids <span class="keyword">in</span> <span class="built_in">enumerate</span>(input_ids):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;input_ids -&gt; &#x27;</span>, tokenizer.convert_ids_to_tokens(_input_ids))</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;token_type_ids -&gt; &#x27;</span>, token_type_ids[index])</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;attention_masks -&gt; &#x27;</span>, attention_masks[index])</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;offset_mappings -&gt; &#x27;</span>, offset_mappings[index])</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;overflow_to_sample_mapping -&gt; &#x27;</span>, overflow_to_sample_mapping[index])</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>可以自行改动这个例子，其中stride默认注释掉了，默认为0。 </p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/12/29/transformers-tokenizer%E5%A4%87%E5%BF%98/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/4/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/6/">Next &amp;raquo;</a>
@@ -1621,7 +1625,7 @@ var _hmt = _hmt || [];
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2024 张宇
+    		&copy; 2025 张宇
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten

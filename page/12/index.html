@@ -206,6 +206,91 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-centos7安装docker" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/09/04/centos7%E5%AE%89%E8%A3%85docker/">centos7安装docker</a>
+    </h1>
+  
+
+        
+        <a href="/2018/09/04/centos7%E5%AE%89%E8%A3%85docker/" class="archive-article-date">
+  	<time datetime="2018-09-04T01:15:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-09-04</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><a target="_blank" rel="noopener" href="https://docs.docker.com/install/linux/docker-ce/centos/#install-docker-ce-1">官方文档</a><br><a target="_blank" rel="noopener" href="https://mirrors.tuna.tsinghua.edu.cn/help/docker-ce/">清华源</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/09/04/centos7%E5%AE%89%E8%A3%85docker/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-游阅江楼记" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1241,130 +1326,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-python多线程教程-并发与并行" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/11/python%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%95%99%E7%A8%8B-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%B9%B6%E8%A1%8C/">python多线程教程:并发与并行</a>
-    </h1>
-  
-
-        
-        <a href="/2018/04/11/python%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%95%99%E7%A8%8B-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%B9%B6%E8%A1%8C/" class="archive-article-date">
-  	<time datetime="2018-04-11T14:49:06.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-11</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>各种激烈的讨论都会经常的提到Python的多线程工作是多么的困难，指向被称为全局解释器锁阻碍了Python代码不能多线程同时执行。由于这个，如果你不是一个Python开发者以及你来自其他语言例如C++活着Java,线程模块表现出来的行为可能不是你所期望的那样。但是必须指出的是你仍可以写出并发或者并行的代码并使其表现出色，只要考虑全面。如果你还没有读到，我建议你看一下 Eqbal Quran’s 在Toptal博客上的<a target="_blank" rel="noopener" href="https://www.toptal.com/ruby/ruby-concurrency-and-parallelism-a-practical-primer">article on concurrency and parallelism in Ruby</a>。</p>
-<p>在Python并发教程中，我们将会写出一个简单的Python脚本去下载来自Imgur排行靠前的图片，我们将从一个顺序下载的版本开始，或一次一个，作为先决条件，你将不得不注册一个<a target="_blank" rel="noopener" href="https://api.imgur.com/oauth2/addclient">应用在Imgur</a>,如果你还没有创建一个Imgur账户，请先创建一个。</p>
-<p>这个教程的脚本已经在Python3.4.2上测试通过，稍微作修改，就可以运行在Python2，urllib改动最大在这两个Python版本上。</p>
-<h3 id="开始在Python上使用多线程"><a href="#开始在Python上使用多线程" class="headerlink" title="开始在Python上使用多线程"></a>开始在Python上使用多线程</h3><p>让我们开始创建一个Python模块，并将其命名成”download.py”, 这个文件将会包含所有需要的函数去获取图片列表以及下载它们。我们将会分开这些函数为三个分离的函数。</p>
-<ol>
-<li>get_links</li>
-<li>download_link</li>
-<li>setup_download_dir</li>
-</ol>
-<p>第三个函数, “setup_download_dir”, 将会被用于创建下载保存目录如果不存在。</p>
-<p>Imgur’s ApI要求HTTP请求头上携带客户端ID的”Authorization”标头，你可以从已经注册的Imgur的应用面板上查看客户端ID，请求返回结果会是JSON格式。我们可以使用Python的标准JSON库去解码。下载这些图片是一个非常简单的任务，只要我们获取到这些图片的URL以及将它们写入文件。</p>
-<p>这个脚本看起来是这样的:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> urllib.request <span class="keyword">import</span> urlopen, Request</span><br><span class="line"></span><br><span class="line">logger = logging.getLogger(__name__)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_links</span>(<span class="params">client_id</span>):</span><br><span class="line">   headers = &#123;<span class="string">&#x27;Authorization&#x27;</span>: <span class="string">&#x27;Client-ID &#123;&#125;&#x27;</span>.<span class="built_in">format</span>(client_id)&#125;</span><br><span class="line">   req = Request(<span class="string">&#x27;https://api.imgur.com/3/gallery/&#x27;</span>, headers=headers, method=<span class="string">&#x27;GET&#x27;</span>)</span><br><span class="line">   <span class="keyword">with</span> urlopen(req) <span class="keyword">as</span> resp:</span><br><span class="line">       data = json.loads(resp.readall().decode(<span class="string">&#x27;utf-8&#x27;</span>))</span><br><span class="line">   <span class="keyword">return</span> <span class="built_in">map</span>(<span class="keyword">lambda</span> item: item[<span class="string">&#x27;link&#x27;</span>], data[<span class="string">&#x27;data&#x27;</span>])</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">download_link</span>(<span class="params">directory, link</span>):</span><br><span class="line">   logger.info(<span class="string">&#x27;Downloading %s&#x27;</span>, link)</span><br><span class="line">   download_path = directory / os.path.basename(link)</span><br><span class="line">   <span class="keyword">with</span> urlopen(link) <span class="keyword">as</span> image, download_path.<span class="built_in">open</span>(<span class="string">&#x27;wb&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">       f.write(image.readall())</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">setup_download_dir</span>():</span><br><span class="line">   download_dir = Path(<span class="string">&#x27;images&#x27;</span>)</span><br><span class="line">   <span class="keyword">if</span> <span class="keyword">not</span> download_dir.exists():</span><br><span class="line">       download_dir.mkdir()</span><br><span class="line">   <span class="keyword">return</span> download_dir</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>接下来，我们将会写一个模块并使用这些函数去下载这些图片，一个接着一个，我们将会将其命名成”simple.py”,这个首先将会包含主函数，最初的Imgur图片下载器。这个模块将会从环境变量”IMGUR_CLIENT_ID”中接收Imgur的客户端ID，它将会在”setup_download_dir”中被调用去创建下载目标目录，最终，它会获取一个图片列表使用”get_links”函数，过滤所有的GIF和唱片URLs，然后使用”download_link”区下载以及保存每一张图片到硬盘中，这个”single.py”看起来如下:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> download <span class="keyword">import</span> setup_download_dir, get_links, download_link</span><br><span class="line"></span><br><span class="line">logging.basicConfig(level=logging.DEBUG, <span class="built_in">format</span>=<span class="string">&#x27;%(asctime)s - %(name)s - %(levelname)s - %(message)s&#x27;</span>)</span><br><span class="line">logging.getLogger(<span class="string">&#x27;requests&#x27;</span>).setLevel(logging.CRITICAL)</span><br><span class="line">logger = logging.getLogger(__name__)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">   ts = time()</span><br><span class="line">   client_id = os.getenv(<span class="string">&#x27;IMGUR_CLIENT_ID&#x27;</span>)</span><br><span class="line">   <span class="keyword">if</span> <span class="keyword">not</span> client_id:</span><br><span class="line">       <span class="keyword">raise</span> Exception(<span class="string">&quot;Couldn&#x27;t find IMGUR_CLIENT_ID environment variable!&quot;</span>)</span><br><span class="line">   download_dir = setup_download_dir()</span><br><span class="line">   links = [l <span class="keyword">for</span> l <span class="keyword">in</span> get_links(client_id) <span class="keyword">if</span> l.endswith(<span class="string">&#x27;.jpg&#x27;</span>)]</span><br><span class="line">   <span class="keyword">for</span> link <span class="keyword">in</span> links:</span><br><span class="line">       download_link(download_dir, link)</span><br><span class="line">   <span class="built_in">print</span>(<span class="string">&#x27;Took &#123;&#125;s&#x27;</span>.<span class="built_in">format</span>(time() - ts))</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">   main()</span><br></pre></td></tr></table></figure>
-
-<p>在我的笔记本上，这个脚本下载91张图片使用了19.4秒，请注意这些数字将因你的网络环境而异。但是我们我们想要下载更多的图片呢？或者900张，而不是90张，每一张图片平均使用0.2秒，900张图片将会使用大约3分钟，那么9000张图片将会使用掉30分钟。好消息是通过并发或并行介绍，我们可以显著的加速。</p>
-<p>所有后续的代码示例将只会导入新的和特定的导入语句，为了方便，这些Python脚本可以在<a target="_blank" rel="noopener" href="https://github.com/volker48/python-concurrency">这个GitHub仓库</a>找到。</p>
-<h3 id="使用多线程进行并发和并行"><a href="#使用多线程进行并发和并行" class="headerlink" title="使用多线程进行并发和并行"></a>使用多线程进行并发和并行</h3><p>线程时最为熟知的方法实现Python并发与并行。线程通常由操作系统提供的功能。线程比进程更为轻量级，并且共用同一内存空间。</p>
-<p>在我们的Python线程教程中，我们将会写一个新的模块代替”single.py”,这个模块将会创建一个8个线程的池，总共包含主线程一共9个线程。我选择8个线程，因为我的电脑有8个CPU以及每个工作线程运行在每个CPU核心上同时运行看起来会是一个好的选择，在练习上，这个数字是基于其他因素选择得应更为仔细，例如其他应用以及服务运行在同一台机器上。</p>
-<p>这个和之前的一个非常相似，除了我们拥有了一个新类，DownloadWorker, 是Thread类下的一个子类，运行方法被重写了。它运行一个无限循环，在每一次的迭代上，它会调用”self.queue.get”去试着从线程安全的队列中获取一个URL，它会阻塞直到队列中有其他worker处理。一旦worker从队列中接收到一条，它接下来将会调用和之前脚本相同的”download_link”方法去下载图片以及保存到图片目录。在下载完成后，worker通知队列这个任务已经完成，这是非常重要的，因为队列跟踪有多少任务入队。然后调用”queue.join()”将会阻塞主线程如果workers没有通知它们已经完成了任务。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> queue <span class="keyword">import</span> Queue</span><br><span class="line"><span class="keyword">from</span> threading <span class="keyword">import</span> Thread</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">DownloadWorker</span>(<span class="title class_ inherited__">Thread</span>):</span><br><span class="line">   <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, queue</span>):</span><br><span class="line">       Thread.__init__(self)</span><br><span class="line">       self.queue = queue</span><br><span class="line"></span><br><span class="line">   <span class="keyword">def</span> <span class="title function_">run</span>(<span class="params">self</span>):</span><br><span class="line">       <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">           <span class="comment"># Get the work from the queue and expand the tuple</span></span><br><span class="line">           directory, link = self.queue.get()</span><br><span class="line">           download_link(directory, link)</span><br><span class="line">           self.queue.task_done()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">   ts = time()</span><br><span class="line">   client_id = os.getenv(<span class="string">&#x27;IMGUR_CLIENT_ID&#x27;</span>)</span><br><span class="line">   <span class="keyword">if</span> <span class="keyword">not</span> client_id:</span><br><span class="line">       <span class="keyword">raise</span> Exception(<span class="string">&quot;Couldn&#x27;t find IMGUR_CLIENT_ID environment variable!&quot;</span>)</span><br><span class="line">   download_dir = setup_download_dir()</span><br><span class="line">   links = [l <span class="keyword">for</span> l <span class="keyword">in</span> get_links(client_id) <span class="keyword">if</span> l.endswith(<span class="string">&#x27;.jpg&#x27;</span>)]</span><br><span class="line">   <span class="comment"># Create a queue to communicate with the worker threads</span></span><br><span class="line">   queue = Queue()</span><br><span class="line">   <span class="comment"># Create 8 worker threads</span></span><br><span class="line">   <span class="keyword">for</span> x <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">8</span>):</span><br><span class="line">       worker = DownloadWorker(queue)</span><br><span class="line">       <span class="comment"># Setting daemon to True will let the main thread exit even though the workers are blocking</span></span><br><span class="line">       worker.daemon = <span class="literal">True</span></span><br><span class="line">       worker.start()</span><br><span class="line">   <span class="comment"># Put the tasks into the queue as a tuple</span></span><br><span class="line">   <span class="keyword">for</span> link <span class="keyword">in</span> links:</span><br><span class="line">       logger.info(<span class="string">&#x27;Queueing &#123;&#125;&#x27;</span>.<span class="built_in">format</span>(link))</span><br><span class="line">       queue.put((download_dir, link))</span><br><span class="line">   <span class="comment"># Causes the main thread to wait for the queue to finish processing all the tasks</span></span><br><span class="line">   queue.join()</span><br><span class="line">   <span class="built_in">print</span>(<span class="string">&#x27;Took &#123;&#125;&#x27;</span>.<span class="built_in">format</span>(time() - ts))</span><br></pre></td></tr></table></figure>
-
-<p>运行这个脚本在同一台机器上会更快的获取结果，只用了4.1秒!和之前的相比快了4.7倍。虽然这要快很多，但是值得提及的是由于GIL的原因同一时刻只有一个线程被执行，因此，这个代码是并发的但是不是并行的，相比之前快的原因在于这是一个IO绑定任务。处理器在下载这些图片时并不需要太耗费力气。大部分时间使用在等待网络上。这也是为什么线程可以提供大幅度的速度提升。处理器可以切换上下文在这些线程无论其中的哪一个准备去做一些任务。在Python或者任务其他带有GIL解释性语言使用线程模块实际上可能导致性能下降，如果你的代码是CPU绑定任务，例如解压文件，使用多线程模块将会使结果更慢，对于CPU绑定的任务来讲和真正的并行执行，我们将会使用multiprocessing模块。</p>
-<p>事实上参考Python的实现，CPython，拥有GIL，不是所有的Python解释器都是这样。例如，IronPython,一个是使用.NET 框架实现的Python解释器，并不会有GIL，诸如Jython,基于Java实现的，你可以<a target="_blank" rel="noopener" href="https://wiki.python.org/moin/PythonImplementations#Working_Implementations">在这</a>找到一系列Python解释器。</p>
-<h3 id="使用多进程"><a href="#使用多进程" class="headerlink" title="使用多进程"></a>使用多进程</h3><p>多进程模块比多线程模块更容易使用，因为我们不需要添加类似于线程示例的类。唯一改变的是主函数。</p>
-<p>使用多进程我们可以创建一个进程池，使用提供的map方法，我们可以将列表中的URLs放入池中。将会产生8个新进程并使用每个进程并行下载这些图片，这是真正的并行。但它也带来的成本。脚本的整个内存被复制到各个子进程中。在这个简单的例子中，这不是什么大不了的事情，但是它可能很容易产生严重开销。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> functools <span class="keyword">import</span> partial</span><br><span class="line"><span class="keyword">from</span> multiprocessing.pool <span class="keyword">import</span> Pool</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">   ts = time()</span><br><span class="line">   client_id = os.getenv(<span class="string">&#x27;IMGUR_CLIENT_ID&#x27;</span>)</span><br><span class="line">   <span class="keyword">if</span> <span class="keyword">not</span> client_id:</span><br><span class="line">       <span class="keyword">raise</span> Exception(<span class="string">&quot;Couldn&#x27;t find IMGUR_CLIENT_ID environment variable!&quot;</span>)</span><br><span class="line">   download_dir = setup_download_dir()</span><br><span class="line">   links = [l <span class="keyword">for</span> l <span class="keyword">in</span> get_links(client_id) <span class="keyword">if</span> l.endswith(<span class="string">&#x27;.jpg&#x27;</span>)]</span><br><span class="line">   download = partial(download_link, download_dir)</span><br><span class="line">   <span class="keyword">with</span> Pool(<span class="number">8</span>) <span class="keyword">as</span> p:</span><br><span class="line">       p.<span class="built_in">map</span>(download, links)</span><br><span class="line">   <span class="built_in">print</span>(<span class="string">&#x27;Took &#123;&#125;s&#x27;</span>.<span class="built_in">format</span>(time() - ts))</span><br></pre></td></tr></table></figure>
-
-
-<h3 id="分配给多个worker"><a href="#分配给多个worker" class="headerlink" title="分配给多个worker"></a>分配给多个worker</h3><p>虽然线程和进程脚本都非常适合运行在个人电脑上，如果你想运行在不同的机器上你应该怎么做呢？或者向上扩展增加更多的CPU。 对于长期运行的web项目来讲会是一个很好的用例。如果你有长时间运行任务，你不想在同一台机器上启动一堆需要运行的应用程序在多进程或多线程上。这将会降低你的应用性能对所有的你的用户，最好能够在另外一台或多台上运行这些任务。</p>
-<p>对于这种任务一个出色的Python库是<a target="_blank" rel="noopener" href="http://python-rq.org/">RQ</a>,一个非常简单但是又非常功能强大的库，你首先需要确定函数和它的参数,<a target="_blank" rel="noopener" href="https://docs.python.org/3.4/library/pickle.html">pickles</a>将会被调用，并将其加入到<a target="_blank" rel="noopener" href="http://redis.io/">Redis</a>列表中，声明工作排队是第一步，但是他并不会做任何事情，我们至少需要一个worker去监听这个工作队列。</p>
-<p>第一步我们需要安装和运行Redis服务在你的个人电脑上，或者拥有访问Redis服务的权限，然后，只会在原有的代码基础上稍作改动，我们首先创建一个RQ队列实例并且连接到Redis服务上通过<a target="_blank" rel="noopener" href="https://github.com/andymccurdy/redis-py">redis-py library</a>,然后，代替刚才调用的”download_link”方法，我们使用“q.enqueue(download_link, download_dir, link)”。这个队列将函数作为它的第一个参数，然后其他参数将会带入到这个函数直到这个任务被执行。</p>
-<p>最后一步我们需要启动这些worker,RQ提供了一系列的脚本去运行这些workers在默认的队列上，只需要在终端是那个执行”rqworker”然后它会启动一个worker监听这个默认的队列，请确保你目前的工作目录和这些脚本是在同一目录中，如果你想监听不同的队列，你可以运行 “rqworker queue_name”然后它就会监听倍命名的队列。关于RQ最出色的地方在于只要你连接到Redis,你可以运行任意多个worker在不同的机器上。这是非常容易扩展的。这个是RQ的版本:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> redis <span class="keyword">import</span> Redis</span><br><span class="line"><span class="keyword">from</span> rq <span class="keyword">import</span> Queue</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">   client_id = os.getenv(<span class="string">&#x27;IMGUR_CLIENT_ID&#x27;</span>)</span><br><span class="line">   <span class="keyword">if</span> <span class="keyword">not</span> client_id:</span><br><span class="line">       <span class="keyword">raise</span> Exception(<span class="string">&quot;Couldn&#x27;t find IMGUR_CLIENT_ID environment variable!&quot;</span>)</span><br><span class="line">   download_dir = setup_download_dir()</span><br><span class="line">   links = [l <span class="keyword">for</span> l <span class="keyword">in</span> get_links(client_id) <span class="keyword">if</span> l.endswith(<span class="string">&#x27;.jpg&#x27;</span>)]</span><br><span class="line">   q = Queue(connection=Redis(host=<span class="string">&#x27;localhost&#x27;</span>, port=<span class="number">6379</span>))</span><br><span class="line">   <span class="keyword">for</span> link <span class="keyword">in</span> links:</span><br><span class="line">       q.enqueue(download_link, download_dir, link)</span><br></pre></td></tr></table></figure>
-
-<p>然而，RQ不是唯一的Python工作队列解决方式，RQ是简单使用并且非常好的覆盖简单用例，如果需要其他高级的特性，其他工作队列，如<a target="_blank" rel="noopener" href="http://www.celeryproject.org/">Celery</a>可以被使用。</p>
-<h3 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h3><p>如果你的代码是IO绑定的，multiprocessing和multithreading都适合你，多进程比多线程更容易使用，但是会占用更多的内存，如果你的代码是CPU绑定的，那么multiprocessing可能是更优的选择。尤其目标机器拥有多个CPU，对于web应用，如果想要扩展worker,RQ会是更好的选择。</p>
-<p>此片文章翻译自:<a target="_blank" rel="noopener" href="https://www.toptal.com/python/beginners-guide-to-concurrency-and-parallelism-in-python">beginners-guide-to-concurrency-and-parallelism-in-python</a>.</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/04/11/python%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%95%99%E7%A8%8B-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%B9%B6%E8%A1%8C/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/11/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><span class="page-number current">12</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/13/">Next &amp;raquo;</a>
@@ -1379,7 +1340,7 @@ var _hmt = _hmt || [];
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2024 张宇
+    		&copy; 2025 张宇
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten

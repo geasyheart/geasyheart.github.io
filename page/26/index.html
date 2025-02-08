@@ -206,6 +206,96 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-10-04LVM快照" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/22/10-04LVM%E5%BF%AB%E7%85%A7/">10_04LVM快照</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/22/10-04LVM%E5%BF%AB%E7%85%A7/" class="archive-article-date">
+  	<time datetime="2015-02-22T02:22:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>快照卷:<br> 快照的作用主要是能够进行在线数据备份与恢复。 </p>
+<ol>
+<li>生命周期为整个数据时长，在这段时长内，数据的增长量不能超过快照卷大小。 </li>
+<li>快照卷应该是只读的。 </li>
+<li>跟原卷在同一个卷组内。</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">为testlv创建快照卷大小50M,(这个时候的快照，是当前testlv下的快照) </span><br><span class="line"><span class="comment"># lvcreate -L 50M -n testlv-snap -s -p r(只读) /dev/myvg/testlv </span></span><br><span class="line"><span class="comment"># mount /dev/myvg/testlv-snap /mnt </span></span><br><span class="line">当其没意义了，可进行删除此逻辑卷 </span><br><span class="line"><span class="comment"># lvremove /dev/myvg/testlv-snap</span></span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/22/10-04LVM%E5%BF%AB%E7%85%A7/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-10-03LVM实作流程" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1164,101 +1254,6 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-08-01facl及用户及Linux终端" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/13/08-01facl%E5%8F%8A%E7%94%A8%E6%88%B7%E5%8F%8ALinux%E7%BB%88%E7%AB%AF/">08_01facl及用户及Linux终端</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/13/08-01facl%E5%8F%8A%E7%94%A8%E6%88%B7%E5%8F%8ALinux%E7%BB%88%E7%AB%AF/" class="archive-article-date">
-  	<time datetime="2015-02-13T10:41:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-13</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>文件系统访问列表：<br>比如:<br> tom创建了一个文件，但是他想共享给jerry，具有可读写的权限，<br> 但是，这个意味着他要把other那加上w权限，这样就不是他所期望的<br> 那样了，所以这个地方引入facl </p>
-<p>FACL：Filesystem Access Control List<br>利用文件扩展属性保存额外的访问控制权限<br>目的：<br> jerry：rw- </p>
-<p>setfacl:<br> -m：设定额外的访问控制权限<br> u：UID：perm<br> setfacl -m u:jerry:rw test.txt<br> 可以使用 getfacl test.txt进行查看<br> g:GID:perm<br> setfacl -m g:group:rw test.txt(多了一个组可读写)<br> 对于目录，<br> setfacl -m d:u：UID：perm:rw DIR<br> 这个意味着对这个目录下的所有文件进行共享<br> -x:取消额外的访问控制权限<br> setfacl -x u:jerry test.txt<br> setfacl -x g:group test.txt<br>getfacl:查看<br> getfacl test.txt </p>
-<p>who:<br> username TTY log_time<br> -r:显示运行级别<br> -H：显示哪登陆的<br>w： log_time 空闲时间 使用cpu时间  运行当前进程使用的时间 正在干什么 </p>
-<p> 这两个命令没法查看su 过去的用户；<br>终端类型：<br> console:控制台<br> pty：物理终端<br> tty#:虚拟终端(附加在pty上)<br> ttys#:串行终端(无VGA时的名称)<br> pts#:伪终端(远程或者图形化界面)<br> #：1，2，3… </p>
-<p>last:显示登录历史<br> 所查看的是 &#x2F;var&#x2F;log&#x2F;wtmp文件，显示用户的登录历史及系统重启历史<br> -n:最近n次登陆<br>lastb:显示用户错误的登录尝试,即没成功的<br> &#x2F;var&#x2F;log&#x2F;btmp文件<br> -n:最近n次登陆<br>lastlog:显示每一个用户的最近一次的成功登陆信息<br> -u：查看哪一个用户<br>basename:用于显示路径的文件名<br> 如:basename &#x2F;etc&#x2F;skel<br> skel </p>
-<p>mail:对应家目录mbox  (我centos的是在&#x2F;var&#x2F;spool&#x2F;mail&#x2F;下)<br>mail -s 发送<br> mail -s “Hello” root &lt; &#x2F;etc&#x2F;skel<br> 即主题是hello，内容是&#x2F;etc&#x2F;skel </p>
-<p>hostname:只是暂时的<br>永久的在 &#x2F;etc&#x2F;sysconfig&#x2F;network </p>
-<p>练习:<br> 如果当前主机名不是<a target="_blank" rel="noopener" href="http://www.geasyheart.com.就将其修改如此/">www.geasyheart.com。就将其修改如此</a><br> [ <code>hostname</code> !&#x3D; ‘<a target="_blank" rel="noopener" href="http://www.geasyheart']">www.geasyheart&#39;]</a> &amp;&amp;hostname <a target="_blank" rel="noopener" href="http://www.geasyheart.com/">www.geasyheart.com</a><br> 如果当前主机名是localhost,就将其修改为<a target="_blank" rel="noopener" href="http://www.geasyheart.com.就将其修改如此/">www.geasyheart.com。就将其修改如此</a><br> [ <code>hostname</code>  &#x3D;&#x3D;’localhost’ ] &amp;&amp; hostname <a target="_blank" rel="noopener" href="http://www.geasyheart.com/">www.geasyheart.com</a><br> 如果当前主机的主机名为空，或none,或localhost，就将其修改为<a target="_blank" rel="noopener" href="http://www.geasyheart.com/">www.geasyheart.com</a><br> [ -z <code>hostname</code> ] || [  <code>hostname</code> &#x3D;&#x3D; ‘none’ -o <code>hostname</code> &#x3D;&#x3D; ‘localhost’ ] &amp;&amp; hostname  <a target="_blank" rel="noopener" href="http://www.geasyheart.com/">www.geasyheart.com</a><br> (这个地方要注意，选项和布尔运算不能放一起)<br>生成随机数：<br>RANDOM：0~32768<br> echo $RANDOM </p>
-<p>随机数生成器：熵池<br>&#x2F;dev&#x2F;random<br>&#x2F;dev&#x2F;urandom<br> 到熵池取随机数，如果取得多，熵池可能会被取空，这个时候，<br> 如果是random的话，会让你等半天，然后再把熵池填满，再让你取；<br> 而urandom是如果取完了，会采用软件乘胜方式，进行生成；<br> 所以，在安全方面，random更高，然而在速度方面，urandom更快； </p>
-<p>写一个脚本，利用RANDOM生成１０个随机数，并找出最大数；  </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">declare -i MAX=0 </span><br><span class="line">declare -i MIN=0 </span><br><span class="line">for I in `seq 1 10`;do </span><br><span class="line"> MYRAND=$RANDOM </span><br><span class="line"> [ $I -eq 1 ] &amp;&amp; MIN=$MYRAND </span><br><span class="line"> if [ $I -le 9 ];then </span><br><span class="line">echo -n &quot;MYRAND,&quot; </span><br><span class="line"> else </span><br><span class="line">echo &quot;$MYRAND&quot; </span><br><span class="line"> fi </span><br><span class="line">[ $MYRAND -gt $MAX ] &amp;&amp; MAX=$MYRAND </span><br><span class="line">[ $MYRAND -lt $MIN ] &amp;&amp; MIN=$MYRAND </span><br><span class="line">done </span><br><span class="line">echo &quot;$MAX&quot; </span><br><span class="line">echo &quot;$MIN </span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/13/08-01facl%E5%8F%8A%E7%94%A8%E6%88%B7%E5%8F%8ALinux%E7%BB%88%E7%AB%AF/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/25/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/24/">24</a><a class="page-number" href="/page/25/">25</a><span class="page-number current">26</span><a class="page-number" href="/page/27/">27</a><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/27/">Next &amp;raquo;</a>
@@ -1273,7 +1268,7 @@ var _hmt = _hmt || [];
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2024 张宇
+    		&copy; 2025 张宇
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
