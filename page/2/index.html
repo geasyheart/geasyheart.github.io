@@ -206,6 +206,110 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-RLHF-DQN" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2024/04/24/RLHF-DQN/">RLHF-DQN</a>
+    </h1>
+  
+
+        
+        <a href="/2024/04/24/RLHF-DQN/" class="archive-article-date">
+  	<time datetime="2024-04-24T06:06:01.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-04-24</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>下面记录下DQN算法以及一些细节，注意哦，本博客更多目的在于当下记录，并非完整严谨的哦，也或许有理解错误。</p>
+<p>关于DQN，看了下网上的介绍以及从Q-Learning到DQN解决state和action无法枚举完的情况。另外也强烈推荐下面链接：</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/624217793">知乎网友实现DQN</a>：可直接按照这个跑通体验下效果。</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PARL/tree/develop">PaddlePaddle&#x2F;PARL</a>：这个是paddle出的RLHF库，并提供了相应的examples帮助入门和深入，并且环境也帮忙解决好了，如果debug能力比较强的话，建议直接看这个哦。</li>
+<li><a target="_blank" rel="noopener" href="https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html">PyTorch DQN实现</a>：这个是pytorch官方实现的DQN算法。</li>
+</ol>
+<h2 id="一些特别的点"><a href="#一些特别的点" class="headerlink" title="一些特别的点"></a>一些特别的点</h2><h3 id="1-俺是value-based的，所以不需要softmax"><a href="#1-俺是value-based的，所以不需要softmax" class="headerlink" title="1. 俺是value based的，所以不需要softmax"></a>1. 俺是value based的，所以不需要softmax</h3><p>看下面这个DQN网络，你觉得有问题么？</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">DQN</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, obs, action</span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        self.fc1 = nn.Linear(obs, <span class="number">64</span>)</span><br><span class="line">        self.fc2 = nn.Linear(<span class="number">64</span>, <span class="number">64</span>)</span><br><span class="line">        self.fc3 = nn.Linear(<span class="number">64</span>, action)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, obs</span>):</span><br><span class="line">        x = torch.relu(self.fc1(obs))</span><br><span class="line">        x = torch.relu(self.fc2(x))</span><br><span class="line">        x = torch.softmax(self.fc3(x))</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>啊啊啊，这里为什么要加softmax呢，是不是习惯了深度学习那套分类思想，再好好想想这里，是不是不应该加softmax。</p>
+<h3 id="2-eps是干嘛的，是否是必须的？"><a href="#2-eps是干嘛的，是否是必须的？" class="headerlink" title="2. eps是干嘛的，是否是必须的？"></a>2. eps是干嘛的，是否是必须的？</h3><p>仔细观察下面代码，eps是在做sample时起作用的，也就是<code>select_action</code>这里，可以看到，在每个epoch结束时，更新新的eps值，从最开始的1,到最后的eps_end&#x3D;0.1,它是一个比较平滑的曲线。</p>
+<p>从<code>select_action</code>可以观察到，action早期处于随机采样的状态，随着epoch的增加，action的决策更多过度到model决策。</p>
+<blockquote>
+<p>那这里是否是必须的呢？</p>
+</blockquote>
+<p>不，这里并不是必须的，因为完全可以在train之前加一个warmup步骤，让model一定程度上学会state到action这个变化。再到后面，就是正常训练流程，不需要sample这个过程了。</p>
+<blockquote>
+<p>那这里更多起到什么作用?</p>
+</blockquote>
+<p>我觉得有个点可以很好理解这里，即从完全小白到慢慢学习直至认知理解的过程。添加warmup，即先提前产生一批训练样本，而eps这里，即随着过程慢慢学习，不过相比warmup，可以更优采取权重随机采样方案，即<code>torch.multinomial(torch.softmax(self(obs), dim=-1), 1).item()</code>，它表现出来的特点是权重高的多次采样出现的频率也会更高，那么随着模型的优化，采样更优的可能性也会提升。</p>
+<h3 id="3-target-net是否是必须的？"><a href="#3-target-net是否是必须的？" class="headerlink" title="3. target_net是否是必须的？"></a>3. target_net是否是必须的？</h3><p>不，这里也并不是必须的。观察整个过程，policy_net要比target_net新一个epoch，而且他俩实际上是在干同一个事情，那么可以将target_net指向policy_net,可以发现epoch的增加，reward的值也是正常提升的。</p>
+<h3 id="4-reply-memory是干嘛的？"><a href="#4-reply-memory是干嘛的？" class="headerlink" title="4. reply memory是干嘛的？"></a>4. reply memory是干嘛的？</h3><p>reply memory可以说记录了整个state和action等的过程，当然有一个maxlen来限制其大小，过早的数据就不要了。</p>
+<p>不过需要指出的是，改动了上面这些点，虽然也可以收敛，但是可能会收敛变慢。</p>
+<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p>这里借鉴了<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/624217793">知乎网友实现DQN</a>。</p>
+<p>pygame&#x3D;&#x3D;2.1.0</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> gym</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch.optim <span class="keyword">as</span> optim</span><br><span class="line"><span class="keyword">from</span> torch.utils.tensorboard <span class="keyword">import</span> SummaryWriter</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> deque</span><br><span class="line"><span class="keyword">from</span> tqdm <span class="keyword">import</span> tqdm</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">DQN</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, state_dim, action_dim</span>):</span><br><span class="line">        <span class="built_in">super</span>(DQN, self).__init__()</span><br><span class="line">        self.fc1 = nn.Linear(state_dim, <span class="number">64</span>)</span><br><span class="line">        self.fc2 = nn.Linear(<span class="number">64</span>, <span class="number">64</span>)</span><br><span class="line">        self.fc3 = nn.Linear(<span class="number">64</span>, action_dim)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        x = torch.relu(self.fc1(x))</span><br><span class="line">        x = torch.relu(self.fc2(x))</span><br><span class="line">        x = self.fc3(x)</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Agent</span>():</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, state_dim, action_dim, memory_size=<span class="number">10000</span>, batch_size=<span class="number">64</span>, gamma=<span class="number">0.99</span>, lr=<span class="number">1e-4</span></span>):</span><br><span class="line">        self.device = torch.device(<span class="string">&quot;cuda&quot;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&quot;cpu&quot;</span>)</span><br><span class="line">        self.state_dim = state_dim</span><br><span class="line">        self.action_dim = action_dim</span><br><span class="line">        self.memory = deque(</span><br><span class="line">            maxlen=memory_size)  <span class="comment"># deque是一个双端队列，可以在队首或队尾插入或删除元素。在DQN算法中，我们使用deque实现经验池来存储之前的经验，因为它可以在队尾插入新的经验，并在队首删除最老的经验，从而保持经验池的大小不变。</span></span><br><span class="line">        self.batch_size = batch_size</span><br><span class="line">        self.gamma = gamma</span><br><span class="line">        self.lr = lr</span><br><span class="line">        self.policy_net = DQN(state_dim, action_dim).to(self.device)</span><br><span class="line">        self.target_net = DQN(state_dim, action_dim).to(self.device)</span><br><span class="line">        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.lr)</span><br><span class="line">        self.loss_fn = nn.MSELoss()</span><br><span class="line">        self.steps = <span class="number">0</span></span><br><span class="line">        self.writer = SummaryWriter()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">select_action</span>(<span class="params">self, state, eps</span>):</span><br><span class="line">        <span class="keyword">if</span> random.random() &lt; eps:</span><br><span class="line">            <span class="keyword">return</span> random.randint(<span class="number">0</span>, self.action_dim - <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            state = torch.FloatTensor(state).to(self.device)</span><br><span class="line">            <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">                action = self.policy_net(state).argmax().item()</span><br><span class="line">            <span class="keyword">return</span> action</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">store_transition</span>(<span class="params">self, state, action, reward, next_state, done</span>):</span><br><span class="line">        self.memory.append((state, action, reward, next_state, done))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">train</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(self.memory) &lt; self.batch_size:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        transitions = random.sample(self.memory, self.batch_size)</span><br><span class="line">        batch = <span class="built_in">list</span>(<span class="built_in">zip</span>(*transitions))</span><br><span class="line"></span><br><span class="line">        state_batch = torch.FloatTensor(batch[<span class="number">0</span>]).to(self.device)</span><br><span class="line">        action_batch = torch.LongTensor(batch[<span class="number">1</span>]).to(self.device)</span><br><span class="line">        reward_batch = torch.FloatTensor(batch[<span class="number">2</span>]).to(self.device)</span><br><span class="line">        next_state_batch = torch.FloatTensor(batch[<span class="number">3</span>]).to(self.device)</span><br><span class="line">        done_batch = torch.FloatTensor(batch[<span class="number">4</span>]).to(self.device)</span><br><span class="line"></span><br><span class="line">        q_values = self.policy_net(state_batch).gather(<span class="number">1</span>, action_batch.unsqueeze(<span class="number">1</span>)).squeeze(<span class="number">1</span>)</span><br><span class="line">        next_q_values = self.target_net(next_state_batch).<span class="built_in">max</span>(<span class="number">1</span>)[<span class="number">0</span>]</span><br><span class="line">        expected_q_values = reward_batch + self.gamma * next_q_values * (<span class="number">1</span> - done_batch)</span><br><span class="line"></span><br><span class="line">        loss = self.loss_fn(q_values, expected_q_values.detach())</span><br><span class="line"></span><br><span class="line">        self.optimizer.zero_grad()</span><br><span class="line">        loss.backward()</span><br><span class="line">        self.optimizer.step()</span><br><span class="line"></span><br><span class="line">        self.steps += <span class="number">1</span></span><br><span class="line">        self.writer.add_scalar(<span class="string">&quot;Loss&quot;</span>, loss.item(), self.steps)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update_target</span>(<span class="params">self</span>):</span><br><span class="line">        self.target_net.load_state_dict(self.policy_net.state_dict())</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">train_epoch</span>(<span class="params">env, eps</span>):</span><br><span class="line">    state = env.reset()</span><br><span class="line">    total_reward = <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        action = agent.select_action(state, eps)</span><br><span class="line"></span><br><span class="line">        next_state, reward, done, _ = env.step(action)</span><br><span class="line"></span><br><span class="line">        agent.store_transition(state, action, reward, next_state, done)</span><br><span class="line">        state = next_state</span><br><span class="line">        agent.train()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># env.render()</span></span><br><span class="line">        total_reward += reward</span><br><span class="line">        <span class="keyword">if</span> done:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">return</span> total_reward</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">train_dqn</span>(<span class="params">env, agent: Agent, eps_start=<span class="number">1</span>, eps_end=<span class="number">0.1</span>, eps_decay=<span class="number">0.995</span>, max_episodes=<span class="number">1000</span>, max_steps=<span class="number">1000</span></span>):</span><br><span class="line">    eps = eps_start</span><br><span class="line">    <span class="keyword">for</span> episode <span class="keyword">in</span> tqdm(<span class="built_in">range</span>(max_episodes)):</span><br><span class="line">        reward = train_epoch(env, eps)</span><br><span class="line">        agent.update_target()</span><br><span class="line">        eps = <span class="built_in">max</span>(eps * eps_decay, eps_end)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&#x27;<span class="subst">&#123;episode&#125;</span> --&gt; <span class="subst">&#123;reward&#125;</span>&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    env = gym.make(<span class="string">&quot;CartPole-v1&quot;</span>)</span><br><span class="line">    state_dim = env.observation_space.shape[<span class="number">0</span>]</span><br><span class="line">    action_dim = env.action_space.n</span><br><span class="line">    agent = Agent(state_dim, action_dim)</span><br><span class="line">    train_dqn(env, agent)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2024/04/24/RLHF-DQN/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-LLM-RLHF工作原理一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1159,107 +1263,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2023/05/04/%E5%B8%B8%E7%94%A8%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-BELLE-使用chatGPT生成训练数据" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2023/04/10/BELLE-%E4%BD%BF%E7%94%A8chatGPT%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/">BELLE-使用chatGPT生成训练数据</a>
-    </h1>
-  
-
-        
-        <a href="/2023/04/10/BELLE-%E4%BD%BF%E7%94%A8chatGPT%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/" class="archive-article-date">
-  	<time datetime="2023-04-10T03:29:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-04-10</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>LoRA<br>peft<br><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/kEGwA_7qAKhIuoxPJyfNuw">https://mp.weixin.qq.com/s/kEGwA_7qAKhIuoxPJyfNuw</a><br><a target="_blank" rel="noopener" href="https://aistudio.baidu.com/aistudio/projectdetail/5567217">https://aistudio.baidu.com/aistudio/projectdetail/5567217</a></p>
-<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>自从chatGPT出来后，好多人&#x2F;机构开始尝试使用chatGPT来生成训练数据，简单省事方便。比如google bard，对，就是你，也有在偷偷使用。本文介绍一个项目<a target="_blank" rel="noopener" href="https://github.com/LianjiaTech/BELLE">BELLE</a>，来看看大佬们是怎么做的。注意：此文重点在于如何生成数据。</p>
-<h2 id="利用chatGPT生成训练数据"><a href="#利用chatGPT生成训练数据" class="headerlink" title="利用chatGPT生成训练数据"></a>利用chatGPT生成训练数据</h2><p>最开始BELLE的思想可以说来自<a target="_blank" rel="noopener" href="https://github.com/tatsu-lab/stanford_alpaca">stanford_alpaca</a>，不过在我写本文时，发现BELLE代码仓库更新了蛮多，所以此处忽略其他，仅介绍数据生成。</p>
-<p>代码入口：<a target="_blank" rel="noopener" href="https://github.com/LianjiaTech/BELLE/blob/c794c1d95a32c4afa34c0f3955be15a65afd4a22/1.5M/generate_instruction.py#L129">generate_instruction_following_data</a>。</p>
-<h3 id="1-加载zh-seed-tasks-json"><a href="#1-加载zh-seed-tasks-json" class="headerlink" title="1. 加载zh_seed_tasks.json"></a>1. 加载zh_seed_tasks.json</h3><p><a target="_blank" rel="noopener" href="https://github.com/LianjiaTech/BELLE/blob/main/1.5M/zh_seed_tasks.json">zh_seed_tasks.json</a></p>
-<img src="/2023/04/10/BELLE-%E4%BD%BF%E7%94%A8chatGPT%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/seed.png" class="" title="seed_task_path">
-
-<p>默认提供了175个种子任务，样例如下图</p>
-<img src="/2023/04/10/BELLE-%E4%BD%BF%E7%94%A8chatGPT%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/seed2.png" class="" title="seed_instruction_data">
-
-<h3 id="2-encode-prompt"><a href="#2-encode-prompt" class="headerlink" title="2. encode_prompt"></a>2. encode_prompt</h3><p>注意此处，看看如何构造chatGPT的输入以及chatGPT的输出。</p>
-<img src="/2023/04/10/BELLE-%E4%BD%BF%E7%94%A8chatGPT%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/encode_prompt.png" class="" title="encode_prompt">
-
-<p>最终prompt如下图所示</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">你被要求提供10个多样化的任务指令。这些任务指令将被提供给GPT模型，我们将评估GPT模型完成指令的能力。\n以下是你提供指令需要满足的要求：\n1.尽量不要在每个指令中重复动词，要最大化指令的多样性。\n2.使用指令的语气也应该多样化。例如，将问题与祈使句结合起来。\n3.指令类型应该是多样化的，包括各种类型的任务，类别种类例如：brainstorming，open QA，closed QA，rewrite，extract，generation，classification，chat，summarization。\n4.GPT语言模型应该能够完成这些指令。例如，不要要求助手创建任何视觉或音频输出。例如，不要要求助手在下午5点叫醒你或设置提醒，因为它无法执行任何操作。例如，指令不应该和音频、视频、图片、链接相关，因为GPT模型无法执行这个操作。\n5.指令用中文书写，指令应该是1到2个句子，允许使用祈使句或问句。\n6.你应该给指令生成适当的输入，输入字段应包含为指令提供的具体示例，它应该涉及现实数据，不应包含简单的占位符。输入应提供充实的内容，使指令具有挑战性。\n7.并非所有指令都需要输入。例如，当指令询问一些常识信息，比如“世界上最高的山峰是什么”，不需要提供具体的上下文。在这种情况下，我们只需在输入字段中放置“&lt;无输入&gt;”。当输入需要提供一些文本素材（例如文章，文章链接）时，就在输入部分直接提供一些样例。当输入需要提供音频、图片、视频或者链接时，则不是满足要求的指令。\n8.输出应该是针对指令和输入的恰当回答。 \n下面是10个任务指令的列表：</span><br><span class="line"></span><br><span class="line">###</span><br><span class="line">1. 指令: 给定一个句子，输出所有单词的词性标记。词性标记包括形容词、副词、连词、限定词、名词、数词、介词、代词、动词、助词。 以下是一个例子： 小明喜欢街角的那个蓝色房子。 词性标记结果是：小明 (名词) 喜欢 (动词) 街角 (名词) 的 (助词) 那个 (代词) 蓝色 (形容词) 房子 (名词) 。</span><br><span class="line">1. 输入:</span><br><span class="line">我确实不明白你在说什么.</span><br><span class="line">1. 输出:</span><br><span class="line">我 (代词) 确实 (副词) 不明白 (动词) 你 (代词) 在 (副词) 说 (动词) 什么(代词) .</span><br><span class="line">###</span><br><span class="line">2. 指令: 给定一组数，找出所有可能的子集，它们的和等于给定的数。</span><br><span class="line">2. 输入:</span><br><span class="line">集合：&#123;3, 12, 7, 2, 8, 4&#125;</span><br><span class="line">目标和：14</span><br><span class="line">2. 输出:</span><br><span class="line">&#123;12, 2&#125;, &#123;7, 3, 4&#125;, &#123;8, 2, 4&#125;</span><br><span class="line">###</span><br><span class="line">3. 指令: 列出一些西游记中孙悟空的技能。</span><br><span class="line">3. 输入:</span><br><span class="line">&lt;无输入&gt;</span><br><span class="line">3. 输出:</span><br><span class="line">1. 筋斗云：西游世界天地间第一飞行法术，速度最快，一个跟头十万八千里。</span><br><span class="line">2. 地煞七十二变：原著中七十二仅仅指数量，可以理解为能够变身成七十二种物体的变身法。</span><br><span class="line">3. 物体变化术：能把毫毛变成本尊或其他物体，如：瞌睡虫，也能把除毫毛以外的其他物体变成本尊形象。</span><br><span class="line">4. 护身法：施展后刀枪不入，天雷天火具莫能伤分毫。不过应该有施法前摇，施法后不能移动，所以孙悟空总是站着不动让人家砍。</span><br><span class="line">5. 三头六臂：额外长出两颗头和四条胳膊，全方位无死角进行战斗，相当于一种战斗形态。</span><br><span class="line">###</span><br><span class="line">4. 指令:</span><br></pre></td></tr></table></figure>
-
-<img src="/2023/04/10/BELLE-%E4%BD%BF%E7%94%A8chatGPT%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/chatGPT-output.png" class="" title="chatGPT-output">
-
-<p>由于没有<code>OPENAI_API_KEY</code>，所以咱们此处构造下<a target="_blank" rel="noopener" href="https://github.com/LianjiaTech/BELLE/blob/c794c1d95a32c4afa34c0f3955be15a65afd4a22/1.5M/generate_instruction.py#L176">results</a>的结果，来看看<code>post_process_gpt3_response</code>的处理。</p>
-<h3 id="3-post-process-gpt3-response"><a href="#3-post-process-gpt3-response" class="headerlink" title="3. post_process_gpt3_response"></a>3. post_process_gpt3_response</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">results = [</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="string">&quot;text&quot;</span>: <span class="string">&quot;根据以下输入文本，生成一篇400字左右的文章。\n4. 输入:\n近年来，随着人们健康意识的增强以及餐饮行业竞争的激烈，餐厅中出现了越来越多的健康餐饮品牌。这些品牌在产品配方、生产过程以及食材选取上更加注重健康因素，受到了越来越多消费者的青睐。同时，获取健康餐饮的途径也变得更加多样化，不光可以通过线下餐厅就餐，还可以通过外卖、自动售卖机等多种方式获取健康餐饮。然而，部分健康餐饮品牌的营养价值不尽相同，消费者在选择的时候需要注意。\n4. 输出:\n健康饮食正在受到越来越多人的重视，一些更加健康、营养更加全面的餐饮品牌正在受到更多关注。这些品牌不仅仅在产品配方、生产过程以及食材选择上更加注重健康因素，还提供了更多获取途径，例如线下餐厅、外卖、自动售卖机等等。但是，消费者在选择健康餐饮时需要注意一些细节。在购买前，建议您了解这家餐饮品牌是否真正关注营养价值，有没有认真挑选食材，是否考虑到了消费者对餐饮的健康需求。同时，您还需要关注一些常见问题，例如是否在加糖等。通过小心谨慎地挑选您的餐饮品牌，您可以尽可能地保证食物的健康性和营养价值，为您的健康保驾护航。&quot;</span></span><br><span class="line">&#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
-
-<img src="/2023/04/10/BELLE-%E4%BD%BF%E7%94%A8chatGPT%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/post_process.png" class="" title="post_process">
-
-<p>可看到，具体做了一些chatGPT回复内容的后处理操作。比如过滤黑名单，chatGPT回复内容提出input、output、instruction。</p>
-<img src="/2023/04/10/BELLE-%E4%BD%BF%E7%94%A8chatGPT%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/gen_ins.png" class="" title="gen-ins">
-
-<h3 id="4-bm25计算instruction相似度"><a href="#4-bm25计算instruction相似度" class="headerlink" title="4. bm25计算instruction相似度"></a>4. bm25计算instruction相似度</h3><p>这步也是后处理，计算chatGPT生成的instruction和已经拥有的instructions的相似度，如果大于阈值，就忽略掉生成的这个instruction。</p>
-<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>在huggingface上可看到作者生成的数据，比如<a target="_blank" rel="noopener" href="https://huggingface.co/datasets/BelleGroup/train_0.5M_CN">train_0.5M_CN</a>,<a target="_blank" rel="noopener" href="https://huggingface.co/datasets/BelleGroup/train_1M_CN">train_1M_CN</a>，这俩构成了作者宣称的1.5M数据集，当然还有一个10M的数据集。更多可看<a target="_blank" rel="noopener" href="https://huggingface.co/BelleGroup">BelleGroup Datasets</a>。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2023/04/10/BELLE-%E4%BD%BF%E7%94%A8chatGPT%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/">展开全文 >></a>
         </p>
       
 

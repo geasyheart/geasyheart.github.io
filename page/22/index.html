@@ -206,6 +206,138 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-23-02数据库及MySQL" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/22/23-02%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8F%8AMySQL/">23_02数据库及MySQL</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/22/23-02%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8F%8AMySQL/" class="archive-article-date">
+  	<time datetime="2015-04-22T02:37:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>强烈建议看一看:<br> <br>B树&#x2F;B-树&#x2F;B+树&#x2F;B*树:<br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/oldhorse/archive/2009/11/16/1604009.html">http://www.cnblogs.com/oldhorse/archive/2009/11/16/1604009.html</a><br> <br> <br> <br> <br>比方说有个bbs，有100万个用户，一亿个帖子，怎样合理管理；<br>如查找用户，我可以使用索引，一个文件专门存放用户名，然后用户名的各种信息保存在其他的服务器中；<br>通过用户名索引查找到用户的信息，这个是索引；<br>用grep在大数据中查找，是最笨的；<br>通过二分法进行用户数据查找，100W大概14次，可以大大减少查找量，不过这种方式还是慢；<br>所以B+树索引算法是更好的<br>查找标准—-搜索码<br> <br>所以开发一个程序来管理索引与数据是最为合适的；<br>叫做数据管理软件 
+  </p>
+<blockquote>
+<p>如何管理数据是非常重要的<br>所以如何有效的查找数据是非常重要的<br>数据库管理系统最为重要</p>
+</blockquote>
+<p>DBMS：dataBase Management System<br>DBA 数据库管理员<br> <br>RDBMS：relational　database management system “关系”数据库管理系统 </p>
+<ol>
+<li>数据库创建&#x2F;删除； </li>
+<li>创建表、删除表、修改表； </li>
+<li>索引的创建、删除； </li>
+<li>用户和权限； </li>
+<li>数据增、删、改； </li>
+<li>查询；</li>
+</ol>
+<p>  </p>
+<ul>
+<li>DML：数据操作语言</li>
+</ul>
+<ul>
+<li>INSERT&#x2F;REPLACE&#x2F;UPDATE&#x2F;DELETE</li>
+</ul>
+<ul>
+<li>DDL：数据定义语言</li>
+</ul>
+<ul>
+<li>CREATE&#x2F;ALTER&#x2F;DROP</li>
+</ul>
+<ul>
+<li>DCL：数据控制语言</li>
+</ul>
+<ul>
+<li>GRANT&#x2F;REVOKE</li>
+</ul>
+<p>  </p>
+<ul>
+<li>数据的组织结构</li>
+</ul>
+<ul>
+<li>层次型 </li>
+<li>网状型 </li>
+<li>关系型</li>
+</ul>
+<p> <br>SQL:结构化查询语言<br> <br>RDBMS：<br>    Oracle、Sybase、infomix(IBM)、SQLServer(Sybase变种)<br>    MySQL、PostgreSQL(egreSQL的后来版本)、pgsql、EnterpriseDB<br> <br>一体化的公司:Oracle   IBM两大巨人<br>去IOE：IBM、Oracle、EMC<br> <br>为了防止MySQL被Oracle私有化，所以原作者开发了MariaDB；<br>有个组织叫做Percona根据MySQL进行改进，不收费，赚服务费，叫percona server； </p>
+<h2 id="MySQL-Connectors"><a href="#MySQL-Connectors" class="headerlink" title="MySQL Connectors"></a>MySQL Connectors</h2><p>进行数据库管理，调用API来对数据库的开发管理，如php、Java、c++等都可以，但是要想使用API，<br>就需要相应的驱动来连接，—–&gt;即你想使用其他语言完成数据库的相关应用，可以调用API来开发自己<br>想要的东西，但是调用API得有相应的驱动使数据库支持对这种编程语言的支持，这种驱动叫做<br>数据库连接器；（这个很重要，为程序员提供支持的）<br>官网有下载 
+  </p>
+<h2 id="反关系模型"><a href="#反关系模型" class="headerlink" title="反关系模型"></a>反关系模型</h2><blockquote>
+<p>    MongoDB<br>    Redis <br>    HBase</p>
+</blockquote>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/22/23-02%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8F%8AMySQL/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-23-01PHP相关概念及配置" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1201,112 +1333,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/04/03/20-02DNS%E5%AD%90%E5%9F%9F%E6%8E%88%E6%9D%83/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-20-01-实验-DNS主从复制及区域传送" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/03/20-01-%E5%AE%9E%E9%AA%8C-DNS%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%8F%8A%E5%8C%BA%E5%9F%9F%E4%BC%A0%E9%80%81/">20_01_实验_DNS主从复制及区域传送</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/03/20-01-%E5%AE%9E%E9%AA%8C-DNS%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%8F%8A%E5%8C%BA%E5%9F%9F%E4%BC%A0%E9%80%81/" class="archive-article-date">
-  	<time datetime="2015-04-03T06:34:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-03</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>主DNS服务器: </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#mv /etc/named.conf /etc/named.conf.bak </span><br><span class="line">#vim /etc/named.conf </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">options &#123; </span><br><span class="line">    directory &quot;/var/named&quot;; </span><br><span class="line">    notify yes;    如果有从DNS，需要指明； </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone &quot;.&quot; IN &#123; </span><br><span class="line">    type hint; </span><br><span class="line">    file &quot;named.ca&quot; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone &quot;localhost&quot; IN &#123; </span><br><span class="line">    type master; </span><br><span class="line">    file &quot;named.localhost&quot;; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone &quot;unravel.com&quot; IN &#123; </span><br><span class="line">    type master; </span><br><span class="line">    allow-transfer &#123; 172.17.12.231; &#125;; </span><br><span class="line">    file &quot;unravel.com.zone&quot;; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone &quot;12.17.127.in-addr-arpa&quot; IN &#123; </span><br><span class="line">    type master; </span><br><span class="line">    file &quot;172.17.12.zone&quot;; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
-
-
-<h1 id="chmod-640-etc-named-conf-chown-root-named-etc-named-conf"><a href="#chmod-640-etc-named-conf-chown-root-named-etc-named-conf" class="headerlink" title="chmod 640 &#x2F;etc&#x2F;named.conf &amp;&amp; chown root.named &#x2F;etc&#x2F;named.conf"></a>chmod 640 &#x2F;etc&#x2F;named.conf &amp;&amp; chown root.named &#x2F;etc&#x2F;named.conf</h1><h1 id="vim-var-named-unravel-com-zone"><a href="#vim-var-named-unravel-com-zone" class="headerlink" title="vim &#x2F;var&#x2F;named&#x2F;unravel.com.zone"></a>vim &#x2F;var&#x2F;named&#x2F;unravel.com.zone</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">$TTL    68400; </span><br><span class="line">@    IN    SOA    ns1.unravel.com.    admin.unravel.com.( </span><br><span class="line">        20150101 </span><br><span class="line">        1H </span><br><span class="line">        2M </span><br><span class="line">        2D </span><br><span class="line">        6H) </span><br><span class="line">    IN    NS    ns1 </span><br><span class="line">    IN    NS    ns2 </span><br><span class="line">    IN    MX    10    mail     </span><br><span class="line">ns1    IN    A    172.17.12.69 </span><br><span class="line">ns2    IN    A    172.17.12.231 </span><br><span class="line">www    IN    A    172.17.12.69 </span><br><span class="line">ww    IN    CNAME    www </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#vim /var/named/172.17.12.zone </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$TTL 86400; </span><br><span class="line">@    IN    SOA    ns1.unravel.com.    admin.unravel.com. ( </span><br><span class="line">        20150101 </span><br><span class="line">        1H </span><br><span class="line">        2M </span><br><span class="line">        2D </span><br><span class="line">        6H) </span><br><span class="line">    IN    NS    ns1.unravel.com. </span><br><span class="line">    IN    NS    ns2.unravel.com. </span><br><span class="line">69    IN    PTR    ns1.unravel.com. </span><br><span class="line">231    IN    PTR    ns2.unravel.com. </span><br><span class="line">69    IN    PTR    www.unravel.com. </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#service named start </span><br></pre></td></tr></table></figure>
-
-<p>从DNS服务器: </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#yum install bind </span><br><span class="line">#mv /etc/named.conf /etc/named.conf.bak </span><br><span class="line">#vim /etc/named.conf </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">options &#123; </span><br><span class="line">    directory &quot;/var/named&quot;; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">zone &quot;unravel.com&quot; IN    &#123; </span><br><span class="line">    type slave; </span><br><span class="line">    file &quot;slaves/unravel.com.zone&quot;; </span><br><span class="line">    masters &#123; 172.17.12.69; &#125;; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone &quot;12.17.172.in-addr-arpa&quot; IN &#123; </span><br><span class="line">    type slave; </span><br><span class="line">    file &quot;slaves/172.17.12.zone&quot;; </span><br><span class="line">    masters &#123; 172.17.12.69; &#125;; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#chown root.named /etc/named.cof </span><br><span class="line">#chmod 640 /etc/named.conf </span><br><span class="line">#service named start </span><br></pre></td></tr></table></figure>
-
-<p>就会完成主从DNS传送 （更多细节参考文档说明）</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/03/20-01-%E5%AE%9E%E9%AA%8C-DNS%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%8F%8A%E5%8C%BA%E5%9F%9F%E4%BC%A0%E9%80%81/">展开全文 >></a>
         </p>
       
 

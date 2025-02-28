@@ -206,6 +206,98 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-24-04-3-实验L-A-M-P编译" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/09/20/24-04-3-%E5%AE%9E%E9%AA%8CL-A-M-P%E7%BC%96%E8%AF%91/">24_04_3_实验L-A-M-P编译</a>
+    </h1>
+  
+
+        
+        <a href="/2015/09/20/24-04-3-%E5%AE%9E%E9%AA%8CL-A-M-P%E7%BC%96%E8%AF%91/" class="archive-article-date">
+  	<time datetime="2015-09-20T02:16:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-20</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="基础"><a href="#基础" class="headerlink" title="基础"></a>基础</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">service iptables off </span><br><span class="line">setenforce 0 </span><br><span class="line">yum -y install epel-release </span><br></pre></td></tr></table></figure>
+
+<h2 id="httpd服务器：192-168-122-111"><a href="#httpd服务器：192-168-122-111" class="headerlink" title="httpd服务器：192.168.122.111"></a>httpd服务器：192.168.122.111</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">tar xvjf apr-1.5.1.tar.bz2                                     </span><br><span class="line">./configure --prefix=/usr/local/apr </span><br><span class="line">make &amp;&amp; make install                                 </span><br><span class="line">tar xvjf apr-util-1.5.4.tar.bz2     </span><br><span class="line">./configure --prefix=/usr/local/apr-util --with-apr=/usr/local/apr         </span><br><span class="line">make &amp;&amp; make install                                                     </span><br><span class="line">                                                                                                 </span><br><span class="line">yum install pcre-devel openssl-devel zlib-devel </span><br><span class="line">tar xvjf httpd-2.4.10.tar.bz2     </span><br><span class="line">./configure --prefix=/usr/local/apache \ </span><br><span class="line">     --sysconfdir=/etc/httpd \ </span><br><span class="line">     --enable-so \ </span><br><span class="line">     --enable-rewrite \ </span><br><span class="line">     --enable-ssl \ </span><br><span class="line">     --enable-cgi  \ </span><br><span class="line">     --enable-cgid \ </span><br><span class="line">    --enable-modules=most \ </span><br><span class="line">    --enable-deflate \ </span><br><span class="line">    --enable-mods-shared=most \ </span><br><span class="line">    --enable-mpms-shared=all \ </span><br><span class="line">    --with-mpm=event \ </span><br><span class="line">    --with-apr=/usr/local/apr \ </span><br><span class="line">    --with-apr-util=/usr/local/apr-util </span><br><span class="line"> make &amp;&amp; make install </span><br><span class="line">  </span><br></pre></td></tr></table></figure>
+<h2 id="php服务器：192-168-122-104"><a href="#php服务器：192-168-122-104" class="headerlink" title="php服务器：192.168.122.104"></a>php服务器：192.168.122.104</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">wget -c  http://cn2.php.net/distributions/php-5.6.12.tar.bz2 </span><br><span class="line"> </span><br><span class="line">./configure --prefix=/usr/local/php --with-config-file-path=/etc --with-openssl --enable-mbstring --with-freetype-dir --with-jpeg-dir --with-png-dir --with-zlib  --with-libxml-dir  --enable-xml --enable-sockets --enable-fpm --with-mcrypt  --with-config-file-scan-dir=/etc/php.d --with-bz2  --enable-zip --with-mysql=mysqlnd --with-pdo-mysql=mysqlnd --with-mysqli=mysqlnd </span><br><span class="line"> </span><br><span class="line"> make &amp;&amp; make install </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cp</span> php.ini-production /etc/php.ini </span><br><span class="line"> <span class="built_in">cp</span> sapi/fpm/init.d.php-fpm /etc/rc.d/init.d/php-fpm </span><br><span class="line"><span class="built_in">chmod</span> +x /etc/rc.d/init.d/php-fpm </span><br><span class="line">chkconfig --add php-fpm </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cp</span> /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf </span><br><span class="line">编辑php-fpm的配置文件： </span><br><span class="line">vi /usr/local/php/etc/php-fpm.conf </span><br><span class="line">配置fpm的相关选项为你所需要的值，并启用pid文件： </span><br><span class="line">listen = 192.168.122.104:9000 </span><br><span class="line">pm.max_children = 50 </span><br><span class="line">pm.start_servers = 5 </span><br><span class="line">pm.min_space_servers = 2 </span><br><span class="line">pm.max_space_servers = 8 </span><br><span class="line">pid = /usr/local/php/var/run/php-fpm.pid </span><br><span class="line"> </span><br><span class="line">接下来就可以启动php-fpm了： </span><br><span class="line">service php-fpm start </span><br><span class="line"> </span><br><span class="line">tar xf xcache-3.2.0.tar.gz </span><br><span class="line"> <span class="built_in">cd</span> xcache-3.2.0 </span><br><span class="line"> yum -y install autoconf </span><br><span class="line">/usr/local/php/bin/phpize </span><br><span class="line">./configure --enable-xcache --with-php-config=/usr/local/php/bin/php-config </span><br><span class="line">make &amp;&amp; make install </span><br><span class="line"> </span><br><span class="line"><span class="built_in">cp</span> xcache.ini /etc/php.d </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">3、启用httpd的相关模块 </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">vim /etc/httpd/httpd.conf </span><br><span class="line">LoadModule proxy_module modules/mod_proxy.so </span><br><span class="line">LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so </span><br><span class="line">在&lt;Directory <span class="string">&quot;/usr/local/apache/htdocs&quot;</span>&gt;外面写如下两行： </span><br><span class="line">ProxyRequests Off </span><br><span class="line">ProxyPassMatch ^/(.*\.php)$ fcgi://192.168.122.104:9000/php/<span class="variable">$1</span> </span><br><span class="line"> </span><br><span class="line">php服务器： </span><br><span class="line"><span class="built_in">mkdir</span> /php </span><br><span class="line">vim /php/phpinfo.php </span><br><span class="line">vim /php/mysql.php </span><br><span class="line">进行测试；； </span><br><span class="line"> </span><br><span class="line">安装phpadmin </span><br><span class="line"><span class="built_in">cp</span> config.sample.inc.php config.inc.php </span><br><span class="line">编辑这个配置文件，修改这一项： </span><br><span class="line"><span class="variable">$cfg</span>[<span class="string">&#x27;Servers&#x27;</span>][<span class="variable">$i</span>][<span class="string">&#x27;host&#x27;</span>] = <span class="string">&#x27;192.168.236.104&#x27;</span>; </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+<p>如果出现:<br>PEAR package PHP_Archive not installed: generated phar will require PHP’s phar extension be enabled. </p>
+<blockquote>
+<p>wget <a target="_blank" rel="noopener" href="http://pear.php.net/go-pear.phar">http://pear.php.net/go-pear.phar</a><br>&#x2F;usr&#x2F;local&#x2F;php&#x2F;bin&#x2F;php go-pear.phar</p>
+</blockquote>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/09/20/24-04-3-%E5%AE%9E%E9%AA%8CL-A-M-P%E7%BC%96%E8%AF%91/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-39-01Linux集群系列之十一-高可用集群之heartbeat-v2-基于crm进行资源管理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1263,97 +1355,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/07/06/33-01MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%94MySQL%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%8F%8Asql%E6%A8%A1%E5%9E%8B/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-32-04MySQL系列之四MySQL客户端的使用" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/07/06/32-04MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9B%9BMySQL%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%9A%84%E4%BD%BF%E7%94%A8/">32_04MySQL系列之四MySQL客户端的使用</a>
-    </h1>
-  
-
-        
-        <a href="/2015/07/06/32-04MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9B%9BMySQL%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%9A%84%E4%BD%BF%E7%94%A8/" class="archive-article-date">
-  	<time datetime="2015-07-06T01:09:09.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-07-06</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>mysql两种操作模式: </p>
-<blockquote>
-<p>交互式模式<br>批处理模式(两种方式)<br>        &gt; mysql&lt;init.sql<br>        &gt; source &#x2F;root&#x2F;test.sql<br>        例如:<br>            #vim test.sql<br>            CREATE DATABASE testdb;<br>            CREATE TABLE testdb.testdb(Name VARCHAR(23));<br>            mysql&gt;source &#x2F;root&#x2F;test.sql </p>
-</blockquote>
-<p>客户端:mysql、mysqladmin、mysqldump、mysqlimport、mysqlcheck<br>服务器:mysqld、mysqld_safe、mysqld_multi<br>            <br>mysql&gt;命令两类:    <br>            <br>    客户端命令:<br>        \d:定义语句结束符; 默认是;<br>        \c:提前终止语句执行<br>        \g:无论语句结束符是什么，直接将此语句送至服务器执行(这个可在忘记结束符是什么的时后使用 select * from testdb\g,觉得没必要，因为敲status可直接看到这些信息)        <br>        \G:无论语句结束符是什么，直接将此语句送至服务器端执行，而且结果以竖排方式显示(这个用的比较多,因为很直观，select * from testdb\G)    <br>            <br>        ! COMMAND:执行shell命令            <br>        \W:语句执行结束后显示警告信息<br>        \w:语句执行结束后不显示警告信息<br>            <br>    服务器端命令:<br>        help KEYWOAD  help SELECT </p>
-<p>    #mysqladmin<br>        create DATABASE<br>        drop DATABASE<br>        ping<br>        processlist<br>        status<br>            –sleep N:显示频率<br>            –count N:显示多个状态<br>        extended-status:显示状态变量<br>        variables:显示服务器变量<br>        flush-privileges&#x3D;reload<br>        flush-tables 关闭所有已打开的表<br>        flush-threads:重置线程池<br>        flush-status:重置大多数的服务器状态变量<br>        flush-logs:二进制和中继日志滚动<br>        flush-hosts:清除主机的内部信息(例如DNS解析信息，主要例如尝试登录mysql数据库失败到一定次数了，可能无法登录了，可以使用此命令，清除这些记录信息)<br>        kill<br>        refresh&#x3D;flush-hosts和flush-logs<br>        shutdown 关闭MySQL服务器<br>        start-slave:启动复制，启动从服务器复制进程<br>            SQL thread<br>            IO  thread<br>        stop-slave:关闭复制<br>        <br>    建议在使用这些命令的时候，vim ~&#x2F;.my.cnf<br>        [client]<br>        user&#x3D;’root’<br>        host&#x3D;’localhost’<br>        password&#x3D;’redhat’<br>        #chmod 700 ~&#x2F;.my.cnf<br>        然后再mysqladmin option,否则会提示没有输入密码，不是太方便<br>    <br>    <br>    开发视角:<br>        数据类型<br>        约束<br>        数据库、表、索引、视图<br>        <br>            <br>    <br>这篇文章写的不错，更多可直接参考这个文章:<br><a target="_blank" rel="noopener" href="http://blog.163.com/sir_876/blog/static/11705223201061210123570/">http://blog.163.com/sir_876/blog/static/11705223201061210123570/</a>        <br>            <br>            <br>            <br>解决乱码问题:<br>#vim &#x2F;etc&#x2F;my.cnf </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]     </span><br><span class="line">character-set-server=utf8 </span><br><span class="line">即可; </span><br><span class="line">客户端 </span><br><span class="line">set names utf8     </span><br><span class="line">即可；； </span><br></pre></td></tr></table></figure>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> <span class="keyword">table</span> status <span class="keyword">like</span> <span class="string">&#x27;tb_name&#x27;</span>; </span><br><span class="line"><span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;%char%&#x27;</span>;</span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/07/06/32-04MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9B%9BMySQL%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%9A%84%E4%BD%BF%E7%94%A8/">展开全文 >></a>
         </p>
       
 

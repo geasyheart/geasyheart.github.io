@@ -206,6 +206,97 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-32-04MySQL系列之四MySQL客户端的使用" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/07/06/32-04MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9B%9BMySQL%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%9A%84%E4%BD%BF%E7%94%A8/">32_04MySQL系列之四MySQL客户端的使用</a>
+    </h1>
+  
+
+        
+        <a href="/2015/07/06/32-04MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9B%9BMySQL%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%9A%84%E4%BD%BF%E7%94%A8/" class="archive-article-date">
+  	<time datetime="2015-07-06T01:09:09.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-07-06</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>mysql两种操作模式: </p>
+<blockquote>
+<p>交互式模式<br>批处理模式(两种方式)<br>        &gt; mysql&lt;init.sql<br>        &gt; source &#x2F;root&#x2F;test.sql<br>        例如:<br>            #vim test.sql<br>            CREATE DATABASE testdb;<br>            CREATE TABLE testdb.testdb(Name VARCHAR(23));<br>            mysql&gt;source &#x2F;root&#x2F;test.sql </p>
+</blockquote>
+<p>客户端:mysql、mysqladmin、mysqldump、mysqlimport、mysqlcheck<br>服务器:mysqld、mysqld_safe、mysqld_multi<br>            <br>mysql&gt;命令两类:    <br>            <br>    客户端命令:<br>        \d:定义语句结束符; 默认是;<br>        \c:提前终止语句执行<br>        \g:无论语句结束符是什么，直接将此语句送至服务器执行(这个可在忘记结束符是什么的时后使用 select * from testdb\g,觉得没必要，因为敲status可直接看到这些信息)        <br>        \G:无论语句结束符是什么，直接将此语句送至服务器端执行，而且结果以竖排方式显示(这个用的比较多,因为很直观，select * from testdb\G)    <br>            <br>        ! COMMAND:执行shell命令            <br>        \W:语句执行结束后显示警告信息<br>        \w:语句执行结束后不显示警告信息<br>            <br>    服务器端命令:<br>        help KEYWOAD  help SELECT </p>
+<p>    #mysqladmin<br>        create DATABASE<br>        drop DATABASE<br>        ping<br>        processlist<br>        status<br>            –sleep N:显示频率<br>            –count N:显示多个状态<br>        extended-status:显示状态变量<br>        variables:显示服务器变量<br>        flush-privileges&#x3D;reload<br>        flush-tables 关闭所有已打开的表<br>        flush-threads:重置线程池<br>        flush-status:重置大多数的服务器状态变量<br>        flush-logs:二进制和中继日志滚动<br>        flush-hosts:清除主机的内部信息(例如DNS解析信息，主要例如尝试登录mysql数据库失败到一定次数了，可能无法登录了，可以使用此命令，清除这些记录信息)<br>        kill<br>        refresh&#x3D;flush-hosts和flush-logs<br>        shutdown 关闭MySQL服务器<br>        start-slave:启动复制，启动从服务器复制进程<br>            SQL thread<br>            IO  thread<br>        stop-slave:关闭复制<br>        <br>    建议在使用这些命令的时候，vim ~&#x2F;.my.cnf<br>        [client]<br>        user&#x3D;’root’<br>        host&#x3D;’localhost’<br>        password&#x3D;’redhat’<br>        #chmod 700 ~&#x2F;.my.cnf<br>        然后再mysqladmin option,否则会提示没有输入密码，不是太方便<br>    <br>    <br>    开发视角:<br>        数据类型<br>        约束<br>        数据库、表、索引、视图<br>        <br>            <br>    <br>这篇文章写的不错，更多可直接参考这个文章:<br><a target="_blank" rel="noopener" href="http://blog.163.com/sir_876/blog/static/11705223201061210123570/">http://blog.163.com/sir_876/blog/static/11705223201061210123570/</a>        <br>            <br>            <br>            <br>解决乱码问题:<br>#vim &#x2F;etc&#x2F;my.cnf </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]     </span><br><span class="line">character-set-server=utf8 </span><br><span class="line">即可; </span><br><span class="line">客户端 </span><br><span class="line">set names utf8     </span><br><span class="line">即可；； </span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> <span class="keyword">table</span> status <span class="keyword">like</span> <span class="string">&#x27;tb_name&#x27;</span>; </span><br><span class="line"><span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;%char%&#x27;</span>;</span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/07/06/32-04MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%9B%9BMySQL%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%9A%84%E4%BD%BF%E7%94%A8/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-32-03MySQL系列之三MySQL数据库基础及编译安装" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1068,90 +1159,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/05/04/29-01iptables%E7%B3%BB%E5%88%97%E4%B9%8Blayer7/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-28-04iptables系列之nat及其过滤功能" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/05/04/28-04iptables%E7%B3%BB%E5%88%97%E4%B9%8Bnat%E5%8F%8A%E5%85%B6%E8%BF%87%E6%BB%A4%E5%8A%9F%E8%83%BD/">28_04iptables系列之nat及其过滤功能</a>
-    </h1>
-  
-
-        
-        <a href="/2015/05/04/28-04iptables%E7%B3%BB%E5%88%97%E4%B9%8Bnat%E5%8F%8A%E5%85%B6%E8%BF%87%E6%BB%A4%E5%8A%9F%E8%83%BD/" class="archive-article-date">
-  	<time datetime="2015-05-04T04:41:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-05-04</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">NAT:Network Address Translation </span><br><span class="line"> </span><br><span class="line">DNAT:目标地址转换 </span><br><span class="line">SNAT:源地址转换(POSTROUTING,OUTPUT)   </span><br><span class="line"> </span><br><span class="line">/proc/sys/net/ipv4/ip_forward 为1就可以实现路由器功能 </span><br><span class="line"> </span><br><span class="line">prerouting后面必须是-i(进站)，即指进来的数据包 </span><br><span class="line">postrouting后面必须是-o(出站)，即指出去的数据包 </span><br><span class="line">prerouting是目的地址转换(DNAT)，要把别人公网IP换成自己内部的IP，才能访问到你们内部受防火墙保护的服务器。 </span><br><span class="line">postrouting是源地址转换(SNAT),要把自己内部网络上受防火墙保护的IP地址转换成自己本地的公网IP才能够上网。 </span><br><span class="line"> </span><br><span class="line">-j SNAT </span><br><span class="line">    --to-source </span><br><span class="line">-j MASQUERADE(只能用于ADSL拨号连接) </span><br><span class="line"> </span><br><span class="line">如果公司内部有一个内网，是192.168.10.0/24的网段，有个主机192.168.10.7,服务器有两个网卡，一个指向内部网段，是192.168.10.6，另外一个是172.16.100.7,如果想访问172.16.100.0/16网段中的172.16.100.2主机，即: </span><br><span class="line"> </span><br><span class="line">192.168.10.7--&gt;192.168.10.6--&gt;172.16.100.7--&gt;172.16.100.2 </span><br><span class="line">有两种实现方案，一种是把服务器打开路由功能，即指: </span><br><span class="line"><span class="comment">#echo 1 &gt; /proc/sys/net/ipv4/ip_forward </span></span><br><span class="line">192.168.10.7: </span><br><span class="line"><span class="comment">#route add default gw 192.168.10.6 &amp;&amp; ping 192.168.10.6 </span></span><br><span class="line">这个时候192.168.10.7是可以ping通172.16.100.7这个地址，因为在Linux中是靠地址访问，而不是靠MAC地址。 </span><br><span class="line">172.16.100.2: </span><br><span class="line"><span class="comment">#route add default gw 172.16.100.7 &amp;&amp; ping 172.16.100.7 </span></span><br><span class="line">如果这时已有默认网关，route del default gw 172.16.100.1 eth0 </span><br><span class="line">这个时候192.168.10.7就可以ping通172.16.100.2网络。 </span><br><span class="line">这个是通过地址转换功能实现。 </span><br><span class="line"> </span><br><span class="line">但是这个时候就要考虑一种情况，172.16.100.2是公网IP，那么这种方式就不行: </span><br><span class="line">iptables -t nat -A POSTROUTING -s 192.168.10.0/24 -j SNAT --to-source 172.16.100.7 </span><br><span class="line"> </span><br><span class="line">如果服务器通过拨号上网，如：ADSL:123.2.3.2 </span><br><span class="line">iptables -t nat -A POSTROUTING -s 192.168.0.024  -o ppp0 -j SNAT --to-source 123.2.3.2 </span><br><span class="line">每次拨号连接，都会导致每次的IP都不一样，那么这就会导致防火墙规则就得不停的改变，这是相当复杂的， </span><br><span class="line">那么可以使用 -j MASQUERADE 会自动找到ADSL拨号可上网的IP。 </span><br><span class="line"> </span><br><span class="line">-j DNAT </span><br><span class="line">    --to-destination </span><br><span class="line">如果公司有台http服务器，放在内网中，地址是192.168.10.22,防火墙网卡1是192.168.10.6,另外一个172.16.100.7(假设公网IP)，来自172.16.100.11访问， </span><br><span class="line">iptables -t nat  -A PREROUTING -p tcp --dport 80 -d 172.6.100.7 -j DNAT --to-destination 192.168.10.22 </span><br><span class="line">如果http监听在8080端口，则 </span><br><span class="line">iptables -t nat  -A PREROUTING -p tcp --dport 80 -d 172.6.100.7 -j DNAT --to-destination 192.168.10.22：8080 </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/05/04/28-04iptables%E7%B3%BB%E5%88%97%E4%B9%8Bnat%E5%8F%8A%E5%85%B6%E8%BF%87%E6%BB%A4%E5%8A%9F%E8%83%BD/">展开全文 >></a>
         </p>
       
 

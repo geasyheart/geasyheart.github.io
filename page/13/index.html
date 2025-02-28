@@ -206,6 +206,127 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-SQLAlchemy混合属性机制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/14/SQLAlchemy%E6%B7%B7%E5%90%88%E5%B1%9E%E6%80%A7%E6%9C%BA%E5%88%B6/">SQLAlchemy混合属性机制</a>
+    </h1>
+  
+
+        
+        <a href="/2018/04/14/SQLAlchemy%E6%B7%B7%E5%90%88%E5%B1%9E%E6%80%A7%E6%9C%BA%E5%88%B6/" class="archive-article-date">
+  	<time datetime="2018-04-14T02:34:55.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-14</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="直接行为"><a href="#直接行为" class="headerlink" title="直接行为"></a>直接行为</h3><p>混合属性, 官方文档中称之为<code>Hybrid Attributes</code>. 这种机制表现为, 一个属性, 在 类 和层面, 和实例 的层面, 其行为是不同的. 之所以需要关注这部分的差异, 原因源于 Python 上下文和 SQL 上下文的差异.<br>类 层面经常是作为 SQL 查询时的一部分, 它面向的是 SQL 上下文. 而 实例 是已经得到或者创建的结果, 它面向的是 Python 上下文.<br>定义模型的 Column() 就是一个典型的混合属性. 作为实例属性时, 是具体的对象值访问, 而作为类属性时, 则有构成 SQL 语句表达式的功能.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Interval</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;interval&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, autoincrement=<span class="literal">True</span>, primary_key=<span class="literal">True</span>)</span><br><span class="line">    start = Column(Integer)</span><br><span class="line">    end = Column(Integer)</span><br><span class="line"></span><br><span class="line">session.add(Interval(start=<span class="number">0</span>, end=<span class="number">100</span>))</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
+<p>实例行为:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ins = session.query(Interval).first()</span><br><span class="line"><span class="built_in">print</span> ins.end - ins.start</span><br></pre></td></tr></table></figure>
+<p>类行为:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ins = session.query(Interval).<span class="built_in">filter</span>(Interval.end - Interval.start &gt; <span class="number">10</span>).first()</span><br></pre></td></tr></table></figure>
+<p>这种机制其实一直在被使用, 但是可能大家都没有留意一个属性在类和实例上的区别.<br>如果属性需要被进一步封装, 那么就需要明确声明<code>Hybrid Attributes</code>了:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy.ext.hybrid <span class="keyword">import</span> hybrid_property, hybrid_method</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Interval</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;interval&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, autoincrement=<span class="literal">True</span>, primary_key=<span class="literal">True</span>)</span><br><span class="line">    start = Column(Integer)</span><br><span class="line">    end = Column(Integer)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @hybrid_property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">length</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self.end - self.start</span><br><span class="line"></span><br><span class="line"><span class="meta">    @hybrid_method</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">bigger</span>(<span class="params">self, i</span>):</span><br><span class="line">        <span class="keyword">return</span> self.length &gt; i</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">session.add(Interval(start=<span class="number">0</span>, end=<span class="number">100</span>))</span><br><span class="line">session.commit()</span><br><span class="line"></span><br><span class="line">ins = session.query(Interval).<span class="built_in">filter</span>(Interval.length &gt; <span class="number">10</span>).first()</span><br><span class="line">ins = session.query(Interval).<span class="built_in">filter</span>(Interval.bigger(<span class="number">10</span>)).first()</span><br><span class="line"><span class="built_in">print</span> ins.bigger(<span class="number">1</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><code>setter</code>的定义同样使用对应的装饰器即可:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Interval</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;interval&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, autoincrement=<span class="literal">True</span>, primary_key=<span class="literal">True</span>)</span><br><span class="line">    start = Column(Integer)</span><br><span class="line">    end = Column(Integer)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @hybrid_property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">length</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">abs</span>(self.end - self.start)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @length.setter</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">length</span>(<span class="params">self, l</span>):</span><br><span class="line">        self.end = self.start + l</span><br></pre></td></tr></table></figure>
+
+<h3 id="表达式行为"><a href="#表达式行为" class="headerlink" title="表达式行为"></a>表达式行为</h3><p>前面说的属性, 在类和实例上有不同行为, 可以看到, 在类上的行为, 其实就是生成 SQL 表达式时的行为. 上面的例子只是简单的运算, SQLAlchemy 可以自动处理好 Python 函数和 SQL 函数的区别. 但是如果是一些特性更强的 SQL 函数, 就需要手动指定了. 于时, 这时的情况变成, 实例行为是 Python 范畴的调用行为, 而类行为则是生成SQL 函数的相关表达式.<br>同时是前面的例子, 对于 length 的定义, 更严格上来说, 应该是取绝对值的.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Interval</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;interval&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, autoincrement=<span class="literal">True</span>, primary_key=<span class="literal">True</span>)</span><br><span class="line">    start = Column(Integer)</span><br><span class="line">    end = Column(Integer)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @hybrid_property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">length</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">abs</span>(self.end - self.start)</span><br></pre></td></tr></table></figure>
+<p>但是, 如果使用了 Python 的<code>abs()</code>函数, 在生成 SQL 表达式时显示有无法处理了. 所以, 需要手动定义:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> func</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Interval</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;interval&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, autoincrement=<span class="literal">True</span>, primary_key=<span class="literal">True</span>)</span><br><span class="line">    start = Column(Integer)</span><br><span class="line">    end = Column(Integer)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @hybrid_property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">length</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">abs</span>(self.end - self.start)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @length.expression</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">length</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> func.<span class="built_in">abs</span>(self.end - self.start)</span><br></pre></td></tr></table></figure>
+
+<p>这样查询时就可以直接使用:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ins = session.query(Interval).<span class="built_in">filter</span>(Interval.length &gt; <span class="number">1</span>).first()</span><br></pre></td></tr></table></figure>
+<p>对应的 SQL :</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span></span><br><span class="line"><span class="keyword">FROM</span> <span class="type">interval</span></span><br><span class="line"><span class="keyword">WHERE</span> <span class="built_in">abs</span>(interval.&quot;end&quot; <span class="operator">-</span> interval.start) <span class="operator">&gt;</span> ?</span><br><span class="line"> LIMIT ? <span class="keyword">OFFSET</span> ?</span><br></pre></td></tr></table></figure>
+
+<h3 id="应用于关系"><a href="#应用于关系" class="headerlink" title="应用于关系"></a>应用于关系</h3><p>总体上没有特别之处:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Account</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;account&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, autoincrement=<span class="literal">True</span>, primary_key=<span class="literal">True</span>)</span><br><span class="line">    user = Column(Integer, ForeignKey(<span class="string">&#x27;user.id&#x27;</span>), index=<span class="literal">True</span>)</span><br><span class="line">    balance = Column(Integer, server_default=<span class="string">&#x27;0&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">User</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;user&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, autoincrement=<span class="literal">True</span>, primary_key=<span class="literal">True</span>)</span><br><span class="line">    name = Column(Unicode(<span class="number">32</span>), nullable=<span class="literal">False</span>, server_default=<span class="string">&#x27;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    accounts = relationship(<span class="string">&#x27;Account&#x27;</span>)</span><br><span class="line">    <span class="comment">#balance = association_proxy(&#x27;accounts&#x27;, &#x27;balance&#x27;)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @hybrid_property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">balance</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">sum</span>(x.balance <span class="keyword">for</span> x <span class="keyword">in</span> self.accounts)</span><br></pre></td></tr></table></figure>
+
+<p>查询时:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user = session.query(User).first()</span><br><span class="line"><span class="built_in">print</span> user.balance</span><br></pre></td></tr></table></figure>
+<p>这里涉及的东西都是 Python 自己的, 包括那个<code>sum()</code>函数, 和<code>SQL</code>没有关系.<br>如果想实现的是, 使用<code>SQL</code>的<code>sum()</code>函数, 取出指定用户的总账户金额数, 那么就要考虑把balance 作成表达式的形式:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> select</span><br><span class="line"></span><br><span class="line"><span class="meta">@hybrid_property</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">balance</span>(<span class="params">self</span>):</span><br><span class="line">    <span class="keyword">return</span> select([func.<span class="built_in">sum</span>(Account.balance)]).where(Account.user == self.<span class="built_in">id</span>).label(<span class="string">&#x27;balance_v&#x27;</span>)</span><br><span class="line">    <span class="comment">#return func.sum(Account.balance)</span></span><br></pre></td></tr></table></figure>
+<p>这样的话,<code>User.balance</code>只是单纯的一个表达式了, 查询时指定字段:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">user = session.query(User, User.balance).first()</span><br><span class="line"><span class="built_in">print</span> user.balance</span><br></pre></td></tr></table></figure>
+
+<p>注意, 如果写成:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">session.query(User.balance).first()</span><br></pre></td></tr></table></figure>
+<p>意义就不再是”获取第一个用户的总金额”, 而变成”获取总金额的第一个”. 这里很坑吧.<br>像上面这样改, 实例层面就无法使用 balance 属性. 所以, 还是先前介绍的, 表达式可以单独处理:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@hybrid_property</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">balance</span>(<span class="params">self</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">sum</span>(x.balance <span class="keyword">for</span> x <span class="keyword">in</span> self.accounts)</span><br><span class="line"></span><br><span class="line"><span class="meta">@balance.expression</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">balance</span>(<span class="params">self</span>):</span><br><span class="line">    <span class="keyword">return</span> select([func.<span class="built_in">sum</span>(Account.balance)]).where(Account.user == self.<span class="built_in">id</span>).label(<span class="string">&#x27;balance_v&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>定义了表达式的 balance , 这部分作为查询条件上当然也是可以的:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">user = session.query(User).<span class="built_in">filter</span>(User.balance &gt; <span class="number">1</span>).first()</span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">SQLAlchemy</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/SQLAlchemy//" class="article-tag-list-link color1">SQLAlchemy</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/04/14/SQLAlchemy%E6%B7%B7%E5%90%88%E5%B1%9E%E6%80%A7%E6%9C%BA%E5%88%B6/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-python多线程教程-并发与并行" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1372,142 +1493,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2018/03/20/SQLAlchemy%E7%A4%BA%E4%BE%8B-%E5%B1%9E%E6%80%A7%E5%AE%9E%E4%BD%93%E5%8C%96%E5%BB%BA%E6%A8%A1/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-SQLAlchemy初始化和创建连接" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/19/SQLAlchemy%E5%88%9D%E5%A7%8B%E5%8C%96%E5%92%8C%E5%88%9B%E5%BB%BA%E8%BF%9E%E6%8E%A5/">SQLAlchemy初始化和创建连接</a>
-    </h1>
-  
-
-        
-        <a href="/2018/03/19/SQLAlchemy%E5%88%9D%E5%A7%8B%E5%8C%96%E5%92%8C%E5%88%9B%E5%BB%BA%E8%BF%9E%E6%8E%A5/" class="archive-article-date">
-  	<time datetime="2018-03-19T09:31:05.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-19</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="SQLAlchemy初始化"><a href="#SQLAlchemy初始化" class="headerlink" title="SQLAlchemy初始化"></a>SQLAlchemy初始化</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> create_engine</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> sessionmaker</span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> Column</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.types <span class="keyword">import</span> String, Integer</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.ext.declarative <span class="keyword">import</span> declarative_base</span><br><span class="line"></span><br><span class="line">engine = create_engine(<span class="string">&#x27;postgresql://test@localhost:5432/test&#x27;</span>)</span><br><span class="line">DBSession = sessionmaker(engine)</span><br><span class="line">session = DBSession()</span><br><span class="line"></span><br><span class="line">BaseModel = declarative_base()</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">User</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;user&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(String, primary_key=<span class="literal">True</span>)</span><br><span class="line">    username = Column(String, index=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Session</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;session&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(String, primary_key=<span class="literal">True</span>)</span><br><span class="line">    user = Column(String, index=<span class="literal">True</span>)</span><br><span class="line">    ip = Column(String)</span><br><span class="line"></span><br><span class="line">query = session.query(Session, User.username).join(User, User.<span class="built_in">id</span> == Session.user)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> query:</span><br><span class="line">    <span class="built_in">print</span> <span class="built_in">dir</span>(i)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<h2 id="SQLAlchemy创建连接"><a href="#SQLAlchemy创建连接" class="headerlink" title="SQLAlchemy创建连接"></a>SQLAlchemy创建连接</h2><h3 id="Engine"><a href="#Engine" class="headerlink" title="Engine"></a>Engine</h3><p>engine 的定义包含了三部分的内容:</p>
-<ol>
-<li>具体数据库类型的实现</li>
-<li>连接池</li>
-<li>策略(即engine自己的实现)</li>
-</ol>
-<p>所谓的数据库类型即是<code>MYSQL</code> , <code>Postgresql</code> , <code>SQLite</code> 这些不同的数据库.<br>一般创建 engine 是使用<code>create_engine</code>方法:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">engine = create_engine(<span class="string">&#x27;postgresql+psycopg2://scott:tiger@localhost/mydatabase&#x27;</span>)</span><br></pre></td></tr></table></figure>
-
-<p>对于这个字符串, SQLAlchemy 提供了工具可用于处理它:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> create_engine</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.engine.url <span class="keyword">import</span> make_url</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.engine.url <span class="keyword">import</span> URL</span><br><span class="line"></span><br><span class="line">s = <span class="string">&#x27;postgresql://test@localhost:5432/bbcustom&#x27;</span></span><br><span class="line">url = make_url(s)</span><br><span class="line">s = URL(drivername=<span class="string">&#x27;postgresql&#x27;</span>, username=<span class="string">&#x27;test&#x27;</span>, password=<span class="string">&quot;&quot;</span>,host=<span class="string">&quot;localhost&quot;</span>, port=<span class="number">5432</span>, database=<span class="string">&quot;bbcustom&quot;</span>)</span><br><span class="line"></span><br><span class="line">engine = create_engine(url)</span><br><span class="line">engine = create_engine(s)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> engine.execute(<span class="string">&#x27;select id from &quot;user&quot;&#x27;</span>).fetchall()</span><br></pre></td></tr></table></figure>
-<p><code>create_engine</code> 函数有很多的控制参数, 这个后面再详细说.</p>
-<h3 id="Engine的策略"><a href="#Engine的策略" class="headerlink" title="Engine的策略"></a>Engine的策略</h3><p><code>create_engine</code>的调用, 实际上会变成<code>strategy.create</code>的调用. 而<code>strategy</code>就是<code>engine</code>的实现细节. <code>strategy</code>可以在<code>create_engine</code>调用时通过<code>strategy</code>参数指定, 目前官方的支持有三种:</p>
-<ol>
-<li>plain, 默认的</li>
-<li>threadlocal, 连接是线程局部的</li>
-<li>mock, 所有的 SQL 语句的执行会使用指定的函数</li>
-</ol>
-<p><code>mock</code> 这个实现, 会把所有的 <code>SQL</code> 语句的执行交给指定的函数来做, 这个函数是由<code>create_engine</code>的 <code>executor</code> 参数指定:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>(<span class="params">sql, *args, **kargs</span>):</span><br><span class="line">    <span class="built_in">print</span> sql, args, kargs</span><br><span class="line"></span><br><span class="line">s = <span class="string">&#x27;postgresql://test@localhost:5432/bbcustom&#x27;</span></span><br><span class="line">engine = create_engine(s, strategy=<span class="string">&#x27;mock&#x27;</span>, executor=f)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> engine.execute(<span class="string">&#x27;select id from &quot;user&quot;&#x27;</span>)</span><br></pre></td></tr></table></figure>
-
-<h3 id="各数据库实现"><a href="#各数据库实现" class="headerlink" title="各数据库实现"></a>各数据库实现</h3><p>各数据库的实现在 SQLAlchemy 中分成了两个部分, 一是数据库的类型, 二是具体数据库中适配的客户端实现. 比如对于 Postgresql 的访问, 可以使用<code>psycopg2</code>, 也可以使用<code>pg8000</code>:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">s = <span class="string">&#x27;postgresql+psycopg2://test@localhost:5432/bbcustom&#x27;</span></span><br><span class="line">s = <span class="string">&#x27;postgresql+pg8000://test@localhost:5432/bbcustom&#x27;</span></span><br><span class="line">engine = create_engine(s)</span><br></pre></td></tr></table></figure>
-
-<p>具体的适配工作, 是需要在代码中实现一个 Dialect 类来完成的. 官方的实现在 dialects 目录下.</p>
-<p>获取具体的 Dialect 的行为, 则是前面提到的<code>URL</code>对象的<code>get_dialect</code>方法.<code>create_engine</code>时你单传一个字符串,<code>SQLAlchemy</code>自己也会使用<code>make_url</code>得到一个<code>URL</code>的实例).</p>
-<h3 id="连接池"><a href="#连接池" class="headerlink" title="连接池"></a>连接池</h3><p>SQLAlchemy 支持连接池, 在<code>create_engine</code>时添加相关参数即可使用.</p>
-<ol>
-<li>pool_size:连接数</li>
-<li>max_overflow:最多多几个连接</li>
-<li>pool_recycle:连接重置周期</li>
-<li>pool_timeout:连接超时时间</li>
-</ol>
-<p>连接池效果:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> create_engine</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.engine.url <span class="keyword">import</span> make_url</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.engine.url <span class="keyword">import</span> URL</span><br><span class="line"></span><br><span class="line">s = <span class="string">&#x27;postgresql://test@localhost:5432/bbcustom&#x27;</span></span><br><span class="line">engine = create_engine(s, pool_size=<span class="number">2</span>, max_overflow=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> threading <span class="keyword">import</span> Thread</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>():</span><br><span class="line">    <span class="built_in">print</span> engine.execute(<span class="string">&#x27;select pg_sleep(5)&#x27;</span>).fetchall()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p = []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>):</span><br><span class="line">    p.append(Thread(target=f))</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> t <span class="keyword">in</span> p:</span><br><span class="line">    t.start()</span><br></pre></td></tr></table></figure>
-
-<p>连接池的实现, 在<code>create_engine</code>调用时也可以指定:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy.pool <span class="keyword">import</span> QueuePool</span><br><span class="line">engine = create_engine(<span class="string">&#x27;sqlite:///file.db&#x27;</span>, poolclass=QueuePool)</span><br></pre></td></tr></table></figure>
-<p>还有:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy.pool <span class="keyword">import</span> NullPool</span><br><span class="line">engine = create_engine(</span><br><span class="line">         <span class="string">&#x27;postgresql+psycopg2://scott:tiger@localhost/test&#x27;</span>,</span><br><span class="line">          poolclass=NullPool)</span><br></pre></td></tr></table></figure>
-
-<p>或者仅仅是获取连接的方法:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sqlalchemy.pool <span class="keyword">as</span> pool</span><br><span class="line"><span class="keyword">import</span> psycopg2</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getconn</span>():</span><br><span class="line">    c = psycopg2.connect(username=<span class="string">&#x27;ed&#x27;</span>, host=<span class="string">&#x27;127.0.0.1&#x27;</span>, dbname=<span class="string">&#x27;test&#x27;</span>)</span><br><span class="line">    <span class="comment"># do things with &#x27;c&#x27; to set up</span></span><br><span class="line">    <span class="keyword">return</span> c</span><br><span class="line"></span><br><span class="line">engine = create_engine(<span class="string">&#x27;postgresql+psycopg2://&#x27;</span>, creator=getconn)</span><br></pre></td></tr></table></figure>
-
-<p>连接池可以被单独使用:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sqlalchemy.pool <span class="keyword">as</span> pool</span><br><span class="line"><span class="keyword">import</span> psycopg2</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getconn</span>():</span><br><span class="line">    c = psycopg2.connect(username=<span class="string">&#x27;ed&#x27;</span>, host=<span class="string">&#x27;127.0.0.1&#x27;</span>, dbname=<span class="string">&#x27;test&#x27;</span>)</span><br><span class="line">    <span class="keyword">return</span> c</span><br><span class="line"></span><br><span class="line">mypool = pool.QueuePool(getconn, max_overflow=<span class="number">10</span>, pool_size=<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line">conn = mypool.connect()</span><br><span class="line">cursor = conn.cursor()</span><br><span class="line">cursor.execute(<span class="string">&quot;select foo&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<p>连接池可以被多个 engine 共享使用:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">e = create_engine(<span class="string">&#x27;postgresql://&#x27;</span>, pool=mypool)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">SQLAlchemy</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/SQLAlchemy//" class="article-tag-list-link color1">SQLAlchemy</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/03/19/SQLAlchemy%E5%88%9D%E5%A7%8B%E5%8C%96%E5%92%8C%E5%88%9B%E5%BB%BA%E8%BF%9E%E6%8E%A5/">展开全文 >></a>
         </p>
       
 

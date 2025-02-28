@@ -206,6 +206,107 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-BELLE-使用chatGPT生成训练数据" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2023/04/10/BELLE-%E4%BD%BF%E7%94%A8chatGPT%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/">BELLE-使用chatGPT生成训练数据</a>
+    </h1>
+  
+
+        
+        <a href="/2023/04/10/BELLE-%E4%BD%BF%E7%94%A8chatGPT%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/" class="archive-article-date">
+  	<time datetime="2023-04-10T03:29:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-04-10</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>LoRA<br>peft<br><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/kEGwA_7qAKhIuoxPJyfNuw">https://mp.weixin.qq.com/s/kEGwA_7qAKhIuoxPJyfNuw</a><br><a target="_blank" rel="noopener" href="https://aistudio.baidu.com/aistudio/projectdetail/5567217">https://aistudio.baidu.com/aistudio/projectdetail/5567217</a></p>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>自从chatGPT出来后，好多人&#x2F;机构开始尝试使用chatGPT来生成训练数据，简单省事方便。比如google bard，对，就是你，也有在偷偷使用。本文介绍一个项目<a target="_blank" rel="noopener" href="https://github.com/LianjiaTech/BELLE">BELLE</a>，来看看大佬们是怎么做的。注意：此文重点在于如何生成数据。</p>
+<h2 id="利用chatGPT生成训练数据"><a href="#利用chatGPT生成训练数据" class="headerlink" title="利用chatGPT生成训练数据"></a>利用chatGPT生成训练数据</h2><p>最开始BELLE的思想可以说来自<a target="_blank" rel="noopener" href="https://github.com/tatsu-lab/stanford_alpaca">stanford_alpaca</a>，不过在我写本文时，发现BELLE代码仓库更新了蛮多，所以此处忽略其他，仅介绍数据生成。</p>
+<p>代码入口：<a target="_blank" rel="noopener" href="https://github.com/LianjiaTech/BELLE/blob/c794c1d95a32c4afa34c0f3955be15a65afd4a22/1.5M/generate_instruction.py#L129">generate_instruction_following_data</a>。</p>
+<h3 id="1-加载zh-seed-tasks-json"><a href="#1-加载zh-seed-tasks-json" class="headerlink" title="1. 加载zh_seed_tasks.json"></a>1. 加载zh_seed_tasks.json</h3><p><a target="_blank" rel="noopener" href="https://github.com/LianjiaTech/BELLE/blob/main/1.5M/zh_seed_tasks.json">zh_seed_tasks.json</a></p>
+<img src="/2023/04/10/BELLE-%E4%BD%BF%E7%94%A8chatGPT%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/seed.png" class="" title="seed_task_path">
+
+<p>默认提供了175个种子任务，样例如下图</p>
+<img src="/2023/04/10/BELLE-%E4%BD%BF%E7%94%A8chatGPT%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/seed2.png" class="" title="seed_instruction_data">
+
+<h3 id="2-encode-prompt"><a href="#2-encode-prompt" class="headerlink" title="2. encode_prompt"></a>2. encode_prompt</h3><p>注意此处，看看如何构造chatGPT的输入以及chatGPT的输出。</p>
+<img src="/2023/04/10/BELLE-%E4%BD%BF%E7%94%A8chatGPT%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/encode_prompt.png" class="" title="encode_prompt">
+
+<p>最终prompt如下图所示</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">你被要求提供10个多样化的任务指令。这些任务指令将被提供给GPT模型，我们将评估GPT模型完成指令的能力。\n以下是你提供指令需要满足的要求：\n1.尽量不要在每个指令中重复动词，要最大化指令的多样性。\n2.使用指令的语气也应该多样化。例如，将问题与祈使句结合起来。\n3.指令类型应该是多样化的，包括各种类型的任务，类别种类例如：brainstorming，open QA，closed QA，rewrite，extract，generation，classification，chat，summarization。\n4.GPT语言模型应该能够完成这些指令。例如，不要要求助手创建任何视觉或音频输出。例如，不要要求助手在下午5点叫醒你或设置提醒，因为它无法执行任何操作。例如，指令不应该和音频、视频、图片、链接相关，因为GPT模型无法执行这个操作。\n5.指令用中文书写，指令应该是1到2个句子，允许使用祈使句或问句。\n6.你应该给指令生成适当的输入，输入字段应包含为指令提供的具体示例，它应该涉及现实数据，不应包含简单的占位符。输入应提供充实的内容，使指令具有挑战性。\n7.并非所有指令都需要输入。例如，当指令询问一些常识信息，比如“世界上最高的山峰是什么”，不需要提供具体的上下文。在这种情况下，我们只需在输入字段中放置“&lt;无输入&gt;”。当输入需要提供一些文本素材（例如文章，文章链接）时，就在输入部分直接提供一些样例。当输入需要提供音频、图片、视频或者链接时，则不是满足要求的指令。\n8.输出应该是针对指令和输入的恰当回答。 \n下面是10个任务指令的列表：</span><br><span class="line"></span><br><span class="line">###</span><br><span class="line">1. 指令: 给定一个句子，输出所有单词的词性标记。词性标记包括形容词、副词、连词、限定词、名词、数词、介词、代词、动词、助词。 以下是一个例子： 小明喜欢街角的那个蓝色房子。 词性标记结果是：小明 (名词) 喜欢 (动词) 街角 (名词) 的 (助词) 那个 (代词) 蓝色 (形容词) 房子 (名词) 。</span><br><span class="line">1. 输入:</span><br><span class="line">我确实不明白你在说什么.</span><br><span class="line">1. 输出:</span><br><span class="line">我 (代词) 确实 (副词) 不明白 (动词) 你 (代词) 在 (副词) 说 (动词) 什么(代词) .</span><br><span class="line">###</span><br><span class="line">2. 指令: 给定一组数，找出所有可能的子集，它们的和等于给定的数。</span><br><span class="line">2. 输入:</span><br><span class="line">集合：&#123;3, 12, 7, 2, 8, 4&#125;</span><br><span class="line">目标和：14</span><br><span class="line">2. 输出:</span><br><span class="line">&#123;12, 2&#125;, &#123;7, 3, 4&#125;, &#123;8, 2, 4&#125;</span><br><span class="line">###</span><br><span class="line">3. 指令: 列出一些西游记中孙悟空的技能。</span><br><span class="line">3. 输入:</span><br><span class="line">&lt;无输入&gt;</span><br><span class="line">3. 输出:</span><br><span class="line">1. 筋斗云：西游世界天地间第一飞行法术，速度最快，一个跟头十万八千里。</span><br><span class="line">2. 地煞七十二变：原著中七十二仅仅指数量，可以理解为能够变身成七十二种物体的变身法。</span><br><span class="line">3. 物体变化术：能把毫毛变成本尊或其他物体，如：瞌睡虫，也能把除毫毛以外的其他物体变成本尊形象。</span><br><span class="line">4. 护身法：施展后刀枪不入，天雷天火具莫能伤分毫。不过应该有施法前摇，施法后不能移动，所以孙悟空总是站着不动让人家砍。</span><br><span class="line">5. 三头六臂：额外长出两颗头和四条胳膊，全方位无死角进行战斗，相当于一种战斗形态。</span><br><span class="line">###</span><br><span class="line">4. 指令:</span><br></pre></td></tr></table></figure>
+
+<img src="/2023/04/10/BELLE-%E4%BD%BF%E7%94%A8chatGPT%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/chatGPT-output.png" class="" title="chatGPT-output">
+
+<p>由于没有<code>OPENAI_API_KEY</code>，所以咱们此处构造下<a target="_blank" rel="noopener" href="https://github.com/LianjiaTech/BELLE/blob/c794c1d95a32c4afa34c0f3955be15a65afd4a22/1.5M/generate_instruction.py#L176">results</a>的结果，来看看<code>post_process_gpt3_response</code>的处理。</p>
+<h3 id="3-post-process-gpt3-response"><a href="#3-post-process-gpt3-response" class="headerlink" title="3. post_process_gpt3_response"></a>3. post_process_gpt3_response</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">results = [</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="string">&quot;text&quot;</span>: <span class="string">&quot;根据以下输入文本，生成一篇400字左右的文章。\n4. 输入:\n近年来，随着人们健康意识的增强以及餐饮行业竞争的激烈，餐厅中出现了越来越多的健康餐饮品牌。这些品牌在产品配方、生产过程以及食材选取上更加注重健康因素，受到了越来越多消费者的青睐。同时，获取健康餐饮的途径也变得更加多样化，不光可以通过线下餐厅就餐，还可以通过外卖、自动售卖机等多种方式获取健康餐饮。然而，部分健康餐饮品牌的营养价值不尽相同，消费者在选择的时候需要注意。\n4. 输出:\n健康饮食正在受到越来越多人的重视，一些更加健康、营养更加全面的餐饮品牌正在受到更多关注。这些品牌不仅仅在产品配方、生产过程以及食材选择上更加注重健康因素，还提供了更多获取途径，例如线下餐厅、外卖、自动售卖机等等。但是，消费者在选择健康餐饮时需要注意一些细节。在购买前，建议您了解这家餐饮品牌是否真正关注营养价值，有没有认真挑选食材，是否考虑到了消费者对餐饮的健康需求。同时，您还需要关注一些常见问题，例如是否在加糖等。通过小心谨慎地挑选您的餐饮品牌，您可以尽可能地保证食物的健康性和营养价值，为您的健康保驾护航。&quot;</span></span><br><span class="line">&#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<img src="/2023/04/10/BELLE-%E4%BD%BF%E7%94%A8chatGPT%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/post_process.png" class="" title="post_process">
+
+<p>可看到，具体做了一些chatGPT回复内容的后处理操作。比如过滤黑名单，chatGPT回复内容提出input、output、instruction。</p>
+<img src="/2023/04/10/BELLE-%E4%BD%BF%E7%94%A8chatGPT%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/gen_ins.png" class="" title="gen-ins">
+
+<h3 id="4-bm25计算instruction相似度"><a href="#4-bm25计算instruction相似度" class="headerlink" title="4. bm25计算instruction相似度"></a>4. bm25计算instruction相似度</h3><p>这步也是后处理，计算chatGPT生成的instruction和已经拥有的instructions的相似度，如果大于阈值，就忽略掉生成的这个instruction。</p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>在huggingface上可看到作者生成的数据，比如<a target="_blank" rel="noopener" href="https://huggingface.co/datasets/BelleGroup/train_0.5M_CN">train_0.5M_CN</a>,<a target="_blank" rel="noopener" href="https://huggingface.co/datasets/BelleGroup/train_1M_CN">train_1M_CN</a>，这俩构成了作者宣称的1.5M数据集，当然还有一个10M的数据集。更多可看<a target="_blank" rel="noopener" href="https://huggingface.co/BelleGroup">BelleGroup Datasets</a>。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2023/04/10/BELLE-%E4%BD%BF%E7%94%A8chatGPT%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-simcse模型" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1154,130 +1255,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2022/09/28/%E5%8D%95%E5%A1%94%E6%96%87%E6%9C%AC%E5%8C%B9%E9%85%8D/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-prompt系列-OpenPrompt入门一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/09/07/prompt%E7%B3%BB%E5%88%97-OpenPrompt%E5%85%A5%E9%97%A8%E4%B8%80/">prompt系列-OpenPrompt入门一</a>
-    </h1>
-  
-
-        
-        <a href="/2022/09/07/prompt%E7%B3%BB%E5%88%97-OpenPrompt%E5%85%A5%E9%97%A8%E4%B8%80/" class="archive-article-date">
-  	<time datetime="2022-09-07T05:57:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-09-07</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>此次开辟一个新的话题，叫做prompting learning。prompting learning常用于零样本、小样本领域，通过将下游训练数据转换成预训练模型任务，进行小样本微调或者零样本进行预测。</p>
-<p>之前在<a href="/2022/08/17/UIE-%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96/" title="UIE-事件提取">UIE-事件提取</a>中也有涉及prompt，但是UIE的做法是构造prompt输入，再和原句一起微调模型，完成提取任务。那这里我们来看看OpenPrompt是怎么做的。</p>
-<p>关于<a target="_blank" rel="noopener" href="https://github.com/thunlp/OpenPrompt">OpenPrompt</a>，此处不做过多介绍，请直接看官网。</p>
-<p>官方有张图阐述了OpenPrompt的架构，请看下图。<br><img src="https://camo.githubusercontent.com/d26f498b1bc63fe804fe21df9d1f91fa55673ee3c45242fd3f49439718376db7/68747470733a2f2f7a332e617831782e636f6d2f323032312f31312f30332f4941645433442e706e67" alt="arch"></p>
-<p>下面通过官方示例来说明它的工作原理。</p>
-<h2 id="主要模块介绍"><a href="#主要模块介绍" class="headerlink" title="主要模块介绍"></a>主要模块介绍</h2><h3 id="1-Template"><a href="#1-Template" class="headerlink" title="1. Template"></a>1. Template</h3><p>这个从网上一搜prompting learning，不可避免搜到template，这个是将下游训练数据通过template转换成符合预训练模型任务的训练数据，保持和预训练任务一致。</p>
-<h3 id="2-Verbalizer"><a href="#2-Verbalizer" class="headerlink" title="2. Verbalizer"></a>2. Verbalizer</h3><p>这个应该怎么翻译呢，姑且称为同义词吧。。。它的作用是从预训练模型vocab中获取符合label的词，比如：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">        <span class="string">&quot;negative&quot;</span>: [<span class="string">&quot;bad&quot;</span>],</span><br><span class="line">        <span class="string">&quot;positive&quot;</span>: [<span class="string">&quot;good&quot;</span>, <span class="string">&quot;wonderful&quot;</span>, <span class="string">&quot;great&quot;</span>],</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>此处先不展开介绍，后续会介绍它的作用和比较坑的地方。</p>
-<h3 id="3-PLM"><a href="#3-PLM" class="headerlink" title="3. PLM"></a>3. PLM</h3><p>这个就没什么可解释的了，就是预训练模型。</p>
-<h2 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h2><p>整体流程代码可见附录。</p>
-<h3 id="1-推理"><a href="#1-推理" class="headerlink" title="1. 推理"></a>1. 推理</h3><p>比如这个情感分类任务，经过Template转换后变成了如下：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Albert Einstein was one of the greatest intellects of his time. It was [MASK]</span><br><span class="line">The film was badly made. It was [MASK]</span><br></pre></td></tr></table></figure>
-
-<p>接着输入给bert模型，拿到mask位置的预测结果output，此时shape为(2, 28996)，表示batch_size为2,整个bert vocab size为28996。</p>
-<p>那如何将这个预测结果对应到<code>negative</code>或<code>positive</code>呢，这里就引出来Verbalizer了。</p>
-<p>将<code>[&#39;bad&#39;, &#39;good&#39;, &#39;wonderful&#39;, &#39;great&#39;]</code>转成tokenizer vocab的index，然后获取output所对应的index，比如下面伪代码：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">aggregate</span>(<span class="params">label_words_logits: torch.Tensor, label_words_mask: torch.Tensor</span>) -&gt; torch.Tensor:</span><br><span class="line">    <span class="string">r&quot;&quot;&quot;Use weight to aggregate the logits of label words.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        label_words_logits(:obj:`torch.Tensor`): The logits of the label words.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        :obj:`torch.Tensor`: The aggregated logits from the label words.</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    label_words_logits = (label_words_logits * label_words_mask).<span class="built_in">sum</span>(-<span class="number">1</span>) / label_words_mask.<span class="built_in">sum</span>(-<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> label_words_logits</span><br><span class="line"></span><br><span class="line">output = torch.rand(<span class="number">2</span>, <span class="number">28996</span>)</span><br><span class="line"><span class="comment"># [tokenizer.vocab.get(i) for i in [&#x27;bad&#x27;, &#x27;good&#x27;, &#x27;wonderful&#x27;, &#x27;great&#x27;]]</span></span><br><span class="line"><span class="comment"># [2213, 1363, 7310, 1632]</span></span><br><span class="line">verbalizer = torch.tensor([[<span class="number">2213</span>,    <span class="number">0</span>,    <span class="number">0</span>],</span><br><span class="line">                    [<span class="number">1363</span>, <span class="number">7310</span>, <span class="number">1632</span>]])</span><br><span class="line">mask = torch.tensor([[<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">                    [<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>]])</span><br><span class="line">logits = output[:, verbalizer]</span><br><span class="line"><span class="comment"># tensor([[[0.0508, 0.0000, 0.0000],</span></span><br><span class="line"><span class="comment">#          [0.1770, 0.9680, 0.0091]],</span></span><br><span class="line"><span class="comment">#         [[0.2045, 0.0000, 0.0000],</span></span><br><span class="line"><span class="comment">#          [0.9504, 0.2127, 0.1417]]])</span></span><br><span class="line"><span class="built_in">print</span>(aggreate(logits, mask))</span><br><span class="line"><span class="comment">#  negative， positive</span></span><br><span class="line"><span class="comment"># tensor([[0.0508, 0.3847],</span></span><br><span class="line"><span class="comment">#         [0.2045, 0.4349]])</span></span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th>样本</th>
-<th>bad</th>
-<th>good</th>
-<th>wonderful</th>
-<th>great</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1</td>
-<td>0.0508</td>
-<td>0.1770</td>
-<td>0.9680</td>
-<td>0.0091</td>
-</tr>
-<tr>
-<td>2</td>
-<td>0.2045</td>
-<td>0.9504</td>
-<td>0.2127</td>
-<td>0.1417</td>
-</tr>
-</tbody></table>
-<p>通过aggreate就拿到最终对应negative和postive的logit了。</p>
-<h3 id="2-训练"><a href="#2-训练" class="headerlink" title="2. 训练"></a>2. 训练</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(aggreate(logits, mask))</span><br><span class="line"><span class="comment"># tensor([[0.0508, 0.3847],</span></span><br><span class="line"><span class="comment">#         [0.2045, 0.4349]])</span></span><br></pre></td></tr></table></figure>
-
-<p>拿到这个后，直接和label做交叉熵不就拿到loss啦～</p>
-<h3 id="3-Verbalizer缺点"><a href="#3-Verbalizer缺点" class="headerlink" title="3. Verbalizer缺点"></a>3. Verbalizer缺点</h3><p>可看到，<code>[&#39;bad&#39;, &#39;good&#39;, &#39;wonderful&#39;, &#39;great&#39;]</code>都是在bert vocab中存在的词，但是在中文里面是以字进行拆分的，那么不会存在<code>不好，精彩，漂亮，优秀...</code>这种词，即使是在WWM模型里面也不存在这些词，那么这个对中文构造这些verbalizer带来了不足。</p>
-<p>而这种方式被称为硬解码，后续再说。</p>
-<h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><h3 id="1-完整代码"><a href="#1-完整代码" class="headerlink" title="1. 完整代码"></a>1. 完整代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># step1:</span></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> openprompt.data_utils <span class="keyword">import</span> InputExample</span><br><span class="line"></span><br><span class="line">classes = [  <span class="comment"># There are two classes in Sentiment Analysis, one for negative and one for positive</span></span><br><span class="line">    <span class="string">&quot;negative&quot;</span>,</span><br><span class="line">    <span class="string">&quot;positive&quot;</span></span><br><span class="line">]</span><br><span class="line">dataset = [  <span class="comment"># For simplicity, there&#x27;s only two examples</span></span><br><span class="line">    <span class="comment"># text_a is the input text of the data, some other datasets may have multiple input sentences in one example.</span></span><br><span class="line">    InputExample(</span><br><span class="line">        guid=<span class="number">0</span>,</span><br><span class="line">        text_a=<span class="string">&quot;Albert Einstein was one of the greatest intellects of his time.&quot;</span>,</span><br><span class="line">    ),</span><br><span class="line">    InputExample(</span><br><span class="line">        guid=<span class="number">1</span>,</span><br><span class="line">        text_a=<span class="string">&quot;The film was badly made.&quot;</span>,</span><br><span class="line">    ),</span><br><span class="line">]</span><br><span class="line"><span class="comment"># step 2</span></span><br><span class="line"><span class="keyword">from</span> openprompt.plms <span class="keyword">import</span> load_plm</span><br><span class="line"></span><br><span class="line">plm, tokenizer, model_config, WrapperClass = load_plm(<span class="string">&quot;bert&quot;</span>, <span class="string">&quot;bert-base-cased&quot;</span>)</span><br><span class="line"><span class="comment"># step3</span></span><br><span class="line"><span class="keyword">from</span> openprompt.prompts <span class="keyword">import</span> ManualTemplate</span><br><span class="line"></span><br><span class="line">promptTemplate = ManualTemplate(</span><br><span class="line">    text=<span class="string">&#x27;&#123;&quot;placeholder&quot;:&quot;text_a&quot;&#125; It was &#123;&quot;mask&quot;&#125;&#x27;</span>,</span><br><span class="line">    tokenizer=tokenizer,</span><br><span class="line">)</span><br><span class="line"><span class="comment"># step4</span></span><br><span class="line"><span class="keyword">from</span> openprompt.prompts <span class="keyword">import</span> ManualVerbalizer</span><br><span class="line"></span><br><span class="line">promptVerbalizer = ManualVerbalizer(</span><br><span class="line">    classes=classes,</span><br><span class="line">    label_words=&#123;</span><br><span class="line">        <span class="string">&quot;negative&quot;</span>: [<span class="string">&quot;bad&quot;</span>],</span><br><span class="line">        <span class="string">&quot;positive&quot;</span>: [<span class="string">&quot;good&quot;</span>, <span class="string">&quot;wonderful&quot;</span>, <span class="string">&quot;great&quot;</span>],</span><br><span class="line">    &#125;,</span><br><span class="line">    tokenizer=tokenizer,</span><br><span class="line">)</span><br><span class="line"><span class="comment"># step 5</span></span><br><span class="line"><span class="keyword">from</span> openprompt <span class="keyword">import</span> PromptForClassification</span><br><span class="line"></span><br><span class="line">promptModel = PromptForClassification(</span><br><span class="line">    template=promptTemplate,</span><br><span class="line">    plm=plm,</span><br><span class="line">    verbalizer=promptVerbalizer,</span><br><span class="line">)</span><br><span class="line"><span class="comment"># step 6</span></span><br><span class="line"><span class="keyword">from</span> openprompt <span class="keyword">import</span> PromptDataLoader</span><br><span class="line"></span><br><span class="line">data_loader = PromptDataLoader(</span><br><span class="line">    dataset=dataset,</span><br><span class="line">    tokenizer=tokenizer,</span><br><span class="line">    template=promptTemplate,</span><br><span class="line">    tokenizer_wrapper_class=WrapperClass,</span><br><span class="line">)</span><br><span class="line"><span class="comment"># step 7</span></span><br><span class="line"><span class="comment"># making zero-shot inference using pretrained MLM with prompt</span></span><br><span class="line">promptModel.<span class="built_in">eval</span>()</span><br><span class="line"><span class="keyword">with</span> torch.no_grad():</span><br><span class="line">    <span class="keyword">for</span> batch <span class="keyword">in</span> data_loader:</span><br><span class="line">        logits = promptModel(batch)</span><br><span class="line">        preds = torch.argmax(logits, dim=-<span class="number">1</span>)</span><br><span class="line">        <span class="built_in">print</span>(classes[preds])</span><br><span class="line"><span class="comment"># predictions would be 1, 0 for classes &#x27;positive&#x27;, &#x27;negative&#x27;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/09/07/prompt%E7%B3%BB%E5%88%97-OpenPrompt%E5%85%A5%E9%97%A8%E4%B8%80/">展开全文 >></a>
         </p>
       
 

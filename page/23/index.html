@@ -206,6 +206,112 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-20-01-实验-DNS主从复制及区域传送" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/03/20-01-%E5%AE%9E%E9%AA%8C-DNS%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%8F%8A%E5%8C%BA%E5%9F%9F%E4%BC%A0%E9%80%81/">20_01_实验_DNS主从复制及区域传送</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/03/20-01-%E5%AE%9E%E9%AA%8C-DNS%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%8F%8A%E5%8C%BA%E5%9F%9F%E4%BC%A0%E9%80%81/" class="archive-article-date">
+  	<time datetime="2015-04-03T06:34:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-03</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>主DNS服务器: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#mv /etc/named.conf /etc/named.conf.bak </span><br><span class="line">#vim /etc/named.conf </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">options &#123; </span><br><span class="line">    directory &quot;/var/named&quot;; </span><br><span class="line">    notify yes;    如果有从DNS，需要指明； </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone &quot;.&quot; IN &#123; </span><br><span class="line">    type hint; </span><br><span class="line">    file &quot;named.ca&quot; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone &quot;localhost&quot; IN &#123; </span><br><span class="line">    type master; </span><br><span class="line">    file &quot;named.localhost&quot;; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone &quot;unravel.com&quot; IN &#123; </span><br><span class="line">    type master; </span><br><span class="line">    allow-transfer &#123; 172.17.12.231; &#125;; </span><br><span class="line">    file &quot;unravel.com.zone&quot;; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone &quot;12.17.127.in-addr-arpa&quot; IN &#123; </span><br><span class="line">    type master; </span><br><span class="line">    file &quot;172.17.12.zone&quot;; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+
+
+<h1 id="chmod-640-etc-named-conf-chown-root-named-etc-named-conf"><a href="#chmod-640-etc-named-conf-chown-root-named-etc-named-conf" class="headerlink" title="chmod 640 &#x2F;etc&#x2F;named.conf &amp;&amp; chown root.named &#x2F;etc&#x2F;named.conf"></a>chmod 640 &#x2F;etc&#x2F;named.conf &amp;&amp; chown root.named &#x2F;etc&#x2F;named.conf</h1><h1 id="vim-var-named-unravel-com-zone"><a href="#vim-var-named-unravel-com-zone" class="headerlink" title="vim &#x2F;var&#x2F;named&#x2F;unravel.com.zone"></a>vim &#x2F;var&#x2F;named&#x2F;unravel.com.zone</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">$TTL    68400; </span><br><span class="line">@    IN    SOA    ns1.unravel.com.    admin.unravel.com.( </span><br><span class="line">        20150101 </span><br><span class="line">        1H </span><br><span class="line">        2M </span><br><span class="line">        2D </span><br><span class="line">        6H) </span><br><span class="line">    IN    NS    ns1 </span><br><span class="line">    IN    NS    ns2 </span><br><span class="line">    IN    MX    10    mail     </span><br><span class="line">ns1    IN    A    172.17.12.69 </span><br><span class="line">ns2    IN    A    172.17.12.231 </span><br><span class="line">www    IN    A    172.17.12.69 </span><br><span class="line">ww    IN    CNAME    www </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#vim /var/named/172.17.12.zone </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$TTL 86400; </span><br><span class="line">@    IN    SOA    ns1.unravel.com.    admin.unravel.com. ( </span><br><span class="line">        20150101 </span><br><span class="line">        1H </span><br><span class="line">        2M </span><br><span class="line">        2D </span><br><span class="line">        6H) </span><br><span class="line">    IN    NS    ns1.unravel.com. </span><br><span class="line">    IN    NS    ns2.unravel.com. </span><br><span class="line">69    IN    PTR    ns1.unravel.com. </span><br><span class="line">231    IN    PTR    ns2.unravel.com. </span><br><span class="line">69    IN    PTR    www.unravel.com. </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#service named start </span><br></pre></td></tr></table></figure>
+
+<p>从DNS服务器: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#yum install bind </span><br><span class="line">#mv /etc/named.conf /etc/named.conf.bak </span><br><span class="line">#vim /etc/named.conf </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">options &#123; </span><br><span class="line">    directory &quot;/var/named&quot;; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">zone &quot;unravel.com&quot; IN    &#123; </span><br><span class="line">    type slave; </span><br><span class="line">    file &quot;slaves/unravel.com.zone&quot;; </span><br><span class="line">    masters &#123; 172.17.12.69; &#125;; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone &quot;12.17.172.in-addr-arpa&quot; IN &#123; </span><br><span class="line">    type slave; </span><br><span class="line">    file &quot;slaves/172.17.12.zone&quot;; </span><br><span class="line">    masters &#123; 172.17.12.69; &#125;; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#chown root.named /etc/named.cof </span><br><span class="line">#chmod 640 /etc/named.conf </span><br><span class="line">#service named start </span><br></pre></td></tr></table></figure>
+
+<p>就会完成主从DNS传送 （更多细节参考文档说明）</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/03/20-01-%E5%AE%9E%E9%AA%8C-DNS%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%8F%8A%E5%8C%BA%E5%9F%9F%E4%BC%A0%E9%80%81/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-20-01DNS主从复制及区域传送" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1277,140 +1383,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/03/25/17-02Linux%E7%B3%BB%E7%BB%9F%E6%95%85%E9%9A%9C%E6%8E%92%E9%99%A4%E6%96%B9%E6%B3%95/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-17-01RHEL系统安装及kickstart" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/24/17-01RHEL%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85%E5%8F%8Akickstart/">17_01RHEL系统安装及kickstart</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/24/17-01RHEL%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85%E5%8F%8Akickstart/" class="archive-article-date">
-  	<time datetime="2015-03-24T14:40:18.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-24</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><blockquote>
-<p>Anaconda:stage2.img   <a target="_blank" rel="noopener" href="http://zh.wikipedia.org/zh-cn/Anaconda">http://zh.wikipedia.org/zh-cn/Anaconda</a>    <br>Anaconda是Red Hat Linux和Fedora的安装管理程序。它以Python及C语言写成，以图形的PyGTK和文字的python-newt接口写成。它可以用来自动安装配置，使用户能够以最小的监督运行。<br>Anaconda安装管理程序应用在RHEL，Fedora和其他一些项目，Anaconda提供纯文字模式和GUI模式，用户可以安装在各种各样的系统。<br>Anacondas是一种吃蜥蜴的蟒蛇，而正因Caldera的安装管理程序名为蜥蜴（lizard），因而得名。 </p>
-</blockquote>
-<p>kickstart :完成自动化安装 </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#yum install system-config-kickstart </span><br><span class="line">#ksvalidator(帮助查看配置文件是否配置有错) </span><br><span class="line">#ksvalidator /root/anaconda.cfg </span><br><span class="line">#system-config-kickstart </span><br></pre></td></tr></table></figure>
-<p>会打开一个配置文件，这样会非常省事 </p>
-<blockquote>
-<p>&#x2F;root&#x2F;anaconda.cfg<br>（一旦安装完，会生成这个文件，所以可以参考这个为样本） </p>
-</blockquote>
-<h2 id="kickstart-三部份"><a href="#kickstart-三部份" class="headerlink" title="kickstart:三部份"></a>kickstart:三部份</h2><ul>
-<li>命令段</li>
-</ul>
-<ul>
-<li><p>必备命令 </p>
-<blockquote>
-<p>keyboard&#x2F;lang&#x2F;timezone&#x2F;rootpw&#x2F;auth(or authconfig)&#x2F;bootloader<br>    keyboard us<br>    lang  en_US (zh_CN)    local -a可查看所有支持的语言<br>    rootpw –iscrypted<br>    timezone [–utc]<timezone>    timeconfig 可查看所有时区，如果乱码，export LANG&#x3D;C<br>    bootloader –location&#x3D;mbr(default) –append&#x3D;”hdd&#x3D;ide-scsi ide&#x3D;nodma” </p>
-</blockquote>
-</li>
-<li><p>可选命令 </p>
-<blockquote>
-<p>autopart&#x2F;ignoredisk&#x2F;clearpart<br>autopart：自动分区<br>ingnoredisk:<br>    ingoredisk –drives&#x3D;drive1,drive2,…<br>    ingoredisk –only-use&#x3D;sda(示例)<br>clearpart:清除分区(如果这个指错，会有致命伤害)<br>    clearpart –drivers&#x3D;hda,hdb –all<br>    clearpart –linux (清除所有Linux分区)<br>    clearpart –none(default) 不移除任何分区，使用空闲空间<br>    clearpart –initlabel(如果没有分区表，就初始化一个)<br>driverdisk(必须使用这个命令告诉安装程序到哪寻找硬盘驱动)<br>    driverdisk –source&#x3D;<a href="ftp://path/to/dd.img">ftp://path/to/dd.img</a><br>    driverdisk –source&#x3D;<a target="_blank" rel="noopener" href="http://path/to/dd.img">http://path/to/dd.img</a><br>    driverdisk –source&#x3D;nfs:host:&#x2F;path&#x2F;to&#x2F;img<br>firewall<br>    firewall –enabled<br>    firewall –disabled<br>    firewall –trust<br>            –ssh<br>            –telnet<br>            –smtp<br>            –http<br>            –ftp<br>firstboot:安装重启后还是要配置，如果不配置，直接–disabled<br>    –disabled<br>    –enabled<br>halt:系统安装完后关机<br>graphical(default):图形化安装<br>text:纯文本方式安装<br>install&#x2F;upgrade（安装还是升级）<br>    url –url http:&#x2F;&#x2F;<server>&#x2F;<dir><br>    url –url ftp:&#x2F;&#x2F;<username>:<password>@<server>&#x2F;<dir><br> interactive(交互模式安装，由于为了就是自动化安装，所以这个没啥用)<br>part  磁盘分区<br>network<br>    –bootproto&#x3D; one of dhcp&#x2F;bootp&#x2F;static<br>    network –bootproto&#x3D;dhcp<br>    network (–device(指定哪个网卡)) –bootproto&#x3D;static –ip&#x3D;10.0.2.15 –netmask&#x3D;255.255.255.0 –gateway&#x3D;10.0.2.254 –nameserver&#x3D;10.0.2.1<br>selinux –permissive<br>skipx(跳过图形化配置) </p>
-</blockquote>
-</li>
-<li><p>软件包选择段，$packages</p>
-</li>
-</ul>
-<ol>
-<li><p>脚本段 </p>
-<blockquote>
-<p>%pre（预安装脚本）：这个由于系统正在安装中，可提供的东西有限，所以一般在安装<br>$post(后安装脚本)    后写脚本，即$post段 </p>
-</blockquote>
-</li>
-<li><p>应该把kickstart文件放哪? </p>
-<blockquote>
-<p>ks&#x3D;  告诉安装服务到哪去找<br>ks&#x3D;http:&#x2F;&#x2F;<br>ks&#x3D;cdrom:&#x2F; </p>
-</blockquote>
-</li>
-<li><p>安装过程中，boot提示符中可以使用的命令: </p>
-<blockquote>
-<p>askmethod<br>dd&#x3D; </p>
-<p>ip&#x3D;<br>netmask&#x3D;<br>gatway&#x3D;    <br>dns&#x3D;dns1,dns2 </p>
-<p>ks&#x3D; nfs:<server>:&#x2F;<path><br>ks&#x3D;http:&#x2F;&#x2F;<server>:&#x2F;<path><br>ks&#x3D;floppy:&#x2F;<path><br>ks&#x3D;hd:<device>:&#x2F;<file><br>ks&#x3D;file:&#x2F;<file ><br>ks&#x3D;cdrom:&#x2F;<path> </p>
-<p>ksdevice&#x3D;<br>nonet(不启用网络功能)    <br>noprobe(不探测硬件信息)防止特殊的硬件在安装驱动过程中失败导致系统安装失败<br>rescue:进入救援模式</p>
-</blockquote>
-</li>
-</ol>
-<p> </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkisofs -R -b isolinux/isolinux.bin -no-emul-boot -boot-load-size 4 -boot-info-table -o boot.iso iso/ </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>（说明，我在使用这个自动化安装Redhat6.5的时候失败，提示无法找到cdrom的驱动，所以写了PXE方式安装）</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/24/17-01RHEL%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85%E5%8F%8Akickstart/">展开全文 >></a>
         </p>
       
 
