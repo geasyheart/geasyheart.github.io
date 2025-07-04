@@ -206,6 +206,106 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-研究torch0-4-1-rnn的实现" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/06/19/%E7%A0%94%E7%A9%B6torch0-4-1-rnn%E7%9A%84%E5%AE%9E%E7%8E%B0/">研究torch0.4.1 rnn的实现</a>
+    </h1>
+  
+
+        
+        <a href="/2021/06/19/%E7%A0%94%E7%A9%B6torch0-4-1-rnn%E7%9A%84%E5%AE%9E%E7%8E%B0/" class="archive-article-date">
+  	<time datetime="2021-06-19T12:38:26.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-19</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="公式"><a href="#公式" class="headerlink" title="公式"></a>公式</h2><img src="/2021/06/19/%E7%A0%94%E7%A9%B6torch0-4-1-rnn%E7%9A%84%E5%AE%9E%E7%8E%B0/f.svg" class="" title="公式">
+
+<h2 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h2><ol>
+<li>所有<a href="#6-%E6%B5%8B%E8%AF%95%E4%BB%A3%E7%A0%81%E5%AE%8C%E6%95%B4%E5%A6%82%E4%B8%8B">测试代码</a>以此为准。</li>
+<li>以torch0.4.1的代码为准进行debug rnn代码， 可以pip install 指定版本的torch.</li>
+</ol>
+<p>从<a href="#6-%E6%B5%8B%E8%AF%95%E4%BB%A3%E7%A0%81%E5%AE%8C%E6%95%B4%E5%A6%82%E4%B8%8B">测试代码</a>可以看到：</p>
+<ol>
+<li>num_layers相当初始化多少层rnn layer，比如此例子的<code>10</code>，</li>
+<li>input_size表示上一层的hidden_size(例如本例子的embedding)</li>
+<li>hidden_size表示rnn的输出hidden_size</li>
+<li>batch_first简单来讲就是内存存储的问题，if batch_first&#x3D;True，那么维度(batch_size, seq_length, hidden_size)，否则seq_length和batch_size对调，另外cudnn底层就是seq_length放在第一位，torch底层也会根据batch_first进行转换</li>
+</ol>
+<h2 id="1-初始化一些参数"><a href="#1-初始化一些参数" class="headerlink" title="1. 初始化一些参数"></a>1. 初始化一些参数</h2><p>以embedding出来为准，输出维度为: (32, 3, 30)<br>rnn第一步初始化hx(10, 32, 4)，一共初始化了num_layer&#x3D;10层，batch_size&#x3D;32，hidden_size&#x3D;4，白话文就是每一层rnn都有一个(32, 4)的矩阵来保存最后一个时刻(ht)的结果。</p>
+<p>这个可以看<code>class RNNBase(Module):</code>。<br>另外还有2个weight，2个bias的初始化。即公式中的<code>w</code>和<code>b</code></p>
+<h2 id="2-AutogradRNN"><a href="#2-AutogradRNN" class="headerlink" title="2. AutogradRNN"></a>2. AutogradRNN</h2><p>初始化参数后，调用此方法，进行rnn计算，如果支持GPU，就会使用cudnn提供好的，此处忽略这里。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">AutogradRNN</span>(<span class="params">mode, input_size, hidden_size, num_layers=<span class="number">1</span>, batch_first=<span class="literal">False</span>,</span></span><br><span class="line"><span class="params">                dropout=<span class="number">0</span>, train=<span class="literal">True</span>, bidirectional=<span class="literal">False</span>, variable_length=<span class="literal">False</span>,</span></span><br><span class="line"><span class="params">                dropout_state=<span class="literal">None</span>, flat_weight=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="comment"># 使用不同的cell进行计算，每一层rnn layer即一个cell。</span></span><br><span class="line">    <span class="keyword">if</span> mode == <span class="string">&#x27;RNN_RELU&#x27;</span>:</span><br><span class="line">        cell = RNNReLUCell</span><br><span class="line">    <span class="keyword">elif</span> mode == <span class="string">&#x27;RNN_TANH&#x27;</span>:</span><br><span class="line">        cell = RNNTanhCell</span><br><span class="line">    <span class="keyword">elif</span> mode == <span class="string">&#x27;LSTM&#x27;</span>:</span><br><span class="line">        cell = LSTMCell</span><br><span class="line">    <span class="keyword">elif</span> mode == <span class="string">&#x27;GRU&#x27;</span>:</span><br><span class="line">        cell = GRUCell</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">raise</span> Exception(<span class="string">&#x27;Unknown mode: &#123;&#125;&#x27;</span>.<span class="built_in">format</span>(mode))</span><br><span class="line">    <span class="comment"># rec_factory即表示Recurrent，就是第四步的函数</span></span><br><span class="line">    rec_factory = variable_recurrent_factory <span class="keyword">if</span> variable_length <span class="keyword">else</span> Recurrent</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> bidirectional:</span><br><span class="line">        <span class="comment"># 可以看到哦，反向就是进行reverse一下</span></span><br><span class="line">        <span class="comment"># 对应代码：steps = range(input.size(0) - 1, -1, -1) if reverse else range(input.size(0))</span></span><br><span class="line">        <span class="comment"># 意思就是从最后一个时刻反向进行更新hidden_size（不同时刻的y）。</span></span><br><span class="line">        layer = (rec_factory(cell), rec_factory(cell, reverse=<span class="literal">True</span>))</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        layer = (rec_factory(cell),)</span><br><span class="line">    <span class="comment"># 这地方疯狂使用闭包...</span></span><br><span class="line">    func = StackedRNN(layer,</span><br><span class="line">                      num_layers,</span><br><span class="line">                      (mode == <span class="string">&#x27;LSTM&#x27;</span>),</span><br><span class="line">                      dropout=dropout,</span><br><span class="line">                      train=train)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params"><span class="built_in">input</span>, weight, hidden, batch_sizes</span>):</span><br><span class="line">        <span class="keyword">if</span> batch_first <span class="keyword">and</span> <span class="keyword">not</span> variable_length:</span><br><span class="line">            <span class="comment"># 囔，这里就会batch_size 和  sequence_length对调</span></span><br><span class="line">            <span class="built_in">input</span> = <span class="built_in">input</span>.transpose(<span class="number">0</span>, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        nexth, output = func(<span class="built_in">input</span>, hidden, weight, batch_sizes)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> batch_first <span class="keyword">and</span> <span class="keyword">not</span> variable_length:</span><br><span class="line">            output = output.transpose(<span class="number">0</span>, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> output, nexth</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> forward</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-StackedRNN"><a href="#3-StackedRNN" class="headerlink" title="3. StackedRNN"></a>3. StackedRNN</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">StackedRNN</span>(<span class="params">inners, num_layers, lstm=<span class="literal">False</span>, dropout=<span class="number">0</span>, train=<span class="literal">True</span></span>):</span><br><span class="line">    </span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">     拿到每一层Recurrent layer计算出来的结果，进行concat到一起进行返回</span></span><br><span class="line"><span class="string">     </span></span><br><span class="line"><span class="string">     inner表示 Recurrent，代码如下</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    num_directions = <span class="built_in">len</span>(inners)</span><br><span class="line">    total_layers = num_layers * num_directions</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params"><span class="built_in">input</span>, hidden, weight, batch_sizes</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        input: 3, 32, 30 (sequence_length, batch_size, embedding input hidden_size),</span></span><br><span class="line"><span class="string">        hidden: 10, 32, 4 (num_layers, batch_size, output hidden_size),</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">assert</span>(<span class="built_in">len</span>(weight) == total_layers)</span><br><span class="line">        next_hidden = []</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> lstm:</span><br><span class="line">            hidden = <span class="built_in">list</span>(<span class="built_in">zip</span>(*hidden))</span><br><span class="line">        <span class="comment"># 遍历rnn中num_layers</span></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(num_layers):</span><br><span class="line">            all_output = []</span><br><span class="line">            <span class="keyword">for</span> j, inner <span class="keyword">in</span> <span class="built_in">enumerate</span>(inners): <span class="comment"># inner表示 Recurrent，代码如下</span></span><br><span class="line">                l = i * num_directions + j</span><br><span class="line"></span><br><span class="line">                hy, output = inner(<span class="built_in">input</span>, hidden[l], weight[l], batch_sizes)</span><br><span class="line">                next_hidden.append(hy)</span><br><span class="line">                all_output.append(output)</span><br><span class="line"></span><br><span class="line">            <span class="built_in">input</span> = torch.cat(all_output, <span class="built_in">input</span>.dim() - <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> dropout != <span class="number">0</span> <span class="keyword">and</span> i &lt; num_layers - <span class="number">1</span>:</span><br><span class="line">                <span class="built_in">input</span> = F.dropout(<span class="built_in">input</span>, p=dropout, training=train, inplace=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> lstm:</span><br><span class="line">            next_h, next_c = <span class="built_in">zip</span>(*next_hidden)</span><br><span class="line">            next_hidden = (</span><br><span class="line">                torch.cat(next_h, <span class="number">0</span>).view(total_layers, *next_h[<span class="number">0</span>].size()),</span><br><span class="line">                torch.cat(next_c, <span class="number">0</span>).view(total_layers, *next_c[<span class="number">0</span>].size())</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            next_hidden = torch.cat(next_hidden, <span class="number">0</span>).view(</span><br><span class="line">                total_layers, *next_hidden[<span class="number">0</span>].size())</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> next_hidden, <span class="built_in">input</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> forward</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="4-Recurrent"><a href="#4-Recurrent" class="headerlink" title="4. Recurrent"></a>4. Recurrent</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">Recurrent</span>(<span class="params">inner, reverse=<span class="literal">False</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    表示单层layer的计算</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params"><span class="built_in">input</span>, hidden, weight, batch_sizes</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        input: 3, 32, 30</span></span><br><span class="line"><span class="string">        hidden: 32, 4 (表示遍历每一个单独的rnn进来，一共10次)</span></span><br><span class="line"><span class="string">        weight:List[  (4, 30), (4,4), (4, ), (4, ) ]</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        output = []</span><br><span class="line">        steps = <span class="built_in">range</span>(<span class="built_in">input</span>.size(<span class="number">0</span>) - <span class="number">1</span>, -<span class="number">1</span>, -<span class="number">1</span>) <span class="keyword">if</span> reverse <span class="keyword">else</span> <span class="built_in">range</span>(<span class="built_in">input</span>.size(<span class="number">0</span>))</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> steps: <span class="comment"># steps为3,因为sequence_length为3</span></span><br><span class="line">            hidden = inner(<span class="built_in">input</span>[i], hidden, *weight) <span class="comment"># hidden就代表上一个时刻的输出， inner为RNNTanhCell，代码如下</span></span><br><span class="line">            <span class="comment"># hack to handle LSTM</span></span><br><span class="line">            output.append(hidden[<span class="number">0</span>] <span class="keyword">if</span> <span class="built_in">isinstance</span>(hidden, <span class="built_in">tuple</span>) <span class="keyword">else</span> hidden)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> reverse:</span><br><span class="line">            output.reverse()</span><br><span class="line">        output = torch.cat(output, <span class="number">0</span>).view(<span class="built_in">input</span>.size(<span class="number">0</span>), *output[<span class="number">0</span>].size())</span><br><span class="line">        <span class="comment"># 此处hidden就代表最后一个时刻的输出(32, 4)，output表示每一个时刻的输出(3, 32, 4)</span></span><br><span class="line">        <span class="comment"># torch.any(output[-1,:,:] == hidden)</span></span><br><span class="line">        <span class="keyword">return</span> hidden, output</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> forward</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="5-Recurrent中的inner："><a href="#5-Recurrent中的inner：" class="headerlink" title="5. Recurrent中的inner："></a>5. Recurrent中的inner：</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 针对rnn</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">RNNTanhCell</span>(<span class="params"><span class="built_in">input</span>, hidden, w_ih, w_hh, b_ih=<span class="literal">None</span>, b_hh=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    input: 32, 30</span></span><br><span class="line"><span class="string">    hidden: 32, 4</span></span><br><span class="line"><span class="string">    w_ih: 4,30</span></span><br><span class="line"><span class="string">    w_hh: 4,4</span></span><br><span class="line"><span class="string">    b_ih: 4</span></span><br><span class="line"><span class="string">    b_hh: 4</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    hy = torch.tanh(F.linear(<span class="built_in">input</span>, w_ih, b_ih) + F.linear(hidden, w_hh, b_hh))</span><br><span class="line">    <span class="keyword">return</span> hy</span><br><span class="line"></span><br><span class="line"><span class="comment"># 针对lstm cell.</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">LSTMCell</span>(<span class="params"><span class="built_in">input</span>, hidden, w_ih, w_hh, b_ih=<span class="literal">None</span>, b_hh=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    input: (32, 30)</span></span><br><span class="line"><span class="string">    hidden: ( (32, 4), (32, 4) )</span></span><br><span class="line"><span class="string">    w_ih: (16, 30)</span></span><br><span class="line"><span class="string">    w_hh: (16, 4)</span></span><br><span class="line"><span class="string">    b_ih: (16, )</span></span><br><span class="line"><span class="string">    b_hh: (16, )</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">input</span>.is_cuda: <span class="comment"># 自行忽略此处代码</span></span><br><span class="line">        igates = F.linear(<span class="built_in">input</span>, w_ih)</span><br><span class="line">        hgates = F.linear(hidden[<span class="number">0</span>], w_hh)</span><br><span class="line">        state = fusedBackend.LSTMFused.apply</span><br><span class="line">        <span class="keyword">return</span> state(igates, hgates, hidden[<span class="number">1</span>]) <span class="keyword">if</span> b_ih <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">else</span> state(igates, hgates, hidden[<span class="number">1</span>], b_ih, b_hh)</span><br><span class="line"></span><br><span class="line">    hx, cx = hidden</span><br><span class="line">    <span class="comment"># 看到么，也是rnn公式哦</span></span><br><span class="line">    gates = F.linear(<span class="built_in">input</span>, w_ih, b_ih) + F.linear(hx, w_hh, b_hh)</span><br><span class="line">    <span class="comment"># 但是此处不一样了，在第一维分割4份出来</span></span><br><span class="line">    ingate, forgetgate, cellgate, outgate = gates.chunk(<span class="number">4</span>, <span class="number">1</span>)</span><br><span class="line">    <span class="comment"># 看到下面这几行公式么，为啥子就能解决梯度消失呢？</span></span><br><span class="line">    <span class="comment"># 神不神奇，意不意外</span></span><br><span class="line">    ingate = torch.sigmoid(ingate)</span><br><span class="line">    forgetgate = torch.sigmoid(forgetgate)</span><br><span class="line">    cellgate = torch.tanh(cellgate)</span><br><span class="line">    outgate = torch.sigmoid(outgate)</span><br><span class="line"></span><br><span class="line">    cy = (forgetgate * cx) + (ingate * cellgate)</span><br><span class="line">    hy = outgate * torch.tanh(cy)</span><br><span class="line">    <span class="comment"># hy: (32,4), (32,4)</span></span><br><span class="line">    <span class="keyword">return</span> hy, cy</span><br><span class="line"></span><br><span class="line"><span class="comment"># 针对gru</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">GRUCell</span>(<span class="params"><span class="built_in">input</span>, hidden, w_ih, w_hh, b_ih=<span class="literal">None</span>, b_hh=<span class="literal">None</span></span>):</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">input</span>.is_cuda:</span><br><span class="line">        gi = F.linear(<span class="built_in">input</span>, w_ih)</span><br><span class="line">        gh = F.linear(hidden, w_hh)</span><br><span class="line">        state = fusedBackend.GRUFused.apply</span><br><span class="line">        <span class="keyword">return</span> state(gi, gh, hidden) <span class="keyword">if</span> b_ih <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">else</span> state(gi, gh, hidden, b_ih, b_hh)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 这里就变了哦</span></span><br><span class="line">    gi = F.linear(<span class="built_in">input</span>, w_ih, b_ih)</span><br><span class="line">    gh = F.linear(hidden, w_hh, b_hh)</span><br><span class="line"></span><br><span class="line">    i_r, i_i, i_n = gi.chunk(<span class="number">3</span>, <span class="number">1</span>)</span><br><span class="line">    h_r, h_i, h_n = gh.chunk(<span class="number">3</span>, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    resetgate = torch.sigmoid(i_r + h_r)</span><br><span class="line">    inputgate = torch.sigmoid(i_i + h_i)</span><br><span class="line">    newgate = torch.tanh(i_n + resetgate * h_n)</span><br><span class="line">    hy = newgate + inputgate * (hidden - newgate)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> hy</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="6-测试代码完整如下"><a href="#6-测试代码完整如下" class="headerlink" title="6. 测试代码完整如下"></a>6. 测试代码完整如下</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="keyword">from</span> torch.nn <span class="keyword">import</span> Embedding, Sigmoid, Linear</span><br><span class="line"><span class="keyword">from</span> torch.nn.modules.rnn <span class="keyword">import</span> RNN</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch.nn <span class="keyword">import</span> BCELoss</span><br><span class="line"><span class="keyword">from</span> torch.optim <span class="keyword">import</span> RMSprop</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">RNNModel</span>(torch.nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">super</span>(RNNModel, self).__init__()</span><br><span class="line">        self.embed = Embedding(<span class="number">6</span>, <span class="number">30</span>)</span><br><span class="line">        self.rnn = RNN(input_size=<span class="number">30</span>, hidden_size=<span class="number">4</span>, batch_first=<span class="literal">True</span>, num_layers=<span class="number">10</span>)</span><br><span class="line">        self.linear = Linear(<span class="number">4</span>, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, <span class="built_in">input</span></span>):</span><br><span class="line">        <span class="built_in">input</span> = self.embed(<span class="built_in">input</span>)</span><br><span class="line">        <span class="comment"># rnn_out: (32, 3, 4) 返回batch_size下每个时刻(sequence_length)的最终输出</span></span><br><span class="line">        <span class="comment"># _ : (10, 32, 4) 表示batch_size下每个rnn layer最后一个时刻的输出</span></span><br><span class="line">        rnn_out, _ = self.rnn(<span class="built_in">input</span>)</span><br><span class="line">        y_pred = self.linear(_.<span class="built_in">sum</span>(<span class="number">0</span>))</span><br><span class="line">        <span class="keyword">return</span> y_pred</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">RNNDemo</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        self.model = RNNModel()</span><br><span class="line"></span><br><span class="line">        self.optim = RMSprop(self.model.parameters())</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">loss</span>(<span class="params">self, y_pred, y_true</span>):</span><br><span class="line">        y_pred = Sigmoid()(y_pred)</span><br><span class="line">        <span class="keyword">return</span> BCELoss()(y_pred, y_true.<span class="built_in">float</span>())</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">train</span>(<span class="params">self, x, y</span>):</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">            <span class="keyword">for</span> _x, _y <span class="keyword">in</span> <span class="built_in">zip</span>(x, y):</span><br><span class="line">                _x = _x.repeat(<span class="number">32</span>, <span class="number">1</span>)</span><br><span class="line">                _y = _y.repeat(<span class="number">32</span>, <span class="number">1</span>)</span><br><span class="line">                y_pred = self.model(_x)</span><br><span class="line">                loss = self.loss(y_pred, _y)</span><br><span class="line">                loss.backward()</span><br><span class="line">                <span class="built_in">print</span>(loss.item())</span><br><span class="line">                self.optim.step()</span><br><span class="line">                self.optim.zero_grad()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    train_data = [</span><br><span class="line">        ([<span class="string">&#x27;A&#x27;</span>, <span class="string">&#x27;B&#x27;</span>, <span class="string">&#x27;C&#x27;</span>], <span class="string">&#x27;right&#x27;</span>),</span><br><span class="line">        ([<span class="string">&#x27;C&#x27;</span>, <span class="string">&#x27;D&#x27;</span>, <span class="string">&#x27;E&#x27;</span>], <span class="string">&#x27;false&#x27;</span>)</span><br><span class="line">    ]</span><br><span class="line">    id_map = &#123;</span><br><span class="line">        <span class="string">&#x27;A&#x27;</span>: <span class="number">1</span>,</span><br><span class="line">        <span class="string">&#x27;B&#x27;</span>: <span class="number">2</span>,</span><br><span class="line">        <span class="string">&#x27;C&#x27;</span>: <span class="number">3</span>,</span><br><span class="line">        <span class="string">&#x27;D&#x27;</span>: <span class="number">4</span>,</span><br><span class="line">        <span class="string">&#x27;E&#x27;</span>: <span class="number">5</span>,</span><br><span class="line">        <span class="string">&#x27;right&#x27;</span>: <span class="number">6</span>,</span><br><span class="line">        <span class="string">&#x27;false&#x27;</span>: <span class="number">7</span></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    rnn = RNNDemo()</span><br><span class="line">    rnn.train(</span><br><span class="line">        [torch.tensor([id_map[i] <span class="keyword">for</span> i <span class="keyword">in</span> sample[<span class="number">0</span>]]).reshape(<span class="number">1</span>, <span class="number">3</span>) <span class="keyword">for</span> sample <span class="keyword">in</span> train_data],</span><br><span class="line">        [torch.tensor(id_map[sample[<span class="number">1</span>]]).reshape(<span class="number">1</span>, <span class="number">1</span>) <span class="keyword">for</span> sample <span class="keyword">in</span> train_data]</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>至此，前向过程完结。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/06/19/%E7%A0%94%E7%A9%B6torch0-4-1-rnn%E7%9A%84%E5%AE%9E%E7%8E%B0/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-简述条件随机场" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1164,124 +1264,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2019/12/26/%E8%BD%AC-%E8%B0%88%E7%88%AC%E8%99%AB%E5%8F%8D%E7%88%AC%E8%99%AB%E5%A5%97%E8%B7%AF/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-变冷的马鞍山" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/19/%E5%8F%98%E5%86%B7%E7%9A%84%E9%A9%AC%E9%9E%8D%E5%B1%B1/">变冷的马鞍山</a>
-    </h1>
-  
-
-        
-        <a href="/2019/11/19/%E5%8F%98%E5%86%B7%E7%9A%84%E9%A9%AC%E9%9E%8D%E5%B1%B1/" class="archive-article-date">
-  	<time datetime="2019-11-19T13:57:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-11-19</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>想来想去，不知道应该怎么写，离开了马鞍山，有点怀念了那里，可能是因为爱上一个人所以喜欢上一座城市吧。套用李志《关于郑州的记忆》中的歌词，</p>
-<blockquote>
-<p>关于郑州我知道的不多<br>为了爱情也曾去过那里<br>每次和朋友聊起过去的旅行<br>一个人悄悄的想起她</p>
-</blockquote>
-<p>不过没有那么伤感啦，马鞍山还是蛮小滴，整体市中心也没有很大，空气不错，比上海的天气要好得多，走在上海的街头，总能感觉到呼吸空气都能呼吸到颗粒的感觉，听说北京更可怕，啧啧啧，下面放图片。</p>
-<h3 id="走着走着下起了雨"><a href="#走着走着下起了雨" class="headerlink" title="走着走着下起了雨"></a>走着走着下起了雨</h3><img src="/2019/11/19/%E5%8F%98%E5%86%B7%E7%9A%84%E9%A9%AC%E9%9E%8D%E5%B1%B1/IMG_20191117_104011.jpg" class="" title="走着走着下起了雨">
-
-<h3 id="走着走着下起了雨，换个角度"><a href="#走着走着下起了雨，换个角度" class="headerlink" title="走着走着下起了雨，换个角度~"></a>走着走着下起了雨，换个角度~</h3><img src="/2019/11/19/%E5%8F%98%E5%86%B7%E7%9A%84%E9%A9%AC%E9%9E%8D%E5%B1%B1/IMG_20191117_104018.jpg" class="" title="走着走着下起了雨2">
-
-<h3 id="完全空白的地方，傻姑娘说适合拍照"><a href="#完全空白的地方，傻姑娘说适合拍照" class="headerlink" title="完全空白的地方，傻姑娘说适合拍照"></a>完全空白的地方，傻姑娘说适合拍照</h3><img src="/2019/11/19/%E5%8F%98%E5%86%B7%E7%9A%84%E9%A9%AC%E9%9E%8D%E5%B1%B1/IMG_20191117_110234.jpg" class="" title="完全空白的地方，傻姑娘说适合拍照">
-
-<h3 id="再来一张"><a href="#再来一张" class="headerlink" title="再来一张"></a>再来一张</h3><img src="/2019/11/19/%E5%8F%98%E5%86%B7%E7%9A%84%E9%A9%AC%E9%9E%8D%E5%B1%B1/IMG_20191117_110157.jpg" class="" title="再来一张">
-
-<h3 id="和傻姑娘一起坐’不安全’的缆车"><a href="#和傻姑娘一起坐’不安全’的缆车" class="headerlink" title="和傻姑娘一起坐’不安全’的缆车"></a>和傻姑娘一起坐’不安全’的缆车</h3><img src="/2019/11/19/%E5%8F%98%E5%86%B7%E7%9A%84%E9%A9%AC%E9%9E%8D%E5%B1%B1/IMG_20191117_122725.jpg" class="" title="和傻姑娘一起坐" alt="不安全">
-
-<h3 id="吓得完全不敢动，几个亿的身价呢～"><a href="#吓得完全不敢动，几个亿的身价呢～" class="headerlink" title="吓得完全不敢动，几个亿的身价呢～"></a>吓得完全不敢动，几个亿的身价呢～</h3><img src="/2019/11/19/%E5%8F%98%E5%86%B7%E7%9A%84%E9%A9%AC%E9%9E%8D%E5%B1%B1/IMG_20191117_113344.jpg" class="" title="吓得完全不敢动">
-
-
-
-<h3 id="三台阁到此一游"><a href="#三台阁到此一游" class="headerlink" title="三台阁到此一游"></a>三台阁到此一游</h3><img src="/2019/11/19/%E5%8F%98%E5%86%B7%E7%9A%84%E9%A9%AC%E9%9E%8D%E5%B1%B1/IMG_20191117_122249.jpg" class="" title="三台阁到此一游">
-
-<h3 id="此时此刻，我要吟诗一首"><a href="#此时此刻，我要吟诗一首" class="headerlink" title="此时此刻，我要吟诗一首"></a>此时此刻，我要吟诗一首</h3><img src="/2019/11/19/%E5%8F%98%E5%86%B7%E7%9A%84%E9%A9%AC%E9%9E%8D%E5%B1%B1/IMG_20191117_123645.jpg" class="">
-
-<h3 id="站在三台阁上指点江山"><a href="#站在三台阁上指点江山" class="headerlink" title="站在三台阁上指点江山~"></a>站在三台阁上指点江山~</h3><img src="/2019/11/19/%E5%8F%98%E5%86%B7%E7%9A%84%E9%A9%AC%E9%9E%8D%E5%B1%B1/IMG_20191117_121113.jpg" class="">
-
-<h3 id="离别总是伤感时"><a href="#离别总是伤感时" class="headerlink" title="离别总是伤感时"></a>离别总是伤感时</h3><img src="/2019/11/19/%E5%8F%98%E5%86%B7%E7%9A%84%E9%A9%AC%E9%9E%8D%E5%B1%B1/IMG_20191117_171344.jpg" class="" title="离别总是伤感时">
-
-<h3 id="路过南京，关于南京我也曾到过这里，我爱南京～"><a href="#路过南京，关于南京我也曾到过这里，我爱南京～" class="headerlink" title="路过南京，关于南京我也曾到过这里，我爱南京～"></a>路过南京，关于南京我也曾到过这里，我爱南京～</h3><img src="/2019/11/19/%E5%8F%98%E5%86%B7%E7%9A%84%E9%A9%AC%E9%9E%8D%E5%B1%B1/IMG_20191117_174224.jpg" class="" title="路过南京，关于南京我也曾到过这里~">
-
-<h3 id="大冷天的上海等待理发时无聊的时光"><a href="#大冷天的上海等待理发时无聊的时光" class="headerlink" title="大冷天的上海等待理发时无聊的时光"></a>大冷天的上海等待理发时无聊的时光</h3><img src="/2019/11/19/%E5%8F%98%E5%86%B7%E7%9A%84%E9%A9%AC%E9%9E%8D%E5%B1%B1/IMG_20191118_195157.jpg" class="" title="大冷天等待理发时无聊的时光">
-
-<h3 id="爱你么么么么么么么么么么哒"><a href="#爱你么么么么么么么么么么哒" class="headerlink" title="爱你么么么么么么么么么么哒"></a>爱你么么么么么么么么么么哒</h3><img src="/2019/11/19/%E5%8F%98%E5%86%B7%E7%9A%84%E9%A9%AC%E9%9E%8D%E5%B1%B1/WechatIMG2.jpeg" class="" title="爱你么么么么么么么么么么哒">
-
-<p>Love you 马鞍山～，晚安。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">小桥流水人家</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/小桥流水人家//" class="article-tag-list-link color2">小桥流水人家</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2019/11/19/%E5%8F%98%E5%86%B7%E7%9A%84%E9%A9%AC%E9%9E%8D%E5%B1%B1/">展开全文 >></a>
         </p>
       
 

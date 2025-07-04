@@ -206,6 +206,129 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-bloomfilter" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/16/bloomfilter/">bloomfilter</a>
+    </h1>
+  
+
+        
+        <a href="/2018/04/16/bloomfilter/" class="archive-article-date">
+  	<time datetime="2018-04-16T07:11:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-16</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p>创建一个m位的位数组(bitmap),先将所有的位数组初始化为0。然后选择k个不同的哈希函数。第i个哈希函数对应的字符串str哈希的结果记为h(i, str),且h(i, str)的范围要在0至m-1。如下图所示。</p>
+<img src="/2018/04/16/bloomfilter/map1.png" class="" title="原理">
+
+<blockquote>
+<p>如何判断字符串是否存在呢？<br>字符串也经过h(i, str),h(2, str),h(3, str)…哈希映射，检查每一个映射到m位的位数组上是否为1，如果不全为1，则表示一定不存在，否则，不能说明完全存在，有误差率在里面，为什么不能说一定存在呢，没看懂，可看：<a target="_blank" rel="noopener" href="http://pages.cs.wisc.edu/~cao/papers/summary-cache/node8.html">BloomFilters</a></p>
+</blockquote>
+<h3 id="关于容错率"><a href="#关于容错率" class="headerlink" title="关于容错率"></a>关于容错率</h3><p>既然不能完全表示存在，那么如何计算这个误差率呢？一共有三个参数:k,m,n。</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>表示</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>k</td>
+<td>哈希个数</td>
+</tr>
+<tr>
+<td>m</td>
+<td>位数组大小</td>
+</tr>
+<tr>
+<td>n</td>
+<td>字符串个数</td>
+</tr>
+</tbody></table>
+<p>下图表示m&#x2F;n的结果与k个哈希函数的选择出现的错误率表格。</p>
+<img src="/2018/04/16/bloomfilter/bloomfilter1.png" class="" title="容错率">
+
+
+<p>如上，举例简单说明，如果声明一个为数组大小为2，只传入一个字符串，那么m&#x2F;n为2，如果选择k个哈希，导致的容错率分别是1.39,0.393,0.400。ok，如果要存1亿个字符串，那么大概为多少呢？</p>
+<p>简单计算：如果容错率要求为5.73e-06,那么m&#x2F;n&#x3D;32,如果n为1亿的话，那么m为32亿，32亿 &#x2F; 8&#x2F; 1024&#x2F;1024&#x3D;381.4697265625MB内存。<br>还是相当可以的。关于更多的容错率，可以看<a target="_blank" rel="noopener" href="http://pages.cs.wisc.edu/~cao/papers/summary-cache/node8.html">BloomFilters</a>。</p>
+<p><a target="_blank" rel="noopener" href="https://hur.st/bloomfilter/?n=100000000&p=0.0000001&m=&k=">此处有个在线计算器</a></p>
+<h3 id="相关的包"><a href="#相关的包" class="headerlink" title="相关的包"></a>相关的包</h3><p>Python实现:<a target="_blank" rel="noopener" href="https://github.com/jaybaird/python-bloomfilter">python-bloomfilter</a><br>C实现:<a target="_blank" rel="noopener" href="https://github.com/axiak/pybloomfiltermmap/">pybloomfiltermmap</a></p>
+<h3 id="后续"><a href="#后续" class="headerlink" title="后续"></a>后续</h3><ol>
+<li>选择使用的包</li>
+<li>最终效果</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/04/16/bloomfilter/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-SQLAlchemy混合属性机制" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1331,168 +1454,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2018/03/22/freezegun-%E4%B8%80%E4%B8%AA%E5%8F%AF%E4%BB%A5%E4%BC%AA%E9%80%A0%E6%97%B6%E9%97%B4%E7%9A%84%E5%BA%93/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-SQLAlchemy示例-属性实体化建模" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/20/SQLAlchemy%E7%A4%BA%E4%BE%8B-%E5%B1%9E%E6%80%A7%E5%AE%9E%E4%BD%93%E5%8C%96%E5%BB%BA%E6%A8%A1/">SQLAlchemy示例:属性实体化建模</a>
-    </h1>
-  
-
-        
-        <a href="/2018/03/20/SQLAlchemy%E7%A4%BA%E4%BE%8B-%E5%B1%9E%E6%80%A7%E5%AE%9E%E4%BD%93%E5%8C%96%E5%BB%BA%E6%A8%A1/" class="archive-article-date">
-  	<time datetime="2018-03-20T02:47:46.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-20</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>假设有这样的场景, 某实体在具体条目上, 其属性是不定的, 或者其属性是充分稀疏的:</p>
-<table>
-<thead>
-<tr>
-<th>id</th>
-<th>name</th>
-<th>attr_0</th>
-<th>attr_1</th>
-<th>attr_2</th>
-<th>…</th>
-<th>attr_n</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1</td>
-<td>foo</td>
-<td>1</td>
-<td>abc</td>
-<td>33</td>
-<td>…</td>
-<td>any</td>
-</tr>
-</tbody></table>
-<p>这种情况下, 把属性看成是单独的实体, 是一个更好的建模方式:</p>
-<table>
-<thead>
-<tr>
-<th>id</th>
-<th>name</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1</td>
-<td>foo</td>
-</tr>
-</tbody></table>
-<table>
-<thead>
-<tr>
-<th>id</th>
-<th>entity_id</th>
-<th>attr_name</th>
-<th>attr_value</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1</td>
-<td>1</td>
-<td>attr_0</td>
-<td>1</td>
-</tr>
-<tr>
-<td>2</td>
-<td>1</td>
-<td>attr_1</td>
-<td>33</td>
-</tr>
-<tr>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-<td>…</td>
-</tr>
-<tr>
-<td>n</td>
-<td>1</td>
-<td>attr_n</td>
-<td>any</td>
-</tr>
-</tbody></table>
-<p>这种模型下, ORM 层面我们考虑封装一个对操作更友好的上层操作接口, 比如:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">obj = Entity()</span><br><span class="line">obj[<span class="string">&#x27;attr_0&#x27;</span>] = <span class="string">&#x27;1&#x27;</span></span><br><span class="line">obj[<span class="string">&#x27;attr_1&#x27;</span>] = <span class="string">&#x27;33&#x27;</span></span><br><span class="line">session.add(obj)</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
-<p>实现上, 就是把对象的方法, 包装成 <code>SQLAlchemy </code>的 <code>ORM</code> 中的对应的关系操作.</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">BaseModel</span>(declarative_base()):</span><br><span class="line">    __abstract__ = <span class="literal">True</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Entity</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;entity&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, autoincrement=<span class="literal">True</span>, primary_key=<span class="literal">True</span>)</span><br><span class="line">    name = Column(Unicode(<span class="number">32</span>), server_default=<span class="string">&#x27;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    _attributes = relationship(<span class="string">&#x27;Attribute&#x27;</span>,</span><br><span class="line">                               collection_class=attribute_mapped_collection(<span class="string">&#x27;key&#x27;</span>),</span><br><span class="line">                               lazy=<span class="string">&#x27;joined&#x27;</span>, cascade=<span class="string">&quot;all, delete-orphan&quot;</span>)</span><br><span class="line">    attributes = association_proxy(<span class="string">&#x27;_attributes&#x27;</span>, <span class="string">&#x27;value&#x27;</span>,</span><br><span class="line">                                   creator=<span class="keyword">lambda</span> k, v: Attribute(key=k, value=v))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Attribute</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;attribute&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, autoincrement=<span class="literal">True</span>, primary_key=<span class="literal">True</span>)</span><br><span class="line">    entity = Column(Integer, ForeignKey(<span class="string">&#x27;entity.id&#x27;</span>), index=<span class="literal">True</span>)</span><br><span class="line">    key = Column(Unicode(<span class="number">32</span>), server_default=<span class="string">&#x27;&#x27;</span>)</span><br><span class="line">    value = Column(UnicodeText, server_default=<span class="string">&#x27;&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    BaseModel.metadata.create_all(Engine)</span><br><span class="line"></span><br><span class="line">    session = Session()</span><br><span class="line"></span><br><span class="line">    entity = Entity(name=<span class="string">u&#x27;哈哈&#x27;</span>)</span><br><span class="line">    entity.attributes[<span class="string">u&#x27;first&#x27;</span>] = <span class="string">u&#x27;abc&#x27;</span></span><br><span class="line">    entity.attributes[<span class="string">u&#x27;sec&#x27;</span>] = <span class="string">u&#x27;hoho&#x27;</span></span><br><span class="line">    session.add(entity)</span><br><span class="line">    session.commit()</span><br><span class="line"></span><br><span class="line">    entity = session.query(Entity).first()</span><br><span class="line">    <span class="built_in">print</span> entity.attributes</span><br><span class="line">    <span class="keyword">del</span> entity.attributes[<span class="string">&#x27;first&#x27;</span>]</span><br><span class="line">    session.commit()</span><br><span class="line"></span><br><span class="line">    entity = session.query(Entity).first()</span><br><span class="line">    <span class="built_in">print</span> entity.attributes</span><br></pre></td></tr></table></figure>
-<p>实现上就两点:</p>
-<p><code>_attributes</code> 关系中, 指定 <code>collection_class </code>, 于是就可以得到一个像 <code>dict</code> 的属性对象了.<br><code>association_proxy</code> 从 <code>dict</code>的属性对象中只抽出我们关心的 <code>value</code> 属性值.</p>
-<p>这个场景中, 还可以再进一步, 在 <code>Entity</code> 类上实现 <code>dict</code> 的一些方法, 直接操作其 <code>attributes</code> 属性, <code>association_proxy</code> 就直接返回 <code>Entity</code> 的实例, 这样代码可以变成这样:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">entity = Entity(name=<span class="string">u&#x27;ABC&#x27;</span>)</span><br><span class="line">entity[<span class="string">u&#x27;first&#x27;</span>] = <span class="string">u&#x27;a&#x27;</span></span><br><span class="line">entity[<span class="string">u&#x27;sec&#x27;</span>] = <span class="string">u&#x27;hoho&#x27;</span></span><br></pre></td></tr></table></figure>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">SQLAlchemy</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/SQLAlchemy//" class="article-tag-list-link color1">SQLAlchemy</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/03/20/SQLAlchemy%E7%A4%BA%E4%BE%8B-%E5%B1%9E%E6%80%A7%E5%AE%9E%E4%BD%93%E5%8C%96%E5%BB%BA%E6%A8%A1/">展开全文 >></a>
         </p>
       
 

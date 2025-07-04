@@ -206,6 +206,164 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-16-01bash脚本编程之十四信号捕捉及系统管理之任务计划" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/03/15/16-01bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%8D%81%E5%9B%9B%E4%BF%A1%E5%8F%B7%E6%8D%95%E6%8D%89%E5%8F%8A%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E4%B9%8B%E4%BB%BB%E5%8A%A1%E8%AE%A1%E5%88%92/">16_01bash脚本编程之十四信号捕捉及系统管理之任务计划</a>
+    </h1>
+  
+
+        
+        <a href="/2015/03/15/16-01bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%8D%81%E5%9B%9B%E4%BF%A1%E5%8F%B7%E6%8D%95%E6%8D%89%E5%8F%8A%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E4%B9%8B%E4%BB%BB%E5%8A%A1%E8%AE%A1%E5%88%92/" class="archive-article-date">
+  	<time datetime="2015-03-15T14:44:12.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-15</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>补充:<br>交叉编译:<br>make ARCH&#x3D; </p>
+<p>${parameter:-word}:如果parameter为空或者未定义，则变量展开为word,否则，展开为parameter的值<br>${parameter:+word}:如果parameter为空或者未定义，不做任何操作，否则，则展开word的值<br>${parameter:&#x3D;word}:如果parameter为空或者未定义，则变量展开为word，并将展开后的值赋给parameter<br>${parameter:offset:length}:取子串，从offset处的后一个字符开始，取length长的子串<br>例如:变量A未做任何赋值 </p>
+<blockquote>
+<p>echo ${A:-30} 30 echo $A <br>echo ${A:+30}    echo $A<br>echo ${A:&#x3D;30} 30 echo $A 30<br>A&#x3D;”hello”<br>echo ${A:2:3} llo </p>
+</blockquote>
+<p>读取配置文件: </p>
+<blockquote>
+<p>#vim a.conf<br>TEST&#x3D;”5”<br>#vim a.sh<br>. &#x2F;root&#x2F;a.conf<br>[ -n “TEST” ] &amp;&amp; echo $TEST </p>
+</blockquote>
+<blockquote>
+<p>#vim a.conf<br>TEST&#x3D;<br>#vim a.sh<br>. &#x2F;root&#x2F;a.conf<br>TEST&#x3D;${TEST:-info}<br>[ -n “TEST” ] &amp;&amp; echo “$TEST”<br>如果TEST为空，则输出info，否则显示TEST的值。 </p>
+</blockquote>
+<p>变量的作用域: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">a=1 </span><br><span class="line">test() &#123; </span><br><span class="line"> a=$&#123;3+4&#125; </span><br><span class="line">&#125; </span><br><span class="line">test </span><br><span class="line">for I in `seq $a 10`;do </span><br><span class="line"> echo $I </span><br><span class="line">done </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>执行结果是 7 8 9 10<br>所以需要局部变量:<br>local VAR_NAME&#x3D; </p>
+<p>mktemp命令:创建临时文件或者目录<br>mktemp: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#mktemp /tmp/file.XX </span><br></pre></td></tr></table></figure>
+
+<p> 这个命令不管执行多少次，XX值不会一样<br> -d:创建临时目录 </p>
+<p>信号: </p>
+<blockquote>
+<p>kill -l:显示所有<br>kill -SIGNAL PID<br>1:HUP<br>2:INT<br>9:KILL<br>15:TERM </p>
+</blockquote>
+<p>脚本中，能实现信号捕捉，但9和15无法捕捉 </p>
+<blockquote>
+<p>Ctrl+c:是2信号<br>Ctrl+z:是18信号<br>trap命令:<br> trap ’COMMAND‘ 信号列表 </p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line"># </span><br><span class="line">trap &#x27;echo &quot;You go...&quot;&#x27; INT </span><br><span class="line">while :;do </span><br><span class="line"> date </span><br><span class="line"> sleep 2 </span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+
+
+<p>如果不加trap那行，使用Ctrl+c可以终止掉，但是trap捕捉2号信号，则表示<br>如果使用Ctrl+c终止时，trap捕捉到2号信号，就会显示You go…并且会照常运行，<br>不会被终止掉。<br>(所以，trap在于你要捕捉的信号，可以使用kill -l显示你想要捕捉的信号) </p>
+<p>ping可以捕捉到Ctrl+c，则不会接受这个信号，如: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line"># </span><br><span class="line">NET=192.168.1 </span><br><span class="line">FILE=`mktemp /tmp/file.XXXX` </span><br><span class="line">clearup() &#123; </span><br><span class="line">echo &quot;quiting...&quot; </span><br><span class="line">rm -rf　$FILE </span><br><span class="line">exit 1 </span><br><span class="line">&#125; </span><br><span class="line">trap &#x27;clearup&#x27; INT </span><br><span class="line"> </span><br><span class="line">for I in `seq 1 254`;do </span><br><span class="line"> if ping -c 1 -W 1 $NET.$I &amp;&gt;/dev/null;then </span><br><span class="line"> echo &quot;$NET.$I is up.&quot; | tee &gt;&gt; $FILE </span><br><span class="line"> else </span><br><span class="line"> echo &quot;$NET.$I is down&quot; </span><br><span class="line"> fi </span><br><span class="line">done </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+
+<p>任务计划: </p>
+<ol>
+<li><p>在未来的某个时间点执行一次某任务: </p>
+<blockquote>
+<p>at<br>batch<br>#at 时间<br>at&gt;command1<br>at&gt;command2<br>at&gt;Ctrl+d即可<br>指定时间:<br>绝对时间: DD.MM.YY MM.DD.YY  10:20(未来的时间，如果今天已过，则明天)<br>相对时间: now+#<br>单位:minutes,hours,days,weeks<br>模糊时间:noon，midnight，teatime<br>命令的执行结果，将以邮件的形式发送给安排任务的用户。<br>at -l:<br>可以显示自己的作业<br>at -d AT_JOB_ID:<br>可以删除作业<br>&#x2F;etc&#x2F;at.deny:只有文件中的用户不能使用<br>&#x2F;etc&#x2F;at.allow:只有这个文件中的用户可使用at<br>如果两个文件都存在，只是读取at.allow…. </p>
+<p>batch:自动选择系统较空闲的时候执行任务，不需要执行时间(当然没必要)<br>其他一样。 </p>
+</blockquote>
+</li>
+<li><p>周期性的执行某任务 </p>
+<blockquote>
+<p>cron:自身就是一个不间断运行的任务<br>anacron:cron的补充，能够实现让cron因为各种原因在过去的时间该执行而未执行的任务在恢复正常<br>执行一次。<br>service crond status<br>service anacron status<br>cron:<br>系统cron任务<br>&#x2F;etc&#x2F;crontab<br>分钟 小时 天 月 周 用户 任务<br>vim &#x2F;etc&#x2F;crontab可查看系统上怎么定义的。<br>用户cron任务<br>&#x2F;var&#x2F;spool&#x2F;cron&#x2F;USERNAME<br>分钟 小时 天 月 周 任务 </p>
+<p>时间的有效值:<br>分钟:0-59<br>小时:0-23<br>天:1-31<br>月:1-12<br>周:0-7,0和7都表示周日 </p>
+<p>时间通配表示:<br>*:敌营的所有有效取值<br>3 * * * *</p>
+</blockquote>
+</li>
+</ol>
+<blockquote>
+<p>3 * * * 7<br>13 12 * * *<br>一般说:天和周不要同时使用<br>,:离散时间点<br>10,40 * * * * 每小时10分和40分执行一次<br>-:连续时间点<br>10 02 * * 1-5 周一到周五02:10连续执行<br>&#x2F;:对应取值范围内每多久一次<br>*&#x2F;3 * * * *    每三分钟一次 </p>
+</blockquote>
+<blockquote>
+<p>执行结果将以邮件形式发送给管理员 </p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">练习:每两小时执行一次 </span><br><span class="line"> 01 */2 * * * /bin/cat /etc/fstab &gt; /dev/null (01-59自定义) </span><br></pre></td></tr></table></figure>
+
+<p>!!!!!!!!!!!!cron的环境变量:(这个需要多加注意)!!!!!!!!!!!!!!<br> cron执行所有命令都去PATH环境变量指定的路径下去找<br> 如用户没登陆，怎么找PATH环境变量<br> 所以，需要写绝对路径..(也可写脚本时写上环境变量)<br> PATH&#x3D;&#x2F;sbin:&#x2F;bin:&#x2F;usr&#x2F;sbin:&#x2F;usr&#x2F;bin<br> 可看&#x2F;etc&#x2F;crontab怎么写的。。。。。。。。 </p>
+<p>&#x2F;etc&#x2F;cron.daily  </p>
+<p>用户任务的管理:<br>crontab  </p>
+<blockquote>
+<p>-l:列出当前用户的所有cron任务<br>-e:编辑<br>-r:移除所有任务<br>-u USERNAME:管理其他用户的cron任务<br>crontab -u user1 -e 编辑任务即可。。<br>将会保存到&#x2F;var&#x2F;spool&#x2F;crom&#x2F;user1的计划任务中。。。 </p>
+</blockquote>
+<blockquote>
+<p>crontab -e <br>*&#x2F;3 * * * * &#x2F;bin&#x2F;echo “how are you”<br>保存退出即可。。  </p>
+<p>anacrontab:<br>cat &#x2F;etc&#x2F;anacrontab可以看看怎样定义的。。。<br>1 65 cron.daily run-parts &#x2F;etc&#x2F;cron.daily<br>如果1天没执行，则在开机后第65分钟开始执行<br>7 70 cron.weekly run-parts &#x2F;etc&#x2F;cron.weekly<br>如果7天没执行，则在开机第70分钟执行<br>30 75 cron.monthly run-parts &#x2F;etc&#x2F;cron.monthly<br>如果30天没执行，则在开机第75分钟开始执行 </p>
+<p>所以只能执行到每天任务 </p>
+</blockquote>
+<p>练习:配置本机每隔两天在凌晨3点20备份一次&#x2F;etc目录，备份文件存放至&#x2F;backup&#x2F;etc目录，文件名类似:etc-2012-06-20.tar.bz2  </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir /backup &amp;&amp; tar cfj etc-`date +%F`.tar.bz2 /etc/* </span><br></pre></td></tr></table></figure>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/03/15/16-01bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%8D%81%E5%9B%9B%E4%BF%A1%E5%8F%B7%E6%8D%95%E6%8D%89%E5%8F%8A%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E4%B9%8B%E4%BB%BB%E5%8A%A1%E8%AE%A1%E5%88%92/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-14-04Linux内核编译及系统裁剪之一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1210,98 +1368,6 @@ traceroute:
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/02/24/11-04linux%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E4%B9%8B%E5%9B%9Bifconfig%E5%8F%8Aip%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-11-02Linux网络配置之二IP报文" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/22/11-02Linux%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E4%B9%8B%E4%BA%8CIP%E6%8A%A5%E6%96%87/">11_02Linux网络配置之二IP报文</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/22/11-02Linux%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E4%B9%8B%E4%BA%8CIP%E6%8A%A5%E6%96%87/" class="archive-article-date">
-  	<time datetime="2015-02-22T15:13:03.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>网桥就是交换机<br>关于网际协议(IP):<br><a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/%E7%BD%91%E9%99%85%E5%8D%8F%E8%AE%AE">http://zh.wikipedia.org/wiki/%E7%BD%91%E9%99%85%E5%8D%8F%E8%AE%AE</a><br>IP封装:<br> 无须与先前未曾通信过的目的主机预先建立好一条特定的”通道”，<br>由于互联网协议提供的是一种”不可靠”的传出机制，所以这个意味着”我能帮你传过去，但是我不能保证传输的可靠性”.<br>而TCP协议(传输控制协议)则保证了传输的可靠性。 </p>
-<p>IP提供的服务:<br>IPv4使用地址解析协议（ARP），而IPv6采用邻居发现协议（NDP）。 </p>
-<p>IP寻址和路由:<br>IP协议最为复杂的方面可能就是寻址和路由了。<br>寻址就是如何将IP地址分配给各个终端节点，以及如何划分和组合子网。<br>所有网络端点都需要路由，尤其是网际之间的路由器。<br>路由器通常用内部网关协议（Interior Gateway Protocols，IGPs）和<br>外部网关协议（External Gateway Protocols，EGPs）决定怎样发送IP数据包。 </p>
-<p>路由:<a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/%E8%B7%AF%E7%94%B1">http://zh.wikipedia.org/wiki/%E8%B7%AF%E7%94%B1</a> </p>
-<p>路由（routing）就是通过互联的网络把信息从源地址传输到目的地址的活动。<br>路由发生在OSI网络参考模型中的第三层即网络层。 </p>
-<p>路由引导分组转送，经过一些中间的节点后，到它们最后的目的地。作成硬件的话，则称为路由器。<br>路由通常根据路由表——一个储存到各个目的地的最佳路径的表——来引导分组转送。<br>因此为了有效率的转送分组，建立储存在路由器内存内的路由表是非常重要的。 </p>
-<p>路由器:<a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/%E8%B7%AF%E7%94%B1%E5%99%A8">http://zh.wikipedia.org/wiki/%E8%B7%AF%E7%94%B1%E5%99%A8</a><br>路由器指链接两个以上个别网络的设备。 </p>
-<p>路由器与交换器的差别:<br>路由器是属于OSI第三层的产品，交换器是OSI第二层的产品。<br>第二层的产品功能在于，将网络上各个电脑的MAC地址记在MAC地址表中，<br>当局域网中的电脑要经过交换器去交换传递数据时，就查询交换器上的MAC地址表中的信息，<br>将数据包发送给指定的电脑，而不会像第一层的产品（如集线器）每台在网络中的电脑都发送。<br>而路由器除了有交换器的功能外，更拥有路由表作为发送数据包时的依据，在有多种选择的路径中选择最佳的路径。<br>此外，并可以连接两个以上不同网段的网络，而交换器只能连接两个。并具有IP分享的功能，<br>如：区分哪些数据包是要发送至[ [PUTO CHINOo .. oo。路由表存储了去往某一网络的最佳路径，<br>该路径的“路由度量值”以及下一跳路由器。参考条目路由获得这个过程的详细描述。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/22/11-02Linux%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E4%B9%8B%E4%BA%8CIP%E6%8A%A5%E6%96%87/">展开全文 >></a>
         </p>
       
 

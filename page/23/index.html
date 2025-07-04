@@ -206,6 +206,119 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-20-02DNS子域授权" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/03/20-02DNS%E5%AD%90%E5%9F%9F%E6%8E%88%E6%9D%83/">20_02DNS子域授权</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/03/20-02DNS%E5%AD%90%E5%9F%9F%E6%8E%88%E6%9D%83/" class="archive-article-date">
+  	<time datetime="2015-04-03T06:35:32.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-03</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>当我想独自分出一个区域的时候，即在父域上新建一个子域进行管理时，如<br>我要访问<a target="_blank" rel="noopener" href="http://www.unravel.com/fin%E6%97%B6%EF%BC%8C%E6%98%AF%E5%9C%A8www.unravel.com%E4%B8%8B%E7%9A%84fin%E8%BF%9B%E8%A1%8C%E8%AE%BF%E9%97%AE%EF%BC%8C">www.unravel.com/fin时，是在www.unravel.com下的fin进行访问，</a><br>我可以新建一个子域，当访问fin的时候，转发给<a target="_blank" rel="noopener" href="http://www.fin.unravel.com这个新的子域;/">www.fin.unravel.com这个新的子域；</a><br>进行分类管理； </p>
+<p>正向区域： </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SUB_ZONE_NAME        IN    NS    NSSERVER_SUB_ZONE_NAME </span><br><span class="line">NSSERVER_SUB_ZONE_NAME    IN    A    IP </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">.com </span><br><span class="line">unravel.com.        IN        NS        ns1.unravel.com. </span><br><span class="line">ns1.unravel.com.    IN        A        172.16.100.1 </span><br></pre></td></tr></table></figure>
+
+<p>在父域上授权子域： </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">fin.unravel.com.        IN        NS     ns1.fin.unravel.com. </span><br><span class="line">fin.unravel.com.        IN        NS    ns2.fin.unravel.com. </span><br><span class="line">ns1.fin.unravel.com.        IN        A    172.16.100.8 </span><br><span class="line">ns2.fin.unravel.com.        IN        A    172.16.100.108 </span><br></pre></td></tr></table></figure>
+
+<p>#################################################################<br>编辑父域： </p>
+<pre><code><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">    vi /var/named/unravel.com.zone </span><br><span class="line">    </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">    fin            IN        NS        ns1.fin </span><br><span class="line">    ns1.fin            IN        A        172.16.100.8 </span><br><span class="line">     </span><br><span class="line">    market            IN        NS        ns1.market </span><br><span class="line">    ns1.market        IN        A        172.16.100.108 </span><br><span class="line">    序列号加1； </span><br></pre></td></tr></table></figure>
+</code></pre>
+<p>然后在子服务器上进行配置： </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#yum install bind   </span><br><span class="line">#vim /etc/named.conf </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">zone &quot;fin.unravel.com&quot; IN &#123; </span><br><span class="line">    type master; </span><br><span class="line">    file &quot;fin.unravel.com.zone&quot;; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#cd /var/named </span><br><span class="line">#vim fin.unravel.com.zone </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>   </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$TTL 600 </span><br><span class="line">@    IN     SOA        ns1.fin.unravel.com.        admin.fin.unravel.com. ( </span><br><span class="line">                        20141111 </span><br><span class="line">                        1H </span><br><span class="line">                        5M </span><br><span class="line">                        2D </span><br><span class="line">                        6H ) </span><br><span class="line">            IN    NS        ns1 </span><br><span class="line">            IN    MX    10    mail </span><br><span class="line">ns1        IN    A    172.16.100.8 </span><br><span class="line">mail        IN    A    172.16.100.9 </span><br><span class="line">www        IN    A    172.16.100.10 </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># service named restart </span><br></pre></td></tr></table></figure>
+<p>##############################################################################<br>在子域上的&#x2F;etc&#x2F;named.conf中添加： </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">zone &quot;unravel.com&quot; IN &#123; </span><br><span class="line">    type master; </span><br><span class="line">    forward  first； &#123;only|first&#125;only直接转发给父域；first先转发给父域；设置子域能访问父域： </span><br><span class="line">    forwarders    &#123; 171.16.100.1; &#125;;转发给父域的IP；这样就能够在收到请求时让父域进行域名解析； </span><br><span class="line">        &#125;; </span><br></pre></td></tr></table></figure>
+
+<p>这个表示只对父域的区域进行转发；即当访问unravel.com时，直接转发给父域，不对其他域的进行转发； 
+  </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">    而如果在 options添加 &#123; </span><br><span class="line">        forward first; </span><br><span class="line">        forwarders &#123; 172.16.100.1; &#125;; </span><br><span class="line">    &#125;; </span><br></pre></td></tr></table></figure>
+<p>表示所有的请求通过父域进行请求；这个应该用的少，上面那个用的多；</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/03/20-02DNS%E5%AD%90%E5%9F%9F%E6%8E%88%E6%9D%83/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-20-01-实验-DNS主从复制及区域传送" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1232,157 +1345,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/03/25/17-03sudo%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-17-02Linux系统故障排除方法" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/25/17-02Linux%E7%B3%BB%E7%BB%9F%E6%95%85%E9%9A%9C%E6%8E%92%E9%99%A4%E6%96%B9%E6%B3%95/">17_02Linux系统故障排除方法</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/25/17-02Linux%E7%B3%BB%E7%BB%9F%E6%95%85%E9%9A%9C%E6%8E%92%E9%99%A4%E6%96%B9%E6%B3%95/" class="archive-article-date">
-  	<time datetime="2015-03-25T01:23:19.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-25</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>常见的系统故障排除: </p>
-<ol>
-<li>确定问题的故障特征 </li>
-<li>重现故障 </li>
-<li>使用工具收集进一步信息 </li>
-<li>排除不可能的原因 </li>
-<li>定位故障 <blockquote>
-<p>    从简单的问题入手<br>    一次尝试一种方式 </p>
-</blockquote>
-</li>
-<li>备份原文件 </li>
-<li>尽可能借助工具</li>
-</ol>
-<p>可能会出现的故障: </p>
-<ol>
-<li>管理员密码忘记 </li>
-<li>系统无法正常启动 <blockquote>
-<p> grub损坏(MBR损坏，grub配置文件丢失，stage2损坏)<br> 系统初始化故障(某文件系统无法正常挂载，驱动不兼容)<br> emergency(会略过sysinit脚本)<br> 服务故障<br> 用户无法正常登录系统（帐号密码不对&#x2F;bash程序故障） </p>
-</blockquote>
-</li>
-<li>命令无法运行（查看PATH是否正确） </li>
-<li>编译过程无法继续(开发环境缺少基本组件)</li>
-</ol>
-<p>系统故障模拟: </p>
-<blockquote>
-<p>这个地方，可参考14_02文档 </p>
-</blockquote>
-<h2 id="MBR损坏"><a href="#MBR损坏" class="headerlink" title="MBR损坏"></a>MBR损坏</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#dd if=/dev/sda of=/root/mbr.backup count=1 bs=512 </span><br><span class="line">#dd if=/dev/zero of=/dev/sda count=1 bs=(&lt;446) </span><br><span class="line">#sync </span><br><span class="line">#reboot </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>解决方式:</p>
-<ol>
-<li>借助其他主机修复 </li>
-<li>使用紧急救援模式 </li>
-<li> 挂载光盘</li>
-</ol>
-<p>示例: </p>
-<blockquote>
-<p>boot:linux rescue<br>&#x2F;mnt&#x2F;sysimage </p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#chroot /mnt/sysimage </span><br><span class="line">#grub </span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>grub&gt;find (hd0,0)&#x2F; tab补全<br>grub&gt;root (hd0,0)<br>grub&gt;setup (hd0)<br>grub&gt;reboot </p>
-</blockquote>
-<h2 id="GRUB配置文件丢失"><a href="#GRUB配置文件丢失" class="headerlink" title="GRUB配置文件丢失"></a>GRUB配置文件丢失</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">grub&gt;root （hd0,0） </span><br><span class="line">grub&gt;kernel /vmlinuz ro root=/dev/mapper/** root=/dev/sdaX </span><br><span class="line">grub&gt;initrd /initrd**** </span><br><span class="line">grub&gt;boot </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>然后重建grub配置文件 </p>
-<h2 id="系统初始化故障"><a href="#系统初始化故障" class="headerlink" title="系统初始化故障"></a>系统初始化故障</h2><p>kernel panic: </p>
-<p>把默认级别设定为0或6<br>进入单用户运行级别，然后修改回来 </p>
-<p>&#x2F;etc&#x2F;rc.d&#x2F;rc3.d删除掉了<br>进入单用户模式，修复目录系统 </p>
-<p>服务故障 </p>
-<p>sendmail,配置文件时间戳检查无法通过<br>进入单用户模式，不让其启动<br>或者红帽启动时一直按I键，交互模式选择禁止此服务 </p>
-<h2 id="etc-rc-d-rc-local脚本语法错误"><a href="#etc-rc-d-rc-local脚本语法错误" class="headerlink" title="&#x2F;etc&#x2F;rc.d&#x2F;rc.local脚本语法错误"></a>&#x2F;etc&#x2F;rc.d&#x2F;rc.local脚本语法错误</h2><p>&#x2F;bin&#x2F;bash删除 </p>
-<p>挂载光盘安装: </p>
-<ol>
-<li>挂载光盘，linux rescue 进入紧急救援模式，重新安装&#x2F;bin&#x2F;bash </li>
-<li>如果从光盘进行安装&#x2F;bin&#x2F;bash,则光盘挂载后，哪一个设备执行光盘，正常来讲是&#x2F;dev&#x2F;sdc </li>
-<li>mount &#x2F;dev&#x2F;sdc &#x2F;media </li>
-<li>rpm -ivh –replacepkgs –root &#x2F;mnt&#x2F;sysimage bash-VERSION.rpm</li>
-</ol>
-<p>从网络中安装: </p>
-<p>命令无法正常执行:<br>例如写成:export PATH&#x3D;&#x2F;data&#x2F;bin,就会导致错误<br>退出当前登录，令起终端重新登录<br>如果配置文件修改，则千万不要退出， </p>
-<p>&#x2F;etc&#x2F;profile </p>
-<p>编译环境无法通过 </p>
-<p>看错误 and google<br>git，avn </p>
-<p>这个地方只是给个基本的介绍，后续服务中出现错误，会详细介绍How to slove </p>
-<p>mknod</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/25/17-02Linux%E7%B3%BB%E7%BB%9F%E6%95%85%E9%9A%9C%E6%8E%92%E9%99%A4%E6%96%B9%E6%B3%95/">展开全文 >></a>
         </p>
       
 

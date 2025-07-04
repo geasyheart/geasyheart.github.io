@@ -7,17 +7,23 @@
   <meta name="baidu-site-verification" content="code-Wz3hIIlkFx" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://geasyheart.github.io">
-  <title>Archives | 博客</title>
+  <title>使用langgraph打造AI服务编排 | 博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="张宇个人博客">
-<meta property="og:type" content="website">
-<meta property="og:title" content="博客">
-<meta property="og:url" content="https://geasyheart.github.io/archives/page/17/index.html">
+  <meta name="description" content="LangGraph是什么？LangGraph是LangChain团队推出的流程编排工具，它基于状态机的思想，结合LangChain的Agent与Tool架构，允许我们以图的形式组织多个AI组件、服务调用、条件判断与上下文流转。 为什么只是给大模型Tools还不够？我们真正需要的是“编排”在大模型Agent系统中，一些入门教程或框架（包括LangChain早期版本）会鼓励用户把各种工具注册给模型，然">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用langgraph打造AI服务编排">
+<meta property="og:url" content="https://geasyheart.github.io/2025/07/03/%E4%BD%BF%E7%94%A8langgraph%E6%89%93%E9%80%A0AI%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92/index.html">
 <meta property="og:site_name" content="博客">
-<meta property="og:description" content="张宇个人博客">
+<meta property="og:description" content="LangGraph是什么？LangGraph是LangChain团队推出的流程编排工具，它基于状态机的思想，结合LangChain的Agent与Tool架构，允许我们以图的形式组织多个AI组件、服务调用、条件判断与上下文流转。 为什么只是给大模型Tools还不够？我们真正需要的是“编排”在大模型Agent系统中，一些入门教程或框架（包括LangChain早期版本）会鼓励用户把各种工具注册给模型，然">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://geasyheart.github.io/2025/07/03/%E4%BD%BF%E7%94%A8langgraph%E6%89%93%E9%80%A0AI%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92/image.png">
+<meta property="og:image" content="https://geasyheart.github.io/2025/07/03/%E4%BD%BF%E7%94%A8langgraph%E6%89%93%E9%80%A0AI%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92/image2.png">
+<meta property="article:published_time" content="2025-07-03T08:40:14.000Z">
+<meta property="article:modified_time" content="2025-07-04T03:23:06.302Z">
 <meta property="article:author" content="张宇">
+<meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://geasyheart.github.io/2025/07/03/%E4%BD%BF%E7%94%A8langgraph%E6%89%93%E9%80%A0AI%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92/image.png">
   
     <link rel="alternative" href="/atom.xml" title="博客" type="application/atom+xml">
   
@@ -204,515 +210,254 @@ var _hmt = _hmt || [];
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-使用langgraph打造AI服务编排" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      使用langgraph打造AI服务编排
+    </h1>
+  
+
+        
+        <a href="/2025/07/03/%E4%BD%BF%E7%94%A8langgraph%E6%89%93%E9%80%A0AI%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92/" class="archive-article-date">
+  	<time datetime="2025-07-03T08:40:14.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2025-07-03</time>
+</a>
+        
+      </header>
     
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="LangGraph是什么？"><a href="#LangGraph是什么？" class="headerlink" title="LangGraph是什么？"></a>LangGraph是什么？</h2><p><a target="_blank" rel="noopener" href="https://github.com/langchain-ai/langgraph">LangGraph</a>是LangChain团队推出的流程编排工具，它基于状态机的思想，结合LangChain的Agent与Tool架构，允许我们以图的形式组织多个AI组件、服务调用、条件判断与上下文流转。</p>
+<h2 id="为什么只是给大模型Tools还不够？我们真正需要的是“编排”"><a href="#为什么只是给大模型Tools还不够？我们真正需要的是“编排”" class="headerlink" title="为什么只是给大模型Tools还不够？我们真正需要的是“编排”"></a>为什么只是给大模型Tools还不够？我们真正需要的是“编排”</h2><p>在大模型Agent系统中，一些入门教程或框架（包括LangChain早期版本）会鼓励用户把各种工具注册给模型，然后说：</p>
+<blockquote>
+<p>“你可以调用这些tools，自己决定该怎么完成任务。”</p>
+</blockquote>
+<p>这听起来像是Agent的“智能体现”，但实际上它把复杂性全推给了语言模型本身，代价非常高。</p>
+<ol>
+<li>低参数量模型在自主决策上效果不好。</li>
+<li>流程逻辑是隐式的，决策都放到了prompt和模型权重中，而我们需要的是可靠、可复现、可维护的系统。从完全黑盒变成工程上可控的状态。</li>
+</ol>
+<h2 id="LangGraph——让模型专注智能，流程交给编排系统"><a href="#LangGraph——让模型专注智能，流程交给编排系统" class="headerlink" title="LangGraph——让模型专注智能，流程交给编排系统"></a>LangGraph——让模型专注智能，流程交给编排系统</h2><p>LangGraph并不是用来替代语言模型的“思考能力”，而是让你把<strong>流程逻辑从模型里“解耦”出来</strong>，这样模型专注处理智能任务，复杂决策与状态控制则交由LangGraph管理——就像微服务和调度系统一样，各司其职。</p>
+<table>
+<thead>
+<tr>
+<th>组件职责</th>
+<th>谁来做</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>工具调用决策</td>
+<td>大模型</td>
+</tr>
+<tr>
+<td>控制流程走向</td>
+<td>LangGraph</td>
+</tr>
+<tr>
+<td>状态管理</td>
+<td>LangGraph</td>
+</tr>
+<tr>
+<td>智能处理（理解&#x2F;总结&#x2F;生成）</td>
+<td>大模型</td>
+</tr>
+<tr>
+<td>并发、回退、异常处理</td>
+<td>LangGraph</td>
+</tr>
+</tbody></table>
+<h2 id="实现一个会讲笑话、查询天气、闲聊的机器人"><a href="#实现一个会讲笑话、查询天气、闲聊的机器人" class="headerlink" title="实现一个会讲笑话、查询天气、闲聊的机器人"></a>实现一个会讲笑话、查询天气、闲聊的机器人</h2><img src="/2025/07/03/%E4%BD%BF%E7%94%A8langgraph%E6%89%93%E9%80%A0AI%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92/image.png" class="流程图">
+
+
+<p>整个流程如上图所示，下面我们来感受下langgraph的实现。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> langchain_core.messages <span class="keyword">import</span> AIMessage, AnyMessage</span><br><span class="line"><span class="keyword">from</span> langchain_deepseek <span class="keyword">import</span> ChatDeepSeek</span><br><span class="line"><span class="keyword">from</span> langgraph.constants <span class="keyword">import</span> END, START</span><br><span class="line"><span class="keyword">from</span> langgraph.graph <span class="keyword">import</span> StateGraph</span><br><span class="line"><span class="keyword">from</span> pydantic <span class="keyword">import</span> BaseModel, Field</span><br><span class="line"><span class="keyword">from</span> typing_extensions <span class="keyword">import</span> TypedDict</span><br><span class="line"></span><br><span class="line">INTENTION_PROMPT = <span class="string">&quot;&quot;&quot;根据下面用户对话信息判断用户意图，意图有：查询天气、讲笑话、闲聊。结果请以json格式输出。</span></span><br><span class="line"><span class="string">例如：</span></span><br><span class="line"><span class="string">对话信息：</span></span><br><span class="line"><span class="string">    User: 今天天气怎么样？</span></span><br><span class="line"><span class="string">输出：</span></span><br><span class="line"><span class="string">    &#123;&quot;intention&quot;: &quot;查询天气&quot;&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">真实对话信息：</span></span><br><span class="line"><span class="string">&#123;&#123;messages&#125;&#125;</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">IntentionOutput</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    intention: <span class="built_in">str</span> = Field(description=<span class="string">&#x27;用户意图&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">llm = ChatDeepSeek(</span><br><span class="line">    model=<span class="string">&quot;deepseek-chat&quot;</span>,  <span class="comment"># 指定 DeepSeek 的模型名称</span></span><br><span class="line">    api_key=os.getenv(<span class="string">&quot;DEEPSEEK_API_KEY&quot;</span>),  <span class="comment"># 替换为您自己的 DeepSeek API 密钥</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">State</span>(<span class="title class_ inherited__">TypedDict</span>):</span><br><span class="line">    messages: <span class="built_in">list</span>[AnyMessage]</span><br><span class="line">    intention: <span class="built_in">str</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化状态图</span></span><br><span class="line">graph_builder = StateGraph(State)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">chatbot</span>(<span class="params">state: State</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;闲聊&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;messages&quot;</span>: AIMessage(content=<span class="string">&#x27;哦吼，我也不知道聊啥子&#x27;</span>)&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_weather</span>(<span class="params">state: State</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;查询天气&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;messages&quot;</span>: AIMessage(content=<span class="string">&#x27;今天天气晴朗，23度，适合外出打羽毛球。&#x27;</span>)&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">joke</span>(<span class="params">state: State</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;讲笑话&quot;&quot;&quot;</span></span><br><span class="line">    history_msgs = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">for</span> msg <span class="keyword">in</span> state[<span class="string">&#x27;messages&#x27;</span>]:</span><br><span class="line">        history_msgs += <span class="string">f&quot;<span class="subst">&#123;msg[<span class="string">&#x27;role&#x27;</span>]&#125;</span>:<span class="subst">&#123;msg[<span class="string">&#x27;content&#x27;</span>]&#125;</span>\n&quot;</span></span><br><span class="line">    prompt = <span class="string">&#x27;请根据用户最新的对话信息讲个笑话：\n&#x27;</span> + history_msgs</span><br><span class="line">    output = llm.invoke(prompt)</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;messages&quot;</span>: output&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">user_intention</span>(<span class="params">state: State</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;意图识别&quot;&quot;&quot;</span></span><br><span class="line">    history_msgs = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">for</span> msg <span class="keyword">in</span> state[<span class="string">&#x27;messages&#x27;</span>]:</span><br><span class="line">        history_msgs += <span class="string">f&quot;<span class="subst">&#123;msg[<span class="string">&#x27;role&#x27;</span>]&#125;</span>:<span class="subst">&#123;msg[<span class="string">&#x27;content&#x27;</span>]&#125;</span>\n&quot;</span></span><br><span class="line">    prompt = INTENTION_PROMPT.replace(<span class="string">&quot;&#123;&#123;messages&#125;&#125;&quot;</span>, history_msgs)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;意图识别&#x27;</span>.center(<span class="number">60</span>, <span class="string">&#x27;-&#x27;</span>))</span><br><span class="line">    <span class="built_in">print</span>(prompt)</span><br><span class="line">    structure_llm = llm.with_structured_output(IntentionOutput)</span><br><span class="line">    output = structure_llm.invoke(prompt)</span><br><span class="line">    final_intention = output.intention</span><br><span class="line">    <span class="keyword">if</span> final_intention <span class="keyword">not</span> <span class="keyword">in</span> (<span class="string">&quot;查询天气&quot;</span>, <span class="string">&quot;讲笑话&quot;</span>, <span class="string">&quot;闲聊&quot;</span>):</span><br><span class="line">        final_intention = <span class="string">&#x27;闲聊&#x27;</span></span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;intention&quot;</span>: final_intention&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">intention_conditional_edge</span>(<span class="params">state: State</span>):</span><br><span class="line">    <span class="keyword">if</span> state[<span class="string">&#x27;intention&#x27;</span>] == <span class="string">&#x27;查询天气&#x27;</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&#x27;get_weather&#x27;</span></span><br><span class="line">    <span class="keyword">elif</span> state[<span class="string">&#x27;intention&#x27;</span>] == <span class="string">&#x27;讲笑话&#x27;</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&#x27;joke&#x27;</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&#x27;chatbot&#x27;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加节点到状态图</span></span><br><span class="line"></span><br><span class="line">graph_builder.add_node(<span class="string">&#x27;user_intention&#x27;</span>, user_intention)</span><br><span class="line">graph_builder.add_node(<span class="string">&quot;chatbot&quot;</span>, chatbot)</span><br><span class="line">graph_builder.add_node(<span class="string">&#x27;get_weather&#x27;</span>, get_weather)</span><br><span class="line">graph_builder.add_node(<span class="string">&#x27;joke&#x27;</span>, joke)</span><br><span class="line"></span><br><span class="line">graph_builder.add_edge(START, <span class="string">&#x27;user_intention&#x27;</span>)</span><br><span class="line">graph_builder.add_conditional_edges(<span class="string">&#x27;user_intention&#x27;</span>, intention_conditional_edge, [</span><br><span class="line">    <span class="string">&#x27;chatbot&#x27;</span>, <span class="string">&#x27;get_weather&#x27;</span>, <span class="string">&#x27;joke&#x27;</span>])</span><br><span class="line">graph_builder.add_edge(<span class="string">&#x27;chatbot&#x27;</span>, END)</span><br><span class="line">graph_builder.add_edge(<span class="string">&#x27;get_weather&#x27;</span>, END)</span><br><span class="line">graph_builder.add_edge(<span class="string">&#x27;joke&#x27;</span>, END)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 编译状态图</span></span><br><span class="line">graph = graph_builder.<span class="built_in">compile</span>()</span><br><span class="line"></span><br><span class="line"><span class="comment"># with open(&quot;/tmp/b.png&quot;, &#x27;wb&#x27;) as f:</span></span><br><span class="line"><span class="comment">#     f.write(graph.get_graph().draw_mermaid_png())</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    round1 = graph.invoke(</span><br><span class="line">        &#123;<span class="string">&quot;messages&quot;</span>: [&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;我很开心，讲个好笑的事情吧&quot;</span>&#125;]&#125;)</span><br><span class="line">    <span class="built_in">print</span>(round1)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>更多示例请参考<a target="_blank" rel="noopener" href="https://langchain-ai.github.io/langgraph/concepts/low_level/">官方文档</a>。</p>
+<h2 id="编排可视化"><a href="#编排可视化" class="headerlink" title="编排可视化"></a>编排可视化</h2><p>可通过<a target="_blank" rel="noopener" href="https://langchain-ai.github.io/langgraph/tutorials/langgraph-platform/local-server/#4-create-a-env-file">LangGraph Studio</a>来进行可视化,操作步骤：</p>
+<h3 id="1-安装必要包"><a href="#1-安装必要包" class="headerlink" title="1. 安装必要包"></a>1. 安装必要包</h3><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Python &gt;= 3.11 is required.</span></span><br><span class="line"></span><br><span class="line">pip install --upgrade <span class="string">&quot;langgraph-cli[inmem]&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-创建langgraph-json"><a href="#2-创建langgraph-json" class="headerlink" title="2. 创建langgraph.json"></a>2. 创建langgraph.json</h3><p>项目结构如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">lg_demo/</span><br><span class="line">  - chat_demo.py(内容如上)</span><br><span class="line">  - langgraph.json</span><br></pre></td></tr></table></figure>
+<p>langgraph.json内容：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;dependencies&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="string">&quot;.&quot;</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;graphs&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;agent&quot;</span><span class="punctuation">:</span> <span class="string">&quot;./chat_demo.py:graph&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-运行"><a href="#3-运行" class="headerlink" title="3. 运行"></a>3. 运行</h3><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DEEPSEEK_API_KEY=&lt;your key&gt;  langgraph dev</span><br></pre></td></tr></table></figure>
+
+<p>会得到如下信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">INFO:langgraph_api.cli:</span><br><span class="line"></span><br><span class="line">        Welcome to</span><br><span class="line"></span><br><span class="line">╦  ┌─┐┌┐┌┌─┐╔═╗┬─┐┌─┐┌─┐┬ ┬</span><br><span class="line">║  ├─┤││││ ┬║ ╦├┬┘├─┤├─┘├─┤</span><br><span class="line">╩═╝┴ ┴┘└┘└─┘╚═╝┴└─┴ ┴┴  ┴ ┴</span><br><span class="line"></span><br><span class="line">- 🚀 API: http://127.0.0.1:2024</span><br><span class="line">- 🎨 Studio UI: https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024</span><br><span class="line">- 📚 API Docs: http://127.0.0.1:2024/docs</span><br><span class="line"></span><br><span class="line">This in-memory server is designed for development and testing.</span><br><span class="line">For production use, please use LangGraph Cloud.</span><br></pre></td></tr></table></figure>
+
+<p>如果浏览器无法正常打开<code>https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024</code>， 可尝试使用Firefox浏览器。</p>
+<h3 id="4-示例"><a href="#4-示例" class="headerlink" title="4. 示例"></a>4. 示例</h3><p>下图为最终可视化效果，包含每个节点及其流向（来自LangGraph Studio）：</p>
+<img src="/2025/07/03/%E4%BD%BF%E7%94%A8langgraph%E6%89%93%E9%80%A0AI%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92/image2.png" class="编排图">
+
+
+<h3 id="5-客户端调用"><a href="#5-客户端调用" class="headerlink" title="5. 客户端调用"></a>5. 客户端调用</h3><p>你也可以通过python sdk进行调用，示例代码：</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">from</span> langgraph_sdk <span class="keyword">import</span> get_sync_client</span><br><span class="line"></span><br><span class="line">client = get_sync_client(url=<span class="string">&quot;http://localhost:2024&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> chunk <span class="keyword">in</span> client.runs.stream(</span><br><span class="line">    <span class="literal">None</span>,  <span class="comment"># Threadless run</span></span><br><span class="line">    <span class="string">&quot;agent&quot;</span>,  <span class="comment"># Name of assistant. Defined in langgraph.json.</span></span><br><span class="line">    <span class="built_in">input</span>=&#123;</span><br><span class="line">        <span class="string">&quot;messages&quot;</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>,</span><br><span class="line">                <span class="string">&quot;content&quot;</span>: <span class="string">&quot;今天南京天气好吗？适合外出吗？&quot;</span>,</span><br><span class="line">            &#125;,</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="string">&quot;role&quot;</span>: <span class="string">&quot;assistant&quot;</span>,</span><br><span class="line">                <span class="string">&quot;content&quot;</span>: <span class="string">&quot;今天天气晴朗，23度，适合外出打羽毛球。&quot;</span></span><br><span class="line">            &#125;,</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>,</span><br><span class="line">                <span class="string">&quot;content&quot;</span>: <span class="string">&quot;那你给我讲个天气相关的笑话吧&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">        ],</span><br><span class="line">    &#125;,</span><br><span class="line">    stream_mode=<span class="string">&quot;messages&quot;</span>,</span><br><span class="line">):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Receiving new event of type: <span class="subst">&#123;chunk.event&#125;</span>...&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(chunk.data)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;\n\n&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="个人感受"><a href="#个人感受" class="headerlink" title="个人感受"></a>个人感受</h2><ol>
+<li>如果为了演示，可以尝试上面可视化部分。</li>
+<li>如果集成至已有服务，可单独使用LangGraph服务编排。</li>
+</ol>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/assets/alipay.png">
+                      <span class="reward-type">支付宝</span>
+                    </div>
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2015" class="archive-year">2015</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/10/29/46-02Tomcat%E7%B3%BB%E5%88%97%E4%B9%8Bjava%E5%88%9D%E6%B6%89/" class="archive-article-date">
-  	<time datetime="2015-10-29T14:24:04.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-29</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/10/29/46-02Tomcat%E7%B3%BB%E5%88%97%E4%B9%8Bjava%E5%88%9D%E6%B6%89/">46_02Tomcat系列之java初涉</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
+      
 
+      
 
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://geasyheart.github.io/2025/07/03/%E4%BD%BF%E7%94%A8langgraph%E6%89%93%E9%80%A0AI%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/10/29/46-01Tomcat%E7%B3%BB%E5%88%97%E4%B9%8Bjava%E5%88%9D%E6%B6%89/" class="archive-article-date">
-  	<time datetime="2015-10-29T14:23:03.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-29</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2025/02/28/%E9%92%A2%E6%9D%90%E8%B4%A8%E6%A3%80/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">钢材质检</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/10/29/46-01Tomcat%E7%B3%BB%E5%88%97%E4%B9%8Bjava%E5%88%9D%E6%B6%89/">46_01Tomcat系列之java初涉</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#LangGraph%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">LangGraph是什么？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AA%E6%98%AF%E7%BB%99%E5%A4%A7%E6%A8%A1%E5%9E%8BTools%E8%BF%98%E4%B8%8D%E5%A4%9F%EF%BC%9F%E6%88%91%E4%BB%AC%E7%9C%9F%E6%AD%A3%E9%9C%80%E8%A6%81%E7%9A%84%E6%98%AF%E2%80%9C%E7%BC%96%E6%8E%92%E2%80%9D"><span class="toc-number">2.</span> <span class="toc-text">为什么只是给大模型Tools还不够？我们真正需要的是“编排”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#LangGraph%E2%80%94%E2%80%94%E8%AE%A9%E6%A8%A1%E5%9E%8B%E4%B8%93%E6%B3%A8%E6%99%BA%E8%83%BD%EF%BC%8C%E6%B5%81%E7%A8%8B%E4%BA%A4%E7%BB%99%E7%BC%96%E6%8E%92%E7%B3%BB%E7%BB%9F"><span class="toc-number">3.</span> <span class="toc-text">LangGraph——让模型专注智能，流程交给编排系统</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E4%BC%9A%E8%AE%B2%E7%AC%91%E8%AF%9D%E3%80%81%E6%9F%A5%E8%AF%A2%E5%A4%A9%E6%B0%94%E3%80%81%E9%97%B2%E8%81%8A%E7%9A%84%E6%9C%BA%E5%99%A8%E4%BA%BA"><span class="toc-number">4.</span> <span class="toc-text">实现一个会讲笑话、查询天气、闲聊的机器人</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%96%E6%8E%92%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="toc-number">5.</span> <span class="toc-text">编排可视化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%AE%89%E8%A3%85%E5%BF%85%E8%A6%81%E5%8C%85"><span class="toc-number">5.1.</span> <span class="toc-text">1. 安装必要包</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%88%9B%E5%BB%BAlanggraph-json"><span class="toc-number">5.2.</span> <span class="toc-text">2. 创建langgraph.json</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E8%BF%90%E8%A1%8C"><span class="toc-number">5.3.</span> <span class="toc-text">3. 运行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E7%A4%BA%E4%BE%8B"><span class="toc-number">5.4.</span> <span class="toc-text">4. 示例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%B0%83%E7%94%A8"><span class="toc-number">5.5.</span> <span class="toc-text">5. 客户端调用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%AA%E4%BA%BA%E6%84%9F%E5%8F%97"><span class="toc-number">6.</span> <span class="toc-text">个人感受</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/10/29/45-02http%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E5%8F%8Ahaproxy/" class="archive-article-date">
-  	<time datetime="2015-10-29T14:22:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-29</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/10/29/45-02http%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E5%8F%8Ahaproxy/">45_02http反向代理及haproxy</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
+        
+    </div>
+</aside>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/10/29/45-01http%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E5%8F%8Ahaproxy/" class="archive-article-date">
-  	<time datetime="2015-10-29T14:20:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-29</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/10/29/45-01http%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E5%8F%8Ahaproxy/">45_01http反向代理及haproxy</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/10/10/44-03-2-%E5%AE%9E%E9%AA%8C%EF%BC%9Amemcached%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE/" class="archive-article-date">
-  	<time datetime="2015-10-10T10:15:59.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-10</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/10/10/44-03-2-%E5%AE%9E%E9%AA%8C%EF%BC%9Amemcached%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE/">44_03_2_实验：memcached安装配置</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/10/06/43-03-2-%E6%90%AD%E5%BB%BALNMP/" class="archive-article-date">
-  	<time datetime="2015-10-06T03:02:55.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-06</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/10/06/43-03-2-%E6%90%AD%E5%BB%BALNMP/">43_03_2_搭建LNMP</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/10/03/42-04-2-mysql-proxy%E5%AE%9E%E9%AA%8C/" class="archive-article-date">
-  	<time datetime="2015-10-03T03:12:53.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-03</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/10/03/42-04-2-mysql-proxy%E5%AE%9E%E9%AA%8C/">42_04_2_mysql-proxy实验</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/10/03/42-04%E5%88%A9%E7%94%A8mysql-proxy%E5%AE%9E%E7%8E%B0%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB-%E7%AC%AC%E4%B8%80%E7%89%88/" class="archive-article-date">
-  	<time datetime="2015-10-03T03:02:55.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-03</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/10/03/42-04%E5%88%A9%E7%94%A8mysql-proxy%E5%AE%9E%E7%8E%B0%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB-%E7%AC%AC%E4%B8%80%E7%89%88/">42_04利用mysql-proxy实现读写分离_第一版_</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/10/02/42-03-2-%E5%AE%9E%E9%AA%8C-MySQL%E5%9F%BA%E4%BA%8EGTID%E7%9A%84%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%A4%8D%E5%88%B6/" class="archive-article-date">
-  	<time datetime="2015-10-02T08:44:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-02</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/10/02/42-03-2-%E5%AE%9E%E9%AA%8C-MySQL%E5%9F%BA%E4%BA%8EGTID%E7%9A%84%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%A4%8D%E5%88%B6/">42_03_2_实验:MySQL基于GTID的多线程复制</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2015/10/02/42-03MySQL%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6-MySQL5/" class="archive-article-date">
-  	<time datetime="2015-10-02T08:43:52.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-02</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2015/10/02/42-03MySQL%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6-MySQL5/">42_03MySQL主从复制--MySQL5</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
   
-    </div></section>
   
 
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/page/16/">&amp;laquo; Prev</a><a class="page-number" href="/archives/">1</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/15/">15</a><a class="page-number" href="/archives/page/16/">16</a><span class="page-number current">17</span><a class="page-number" href="/archives/page/18/">18</a><a class="page-number" href="/archives/page/19/">19</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/28/">28</a><a class="extend next" rel="next" href="/archives/page/18/">Next &amp;raquo;</a>
-    </nav>
+  
+
+  
+
   
 
 
@@ -736,8 +481,8 @@ var _hmt = _hmt || [];
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

@@ -206,6 +206,254 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-23-03MySQL初步，数据类型及SQL语句" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/22/23-03MySQL%E5%88%9D%E6%AD%A5%EF%BC%8C%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%8F%8ASQL%E8%AF%AD%E5%8F%A5/">23_03MySQL初步，数据类型及SQL语句</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/22/23-03MySQL%E5%88%9D%E6%AD%A5%EF%BC%8C%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%8F%8ASQL%E8%AF%AD%E5%8F%A5/" class="archive-article-date">
+  	<time datetime="2015-04-22T02:38:42.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><ul>
+<li>DBMS</li>
+</ul>
+<ul>
+<li>数据管理的独立性 </li>
+<li>有效完成数据存取 </li>
+<li>数据完整性和安全性   </li>
+<li>数据集中管理 </li>
+<li>并发存储于故障恢复</li>
+</ul>
+<p>     </p>
+<ol>
+<li>SQL<blockquote>
+<p>    结构化查询语言SQL（STRUCTURED QUERY LANGUAGE）是最重要的关系数据库操作语言，<br>    并且它的影响已经超出数据库领域，得到其他领域的重视和采用，<br>    如人工智能领域的数据检索，第四代软件开发工具中嵌入SQL的语言等； </p>
+</blockquote>
+</li>
+<li>SQL接口 <blockquote>
+<p>    Oracle,PL&#x2F;SQL<br>    SQL SERVER </p>
+</blockquote>
+</li>
+<li>软件包格式<blockquote>
+<p>    软件包管理器特有的格式<br>    通用二进制格式<br>    源程序 </p>
+</blockquote>
+</li>
+<li>端口:TCP&#x2F;3306 <blockquote>
+<p>    mysql用户<br>    mysql组</p>
+</blockquote>
+</li>
+</ol>
+<p> <br> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#yum install mysql-server </span></span><br><span class="line"><span class="comment">#service mysqld start </span></span><br></pre></td></tr></table></figure><br>5. mysql客户端： </p>
+<blockquote>
+<p>    交互式模式<br>    批处理模式 
+  </p>
+</blockquote>
+<h2 id="交互式模式中的命令类别"><a href="#交互式模式中的命令类别" class="headerlink" title="交互式模式中的命令类别"></a>交互式模式中的命令类别</h2><ul>
+<li>客户端命令  mysql&gt;help</li>
+</ul>
+<p>   </p>
+<ul>
+<li>显示出来的都是客户端命令</li>
+</ul>
+<ul>
+<li>服务器端命令 mysqld</li>
+</ul>
+<ul>
+<li>都必须使用语句结束符，默认为分号；<br>初始化： <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">     server mysqld start 第一次，看上面的就是初始化； </span><br><span class="line">     设定mysql的root密码 </span><br><span class="line">     /usr/bin/mysqladmin -u root password <span class="string">&#x27;new-password&#x27;</span>  //input mysql passwd </span><br><span class="line">     /usr/bin/mysqladmin -u root -h server41.example.com password <span class="string">&#x27;new-password&#x27;</span> </span><br><span class="line">     netstat -ntlp | grep　mysql         </span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>      <br>rpm安装的mysql的文件在:&#x2F;var&#x2F;lib&#x2F;mysql&#x2F;mysql&#x2F; 
+  </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#rpm -ql mysql-server | less </span></span><br><span class="line"><span class="comment">#cd /var/lib/mysql/ </span></span><br></pre></td></tr></table></figure>
+<p>可以看到mysql。。<br> <br>mysql: </p>
+<blockquote>
+<p>    -u USERNAME不指明的话默认是root<br>    -p passwd不指明的话默认是空密码<br>    -h MYSQL_SERVER不指明的话默认是本地地址<br>    <br>用户：USERNAME@HOST<br>    mysql -uroot -p -h 192.168.0.107这样登不上去，认为这是通过远程主机登陆<br>    mysql -uroot -p -h 127.0.0.1 这样可以登上去，这个实在本地主机登陆<br>    因为mysql的用户名应该是USERNAME@HOST<br> <br>在linux上同一台主机上使用socket进行连接<br>&#x2F;var&#x2F;lib&#x2F;mysql&#x2F;mysql.sock 使用这种方式连接要快的多；<br> <br>不在同一个主机上，就要使用tcp协议进行连接；<br>在windows上使用共享memory进行连接；<br> <br>    mysql&gt; SHOW　DATABASES;<br>显示当前的数据库：<br>    information_schema位于内存中；<br>    mysql<br>    test<br> 如果在&#x2F;var&#x2F;lib&#x2F;mysql&#x2F;中创建一个文件，再用SHOW DATABASES看时，<br> 就会多一个数据库；<br> <br> 设置客户端默认使用的一个数据库；<br>    USE db-name；<br>    例如：<br>    USE mytext；<br> <br>## 关系数据库对象</p>
+</blockquote>
+<ol>
+<li>表</li>
+</ol>
+<ul>
+<li>行：row </li>
+<li>列：field，column（也叫）</li>
+<li>定义字段名称，数据类型，类型修饰符（约束)</li>
+</ul>
+<ul>
+<li>字符</li>
+</ul>
+<ol>
+<li>CHAR（n） </li>
+<li>VARCHAR（n） </li>
+<li>BINARY（n） </li>
+<li>VARBINARY(n) </li>
+<li>TEXT(n) </li>
+<li>BLOB(n)</li>
+</ol>
+<ul>
+<li>数值</li>
+</ul>
+<ol>
+<li>精确数值 </li>
+<li>整形 </li>
+<li>    TINYINT </li>
+<li>    SMALLINT </li>
+<li>    MEDIUMINT </li>
+<li>    INT </li>
+<li>    BIGINT</li>
+</ol>
+<ul>
+<li>日期</li>
+</ul>
+<ol>
+<li>DATE </li>
+<li>TIME </li>
+<li>DATETIME </li>
+<li>STAMP</li>
+</ol>
+<ul>
+<li>布尔         </li>
+<li>索引（加速表的查询） </li>
+<li>视图 </li>
+<li>约束 </li>
+<li>存储过程 </li>
+<li>存储函数 </li>
+<li>触发器（做主动数据库的） </li>
+<li>游标 </li>
+<li>用户 </li>
+<li>权限 </li>
+<li>事务<br>MYSQL常用命令：</li>
+</ul>
+<p> <br>2. DDL(数据模式定义语言)： </p>
+<blockquote>
+<p>    CREATE<br>    ALTER<br>    DROP<br>3. DML（数据操作语言）：<br>    INSERT<br>    UPDATE<br>    DELETE<br>4. DCL（数据控制语言）：<br>    GRANT<br>    REVOKE  </p>
+</blockquote>
+<h2 id="DDL"><a href="#DDL" class="headerlink" title="DDL"></a>DDL</h2><ol>
+<li>创建数据库<blockquote>
+<p>CREATE DATABASE db_name;<br>CREATE DATABASE IF NOT EXISTS db_name；<br>CREATE DATABASE mytest； </p>
+</blockquote>
+</li>
+<li>删除数据库</li>
+</ol>
+<p>         </p>
+<blockquote>
+<p>DROP TABLE，是从数据库中删除表。删除后，表结构不在存在，无法再对该表进行任何操作。<br>DROP DATABASE db-name；<br>—-&gt;DROP DATABASE mytest2；<br>3. 创建表<br>CREATE TABLE db_name(col1,col2,…);<br>USE mytest；设置客户端默认使用的数据库；<br>(如果不是这样操作，就要CREATE TABLE mytext.students() )                Gender性别<br>CREATE TABLE students(Name CHAR（20）NOT NULL,Age TINYINT UNSIGNED,Gender CHAR(1) NOT NULL)；<br>如果出现错误，第一检查语法是否有问题，第二：我在创建mytest这个数据库的时候，是用root，默认的用户和用户组不属于mysql，<br>所以应该把用户和用户组改为mysql；    chown mysql:mysql &#x2F;mytest;<br>    + 查看库中的表：<br>        SHOW TABLES FROM  DB_NAME;<br>        —-&gt; SHOW students;<br>    + 查看表的结构：<br>        DESC TABLE tb_name;<br>        DESC  students；<br>                        help ALTER TABLE 可获取关于table的帮助；<br>    + 修改表：<br>        ALTER TABLE tb_name;ALTER TABLE students;向右增加一列;<br>                            ALTER TABLE students ADD course VARCHAR（100）；增加一行course的；<br>            MODIFY;            修改内容；<br>            CHANGE;            ALTER TABLE students CHANGE course COURSE VARCHAR(100)AFTER Name 改变名称；<br>            ADD;<br>            DROP; 
+  </p>
+</blockquote>
+<h2 id="DML"><a href="#DML" class="headerlink" title="DML"></a>DML</h2><ol>
+<li>语法</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">INSERT</span> <span class="keyword">INTO</span> tb_name(col1,col2,...) <span class="keyword">VALUES</span><span class="operator">|</span>(<span class="string">&#x27;STRING,NUM,....&#x27;</span>); </span><br><span class="line">        INTERT <span class="keyword">INTO</span> students (Name,Gender)<span class="keyword">VALUE</span>(<span class="string">&#x27;LingHuchong&#x27;</span>,<span class="string">&#x27;M&#x27;</span>),(<span class="string">&#x27;XiaoLongnv&#x27;</span>,<span class="string">&#x27;F&#x27;</span>); </span><br><span class="line">    <span class="keyword">UPDATE</span> tb_name <span class="keyword">SET</span> <span class="keyword">column</span><span class="operator">=</span><span class="keyword">value</span> <span class="keyword">WHERE</span> Name<span class="operator">=</span><span class="string">&#x27;XiaoXiangzi&#x27;</span> </span><br><span class="line">        <span class="keyword">UPDATE</span> students <span class="keyword">SET</span> course<span class="operator">=</span><span class="string">&#x27;bixiejianfa&#x27;</span> <span class="keyword">WHERE</span> Name<span class="operator">=</span><span class="string">&#x27;XiaoXiangzi&#x27;</span>; </span><br><span class="line">         </span><br><span class="line">    <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> students; </span><br><span class="line">                查看表中内容； </span><br><span class="line">        选择：指定以某字段作为搜索码，做逻辑比较，筛选符合条件的行； </span><br><span class="line">        投影：筛选符合条件的列； </span><br><span class="line">    如： </span><br><span class="line">        <span class="keyword">SELECT</span> Name,course <span class="keyword">FROM</span> students <span class="keyword">WHERE</span> Gender<span class="operator">=</span><span class="string">&#x27;M&#x27;</span>; </span><br><span class="line">         </span><br><span class="line">            <span class="keyword">WHERE</span> 指定选择条件； </span><br><span class="line">    <span class="keyword">DELETE</span> <span class="keyword">DELETE</span>  是有条件的删除表中的数据，如果不写条件，全表删除，而删除后，表仍然存在，仍可以对表进行操作。 </span><br><span class="line">            具体语法为<span class="keyword">DELETE</span> <span class="keyword">FROM</span> <span class="keyword">TABLE</span> <span class="keyword">WHERE</span> 条件。 </span><br><span class="line">            同样，还有一个<span class="keyword">TRUNCATE</span> <span class="keyword">TABLE</span> TABLENAME语句，是全表不提交删除，也是删除数据，表仍然存在。 </span><br><span class="line">        <span class="keyword">DELETE</span> <span class="keyword">FROM</span> students <span class="keyword">WHERE</span> course<span class="operator">=</span>‘bixiejianfa’; </span><br></pre></td></tr></table></figure>
+<p>    <br>2. 创建用户</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">        <span class="keyword">CREATE</span> <span class="keyword">USER</span> <span class="string">&#x27;USERNAME&#x27;</span>@<span class="string">&#x27;HOST&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;PASSWORD&#x27;</span>; </span><br><span class="line">            <span class="comment">---&gt;CREATE USER &#x27;alex&#x27;@&#x27;%&#x27; IDENTIFIED BY &#x27;alex&#x27;;   </span></span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>删除用户</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">        <span class="keyword">DROP</span> <span class="keyword">USER</span> <span class="string">&#x27;USERNAME&#x27;</span>@<span class="string">&#x27;HOST&#x27;</span>; </span><br><span class="line">```   </span><br><span class="line">        HOST: </span><br><span class="line">            IP; </span><br><span class="line">            HOSTNAME; </span><br><span class="line">            NETWORK; </span><br><span class="line">            通配符 </span><br><span class="line">                _:匹配任意单个字符， </span><br><span class="line">                <span class="operator">%</span>：匹配任意字符；   </span><br><span class="line">                 </span><br><span class="line">## DCL</span><br><span class="line">    <span class="keyword">GRANT</span> pril,pri2,...<span class="keyword">ON</span> DB_NAME,TB_NAME <span class="keyword">TO</span> <span class="string">&#x27;USERNAME&#x27;</span>@<span class="string">&#x27;HOST&#x27;</span>(IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;PASSWORD&#x27;</span>); </span><br><span class="line">    <span class="keyword">REVOKE</span> pri1,pri2...ON DB_NAME,TB_NAME <span class="keyword">TO</span> <span class="string">&#x27;USERNAME&#x27;</span>@<span class="string">&#x27;HOST&#x27;</span>; </span><br><span class="line">     </span><br><span class="line">    查看用户授权：<span class="keyword">SHOW</span> GRANTS <span class="keyword">FOR</span> <span class="string">&#x27;alex&#x27;</span>@<span class="string">&#x27;%&#x27;</span>;  USEAGE表示只能连接到这个服务器上； </span><br><span class="line">    授权: </span><br><span class="line">        <span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES <span class="keyword">ON</span> mytest.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;alex&#x27;</span>@<span class="string">&#x27;%&#x27;</span>； </span><br><span class="line">    说明，我在试验时如果指定任意主机均可登录，但是无法从本地登录，远端可登录。 </span><br><span class="line">        <span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;root‘@‘172.16.%.%’ IDENTIFIED BY &#x27;</span>passwd<span class="string">&#x27; </span></span><br><span class="line"><span class="string">        root在172.16这个网段对所有库和表具有所有操作权限，密码为passwd； </span></span><br><span class="line"><span class="string">  </span></span><br><span class="line"><span class="string">## 练习</span></span><br><span class="line"><span class="string">+  建立如下表</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">|ID   | Name          |  Age | Gender|    Course |</span></span><br><span class="line"><span class="string">|:-----|:---------------:|:------:|:---------:|:----------|</span></span><br><span class="line"><span class="string">|1    | Ling Huchong  | 24   | Male    |  Hamogong |</span></span><br><span class="line"><span class="string">|2    | Huang Rong    |   19 |  Female |   Chilian Shenzhang |</span></span><br><span class="line"><span class="string">|3    | Lu Wushuang   |    18|  Female |   Jiuyang Shengong |</span></span><br><span class="line"><span class="string">|4    | Zhu ziliu     |  52  |  Male   |  Pixiejianfa |</span></span><br><span class="line"><span class="string">|5    | Chen Jialuo   |    22|  Male   | Xianglong shibazhang |</span></span><br><span class="line"><span class="string">  </span></span><br><span class="line"><span class="string">```sql</span></span><br><span class="line"><span class="string">mysql&gt;CREATE TABLE tech(ID TINYINT NOT NULL,Name CHAR(20)NOT NULL,Age TINYINT NOT NULL,Gender CHAR(6)NOT NULL,Course CHAR(20)NOT NULL); </span></span><br><span class="line"><span class="string">mysql&gt;INSERT INTO tech(ID,Name,Age,Gender,Course)VALUE(1,&#x27;</span>Ling Huchong<span class="string">&#x27;,24,&#x27;</span>Male<span class="string">&#x27;,&#x27;</span>Hamogong<span class="string">&#x27;),(2,&#x27;</span>Huang Rong<span class="string">&#x27;,19,&#x27;</span>Female<span class="string">&#x27;,&#x27;</span>Jiuyang Shengong<span class="string">&#x27;),(4,&#x27;</span>Zhu ziliu<span class="string">&#x27;,52,&#x27;</span>Male<span class="string">&#x27;,&#x27;</span>Pixiejianfa<span class="string">&#x27;),(5,&#x27;</span>Chen Jialuo<span class="string">&#x27;,22,&#x27;</span>Male<span class="string">&#x27;,&#x27;</span>Xianglong shibazhang<span class="string">&#x27;); </span></span><br></pre></td></tr></table></figure>
+<p>  </p>
+<ul>
+<li>完成如下操作</li>
+</ul>
+<ul>
+<li>找出性别为女性的所有人； <blockquote>
+<p>        SELECT * FROM tech WHERE Gender&#x3D;’Female’; </p>
+</blockquote>
+</li>
+<li>找出年龄大于20的所有人； <blockquote>
+<p>        SELECT * FROM tech WHERE Age&gt;20; </p>
+</blockquote>
+</li>
+<li>修改Zhu Ziliu的Course为Kuihua Baodian; <blockquote>
+<p>        UPDATE tech SET Course&#x3D;’Kuihua Baodian’WHERE Name&#x3D;’Zhu Ziliu’; </p>
+</blockquote>
+</li>
+<li>删除年龄小于等于19岁的所有人； <blockquote>
+<p>        DELETE FROM tech WHERE Age &lt;&#x3D;19; </p>
+</blockquote>
+</li>
+<li>授权给testuser对testdb库有所有访问权限； <blockquote>
+<p>        GRANT ALL PRIVILEGES ON testdb.* to testuser@’%’;</p>
+</blockquote>
+</li>
+</ul>
+<p> </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span>USE mysql; </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">SELECT</span> <span class="keyword">User</span>,Host,Password <span class="keyword">FROM</span> <span class="keyword">user</span>; </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>root    localhost    *08E080RERFJA030030JFAFJ3IFADFA343424；<br> <br>为用户设定密码： </p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span> mysql<span class="operator">&gt;</span><span class="keyword">SET</span> PASSWORD <span class="keyword">FOR</span> <span class="string">&#x27;root&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span><span class="operator">=</span>PASSWORD(<span class="string">&#x27;new-password&#x27;</span>); </span><br><span class="line">     </span><br><span class="line"><span class="number">2.</span> #mysqladmin <span class="operator">-</span>u root <span class="operator">-</span>h HOST <span class="operator">-</span>p password <span class="string">&#x27;new_password&#x27;</span>; </span><br><span class="line">    输入old_password; </span><br><span class="line"><span class="number">3.</span> mysql<span class="operator">&gt;</span> <span class="keyword">UPDATE</span> <span class="keyword">user</span> <span class="keyword">SET</span> Password<span class="operator">=</span>PASSWORD(<span class="string">&#x27;password&#x27;</span>)<span class="keyword">WHERE</span> <span class="keyword">USER</span><span class="operator">=</span><span class="string">&#x27;root&#x27;</span> <span class="keyword">AND</span> Host<span class="operator">=</span><span class="string">&#x27;127.0.0.1&#x27;</span>; </span><br><span class="line">  </span><br><span class="line"><span class="number">4.</span> 在数据库中更改完后，要mysql<span class="operator">&gt;</span> FLUSH PRIVILEGES;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/22/23-03MySQL%E5%88%9D%E6%AD%A5%EF%BC%8C%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%8F%8ASQL%E8%AF%AD%E5%8F%A5/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-23-02数据库及MySQL" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1220,119 +1468,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/04/03/38-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B9%9D-%E9%AB%98%E5%8F%AF%E7%94%A8%E9%9B%86%E7%BE%A4%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E5%A4%9A%E8%8A%82%E7%82%B9%E9%9B%86%E7%BE%A4/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-20-02DNS子域授权" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/03/20-02DNS%E5%AD%90%E5%9F%9F%E6%8E%88%E6%9D%83/">20_02DNS子域授权</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/03/20-02DNS%E5%AD%90%E5%9F%9F%E6%8E%88%E6%9D%83/" class="archive-article-date">
-  	<time datetime="2015-04-03T06:35:32.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-03</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>当我想独自分出一个区域的时候，即在父域上新建一个子域进行管理时，如<br>我要访问<a target="_blank" rel="noopener" href="http://www.unravel.com/fin%E6%97%B6%EF%BC%8C%E6%98%AF%E5%9C%A8www.unravel.com%E4%B8%8B%E7%9A%84fin%E8%BF%9B%E8%A1%8C%E8%AE%BF%E9%97%AE%EF%BC%8C">www.unravel.com/fin时，是在www.unravel.com下的fin进行访问，</a><br>我可以新建一个子域，当访问fin的时候，转发给<a target="_blank" rel="noopener" href="http://www.fin.unravel.com这个新的子域;/">www.fin.unravel.com这个新的子域；</a><br>进行分类管理； </p>
-<p>正向区域： </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SUB_ZONE_NAME        IN    NS    NSSERVER_SUB_ZONE_NAME </span><br><span class="line">NSSERVER_SUB_ZONE_NAME    IN    A    IP </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">.com </span><br><span class="line">unravel.com.        IN        NS        ns1.unravel.com. </span><br><span class="line">ns1.unravel.com.    IN        A        172.16.100.1 </span><br></pre></td></tr></table></figure>
-
-<p>在父域上授权子域： </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">fin.unravel.com.        IN        NS     ns1.fin.unravel.com. </span><br><span class="line">fin.unravel.com.        IN        NS    ns2.fin.unravel.com. </span><br><span class="line">ns1.fin.unravel.com.        IN        A    172.16.100.8 </span><br><span class="line">ns2.fin.unravel.com.        IN        A    172.16.100.108 </span><br></pre></td></tr></table></figure>
-
-<p>#################################################################<br>编辑父域： </p>
-<pre><code><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">    vi /var/named/unravel.com.zone </span><br><span class="line">    </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">    fin            IN        NS        ns1.fin </span><br><span class="line">    ns1.fin            IN        A        172.16.100.8 </span><br><span class="line">     </span><br><span class="line">    market            IN        NS        ns1.market </span><br><span class="line">    ns1.market        IN        A        172.16.100.108 </span><br><span class="line">    序列号加1； </span><br></pre></td></tr></table></figure>
-</code></pre>
-<p>然后在子服务器上进行配置： </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#yum install bind   </span><br><span class="line">#vim /etc/named.conf </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">zone &quot;fin.unravel.com&quot; IN &#123; </span><br><span class="line">    type master; </span><br><span class="line">    file &quot;fin.unravel.com.zone&quot;; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#cd /var/named </span><br><span class="line">#vim fin.unravel.com.zone </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>   </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$TTL 600 </span><br><span class="line">@    IN     SOA        ns1.fin.unravel.com.        admin.fin.unravel.com. ( </span><br><span class="line">                        20141111 </span><br><span class="line">                        1H </span><br><span class="line">                        5M </span><br><span class="line">                        2D </span><br><span class="line">                        6H ) </span><br><span class="line">            IN    NS        ns1 </span><br><span class="line">            IN    MX    10    mail </span><br><span class="line">ns1        IN    A    172.16.100.8 </span><br><span class="line">mail        IN    A    172.16.100.9 </span><br><span class="line">www        IN    A    172.16.100.10 </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># service named restart </span><br></pre></td></tr></table></figure>
-<p>##############################################################################<br>在子域上的&#x2F;etc&#x2F;named.conf中添加： </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">zone &quot;unravel.com&quot; IN &#123; </span><br><span class="line">    type master; </span><br><span class="line">    forward  first； &#123;only|first&#125;only直接转发给父域；first先转发给父域；设置子域能访问父域： </span><br><span class="line">    forwarders    &#123; 171.16.100.1; &#125;;转发给父域的IP；这样就能够在收到请求时让父域进行域名解析； </span><br><span class="line">        &#125;; </span><br></pre></td></tr></table></figure>
-
-<p>这个表示只对父域的区域进行转发；即当访问unravel.com时，直接转发给父域，不对其他域的进行转发； 
-  </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">    而如果在 options添加 &#123; </span><br><span class="line">        forward first; </span><br><span class="line">        forwarders &#123; 172.16.100.1; &#125;; </span><br><span class="line">    &#125;; </span><br></pre></td></tr></table></figure>
-<p>表示所有的请求通过父域进行请求；这个应该用的少，上面那个用的多；</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/03/20-02DNS%E5%AD%90%E5%9F%9F%E6%8E%88%E6%9D%83/">展开全文 >></a>
         </p>
       
 

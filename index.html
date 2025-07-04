@@ -206,6 +206,150 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-使用langgraph打造AI服务编排" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2025/07/03/%E4%BD%BF%E7%94%A8langgraph%E6%89%93%E9%80%A0AI%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92/">使用langgraph打造AI服务编排</a>
+    </h1>
+  
+
+        
+        <a href="/2025/07/03/%E4%BD%BF%E7%94%A8langgraph%E6%89%93%E9%80%A0AI%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92/" class="archive-article-date">
+  	<time datetime="2025-07-03T08:40:14.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2025-07-03</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="LangGraph是什么？"><a href="#LangGraph是什么？" class="headerlink" title="LangGraph是什么？"></a>LangGraph是什么？</h2><p><a target="_blank" rel="noopener" href="https://github.com/langchain-ai/langgraph">LangGraph</a>是LangChain团队推出的流程编排工具，它基于状态机的思想，结合LangChain的Agent与Tool架构，允许我们以图的形式组织多个AI组件、服务调用、条件判断与上下文流转。</p>
+<h2 id="为什么只是给大模型Tools还不够？我们真正需要的是“编排”"><a href="#为什么只是给大模型Tools还不够？我们真正需要的是“编排”" class="headerlink" title="为什么只是给大模型Tools还不够？我们真正需要的是“编排”"></a>为什么只是给大模型Tools还不够？我们真正需要的是“编排”</h2><p>在大模型Agent系统中，一些入门教程或框架（包括LangChain早期版本）会鼓励用户把各种工具注册给模型，然后说：</p>
+<blockquote>
+<p>“你可以调用这些tools，自己决定该怎么完成任务。”</p>
+</blockquote>
+<p>这听起来像是Agent的“智能体现”，但实际上它把复杂性全推给了语言模型本身，代价非常高。</p>
+<ol>
+<li>低参数量模型在自主决策上效果不好。</li>
+<li>流程逻辑是隐式的，决策都放到了prompt和模型权重中，而我们需要的是可靠、可复现、可维护的系统。从完全黑盒变成工程上可控的状态。</li>
+</ol>
+<h2 id="LangGraph——让模型专注智能，流程交给编排系统"><a href="#LangGraph——让模型专注智能，流程交给编排系统" class="headerlink" title="LangGraph——让模型专注智能，流程交给编排系统"></a>LangGraph——让模型专注智能，流程交给编排系统</h2><p>LangGraph并不是用来替代语言模型的“思考能力”，而是让你把<strong>流程逻辑从模型里“解耦”出来</strong>，这样模型专注处理智能任务，复杂决策与状态控制则交由LangGraph管理——就像微服务和调度系统一样，各司其职。</p>
+<table>
+<thead>
+<tr>
+<th>组件职责</th>
+<th>谁来做</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>工具调用决策</td>
+<td>大模型</td>
+</tr>
+<tr>
+<td>控制流程走向</td>
+<td>LangGraph</td>
+</tr>
+<tr>
+<td>状态管理</td>
+<td>LangGraph</td>
+</tr>
+<tr>
+<td>智能处理（理解&#x2F;总结&#x2F;生成）</td>
+<td>大模型</td>
+</tr>
+<tr>
+<td>并发、回退、异常处理</td>
+<td>LangGraph</td>
+</tr>
+</tbody></table>
+<h2 id="实现一个会讲笑话、查询天气、闲聊的机器人"><a href="#实现一个会讲笑话、查询天气、闲聊的机器人" class="headerlink" title="实现一个会讲笑话、查询天气、闲聊的机器人"></a>实现一个会讲笑话、查询天气、闲聊的机器人</h2><img src="/2025/07/03/%E4%BD%BF%E7%94%A8langgraph%E6%89%93%E9%80%A0AI%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92/image.png" class="流程图">
+
+
+<p>整个流程如上图所示，下面我们来感受下langgraph的实现。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> langchain_core.messages <span class="keyword">import</span> AIMessage, AnyMessage</span><br><span class="line"><span class="keyword">from</span> langchain_deepseek <span class="keyword">import</span> ChatDeepSeek</span><br><span class="line"><span class="keyword">from</span> langgraph.constants <span class="keyword">import</span> END, START</span><br><span class="line"><span class="keyword">from</span> langgraph.graph <span class="keyword">import</span> StateGraph</span><br><span class="line"><span class="keyword">from</span> pydantic <span class="keyword">import</span> BaseModel, Field</span><br><span class="line"><span class="keyword">from</span> typing_extensions <span class="keyword">import</span> TypedDict</span><br><span class="line"></span><br><span class="line">INTENTION_PROMPT = <span class="string">&quot;&quot;&quot;根据下面用户对话信息判断用户意图，意图有：查询天气、讲笑话、闲聊。结果请以json格式输出。</span></span><br><span class="line"><span class="string">例如：</span></span><br><span class="line"><span class="string">对话信息：</span></span><br><span class="line"><span class="string">    User: 今天天气怎么样？</span></span><br><span class="line"><span class="string">输出：</span></span><br><span class="line"><span class="string">    &#123;&quot;intention&quot;: &quot;查询天气&quot;&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">真实对话信息：</span></span><br><span class="line"><span class="string">&#123;&#123;messages&#125;&#125;</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">IntentionOutput</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    intention: <span class="built_in">str</span> = Field(description=<span class="string">&#x27;用户意图&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">llm = ChatDeepSeek(</span><br><span class="line">    model=<span class="string">&quot;deepseek-chat&quot;</span>,  <span class="comment"># 指定 DeepSeek 的模型名称</span></span><br><span class="line">    api_key=os.getenv(<span class="string">&quot;DEEPSEEK_API_KEY&quot;</span>),  <span class="comment"># 替换为您自己的 DeepSeek API 密钥</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">State</span>(<span class="title class_ inherited__">TypedDict</span>):</span><br><span class="line">    messages: <span class="built_in">list</span>[AnyMessage]</span><br><span class="line">    intention: <span class="built_in">str</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化状态图</span></span><br><span class="line">graph_builder = StateGraph(State)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">chatbot</span>(<span class="params">state: State</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;闲聊&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;messages&quot;</span>: AIMessage(content=<span class="string">&#x27;哦吼，我也不知道聊啥子&#x27;</span>)&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_weather</span>(<span class="params">state: State</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;查询天气&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;messages&quot;</span>: AIMessage(content=<span class="string">&#x27;今天天气晴朗，23度，适合外出打羽毛球。&#x27;</span>)&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">joke</span>(<span class="params">state: State</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;讲笑话&quot;&quot;&quot;</span></span><br><span class="line">    history_msgs = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">for</span> msg <span class="keyword">in</span> state[<span class="string">&#x27;messages&#x27;</span>]:</span><br><span class="line">        history_msgs += <span class="string">f&quot;<span class="subst">&#123;msg[<span class="string">&#x27;role&#x27;</span>]&#125;</span>:<span class="subst">&#123;msg[<span class="string">&#x27;content&#x27;</span>]&#125;</span>\n&quot;</span></span><br><span class="line">    prompt = <span class="string">&#x27;请根据用户最新的对话信息讲个笑话：\n&#x27;</span> + history_msgs</span><br><span class="line">    output = llm.invoke(prompt)</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;messages&quot;</span>: output&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">user_intention</span>(<span class="params">state: State</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;意图识别&quot;&quot;&quot;</span></span><br><span class="line">    history_msgs = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">for</span> msg <span class="keyword">in</span> state[<span class="string">&#x27;messages&#x27;</span>]:</span><br><span class="line">        history_msgs += <span class="string">f&quot;<span class="subst">&#123;msg[<span class="string">&#x27;role&#x27;</span>]&#125;</span>:<span class="subst">&#123;msg[<span class="string">&#x27;content&#x27;</span>]&#125;</span>\n&quot;</span></span><br><span class="line">    prompt = INTENTION_PROMPT.replace(<span class="string">&quot;&#123;&#123;messages&#125;&#125;&quot;</span>, history_msgs)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;意图识别&#x27;</span>.center(<span class="number">60</span>, <span class="string">&#x27;-&#x27;</span>))</span><br><span class="line">    <span class="built_in">print</span>(prompt)</span><br><span class="line">    structure_llm = llm.with_structured_output(IntentionOutput)</span><br><span class="line">    output = structure_llm.invoke(prompt)</span><br><span class="line">    final_intention = output.intention</span><br><span class="line">    <span class="keyword">if</span> final_intention <span class="keyword">not</span> <span class="keyword">in</span> (<span class="string">&quot;查询天气&quot;</span>, <span class="string">&quot;讲笑话&quot;</span>, <span class="string">&quot;闲聊&quot;</span>):</span><br><span class="line">        final_intention = <span class="string">&#x27;闲聊&#x27;</span></span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;intention&quot;</span>: final_intention&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">intention_conditional_edge</span>(<span class="params">state: State</span>):</span><br><span class="line">    <span class="keyword">if</span> state[<span class="string">&#x27;intention&#x27;</span>] == <span class="string">&#x27;查询天气&#x27;</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&#x27;get_weather&#x27;</span></span><br><span class="line">    <span class="keyword">elif</span> state[<span class="string">&#x27;intention&#x27;</span>] == <span class="string">&#x27;讲笑话&#x27;</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&#x27;joke&#x27;</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&#x27;chatbot&#x27;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加节点到状态图</span></span><br><span class="line"></span><br><span class="line">graph_builder.add_node(<span class="string">&#x27;user_intention&#x27;</span>, user_intention)</span><br><span class="line">graph_builder.add_node(<span class="string">&quot;chatbot&quot;</span>, chatbot)</span><br><span class="line">graph_builder.add_node(<span class="string">&#x27;get_weather&#x27;</span>, get_weather)</span><br><span class="line">graph_builder.add_node(<span class="string">&#x27;joke&#x27;</span>, joke)</span><br><span class="line"></span><br><span class="line">graph_builder.add_edge(START, <span class="string">&#x27;user_intention&#x27;</span>)</span><br><span class="line">graph_builder.add_conditional_edges(<span class="string">&#x27;user_intention&#x27;</span>, intention_conditional_edge, [</span><br><span class="line">    <span class="string">&#x27;chatbot&#x27;</span>, <span class="string">&#x27;get_weather&#x27;</span>, <span class="string">&#x27;joke&#x27;</span>])</span><br><span class="line">graph_builder.add_edge(<span class="string">&#x27;chatbot&#x27;</span>, END)</span><br><span class="line">graph_builder.add_edge(<span class="string">&#x27;get_weather&#x27;</span>, END)</span><br><span class="line">graph_builder.add_edge(<span class="string">&#x27;joke&#x27;</span>, END)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 编译状态图</span></span><br><span class="line">graph = graph_builder.<span class="built_in">compile</span>()</span><br><span class="line"></span><br><span class="line"><span class="comment"># with open(&quot;/tmp/b.png&quot;, &#x27;wb&#x27;) as f:</span></span><br><span class="line"><span class="comment">#     f.write(graph.get_graph().draw_mermaid_png())</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    round1 = graph.invoke(</span><br><span class="line">        &#123;<span class="string">&quot;messages&quot;</span>: [&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;我很开心，讲个好笑的事情吧&quot;</span>&#125;]&#125;)</span><br><span class="line">    <span class="built_in">print</span>(round1)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>更多示例请参考<a target="_blank" rel="noopener" href="https://langchain-ai.github.io/langgraph/concepts/low_level/">官方文档</a>。</p>
+<h2 id="编排可视化"><a href="#编排可视化" class="headerlink" title="编排可视化"></a>编排可视化</h2><p>可通过<a target="_blank" rel="noopener" href="https://langchain-ai.github.io/langgraph/tutorials/langgraph-platform/local-server/#4-create-a-env-file">LangGraph Studio</a>来进行可视化,操作步骤：</p>
+<h3 id="1-安装必要包"><a href="#1-安装必要包" class="headerlink" title="1. 安装必要包"></a>1. 安装必要包</h3><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Python &gt;= 3.11 is required.</span></span><br><span class="line"></span><br><span class="line">pip install --upgrade <span class="string">&quot;langgraph-cli[inmem]&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-创建langgraph-json"><a href="#2-创建langgraph-json" class="headerlink" title="2. 创建langgraph.json"></a>2. 创建langgraph.json</h3><p>项目结构如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">lg_demo/</span><br><span class="line">  - chat_demo.py(内容如上)</span><br><span class="line">  - langgraph.json</span><br></pre></td></tr></table></figure>
+<p>langgraph.json内容：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;dependencies&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="string">&quot;.&quot;</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;graphs&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;agent&quot;</span><span class="punctuation">:</span> <span class="string">&quot;./chat_demo.py:graph&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-运行"><a href="#3-运行" class="headerlink" title="3. 运行"></a>3. 运行</h3><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DEEPSEEK_API_KEY=&lt;your key&gt;  langgraph dev</span><br></pre></td></tr></table></figure>
+
+<p>会得到如下信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">INFO:langgraph_api.cli:</span><br><span class="line"></span><br><span class="line">        Welcome to</span><br><span class="line"></span><br><span class="line">╦  ┌─┐┌┐┌┌─┐╔═╗┬─┐┌─┐┌─┐┬ ┬</span><br><span class="line">║  ├─┤││││ ┬║ ╦├┬┘├─┤├─┘├─┤</span><br><span class="line">╩═╝┴ ┴┘└┘└─┘╚═╝┴└─┴ ┴┴  ┴ ┴</span><br><span class="line"></span><br><span class="line">- 🚀 API: http://127.0.0.1:2024</span><br><span class="line">- 🎨 Studio UI: https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024</span><br><span class="line">- 📚 API Docs: http://127.0.0.1:2024/docs</span><br><span class="line"></span><br><span class="line">This in-memory server is designed for development and testing.</span><br><span class="line">For production use, please use LangGraph Cloud.</span><br></pre></td></tr></table></figure>
+
+<p>如果浏览器无法正常打开<code>https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024</code>， 可尝试使用Firefox浏览器。</p>
+<h3 id="4-示例"><a href="#4-示例" class="headerlink" title="4. 示例"></a>4. 示例</h3><p>下图为最终可视化效果，包含每个节点及其流向（来自LangGraph Studio）：</p>
+<img src="/2025/07/03/%E4%BD%BF%E7%94%A8langgraph%E6%89%93%E9%80%A0AI%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92/image2.png" class="编排图">
+
+
+<h3 id="5-客户端调用"><a href="#5-客户端调用" class="headerlink" title="5. 客户端调用"></a>5. 客户端调用</h3><p>你也可以通过python sdk进行调用，示例代码：</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">from</span> langgraph_sdk <span class="keyword">import</span> get_sync_client</span><br><span class="line"></span><br><span class="line">client = get_sync_client(url=<span class="string">&quot;http://localhost:2024&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> chunk <span class="keyword">in</span> client.runs.stream(</span><br><span class="line">    <span class="literal">None</span>,  <span class="comment"># Threadless run</span></span><br><span class="line">    <span class="string">&quot;agent&quot;</span>,  <span class="comment"># Name of assistant. Defined in langgraph.json.</span></span><br><span class="line">    <span class="built_in">input</span>=&#123;</span><br><span class="line">        <span class="string">&quot;messages&quot;</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>,</span><br><span class="line">                <span class="string">&quot;content&quot;</span>: <span class="string">&quot;今天南京天气好吗？适合外出吗？&quot;</span>,</span><br><span class="line">            &#125;,</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="string">&quot;role&quot;</span>: <span class="string">&quot;assistant&quot;</span>,</span><br><span class="line">                <span class="string">&quot;content&quot;</span>: <span class="string">&quot;今天天气晴朗，23度，适合外出打羽毛球。&quot;</span></span><br><span class="line">            &#125;,</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>,</span><br><span class="line">                <span class="string">&quot;content&quot;</span>: <span class="string">&quot;那你给我讲个天气相关的笑话吧&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">        ],</span><br><span class="line">    &#125;,</span><br><span class="line">    stream_mode=<span class="string">&quot;messages&quot;</span>,</span><br><span class="line">):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Receiving new event of type: <span class="subst">&#123;chunk.event&#125;</span>...&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(chunk.data)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;\n\n&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="个人感受"><a href="#个人感受" class="headerlink" title="个人感受"></a>个人感受</h2><ol>
+<li>如果为了演示，可以尝试上面可视化部分。</li>
+<li>如果集成至已有服务，可单独使用LangGraph服务编排。</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2025/07/03/%E4%BD%BF%E7%94%A8langgraph%E6%89%93%E9%80%A0AI%E6%9C%8D%E5%8A%A1%E7%BC%96%E6%8E%92/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-钢材质检" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1023,101 +1167,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2024/05/07/RLHF-Actor-Critic/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-RLHF-policy-gradient" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2024/04/26/RLHF-policy-gradient/">RLHF-policy_gradient</a>
-    </h1>
-  
-
-        
-        <a href="/2024/04/26/RLHF-policy-gradient/" class="archive-article-date">
-  	<time datetime="2024-04-26T02:46:31.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-04-26</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这个是RLHF系列中的策略梯度部分，在看了<a target="_blank" rel="noopener" href="https://github.com/boyu-ai/Hands-on-RL/blob/main/%E7%AC%AC9%E7%AB%A0-%E7%AD%96%E7%95%A5%E6%A2%AF%E5%BA%A6%E7%AE%97%E6%B3%95.ipynb">Hands-on-RL</a>和<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PARL/tree/develop/examples/QuickStart">parl</a>两者实现后，感觉整体难度并不是很高，但是当自己从零实现时还是会莫名其妙多一些问题，相比深度学习来讲，还是有蛮多小细节是需要额外注意的。</p>
-<h2 id="注意点"><a href="#注意点" class="headerlink" title="注意点"></a>注意点</h2><h3 id="1-log平滑"><a href="#1-log平滑" class="headerlink" title="1. log平滑"></a>1. log平滑</h3><p>这里是指learn阶段中的获取最大期望阶段，如下代码所示：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">output = self.model(obs_bs)</span><br><span class="line">output = torch.log(output.gather(-<span class="number">1</span>, action_bs.reshape(-<span class="number">1</span>, <span class="number">1</span>)))</span><br></pre></td></tr></table></figure>
-
-<p>在最开始自己实现时，我没有加log进行平滑，发现模型没法收敛(CarPole-v0 reward最大得分为200)，一直是8,9徘徊。后来我看了上述实现，发现这里多了个log,这里让我觉得很困惑，因为我觉得这一步是不必要的，原因有以下几个方面：</p>
-<ol>
-<li>model.forward部分，已经用softmax做归一化了，已经避免了差异较大的情况。</li>
-<li>从某种角度来讲，我甚至觉得model.forward中的softmax部分也不应该添加。因为本质来讲就是希望期望最大嘛。</li>
-</ol>
-<p>但是呢，如果不加log这一步，模型就无法收敛。</p>
-<h3 id="2-折扣因子"><a href="#2-折扣因子" class="headerlink" title="2. 折扣因子"></a>2. 折扣因子</h3><p>这里是指在每一次done，产生了一批state、reward、action之后，在进行计算loss时，下一步的reward还要考虑当前步reward的结果，即下一步的reward一定要小于当前步的reward。也就是<code>calc_reward_to_go</code>函数这里。</p>
-<p>这里同样也会觉得很困惑，因为如果希望期望最大，那就reward * prob使其概率最大即可。</p>
-<p>如果看<a target="_blank" rel="noopener" href="https://github.com/boyu-ai/Hands-on-RL/blob/main/%E7%AC%AC9%E7%AB%A0-%E7%AD%96%E7%95%A5%E6%A2%AF%E5%BA%A6%E7%AE%97%E6%B3%95.ipynb">Hands-on-RL</a>他的实现，不会感到任何困惑，因为他是用for来做的。但是呢，<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PARL/tree/develop/examples/QuickStart">parl</a>的实现在考虑了<code>reward * prob使其概率最大</code>这一步之后，又添加了<code>calc_reward_to_go</code>函数，从而本来是个离散的东西，强生生的给变成了一个连续状态的事情，关键呢，怎么看都不像是连续的，因为当前步在计算loss时也并没有跟上一步扯上直接的关系。</p>
-<p>这一步还好，从理解角度来讲，我会更倾向<a target="_blank" rel="noopener" href="https://github.com/boyu-ai/Hands-on-RL/blob/main/%E7%AC%AC9%E7%AB%A0-%E7%AD%96%E7%95%A5%E6%A2%AF%E5%BA%A6%E7%AE%97%E6%B3%95.ipynb">Hands-on-RL</a>的实现，容易理解。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>关于第一点，我的感觉是步子不能迈太大，宁可慢慢收敛，也要比无法收敛更强，例如model部分我尝试改成如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">PolicyNet</span>(torch.nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, state_dim, hidden_dim, action_dim</span>):</span><br><span class="line">        <span class="built_in">super</span>(PolicyNet, self).__init__()</span><br><span class="line">        self.state_dim = state_dim</span><br><span class="line">        self.action_dim = action_dim</span><br><span class="line">        self.fc1 = torch.nn.Linear(state_dim, hidden_dim)</span><br><span class="line">        self.fc2 = torch.nn.Linear(hidden_dim, action_dim)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        x = F.relu(self.fc1(x))</span><br><span class="line">        <span class="comment"># return F.softmax(self.fc2(x), dim=-1)</span></span><br><span class="line">        <span class="keyword">return</span> self.fc2(x)</span><br><span class="line"><span class="meta">    @torch.no_grad()</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">sample</span>(<span class="params">self, obs</span>):</span><br><span class="line">        result = self(torch.FloatTensor(obs))</span><br><span class="line">        result = F.softmax(result, dim=-<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> torch.multinomial(result, <span class="number">1</span>).item()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>即forward部分不用softmax,剩下代码保持不变，也同样处于无法收敛状态，似乎来看,softmax+log才是这个算法成功的关键。</p>
-<p>这里让我想到一个事情，在深度学习Layer参数初始化的过程，比如：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a = nn.Linear(2222, 11)</span><br></pre></td></tr></table></figure>
-<p>我们会是这么写，基本不会关心a这个linear的参数是如何初始化的。是因为框架内部已经考虑了kaiming、xavier、uniform等各种初始化技术。如果不加这些参数初始化技术，模型基本也很难收敛。</p>
-<p>所以如果应用的话，可以采用现成的实现，如果研究的话，其中一些细节可以慢慢调整。</p>
-<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> random</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> gym</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> tqdm <span class="keyword">import</span> tqdm</span><br><span class="line"><span class="keyword">import</span> rl_utils</span><br><span class="line"><span class="keyword">from</span> parl.env <span class="keyword">import</span> CompatWrapper</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PolicyNet</span>(torch.nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, state_dim, hidden_dim, action_dim</span>):</span><br><span class="line">        <span class="built_in">super</span>(PolicyNet, self).__init__()</span><br><span class="line">        self.state_dim = state_dim</span><br><span class="line">        self.action_dim = action_dim</span><br><span class="line">        self.fc1 = torch.nn.Linear(state_dim, hidden_dim)</span><br><span class="line">        self.fc2 = torch.nn.Linear(hidden_dim, action_dim)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        x = F.relu(self.fc1(x))</span><br><span class="line">        <span class="keyword">return</span> F.softmax(self.fc2(x), dim=-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @torch.no_grad()</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">sample</span>(<span class="params">self, obs</span>):</span><br><span class="line">        result = self(torch.FloatTensor(obs))</span><br><span class="line">        <span class="keyword">return</span> torch.multinomial(result, <span class="number">1</span>).item()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">calc_reward_to_go</span>(<span class="params">reward_list, gamma=<span class="number">1.0</span></span>):</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(reward_list) - <span class="number">2</span>, -<span class="number">1</span>, -<span class="number">1</span>):</span><br><span class="line">        <span class="comment"># G_i = r_i + γ·G_i+1</span></span><br><span class="line">        reward_list[i] += gamma * reward_list[i + <span class="number">1</span>]  <span class="comment"># Gt</span></span><br><span class="line">    <span class="keyword">return</span> np.array(reward_list)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Agent</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, state_dim, action_dim, hidden_dim</span>):</span><br><span class="line">        self.model = PolicyNet(state_dim=state_dim, hidden_dim=hidden_dim, action_dim=action_dim)</span><br><span class="line">        self.optim = torch.optim.Adam(self.model.parameters(), lr=<span class="number">1e-3</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">train</span>(<span class="params">self, env</span>):</span><br><span class="line">        total_reward = <span class="number">0</span></span><br><span class="line">        obs_bs, action_bs, next_obs_bs, reward_bs, done_bs = [], [], [], [], []</span><br><span class="line">        obs = env.reset()</span><br><span class="line">        <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">            action = self.model.sample(obs=obs)</span><br><span class="line">            next_obs, reward, done, info = env.step(action=action)</span><br><span class="line">            <span class="keyword">if</span> done:</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">            obs_bs.append(obs)</span><br><span class="line">            action_bs.append(action)</span><br><span class="line">            next_obs_bs.append(next_obs)</span><br><span class="line">            reward_bs.append(reward)</span><br><span class="line">            done_bs.append(done)</span><br><span class="line"></span><br><span class="line">            total_reward += reward</span><br><span class="line">            obs = next_obs</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> obs_bs: <span class="keyword">return</span> total_reward</span><br><span class="line">        <span class="comment"># learn</span></span><br><span class="line">        reward_bs = calc_reward_to_go(reward_bs)</span><br><span class="line"></span><br><span class="line">        obs_bs = torch.FloatTensor(np.array(obs_bs))</span><br><span class="line">        action_bs = torch.LongTensor(np.array(action_bs))</span><br><span class="line">        reward_bs = torch.FloatTensor(np.array(reward_bs))</span><br><span class="line"></span><br><span class="line">        output = self.model(obs_bs)</span><br><span class="line">        output = torch.log(output.gather(-<span class="number">1</span>, action_bs.reshape(-<span class="number">1</span>, <span class="number">1</span>)))</span><br><span class="line"></span><br><span class="line">        loss = torch.mean(-<span class="number">1</span> * output.flatten() * reward_bs)</span><br><span class="line"></span><br><span class="line">        self.optim.zero_grad()</span><br><span class="line">        loss.backward()</span><br><span class="line">        self.optim.step()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> total_reward</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    env = CompatWrapper(gym.make(<span class="string">&#x27;CartPole-v0&#x27;</span>))</span><br><span class="line">    agent = Agent(env.observation_space.shape[<span class="number">0</span>], action_dim=env.action_space.n, hidden_dim=<span class="number">64</span>)</span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10000</span>):</span><br><span class="line">        total_reward = agent.train(env=env)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&#x27;Epoch[<span class="subst">&#123;epoch&#125;</span>]--&gt;<span class="subst">&#123;total_reward&#125;</span>&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2024/04/26/RLHF-policy-gradient/">展开全文 >></a>
         </p>
       
 

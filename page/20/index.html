@@ -206,6 +206,96 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-33-01MySQL系列之五MySQL数据类型及sql模型" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/07/06/33-01MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%94MySQL%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%8F%8Asql%E6%A8%A1%E5%9E%8B/">33_01MySQL系列之五MySQL数据类型及sql模型</a>
+    </h1>
+  
+
+        
+        <a href="/2015/07/06/33-01MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%94MySQL%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%8F%8Asql%E6%A8%A1%E5%9E%8B/" class="archive-article-date">
+  	<time datetime="2015-07-06T01:11:11.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-07-06</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>存储引擎，也被称为表类型;<br>MyISAM:无事务，表锁<br>    .frm:表结构定义文件<br>    .MYD:表数据<br>    .MYI:索引<br>    <br>InnoDB:事务，行锁<br>    .frm:表结构<br>    .ibd:表空间(数据和索引) </p>
+<p>SHOW ENGINES;<br>SHOW TABLE [LIKE] 可以用来查看表属性；<br>    SHOW TABLE STATUS LIKE ‘tb1’\G (这个会用的非常多)<br>    <br>程序语言连接数据的方式:<br>    动态SQL:通过函数或方法与数据库服务建立连接;<br>    嵌入式SQL<br>    <br>DBA:<br>    开发DBA:数据库设计、SQL语言、存储过程、存储函数、触发器<br>    管理DBA:    安装、升级、备份、恢复、用户管理、权限管理、监控、性能分析、基准测试 
+     </p>
+<p>                            Developing With MySQL<br>MySQL data types<br>    数值型<br>        精确数值<br>            int<br>            decimal<br>        近似数值<br>            float(M,N)<br>            double<br>            real<br>    字符型<br>        定长<br>            CHAR(M) M characters 最多255个<br>        变长<br>            VARCHAR(M) 多占用1个 最多65535个, 例如VARCHAR(3),最多存3个字符，但占用4个字节，最后一个最为结束符；<br>            TINYTEXT  多占用1个 最多255个字节<br>            TEXT          多占用2个     最多65535个字节<br>            MEDIUMTEXT多占用3个 最多16777215个字节<br>            LONGTEXT  多占用4个 最多4294967295个字节<br>    日期时间型<br>        date:CCYY-MM-DD<br>        time:hh:mm:ss<br>        datatime:CCYY-MM-DD hh:mm:ss<br>        timestampCCYY-MM-DD hh:mm:ss<br>    <br>    ENUM(枚举):<br>    SET(集合):            <br>    数据类型:<br>    1、存入的值类型<br>    2、占据的存储空间<br>    3、定长还是变长<br>    4、如何比较及排序<br>    5、是否能够索引<br>        <br>    SHOW CHARACTER SET;<br>        可以用来查看支持的字符集<br>    SHOW COLLATION;<br>        查看所有支持的排序规则<br>    AUTO_INCREMENT:整型、主键或唯一键、无符号<br>    <br>    SQL模型:<br>    MySQL服务器变量<br>        作用域，分为两类:<br>            全局变量<br>                SHOW GLOBAL VARIABLES<br>            会话变量<br>                SHOW [SESSION] BARIABLES<br>        生效时间，分为两类:<br>            动态:即时修改<br>            静态:写在配置文件中<br>                通过参数传递给mysqld<br>        动态调整参数的生效方式:<br>            全局:对当前会话无效，只对新建立会话有效;<br>            会话:即时生效，但只对当前会话有效;<br>            <br>    服务器变量:@@变量名<br>        显示:SELECT<br>         设定:SET GLOBAL|SESSION 变量名&#x3D;’value’;<br>        例如:<br>        &gt;SET GLOBAL sql_mode&#x3D;’strict_all_tables’;<br>        &gt;SELECT @@session.sql_mode;<br>            会发现没对当前会话生效<br>        <br>        &gt;SET SESSION sql_mode&#x3D;’stict_trans_tables’;<br>        &gt;SELECT @@global.sql_mode;<br>            会发现全局变量并没有改变 
+         </p>
+<p>    <br>有时候也怀疑，自己追求的是不是正确的，或者说不应该这么极端。<br>虽然在这个地方写个人心情不好，不过反正自己写的估计没人看~~~</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/07/06/33-01MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%BA%94MySQL%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%8F%8Asql%E6%A8%A1%E5%9E%8B/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-32-04MySQL系列之四MySQL客户端的使用" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1050,115 +1140,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/05/04/29-02iptables%E7%B3%BB%E5%88%97%E4%B9%8Blayer7/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-29-01iptables系列之layer7" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/05/04/29-01iptables%E7%B3%BB%E5%88%97%E4%B9%8Blayer7/">29_01iptables系列之layer7</a>
-    </h1>
-  
-
-        
-        <a href="/2015/05/04/29-01iptables%E7%B3%BB%E5%88%97%E4%B9%8Blayer7/" class="archive-article-date">
-  	<time datetime="2015-05-04T04:41:58.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-05-04</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>DMZ(非军事化区域) </p>
-<p>内核编译:<br>    配置: .config (&#x2F;proc&#x2F;cpuinfo,lspci,lsusb,hal-device)<br>        make menuconfig<br>    编译:<br>        make<br>        只编译部分源码:<br>            make SUBDIR&#x3D;arch&#x2F;<br>            make drivers&#x2F;net&#x2F;pcnet32.ko<br>        转存编译结果<br>            make O&#x3D;&#x2F;path&#x2F;to&#x2F;somewhere<br>    安装内核模块<br>        make modules_install<br>    安装内核<br>        make install<br>       <br>    <br>layer7–l7<br>应用:xunlei,qq,netfilter&lt;–patch </p>
-<p>-m layer7 –l7proto xunlei -j DROP </p>
-<p>1、给内核打补丁，并重新编译内核<br>2、给iptables源码打补丁，并重新编译iptables<br>3、安装l7proto </p>
-<p>Kernel Patch </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#tar xf linux-version.tar.gz -C /usr/src </span></span><br><span class="line"><span class="comment">#tar xf netfilter.version.tar.gz -C /usr/src </span></span><br><span class="line"><span class="comment">#cd /usr/src </span></span><br><span class="line"><span class="comment">#ln -s linux-version linux </span></span><br><span class="line"><span class="comment">#cd /usr/src/linux/ </span></span><br><span class="line"><span class="comment">#patch -p1 &lt;../netfilter-version/kernel-version-version-layer7-version.patch </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#cp /boot/config-version /usr/src/linux/.config </span></span><br><span class="line"><span class="comment">#make menuconfig </span></span><br></pre></td></tr></table></figure>
-<p>Networking support-&gt;Networking Options-&gt;Network packet filtering framework-&gt;Core Netfilter Configuration </p>
-<p><M> Netfilter connection tracking support<br><M> “Layer7” match support<br><M> “string” match support<br><M> “time” match support<br><M> “iprange” match support<br><M> “connlimit” match support<br><M> “state” match support<br><M> “conntrack” connection match support<br><M> “mac” address match support<br><M> “multiport” Multiple port match support </p>
-<p>Networking support -&gt; Networking Options -&gt;Network packet filtering framework -&gt;IP:Netfilter Configuration<br><M> IPv4 connection tracking support (required for NAT)<br><M> Full NAT<br>    <M> MASQUERADE target support<br>    <M> NETMAP target support<br>    <M> REDIRECT target support<br>    <br>#make<br>#make modules_install<br>#make install </p>
-<p>Complies iptables: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#cp /etc/init.d/iptables ~/iptables </span></span><br><span class="line"><span class="comment">#cp /etc/sysconfig/iptables-config ~/ &amp;&amp; cp /etc/sysconfig/iptables ~/iptables-rules </span></span><br><span class="line"><span class="comment">#service iptables off &amp;&amp; chkconfig iptables off </span></span><br><span class="line"><span class="comment">#rpm -e iptables-ipv6 iptables iptstate --nodeps </span></span><br><span class="line"><span class="comment">#tar xf iptables-version.tar.bz2 -C /usr/src </span></span><br><span class="line"><span class="comment">#cd /usr/src/iptables-version </span></span><br><span class="line"><span class="comment">#cp ../netfilter-layer7-version/iptables-versionforward-for-kernel-versionforward/libxt_layer7.* ./extensions/ </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#./configure -prefix=/usr --with-ksource=/usr/src/linux </span></span><br><span class="line"><span class="comment">#make </span></span><br><span class="line"><span class="comment">#make install </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#tar xf l7-protocols-version.tar.gz </span></span><br><span class="line"><span class="comment">#cd l7-protocol-version </span></span><br><span class="line"><span class="comment">#make install </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#mv ~/iptables /etc/rc.d/init.d/ &amp;&amp; 修改iptables的路径，默认编译在/usr/sbin/iptables </span></span><br><span class="line"><span class="comment">#chkconfig --add iptables &amp;&amp; cp ~/iptables-config /etc/sysconfig/ </span></span><br><span class="line"><span class="comment">#service iptables start </span></span><br><span class="line"> </span><br><span class="line">l7-filter uses the standard iptables extension syntax </span><br><span class="line"><span class="comment">#iptables [specity table &amp; chain] -m layer7 --l7proto [protocol name] -j [action] </span></span><br></pre></td></tr></table></figure>
-<p>     
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-           </p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/05/04/29-01iptables%E7%B3%BB%E5%88%97%E4%B9%8Blayer7/">展开全文 >></a>
         </p>
       
 
