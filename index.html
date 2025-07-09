@@ -206,6 +206,137 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-从LLM自主探索到LangGraph流程驱动：深度研究的两种范式" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2025/07/09/%E4%BB%8ELLM%E8%87%AA%E4%B8%BB%E6%8E%A2%E7%B4%A2%E5%88%B0LangGraph%E6%B5%81%E7%A8%8B%E9%A9%B1%E5%8A%A8%EF%BC%9A%E6%B7%B1%E5%BA%A6%E7%A0%94%E7%A9%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E8%8C%83%E5%BC%8F/">从LLM自主探索到LangGraph流程驱动：深度研究的两种范式</a>
+    </h1>
+  
+
+        
+        <a href="/2025/07/09/%E4%BB%8ELLM%E8%87%AA%E4%B8%BB%E6%8E%A2%E7%B4%A2%E5%88%B0LangGraph%E6%B5%81%E7%A8%8B%E9%A9%B1%E5%8A%A8%EF%BC%9A%E6%B7%B1%E5%BA%A6%E7%A0%94%E7%A9%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E8%8C%83%E5%BC%8F/" class="archive-article-date">
+  	<time datetime="2025-07-09T03:41:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2025-07-09</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="1-什么是Deep-Research？为什么它值得关注"><a href="#1-什么是Deep-Research？为什么它值得关注" class="headerlink" title="1. 什么是Deep Research？为什么它值得关注"></a>1. 什么是Deep Research？为什么它值得关注</h2><p><strong>Deep Research</strong>是一种面向“深度研究”任务的新型AI Agent能力。它不再只是被动地回答提问，而是具备主动探索、综合整合信息、产出可信且可追溯答案的“研究员式”智能。</p>
+<p>简而言之：它让AI真正参与“调研”而非“聊天”。</p>
+<p>下图展示了ChatGPT与Grok所提供的深度研究功能界面：</p>
+<table>
+<thead>
+<tr>
+<th><img src="/2025/07/09/%E4%BB%8ELLM%E8%87%AA%E4%B8%BB%E6%8E%A2%E7%B4%A2%E5%88%B0LangGraph%E6%B5%81%E7%A8%8B%E9%A9%B1%E5%8A%A8%EF%BC%9A%E6%B7%B1%E5%BA%A6%E7%A0%94%E7%A9%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E8%8C%83%E5%BC%8F/chatgpt_deepresearch.png" class="ChatGPT深度研究"></th>
+<th><img src="/2025/07/09/%E4%BB%8ELLM%E8%87%AA%E4%B8%BB%E6%8E%A2%E7%B4%A2%E5%88%B0LangGraph%E6%B5%81%E7%A8%8B%E9%A9%B1%E5%8A%A8%EF%BC%9A%E6%B7%B1%E5%BA%A6%E7%A0%94%E7%A9%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E8%8C%83%E5%BC%8F/grok_deepresearch.png" class="Grok深度研究"></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ChatGPT运行深度思考</td>
+<td>Grok DeepSearch</td>
+</tr>
+</tbody></table>
+<h2 id="2-Gemini-LangGraph：一个全流程深度研究的范例"><a href="#2-Gemini-LangGraph：一个全流程深度研究的范例" class="headerlink" title="2. Gemini+LangGraph：一个全流程深度研究的范例"></a>2. Gemini+LangGraph：一个全流程深度研究的范例</h2><p><a target="_blank" rel="noopener" href="https://github.com/google-gemini/gemini-fullstack-langgraph-quickstart">gemini-fullstack-langgraph-quickstart</a>是Google Gemini官方推出的开源示例，展示了如何基于 LangGraph+Gemini API构建一个具备“多轮推理”能力的AI Agent，并通过Web页面进行交互。</p>
+<p><img src="https://raw.githubusercontent.com/google-gemini/gemini-fullstack-langgraph-quickstart/refs/heads/main/app.png" alt="示例"></p>
+<p>虽然该项目提供了详尽的运行指南，但本文更关注其背后的核心机制：LangGraph如何实现LLM推理流程的编排？</p>
+<h2 id="3-核心实现流程解析"><a href="#3-核心实现流程解析" class="headerlink" title="3. 核心实现流程解析"></a>3. 核心实现流程解析</h2><table>
+<thead>
+<tr>
+<th><img src="https://raw.githubusercontent.com/google-gemini/gemini-fullstack-langgraph-quickstart/refs/heads/main/agent.png" alt="agent"></th>
+<th><img src="/2025/07/09/%E4%BB%8ELLM%E8%87%AA%E4%B8%BB%E6%8E%A2%E7%B4%A2%E5%88%B0LangGraph%E6%B5%81%E7%A8%8B%E9%A9%B1%E5%8A%A8%EF%BC%9A%E6%B7%B1%E5%BA%A6%E7%A0%94%E7%A9%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E8%8C%83%E5%BC%8F/graph.png" class="grph"></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>官方示例中的AI Agent推理流程图</td>
+<td>LangGraph 构建的有向图编排结构</td>
+</tr>
+</tbody></table>
+<p>核心节点如下：</p>
+<ol>
+<li><code>generate_query</code>：根据用户输入生成初始查询（最多3个搜索关键词）。</li>
+<li><code>web_search</code>:对每个查询项调用Gemini模型与Google Search API进行搜索，获取网页摘要。</li>
+<li><code>reflection</code>:分析搜索结果，判断信息是否充足，是否存在知识空白。这一反思过程同样使用Gemini模型完成。</li>
+<li><code>evaluate_research</code>:迭代优化,如果发现存在知识空白或信息不足，它将生成后续查询，并重复进行网页研究和反思步骤（最多可执行预设次数的循环）。</li>
+<li><code>finalize_answer</code>:生成最终答案,当研究被认为已经足够时，代理会使用Gemini模型将收集到的信息整合成连贯的答案，并附上网页来源的引用。</li>
+</ol>
+<p>这个流程类似于“自主调研-不断提问-自我反思-形成结论”的思维链式行为，LangGraph则负责把这些步骤编排成<code>可复用的流程图模型</code>。</p>
+<h2 id="4-是否值得学习LangGraph？我认为值得"><a href="#4-是否值得学习LangGraph？我认为值得" class="headerlink" title="4. 是否值得学习LangGraph？我认为值得"></a>4. 是否值得学习LangGraph？我认为值得</h2><p>LangGraph提供了一个更<strong>结构化</strong>、<strong>流程驱动</strong>的方式来构建AI Agent。它不仅仅是一个框架，更是一种对AI应用开发的全新“思维方式”：</p>
+<ul>
+<li>明确节点定义（如搜索、反思、决策）</li>
+<li>明确控制流（判断、循环、终止）</li>
+<li>易于扩展与调试（可以替换 LLM、外部工具）</li>
+</ul>
+<p>而不是用大量if-else去拼凑“多轮对话”逻辑。</p>
+<h2 id="5-我的简化实现（Gemini→DeepSeek，Google-Search→SearXNG）"><a href="#5-我的简化实现（Gemini→DeepSeek，Google-Search→SearXNG）" class="headerlink" title="5. 我的简化实现（Gemini→DeepSeek，Google Search→SearXNG）"></a>5. 我的简化实现（Gemini→DeepSeek，Google Search→SearXNG）</h2><p>我基于官方代码进行了简化与改造：</p>
+<ul>
+<li>LLM模型替换为DeepSeek</li>
+<li>搜索服务替换为开源搜索聚合工具SearXNG</li>
+<li>修复了原示例中“重复搜索”的bug</li>
+</ul>
+<p>你可以查看并运行这个最小实现版本：&lt;见附录-LangGraph DeepResearch最小实现&gt;</p>
+<h2 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h2><h3 id="SearXNG"><a href="#SearXNG" class="headerlink" title="SearXNG"></a>SearXNG</h3><img src="/2025/07/09/%E4%BB%8ELLM%E8%87%AA%E4%B8%BB%E6%8E%A2%E7%B4%A2%E5%88%B0LangGraph%E6%B5%81%E7%A8%8B%E9%A9%B1%E5%8A%A8%EF%BC%9A%E6%B7%B1%E5%BA%A6%E7%A0%94%E7%A9%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E8%8C%83%E5%BC%8F/SearXNG.png" class="关于SearXNG"> 
+
+<h3 id="LangGraph-Studio"><a href="#LangGraph-Studio" class="headerlink" title="LangGraph Studio"></a>LangGraph Studio</h3><img src="/2025/07/09/%E4%BB%8ELLM%E8%87%AA%E4%B8%BB%E6%8E%A2%E7%B4%A2%E5%88%B0LangGraph%E6%B5%81%E7%A8%8B%E9%A9%B1%E5%8A%A8%EF%BC%9A%E6%B7%B1%E5%BA%A6%E7%A0%94%E7%A9%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E8%8C%83%E5%BC%8F/langgraph_run.png" class="运行结果"> 
+
+<h3 id="LangGraph-DeepResearch最小实现"><a href="#LangGraph-DeepResearch最小实现" class="headerlink" title="LangGraph DeepResearch最小实现"></a>LangGraph DeepResearch最小实现</h3><p>👉<a target="_blank" rel="noopener" href="https://gist.github.com/geasyheart/053c65c00edb1c90a1882228944015e9">LangGraph DeepResearch最小实现</a>:<a target="_blank" rel="noopener" href="https://gist.github.com/geasyheart/053c65c00edb1c90a1882228944015e9">https://gist.github.com/geasyheart/053c65c00edb1c90a1882228944015e9</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2025/07/09/%E4%BB%8ELLM%E8%87%AA%E4%B8%BB%E6%8E%A2%E7%B4%A2%E5%88%B0LangGraph%E6%B5%81%E7%A8%8B%E9%A9%B1%E5%8A%A8%EF%BC%9A%E6%B7%B1%E5%BA%A6%E7%A0%94%E7%A9%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E8%8C%83%E5%BC%8F/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-使用langgraph打造AI服务编排" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1088,85 +1219,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2024/05/08/DPO/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-RLHF-Actor-Critic" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2024/05/07/RLHF-Actor-Critic/">RLHF-Actor-Critic</a>
-    </h1>
-  
-
-        
-        <a href="/2024/05/07/RLHF-Actor-Critic/" class="archive-article-date">
-  	<time datetime="2024-05-07T03:41:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-05-07</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>值函数希望学习一个价值函数，这个值可以用于评估当前决策的分值。策略函数希望学习一个策略函数，拿到其动作的概率分布。</p>
-<blockquote>
-<p>Actor-Critic是在策略函数的基础上，额外引入学习价值函数，来帮助策略函数更好地学习。</p>
-</blockquote>
-<p>下面这个图很好表示了两者关系。<br><img src="https://hrl.boyuai.com/static/640.5dee5ab0.jpg" alt="图"></p>
-<p>重点看<a target="_blank" rel="noopener" href="https://hrl.boyuai.com/chapter/2/actor-critic%E7%AE%97%E6%B3%95">actor-critic算法</a>中<code>update函数log_probs</code>部分。actor采用策略，critic来进行评价。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2024/05/07/RLHF-Actor-Critic/">展开全文 >></a>
         </p>
       
 

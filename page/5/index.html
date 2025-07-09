@@ -206,6 +206,92 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-模型优化点" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/08/05/%E6%A8%A1%E5%9E%8B%E4%BC%98%E5%8C%96%E7%82%B9/">模型优化点</a>
+    </h1>
+  
+
+        
+        <a href="/2022/08/05/%E6%A8%A1%E5%9E%8B%E4%BC%98%E5%8C%96%E7%82%B9/" class="archive-article-date">
+  	<time datetime="2022-08-05T08:56:52.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-05</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="1-SWA-随机权重平均"><a href="#1-SWA-随机权重平均" class="headerlink" title="1. SWA(随机权重平均)"></a>1. SWA(随机权重平均)</h3><p>简单来说就是将指定epochs范围内训练出来的模型，将这些模型的weight取平均赋值给这个swa_model。</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://pytorch.org/blog/pytorch-1.6-now-includes-stochastic-weight-averaging/">Pytorch内置的swa</a>，但是引入了一个SWALR。</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/WuHuRestaurant/xf_event_extraction2020Top1/blob/156b2fd429c3a752134b4050f97db7a06ea38c24/src_final/utils/functions_utils.py#L121">一个项目用到的</a>。</li>
+</ol>
+<h3 id="2-attack-training-对抗训练"><a href="#2-attack-training-对抗训练" class="headerlink" title="2. attack training(对抗训练)"></a>2. attack training(对抗训练)</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># FGM</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">FGM</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, model: nn.Module, eps=<span class="number">1.</span></span>):</span><br><span class="line">        self.model = (</span><br><span class="line">            model.module <span class="keyword">if</span> <span class="built_in">hasattr</span>(model, <span class="string">&quot;module&quot;</span>) <span class="keyword">else</span> model</span><br><span class="line">        )</span><br><span class="line">        self.eps = eps</span><br><span class="line">        self.backup = &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment"># only attack word embedding</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">attack</span>(<span class="params">self, emb_name=<span class="string">&#x27;word_embeddings&#x27;</span></span>):</span><br><span class="line">        <span class="keyword">for</span> name, param <span class="keyword">in</span> self.model.named_parameters():</span><br><span class="line">            <span class="keyword">if</span> param.requires_grad <span class="keyword">and</span> emb_name <span class="keyword">in</span> name:</span><br><span class="line">                self.backup[name] = param.data.clone()</span><br><span class="line">                norm = torch.norm(param.grad)</span><br><span class="line">                <span class="keyword">if</span> norm <span class="keyword">and</span> <span class="keyword">not</span> torch.isnan(norm):</span><br><span class="line">                    r_at = self.eps * param.grad / norm</span><br><span class="line">                    param.data.add_(r_at)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">restore</span>(<span class="params">self, emb_name=<span class="string">&#x27;word_embeddings&#x27;</span></span>):</span><br><span class="line">        <span class="keyword">for</span> name, para <span class="keyword">in</span> self.model.named_parameters():</span><br><span class="line">            <span class="keyword">if</span> para.requires_grad <span class="keyword">and</span> emb_name <span class="keyword">in</span> name:</span><br><span class="line">                <span class="keyword">assert</span> name <span class="keyword">in</span> self.backup</span><br><span class="line">                para.data = self.backup[name]</span><br><span class="line"></span><br><span class="line">        self.backup = &#123;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># PGD</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PGD</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, model, eps=<span class="number">1.</span>, alpha=<span class="number">0.3</span></span>):</span><br><span class="line">        self.model = (</span><br><span class="line">            model.module <span class="keyword">if</span> <span class="built_in">hasattr</span>(model, <span class="string">&quot;module&quot;</span>) <span class="keyword">else</span> model</span><br><span class="line">        )</span><br><span class="line">        self.eps = eps</span><br><span class="line">        self.alpha = alpha</span><br><span class="line">        self.emb_backup = &#123;&#125;</span><br><span class="line">        self.grad_backup = &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">attack</span>(<span class="params">self, emb_name=<span class="string">&#x27;word_embeddings&#x27;</span>, is_first_attack=<span class="literal">False</span></span>):</span><br><span class="line">        <span class="keyword">for</span> name, param <span class="keyword">in</span> self.model.named_parameters():</span><br><span class="line">            <span class="keyword">if</span> param.requires_grad <span class="keyword">and</span> emb_name <span class="keyword">in</span> name:</span><br><span class="line">                <span class="keyword">if</span> is_first_attack:</span><br><span class="line">                    self.emb_backup[name] = param.data.clone()</span><br><span class="line">                norm = torch.norm(param.grad)</span><br><span class="line">                <span class="keyword">if</span> norm != <span class="number">0</span> <span class="keyword">and</span> <span class="keyword">not</span> torch.isnan(norm):</span><br><span class="line">                    r_at = self.alpha * param.grad / norm</span><br><span class="line">                    param.data.add_(r_at)</span><br><span class="line">                    param.data = self.project(name, param.data)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">restore</span>(<span class="params">self, emb_name=<span class="string">&#x27;word_embeddings&#x27;</span></span>):</span><br><span class="line">        <span class="keyword">for</span> name, param <span class="keyword">in</span> self.model.named_parameters():</span><br><span class="line">            <span class="keyword">if</span> param.requires_grad <span class="keyword">and</span> emb_name <span class="keyword">in</span> name:</span><br><span class="line">                <span class="keyword">assert</span> name <span class="keyword">in</span> self.emb_backup</span><br><span class="line">                param.data = self.emb_backup[name]</span><br><span class="line">        self.emb_backup = &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">project</span>(<span class="params">self, param_name, param_data</span>):</span><br><span class="line">        r = param_data - self.emb_backup[param_name]</span><br><span class="line">        <span class="keyword">if</span> torch.norm(r) &gt; self.eps:</span><br><span class="line">            r = self.eps * r / torch.norm(r)</span><br><span class="line">        <span class="keyword">return</span> self.emb_backup[param_name] + r</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backup_grad</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">for</span> name, param <span class="keyword">in</span> self.model.named_parameters():</span><br><span class="line">            <span class="keyword">if</span> param.requires_grad <span class="keyword">and</span> param.grad <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">                self.grad_backup[name] = param.grad.clone()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">restore_grad</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">for</span> name, param <span class="keyword">in</span> self.model.named_parameters():</span><br><span class="line">            <span class="keyword">if</span> param.requires_grad <span class="keyword">and</span> param.grad <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">                param.grad = self.grad_backup[name]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 初始化</span></span><br><span class="line">fgm = FGM(model)</span><br><span class="line"><span class="keyword">for</span> batch_input, batch_label <span class="keyword">in</span> data:</span><br><span class="line">  <span class="comment"># 正常训练</span></span><br><span class="line">  loss = model(batch_input, batch_label)</span><br><span class="line">  loss.backward() <span class="comment"># 反向传播，得到正常的grad</span></span><br><span class="line">  <span class="comment"># 对抗训练</span></span><br><span class="line">  fgm.attack() <span class="comment"># embedding被修改了</span></span><br><span class="line">  <span class="comment"># optimizer.zero_grad() # 如果不想累加梯度，就把这里的注释取消</span></span><br><span class="line">  loss_sum = model(batch_input, batch_label)</span><br><span class="line">  loss_sum.backward() <span class="comment"># 反向传播，在正常的grad基础上，累加对抗训练的梯度</span></span><br><span class="line">  fgm.restore() <span class="comment"># 恢复Embedding的参数</span></span><br><span class="line">  <span class="comment"># 梯度下降，更新参数</span></span><br><span class="line">  optimizer.step()</span><br><span class="line">  optimizer.zero_grad()</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><a target="_blank" rel="noopener" href="https://wmathor.com/index.php/archives/1537/">https://wmathor.com/index.php/archives/1537/</a></li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/08/05/%E6%A8%A1%E5%9E%8B%E4%BC%98%E5%8C%96%E7%82%B9/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-讯飞2020年事件提取比赛第一名-触发词提取" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1580,120 +1666,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2022/01/12/SIFRank-zh%E4%B8%8E%E5%85%B3%E9%94%AE%E8%AF%8D%E6%8F%90%E5%8F%96/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-信息提取之分块或表达式" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/01/05/%E4%BF%A1%E6%81%AF%E6%8F%90%E5%8F%96%E4%B9%8B%E5%88%86%E5%9D%97%E6%88%96%E8%A1%A8%E8%BE%BE%E5%BC%8F/">信息提取中分块或表达式</a>
-    </h1>
-  
-
-        
-        <a href="/2022/01/05/%E4%BF%A1%E6%81%AF%E6%8F%90%E5%8F%96%E4%B9%8B%E5%88%86%E5%9D%97%E6%88%96%E8%A1%A8%E8%BE%BE%E5%BC%8F/" class="archive-article-date">
-  	<time datetime="2022-01-05T02:58:12.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-01-05</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>什么是表达式，用一组规则来进行信息表示与提取。</p>
-<p>这个名字起的有点绕，本质来讲他是做下面这个事情的。</p>
-<p>假设分词结果如下所示：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">    (<span class="string">&#x27;现在&#x27;</span>, <span class="string">&#x27;time&#x27;</span>),</span><br><span class="line">    (<span class="string">&#x27;社区&#x27;</span>, <span class="string">&#x27;n&#x27;</span>),</span><br><span class="line">    (<span class="string">&#x27;在&#x27;</span>, <span class="string">&#x27;p&#x27;</span>),</span><br><span class="line">    (<span class="string">&#x27;进行&#x27;</span>, <span class="string">&#x27;v&#x27;</span>),</span><br><span class="line">    (<span class="string">&#x27;网格化&#x27;</span>, <span class="string">&#x27;n&#x27;</span>),</span><br><span class="line">    (<span class="string">&#x27;管理&#x27;</span>, <span class="string">&#x27;n&#x27;</span>)</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
-
-<h2 id="表达式"><a href="#表达式" class="headerlink" title="表达式"></a>表达式</h2><h3 id="演变1"><a href="#演变1" class="headerlink" title="演变1"></a>演变1</h3><p>如果从这句话中进行关键词提取，分词粒度太低，那么我们首先会想着聚合。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[(<span class="string">&#x27;社区&#x27;</span>, <span class="string">&#x27;n&#x27;</span>), (<span class="string">&#x27;网格化&#x27;</span>, <span class="string">&#x27;n&#x27;</span>), (<span class="string">&#x27;管理&#x27;</span>, <span class="string">&#x27;n&#x27;</span>)]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><code>网格化管理</code>更能体现出比管理更具体的含义，那么你会接着使用2阶的<code>n-gram</code>，那么<code>网格化管理</code>会提取出来。</p>
-<h3 id="演变2"><a href="#演变2" class="headerlink" title="演变2"></a>演变2</h3><p><code>现在社区</code>也是2阶n-gram，他们应该聚合吗？显然是不应该的，那么我们认识到：<br>n-gram是必须的，但是配置出来的规则不止n-gram。</p>
-<p>那么我们尝试添加进去<code>词性</code>特征。</p>
-<p>伪代码如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> before_token.pos == <span class="string">&#x27;n&#x27;</span> <span class="keyword">and</span> cur_token.pos == <span class="string">&#x27;n&#x27;</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;那么就聚合&#x27;</span>)</span><br></pre></td></tr></table></figure>
-
-
-<h3 id="演变3"><a href="#演变3" class="headerlink" title="演变3"></a>演变3</h3><p>假设到此我们都可以用一堆hardcode来解决了，如果我们允许自定义配置，那么上面的hardcode就要换一种方式来表达。</p>
-<h3 id="演变4"><a href="#演变4" class="headerlink" title="演变4"></a>演变4</h3><p>此方法自行实现。我们可以定义每个token的判断逻辑。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">token_match</span>(<span class="params">token, element</span>):</span><br><span class="line">    <span class="comment"># ！开头表示词性</span></span><br><span class="line">    <span class="keyword">if</span> element.startswith(<span class="string">&#x27;!&#x27;</span>):</span><br><span class="line">        <span class="keyword">return</span> token.pos == element[<span class="number">1</span>:]</span><br><span class="line">    <span class="comment"># @表示词</span></span><br><span class="line">    <span class="keyword">elif</span> element.startswith(<span class="string">&#x27;@&#x27;</span>):</span><br><span class="line">        <span class="keyword">return</span> token.word == element[<span class="number">1</span>:]</span><br><span class="line">    <span class="keyword">raise</span> <span class="comment"># 自行实现其他的</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 每个表达式判断</span></span><br><span class="line"><span class="keyword">for</span> element <span class="keyword">in</span> express:</span><br><span class="line">    <span class="keyword">for</span> index，token <span class="keyword">in</span> <span class="built_in">enumerate</span>(tokens):</span><br><span class="line">        <span class="keyword">if</span> token_match(token, element):</span><br><span class="line">            <span class="comment"># 最终构成一个DAG</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="演变5"><a href="#演变5" class="headerlink" title="演变5"></a>演变5</h3><p>到这里为止，我们认为实现了一个可自定义配置的表达式，但是问题来了，上面这个准确来讲是实现了硬匹配的，只能一个token一个token的来写表达式规则，比如我想实现[‘!n’, ‘!n’, ‘!n’, ‘!n’]这种,那就要写4遍这个。而不是!n+这种。</p>
-<p>那么自行实现正则表达式会是更优的方式。</p>
-<p>那先转换下思路，有没有现成的实现方式或者相关术语，可以拿来参考。</p>
-<h2 id="分块（chunk）"><a href="#分块（chunk）" class="headerlink" title="分块（chunk）"></a>分块（chunk）</h2><p>根据<a target="_blank" rel="noopener" href="https://www.nltk.org/book_1ed/">Nature Language Processing with Python</a>第七章<a target="_blank" rel="noopener" href="https://www.nltk.org/book_1ed/ch07.html">Extracting Information from Text</a>中介绍到<code>分块</code>概念。</p>
-<p>我们将用于实体检测的基本技术是分块，它分割和标记多令牌序列，如下图所示。</p>
-<img src="/2022/01/05/%E4%BF%A1%E6%81%AF%E6%8F%90%E5%8F%96%E4%B9%8B%E5%88%86%E5%9D%97%E6%88%96%E8%A1%A8%E8%BE%BE%E5%BC%8F/chunk-segmentation.png" class="" title="chunk-segmentation">
-
-<p>那么由此可见，我们可以看到用于分块的正则表达式和n-gram方法。</p>
-<h3 id="例子1"><a href="#例子1" class="headerlink" title="例子1"></a>例子1</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>sentence = [(<span class="string">&#x27;the&#x27;</span>, <span class="string">&#x27;DT&#x27;</span>), (<span class="string">&#x27;little&#x27;</span>, <span class="string">&#x27;JJ&#x27;</span>), (<span class="string">&#x27;yellow&#x27;</span>, <span class="string">&#x27;JJ&#x27;</span>), (<span class="string">&#x27;dog&#x27;</span>, <span class="string">&#x27;NN&#x27;</span>), (<span class="string">&#x27;barked&#x27;</span>, <span class="string">&#x27;VBD&#x27;</span>), (<span class="string">&#x27;at&#x27;</span>, <span class="string">&#x27;IN&#x27;</span>), (<span class="string">&#x27;the&#x27;</span>, <span class="string">&#x27;DT&#x27;</span>), (<span class="string">&#x27;cat&#x27;</span>, <span class="string">&#x27;NN&#x27;</span>)]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>grammar = <span class="string">&quot;NP: &#123;&lt;DT&gt;?&lt;JJ&gt;*&lt;NN&gt;&#125;&quot;</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>cp = nltk.RegexpParser(grammar)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>result = cp.parse(sentence)</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>result.pretty_print()</span><br><span class="line">                            S                                       </span><br><span class="line">     _______________________|______________________________          </span><br><span class="line">    |        |              NP                             NP       </span><br><span class="line">    |        |      ________|_________________        _____|____     </span><br><span class="line">barked/VBD at/IN the/DT little/JJ yellow/JJ dog/NN the/DT     cat/NN</span><br></pre></td></tr></table></figure>
-
-<p>由这个例子可见，grammer中：</p>
-<ol>
-<li><code>NP</code>为自定义的名字，nonterminal，表示为这个grammer应该对应的label是什么。这个可自行参考constituency tree parser。</li>
-<li><code>&#123;&#125;</code>表示一套表达式的范围，rule。</li>
-<li><code>&lt;&gt;</code>对应token的表示。</li>
-<li><code>?</code>, <code>*</code>, <code>+</code>就对应正常的正则。</li>
-</ol>
-<p><a target="_blank" rel="noopener" href="https://www.nltk.org/book_1ed/ch07.html">更多例子可参考</a>。</p>
-<p>搜了些资料，貌似没有根据词特征来进行patten匹配的。<br>通过<a target="_blank" rel="noopener" href="https://github.com/nltk/nltk/blob/787575a4fe2cb04acfbeb88b7cad7fde69459413/nltk/chunk/regexp.py#L95">源码</a>可看出的确是不支持词匹配的。</p>
-<p>基于这个的应用，可看<code>SIFRank_zh</code>算法的<a target="_blank" rel="noopener" href="https://github.com/sunyilgdx/SIFRank_zh/blob/9955ea5561e3103996a926e0efdc3a78106eb5d0/model/extractor.py#L29">应用</a>。</p>
-<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>如果需要其他特征，可以先词性匹配，后续加规则来实现。<br>自己实现一个更高级的😂😂😂。</p>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a target="_blank" rel="noopener" href="https://www.nltk.org/book_1ed/">Nature Language Processing with Python</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/01/05/%E4%BF%A1%E6%81%AF%E6%8F%90%E5%8F%96%E4%B9%8B%E5%88%86%E5%9D%97%E6%88%96%E8%A1%A8%E8%BE%BE%E5%BC%8F/">展开全文 >></a>
         </p>
       
 

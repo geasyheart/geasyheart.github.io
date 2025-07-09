@@ -206,6 +206,98 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-bert和xlnet" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/10/28/bert%E5%92%8Cxlnet/">bert和xlnet</a>
+    </h1>
+  
+
+        
+        <a href="/2021/10/28/bert%E5%92%8Cxlnet/" class="archive-article-date">
+  	<time datetime="2021-10-28T01:35:10.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-28</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="1-AR与AE语言模型"><a href="#1-AR与AE语言模型" class="headerlink" title="1. AR与AE语言模型"></a>1. AR与AE语言模型</h2><p>AR: Autoregressive Language modeling<br>AE: AutoEncoding Language modeling</p>
+<img src="/2021/10/28/bert%E5%92%8Cxlnet/3.awebp" class="" title="ARAE">
+
+<p>AR语言模型：指的是，依据前面（或后面）出现的tokens来预测当前时刻的token，代表有ELMO,GPT等。<br>AE语言模型：通过上下文信息来预测被mask的token，代表有 BERT , Word2Vec(CBOW)  。</p>
+<h3 id="二者有着它们各自的优缺点："><a href="#二者有着它们各自的优缺点：" class="headerlink" title="二者有着它们各自的优缺点："></a>二者有着它们各自的优缺点：</h3><h4 id="AR-语言模型："><a href="#AR-语言模型：" class="headerlink" title="AR 语言模型："></a>AR 语言模型：</h4><p>缺点： 它只能利用单向语义而不能同时利用上下文信息。ELMO 通过双向都做AR 模型，然后进行拼接，但从结果来看，效果并不是太好。<br>优点： 对生成模型友好，天然符合生成式任务的生成过程。这也是为什么 GPT 能够编故事的原因。</p>
+<h4 id="AE-语言模型："><a href="#AE-语言模型：" class="headerlink" title="AE 语言模型："></a>AE 语言模型：</h4><p>缺点： 由于训练中采用了 [MASK] 标记，导致预训练与微调阶段不一致的问题。BERT独立性假设问题，即没有对被遮掩（Mask）的 token 之间的关系进行学习。此外对于生成式问题， AE 模型也显得捉襟见肘。<br>优点： 能够很好的编码上下文语义信息（即考虑句子的双向信息）， 在自然语言理解相关的下游任务上表现突出。</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>所以，AR方式所带来的自回归性学习了预测 token 之间的依赖，这是 BERT 所没有的；而 BERT 的AE方式带来的对深层次双向信息的学习，却又是像ELMo还有GPT单向语言模型所没有的，不管是有没有替换 [MASK]。于是，自然就会想，如何将两者的优点统一起来？这时就到了XLNet登场的时间。</p>
+<h2 id="2-Permutation-Language-Model"><a href="#2-Permutation-Language-Model" class="headerlink" title="2. Permutation Language Model"></a>2. Permutation Language Model</h2><img src="/2021/10/28/bert%E5%92%8Cxlnet/4.awebp" class="" title="Permutation Language Model">
+
+<p>具体实现方式是，通过随机取一句话的一种排列，然后将末尾一定量的词给遮掩（和 BERT 里的直接替换 [MASK] 有些不同）掉，最后用 AR 的方式来按照这种排列依次预测被遮掩掉的词。</p>
+<img src="/2021/10/28/bert%E5%92%8Cxlnet/5.awebp" class="" title="Permutation Language Model">
+
+<h2 id="3-Transformer-XL"><a href="#3-Transformer-XL" class="headerlink" title="3. Transformer-XL"></a>3. Transformer-XL</h2><h2 id="4-Relative-Positional-Encoding"><a href="#4-Relative-Positional-Encoding" class="headerlink" title="4. Relative Positional Encoding"></a>4. Relative Positional Encoding</h2><h2 id="简单知识点"><a href="#简单知识点" class="headerlink" title="简单知识点"></a>简单知识点</h2><h3 id="1-bert-mask之间相互独立"><a href="#1-bert-mask之间相互独立" class="headerlink" title="1. bert mask之间相互独立"></a>1. bert mask之间相互独立</h3><p>BERT进行了独立假设，比如句子[New, York, is, a, city]， 假定MASK掉New York，输入为[MASK, MASK, is, a, city], Bert根据is a city 预测New; 根据is a city预测York. 也就是预测New和预测York是独立的，不相关的。</p>
+<img src="/2021/10/28/bert%E5%92%8Cxlnet/1.jpg" class="" title="相互独立">
+<p>作者提出的Generalized Autoregressive LM在预测York依赖了New。</p>
+<img src="/2021/10/28/bert%E5%92%8Cxlnet/2.jpg" class="" title="依赖new">
+
+<p>总结：BERT: Masked Language Model, 使用了双边的context信息，但是忽略了masked token之间的依赖关系。</p>
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/6953820168002732040">一文看懂XLNet</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/10/28/bert%E5%92%8Cxlnet/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-biaffine分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1132,112 +1224,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2021/07/23/%E6%88%91%E6%9C%80%E6%95%AC%E7%88%B1%E7%9A%84%E8%80%81%E5%A9%86/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-ubuntu16-04多GPU风扇转速调整" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/07/22/ubuntu16-04%E5%A4%9AGPU%E9%A3%8E%E6%89%87%E8%BD%AC%E9%80%9F%E8%B0%83%E6%95%B4/">ubuntu16.04多GPU风扇转速调整</a>
-    </h1>
-  
-
-        
-        <a href="/2021/07/22/ubuntu16-04%E5%A4%9AGPU%E9%A3%8E%E6%89%87%E8%BD%AC%E9%80%9F%E8%B0%83%E6%95%B4/" class="archive-article-date">
-  	<time datetime="2021-07-22T04:22:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-07-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>最近闲置出来两块1080ti GPU，内心那叫一个激动哇，虽然有些老，另外训练时转速提不上去，此次就解决这个问题。</p>
-<h2 id="方法一（个人只在单GPU上实验成功）"><a href="#方法一（个人只在单GPU上实验成功）" class="headerlink" title="方法一（个人只在单GPU上实验成功）"></a>方法一（个人只在单GPU上实验成功）</h2><h3 id="1-生成xorg-conf"><a href="#1-生成xorg-conf" class="headerlink" title="1. 生成xorg.conf"></a>1. 生成xorg.conf</h3><p>如果:</p>
-<blockquote>
-<p>cannot stat &#x2F;etc&#x2F;x11&#x2F;xorg.conf no such file or directory</p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 生成这个文件</span></span><br><span class="line"></span><br><span class="line">$ sudo nvidia-xconfig --enable-all-gpus --cool-bits=4</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h3 id="2-vim-etc-x11-xorg-conf"><a href="#2-vim-etc-x11-xorg-conf" class="headerlink" title="2. vim &#x2F;etc&#x2F;x11&#x2F;xorg.conf"></a>2. vim &#x2F;etc&#x2F;x11&#x2F;xorg.conf</h3><p>添加<code>Option &quot;Coolbits&quot; &quot;4&quot;</code>到device nvidia 里面.如果有多个就每个都add。</p>
-<h3 id="3-reboot"><a href="#3-reboot" class="headerlink" title="3. reboot"></a>3. reboot</h3><h3 id="4-nvidia-settings"><a href="#4-nvidia-settings" class="headerlink" title="4.nvidia-settings"></a>4.nvidia-settings</h3><p>打开nvidia-settings软件，然后调风扇转速即可。</p>
-<h2 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h2><blockquote>
-<p>使用<a target="_blank" rel="noopener" href="https://github.com/andyljones/coolgpus">coolgpus</a></p>
-</blockquote>
-<h3 id="1-关闭图形化界面"><a href="#1-关闭图形化界面" class="headerlink" title="1. 关闭图形化界面"></a>1. 关闭图形化界面</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop lightgdm  &amp;&amp; systemctl lightgdm <span class="built_in">disable</span> lightgdm</span><br></pre></td></tr></table></figure>
-
-
-<h3 id="2-使用coolgpus"><a href="#2-使用coolgpus" class="headerlink" title="2. 使用coolgpus"></a>2. 使用coolgpus</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=Headless GPU Fan Control</span><br><span class="line">After=syslog.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">ExecStart=/home/ajones/conda/bin/coolgpus --<span class="built_in">kill</span> </span><br><span class="line">Restart=on-failure</span><br><span class="line">RestartSec=5s</span><br><span class="line">ExecStop=/bin/kill -2 <span class="variable">$MAINPID</span></span><br><span class="line">KillMode=none </span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl <span class="built_in">enable</span> coolgpus</span><br><span class="line">sudo systemctl start coolgpus</span><br></pre></td></tr></table></figure>
-
-
-<h3 id="个人建议"><a href="#个人建议" class="headerlink" title="个人建议"></a>个人建议</h3><p>如果使用coolgpus的时候先确保可以正常使用，然后再添加到systemctl里面去。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop lightgdm</span><br><span class="line">sudo $(<span class="built_in">which</span> coolgpus) --speed 99 99</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>如果可以了再后续操作。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/07/22/ubuntu16-04%E5%A4%9AGPU%E9%A3%8E%E6%89%87%E8%BD%AC%E9%80%9F%E8%B0%83%E6%95%B4/">展开全文 >></a>
         </p>
       
 

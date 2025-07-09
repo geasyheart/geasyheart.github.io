@@ -206,6 +206,107 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-40-02-2-MySQL-DRBD" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/09/22/40-02-2-MySQL-DRBD/">40_02_2_MySQL+DRBD</a>
+    </h1>
+  
+
+        
+        <a href="/2015/09/22/40-02-2-MySQL-DRBD/" class="archive-article-date">
+  	<time datetime="2015-09-22T02:17:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <ul>
+<li>两个节点都要做．．．．</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">＃fdisk /dev/sdb     分了500M大小，同步速度一取决于DRBD配置文件中的rate定义，在drbd84版本中就不存在这个选项了． </span><br><span class="line">＃partprobe /dev/sdb </span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>epel</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">＃rpm -Uvh http://www.elrepo.org/elrepo-release-6-6.el6.elrepo.noarch.rpm </span><br><span class="line">＃yum install -y drbd83 kmod-drbd83 </span><br><span class="line">＃yum install -y epel-release    corosync pacemaker  　这个是因为后面安装crm时需要pash,需要这个源； </span><br><span class="line">＃elinks http://download.opensuse.org/repositories/network:/ha-clustering:/Stable/CentOS_CentOS-6/x86_64/　　下载crmsh,如果用pcs,就没必要了。 </span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>global-common</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line">配置/etc/drbd.d/global-common.conf </span><br><span class="line">global &#123; </span><br><span class="line">    usage-count no; </span><br><span class="line">    <span class="comment">#minor-count dialog-refresh disable-ip-verification </span></span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">common&#123; </span><br><span class="line">    protocol C;　　 </span><br><span class="line"> </span><br><span class="line">    handlers&#123; </span><br><span class="line">        pri-on-incon-degr <span class="string">&quot;/usr/lib/drbd/notify-pri-on-incon-degr.sh; /usr/lib/drbd/notify-emergency-reboot.sh; echo b &gt; /proc/sysrq-trigger ; reboot -f&quot;</span>; </span><br><span class="line">        pri-lost-after-sb <span class="string">&quot;/usr/lib/drbd/notify-pri-lost-after-sb.sh; /usr/lib/drbd/notify-emergency-reboot.sh ; echo b &gt; /proc/sysrq-trigger ;reboot -f&quot;</span>; </span><br><span class="line">        local-io-error <span class="string">&quot;/usr/lib/drbd/notify-io-error.sh; /usr/lib/drbd/notify-io-emergency-shutdown.sh; echo 0 &gt; /proc/sysrq-trigger ; halt -f&quot;</span>; </span><br><span class="line">        <span class="comment">#fence-peer &quot;/usr/lib/drbd/crm-fence-peer.sh&quot;; </span></span><br><span class="line">        <span class="comment">#split-brain &quot;/usr/lib/drbd/notify-split-brain.sh reboot&quot;; </span></span><br><span class="line">        <span class="comment">#out-of-sync &quot;/usr/lib/drbd/notify-out-of-sync.sh root&quot;; </span></span><br><span class="line">        <span class="comment">#before-resync-target &quot;/usr/lib/drbd/snapshot-resync-target-lvm.sh -p 15 -- -c 16K&quot;; </span></span><br><span class="line">        <span class="comment">#after-resync-target /usr/lib/drbd/unsnapshot-resync-target-lvm.sh; </span></span><br><span class="line">        &#125; </span><br><span class="line">    startup&#123; </span><br><span class="line">        <span class="comment">#wfc-timeout 120; </span></span><br><span class="line">        <span class="comment">#degr-wfc-timeout 120; </span></span><br><span class="line">    &#125; </span><br><span class="line">    disk&#123; </span><br><span class="line">        on-io-error detach;　　 </span><br><span class="line">            <span class="comment">#fencing resource-only; </span></span><br><span class="line">    &#125; </span><br><span class="line">    net&#123; </span><br><span class="line">        cram-hmac-alg <span class="string">&quot;sha1&quot;</span>; </span><br><span class="line">        shared-secret <span class="string">&quot;mydrbdlab&quot;</span>;   </span><br><span class="line">    &#125; </span><br><span class="line">    syncer&#123; </span><br><span class="line">        rate 1000M; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line"><span class="comment">#vim /etc/drbd.d/web.res </span></span><br><span class="line">resource web&#123; </span><br><span class="line">    on node1.test.com&#123; </span><br><span class="line">        device /dev/drbd0; </span><br><span class="line">        disk /dev/sdb1; </span><br><span class="line">        address 192.168.1.110:7789; </span><br><span class="line">        meta-disk internal; </span><br><span class="line">    &#125; </span><br><span class="line">    on node2.test.com&#123; </span><br><span class="line">        device /dev/drbd0; </span><br><span class="line">        disk /dev/sdb1; </span><br><span class="line">        address 192.168.1.111:7789; </span><br><span class="line">        meta-disk internal; </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line"><span class="comment">#scp -r  /etc/drbd.d/* node2:/etc/drbd.d/ </span></span><br><span class="line"><span class="comment">#drbdadm create-md web    两个节点都要做 </span></span><br><span class="line"><span class="comment">#modprobe drbd　　　　　如果有需要，反正我没用到这步 </span></span><br><span class="line"><span class="comment">#service drbd start　　&amp;&amp;  ssh node2 &#x27;service drbd start&#x27; </span></span><br><span class="line"> </span><br><span class="line">查看启动状态: </span><br><span class="line"><span class="comment">#cat /proc/drbd　&amp;&amp; drbd-overview       一定要看到Secondary/Secondary  有可能出现的错误是split-brain; </span></span><br><span class="line">[root@node1 ~]<span class="comment"># drbdadm -- --overwrite-data-of-peer primary web </span></span><br><span class="line">说明:一旦变主节点后，<span class="built_in">cat</span> /proc/drbd会发现进行数据更新，一定要更新完，否则会出错!! </span><br><span class="line">[root@node1 ~]<span class="comment"># mkfs.ext4 /dev/drbd0 </span></span><br><span class="line">[root@node1 ~]<span class="comment"># mount /dev/drbd0 /mysqldata/ </span></span><br><span class="line">[root@node1 ~]<span class="comment"># tar xf mysql-5.6.24-linux-glibc2.5-x86_64.tar.gz  -C /usr/local/ </span></span><br><span class="line">[root@node1 ~]<span class="comment"># ln -sv /usr/local &amp;&amp; ln -sv mysql-5.6.24-linux-glibc2.5-x86_64/ mysql </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># groupadd -g 3306 mysql </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># useradd -u 3306 -g mysql mysql </span></span><br><span class="line">[root@node1 ~]<span class="comment"># scripts/mysql_install_db --user=mysql --datadir=/mysqldata/ </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># cp support-files/my-default.cnf /etc/my.cnf </span></span><br><span class="line">[root@node1 mysql]<span class="comment">#修改datadir=/mysqldata </span></span><br><span class="line"> </span><br><span class="line">[root@node1 mysql]<span class="comment">#cp support-files/mysql.server /etc/init.d/mysqld </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># chown -R root.mysql /usr/local/mysql/* </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># chown -R mysql.mysql /mysqldata/ </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># service mysqld start                              插入数据，进行后续验证。 </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># service mysqld stop </span></span><br><span class="line">[root@node1 mysql]<span class="comment">#chkconfig --add mysqld </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># chkconfig mysqld off </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># umount /mysqldata/ </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># drbdadm secondary web </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># scp /etc/init.d/mysqld root@node2:/etc/init.d/mysqld </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># scp /etc/my.cnf node2:/etc/ </span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">[root@node2 <span class="built_in">local</span>]<span class="comment"># ln -sv mysql-5.6.24-linux-glibc2.5-x86_64/ mysql </span></span><br><span class="line">[root@node2 mysql]<span class="comment"># drbdadm primary web </span></span><br><span class="line">[root@node2 mysql]<span class="comment"># drbd-overview </span></span><br><span class="line">[root@node2 mysql]<span class="comment">#mkdir /mysqldata &amp;&amp;  mount /dev/drbd0 /mysqldata/ </span></span><br><span class="line">[root@node2 mysqldata]<span class="comment"># groupadd -g 3306 mysql </span></span><br><span class="line">[root@node2 mysqldata]<span class="comment"># useradd -u 3306 -g mysql mysql </span></span><br><span class="line">[root@node2 mysqldata]<span class="comment"># service mysqld start </span></span><br><span class="line">[root@node2 mysqldata]<span class="comment"># /usr/local/mysql/bin/mysql 　　　　进行数据验证，插入数据。 </span></span><br><span class="line">[root@node2 mysqldata]<span class="comment"># chown root.mysql /usr/local/mysql/* </span></span><br><span class="line">[root@node2 mysqldata]<span class="comment"># service mysqld stop </span></span><br><span class="line">[root@node2 mysqldata]<span class="comment"># chkconfig　--add mysqld </span></span><br><span class="line">[root@node2 mysqldata]<span class="comment"># chkconfig mysqld off </span></span><br><span class="line">[root@node2 / ]<span class="comment"># umount /mysqldata/ </span></span><br><span class="line">[root@node2 /]<span class="comment"># drbd-overview </span></span><br><span class="line">[root@node2 /]<span class="comment"># drbdadm secondary web </span></span><br><span class="line">[root@node2 /]<span class="comment"># drbd-overview </span></span><br><span class="line">说明，这个时候可以再次进行主从切换，查看node2上插入的数据是否可以在node1上看到，如果成功，表明DRBD配置成功。 </span><br><span class="line"><span class="comment">#sevice drbd stop  &amp;&amp; ssh node2 &quot;sevice drbd stop&quot; </span></span><br><span class="line"><span class="comment">#chkconfig drbd off &amp;&amp; ssh node2 &quot;chkconfig drbd off&quot; </span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>配置corosync</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br></pre></td><td class="code"><pre><span class="line">[root@node1 mysql]<span class="comment"># cd /etc/crosync </span></span><br><span class="line">[root@node1 mysql]<span class="comment"># cp corosync.conf.example corosync.conf </span></span><br><span class="line"> </span><br><span class="line">编辑corosync.conf,添加如下内容: </span><br><span class="line">service&#123; </span><br><span class="line">    ver: 0 </span><br><span class="line">    name:pacemaker </span><br><span class="line">&#125; </span><br><span class="line">aisexec&#123; </span><br><span class="line">    user:root </span><br><span class="line">    group:root </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">最后的配置文件: </span><br><span class="line"><span class="comment"># Please read the corosync.conf.5 manual page </span></span><br><span class="line">compatibility: whitetank </span><br><span class="line">totem &#123; </span><br><span class="line">    version: 2   配置文件的版本号，不要动 </span><br><span class="line">    secauth: on　安全的认证机制，默认关闭 </span><br><span class="line">    threads: 2    使用多少个线程进行加密和组播通信的； </span><br><span class="line">    interface &#123; </span><br><span class="line">        ringnumber: 0　　环数 </span><br><span class="line">        bindnetaddr: 172.16.0.0　在哪个网络内进行组播 </span><br><span class="line">        mcastaddr: 226.99.6.17　　组播地址,只要不是224网段即可 </span><br><span class="line">        mcastport: 5405    　　组播端口,heartbeat是694 </span><br><span class="line">        ttl: 1 </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line">logging &#123;     </span><br><span class="line">    fileline: off    表示各行日志文件是否需要打印分割线 </span><br><span class="line">    to_stderr: no    是否发送标准错误信息到前端，不要打开，否则跑前端 </span><br><span class="line">    to_logfile: <span class="built_in">yes</span>　发往哪，下面定义，关闭的话发往syslog; </span><br><span class="line">    logfile: /var/log/cluster/corosync.log  这个目录默认不存在，所以应该创建 </span><br><span class="line">    to_syslog: no    既然上面定义了发往logfile，这个关闭即可，默认打开的；　 </span><br><span class="line">    debug: off    如果系统出现错误，可以打开进行排除 </span><br><span class="line">    timestamp: on　是否记录时间戳，既然要进行获取时间，就要通过系统调用，然后获取时间给每行日志加时间戳， </span><br><span class="line">            意味着更多的系统调用和IO操作，默认打开，看需要； </span><br><span class="line">    logger_subsys &#123; </span><br><span class="line">        subsys: AMF　如果没装openAIS,可以不用打开 </span><br><span class="line">        debug: off </span><br><span class="line">    &#125; </span><br><span class="line">&#125; </span><br><span class="line">service&#123; </span><br><span class="line">    ver: 0 </span><br><span class="line">    name:pacemaker </span><br><span class="line">    <span class="comment">#use_mgmtd: yes </span></span><br><span class="line">&#125; </span><br><span class="line">如果没装openAIS,这项可以不用添加，当然加上也可以； </span><br><span class="line">aisexec&#123; </span><br><span class="line">    user:root </span><br><span class="line">    group:root </span><br><span class="line">&#125; </span><br><span class="line"> </span><br><span class="line">生成节点间通信时用到的认证秘钥文件: </span><br><span class="line">[root@node1 mysql]<span class="comment">##corosync-keygen </span></span><br><span class="line"> </span><br><span class="line">将corosync.conf和authkey复制到node2: </span><br><span class="line">[root@node1 corosync.d]<span class="comment">#scp -p corosync.conf authkey node2:/etc/corosync </span></span><br><span class="line">[root@node1 corosync.d]<span class="comment">#service corosync start &amp;&amp; ssh node2 &quot;service corosync start&quot; </span></span><br><span class="line"> </span><br><span class="line">[root@node1 corosync.d]<span class="comment">#crm configure    当然，这个这里给出了配置步骤，当然也可直接剪切下面的，需要说明的是，不论如何，都要有资源约束关系。 </span></span><br><span class="line">1)property stonith-enabled=<span class="literal">false</span> </span><br><span class="line">2)property no-quorum-policy=ignore </span><br><span class="line">3)resource-stickiness=100 </span><br><span class="line">crm(live)configure<span class="comment"># primitive mystore ocf:linbit:drbd params drbd_resource=&quot;web&quot; op monitor role=&quot;Master&quot; interval=10s timeout=20s op monitor role=&quot;Slave&quot; interval=20s timeout=20s op start timeout=240s op stop timeout=100s </span></span><br><span class="line">crm(live)configure<span class="comment">#verify </span></span><br><span class="line">crm(live)configure<span class="comment"># ms ms_mystor mystore meta clone-max=&quot;2&quot; clone-node-max=&quot;1&quot; master-max=&quot;1&quot; master-node-max=&quot;1&quot;  notify=&quot;true&quot; </span></span><br><span class="line">crm(live)configure<span class="comment">#verify </span></span><br><span class="line">crm(live)configure<span class="comment">#commit </span></span><br><span class="line">crm(live)configure<span class="comment"># primitive webfs ocf:heartbeat:Filesystem params device=/dev/drbd0 directory=/mysqldata fstype=ext4 op start timeout=60 op stop timeout=60 </span></span><br><span class="line">crm(live)configure<span class="comment"># colocation webfs_with_ms_mystor inf: webfs ms_mystor:Master </span></span><br><span class="line">crm(live)configure<span class="comment"># order webfs_after_ms_mystor inf: ms_mystor:promote webfs:start </span></span><br><span class="line"> </span><br><span class="line">crm(live)configure<span class="comment"># primitive mysqld lsb:mysqld </span></span><br><span class="line">crm(live)configure<span class="comment"># colocation mysqld_with_webfs inf: mysqld webfs </span></span><br><span class="line">crm(live)configure<span class="comment"># order mysqld_after_webfs mandatory: webfs mysqld </span></span><br><span class="line">crm(live)configure<span class="comment">#verify </span></span><br><span class="line">crm(live)configure<span class="comment">#commit </span></span><br><span class="line"> </span><br><span class="line">crm(live)configure<span class="comment">#primitive myip ocf:heartbeat:IPaddr params ip=192.168.1.120 (nic=eth0 cidr_netmask=255.255.255.0)我在这一步时，老是出错，把括号内的去掉，然后verify和commit下，看是否正常，如果正常，那就继续，当然可以先加上括号内的．． </span></span><br><span class="line">crm(live)configure<span class="comment">#colocation myip_with_ms_mystor inf:  myip ms_mystor:Master </span></span><br><span class="line">crm(live)configure<span class="comment">#verify </span></span><br><span class="line">crm(live)configure<span class="comment">#commit </span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">在测试时，可用这个命令将主节点变为备节点: </span><br><span class="line"><span class="comment">#crm node standby </span></span><br><span class="line">然后,资源会跑到另外一个节点上，然后让节点再上线: </span><br><span class="line"><span class="comment">#crm node online </span></span><br><span class="line">在另外一个节点上登录数据库，发现在上一个节点上创建的资源是否有，如果有，则表明同步成功，如果没有： </span><br><span class="line"><span class="comment">#drbd-overview </span></span><br><span class="line">如果显示 -bash:/sbin/drbd-overview:No such file or directory </span><br><span class="line">在另外一个节点上，发现正常: </span><br><span class="line"><span class="comment">#cat /proc/drbd </span></span><br><span class="line">那么不要着急，敲　/cat/proc/drbd,因为slave节点不会对drbd-overview显示!! </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">需要说明的是:我在这里配置时使用的是LCMC直观查看，但是有一点，当我把配置文件提交时，node2的状态是standby,也就是没有上线， </span><br><span class="line">我不知道是因为什么原因导致的，但是必要做的两步: </span><br><span class="line">[root@node2 mysqldata]<span class="comment"># cat /proc/drbd    查看状态是Primary/Secondary,如果不是， </span></span><br><span class="line">[root@node2 mysqldata]<span class="comment"># crm  node online   如果状态变成Primary/Secondary了，那么则成功。。。 </span></span><br><span class="line"> </span><br><span class="line">配置文件: </span><br><span class="line">node node1.test.com \ </span><br><span class="line">        attributes standby=off </span><br><span class="line">node node2.test.com \ </span><br><span class="line">        attributes standby=on </span><br><span class="line">primitive myip IPaddr \ </span><br><span class="line">        params ip=192.168.1.120 </span><br><span class="line">primitive mysqld lsb:mysqld </span><br><span class="line">primitive mystore ocf:linbit:drbd \ </span><br><span class="line">        params drbd_resource=web \ </span><br><span class="line">        op monitor role=Master interval=10s <span class="built_in">timeout</span>=20s \ </span><br><span class="line">        op monitor role=Slave interval=20s <span class="built_in">timeout</span>=20s \ </span><br><span class="line">        op start <span class="built_in">timeout</span>=240s interval=0 \ </span><br><span class="line">        op stop <span class="built_in">timeout</span>=100s interval=0 </span><br><span class="line">primitive webfs Filesystem \ </span><br><span class="line">        params device=<span class="string">&quot;/dev/drbd0&quot;</span> directory=<span class="string">&quot;/mysqldata&quot;</span> fstype=ext4 \ </span><br><span class="line">        op start <span class="built_in">timeout</span>=60 interval=0 \ </span><br><span class="line">        op stop <span class="built_in">timeout</span>=60 interval=0 </span><br><span class="line">ms ms_mystor mystore \ </span><br><span class="line">        meta clone-max=2 clone-node-max=1 master-max=1 master-node-max=1 notify=<span class="literal">true</span> </span><br><span class="line">colocation myip_with_ms_mystor inf: myip ms_mystor:Master </span><br><span class="line">colocation mysqld_with_webfs inf: mysqld webfs </span><br><span class="line">colocation webfs_with_ms_mystor inf: webfs ms_mystor:Master </span><br><span class="line">order mysqld_after_webfs Mandatory: webfs mysqld </span><br><span class="line">order webfs_after_ms_mystor inf: ms_mystor:promote webfs:start </span><br><span class="line">property cib-bootstrap-options: \ </span><br><span class="line">        expected-quorum-votes=2 \ </span><br><span class="line">        stonith-enabled=<span class="literal">false</span> \ </span><br><span class="line">        dc-version=1.1.11-97629de \ </span><br><span class="line">        no-quorum-policy=ignore \ </span><br><span class="line">        cluster-infrastructure=<span class="string">&quot;classic openais (with plugin)&quot;</span> \ </span><br><span class="line">        last-lrm-refresh=1437553803 </span><br><span class="line">rsc_defaults rsc-options: </span><br><span class="line"><span class="comment">#vim:set syntax=pcmk </span></span><br><span class="line">~</span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/09/22/40-02-2-MySQL-DRBD/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-39-02Linux集群系列之十二-高可用集群之基于heartbeat和nfs的高可用MySQL" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1228,147 +1329,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/07/06/33-03MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%83%EF%BC%8D%E5%8D%95%E8%A1%A8%E6%9F%A5%E8%AF%A2%E3%80%81%E5%A4%9A%E8%A1%A8%E6%9F%A5%E8%AF%A2%E5%92%8C%E5%AD%90%E6%9F%A5%E8%AF%A2/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-33-02-MySQL系列之六MySQL管理表和索引" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/07/06/33-02-MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%85%ADMySQL%E7%AE%A1%E7%90%86%E8%A1%A8%E5%92%8C%E7%B4%A2%E5%BC%95/">33_02-MySQL系列之六MySQL管理表和索引</a>
-    </h1>
-  
-
-        
-        <a href="/2015/07/06/33-02-MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%85%ADMySQL%E7%AE%A1%E7%90%86%E8%A1%A8%E5%92%8C%E7%B4%A2%E5%BC%95/" class="archive-article-date">
-  	<time datetime="2015-07-06T01:12:44.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-07-06</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> SCHEMA IF <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> students <span class="type">CHARACTER</span> <span class="keyword">SET</span> <span class="string">&#x27;gbk&#x27;</span> <span class="keyword">COLLATE</span> <span class="string">&#x27;gbk_chinese-ci&#x27;</span>;</span><br><span class="line"><span class="keyword">DROP</span> [DATABASE<span class="operator">|</span>SCHEMA] db_name;</span><br></pre></td></tr></table></figure>
-<h2 id="表"><a href="#表" class="headerlink" title="表"></a>表</h2><ol>
-<li>直接定义一张空表；</li>
-<li>从其他表中查询出数据，并以之创建新表；</li>
-<li>以其他表为模板创建一个空表；</li>
-</ol>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> [IF <span class="keyword">NOT</span> <span class="keyword">EXISTS</span>] tb_name(col_name col_defination,<span class="keyword">constraint</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> tb1(id <span class="type">INT</span> UNSIGNED <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT <span class="keyword">PRIMARY</span> KEY,Name <span class="type">CHAR</span>(<span class="number">20</span>)<span class="keyword">NOT</span> <span class="keyword">NULL</span>,Age TINYINT <span class="keyword">NOT</span> <span class="keyword">NULL</span>);</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> tb1(id <span class="type">INT</span> UNSIGNED <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT,Name <span class="type">CHAR</span>(<span class="number">20</span>)<span class="keyword">NOT</span> <span class="keyword">NULL</span>,<span class="keyword">PRIMARY</span> KEY(id));</span><br></pre></td></tr></table></figure>
-<p>键都是索引，是特殊索引<br>键也称作约束，可用作索引，属于特殊索引(有特殊限定):B+Tree</p>
-<ol>
-<li>直接定义一张空表</li>
-</ol>
-<p>指定表的存储引擎:</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> courses(CID TINYINT UNSIGNED <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT <span class="keyword">PRIMARY</span> KEY,Course <span class="type">VARCHAR</span>(<span class="number">50</span>)<span class="keyword">NOT</span> <span class="keyword">NULL</span>)ENGINE<span class="operator">=</span>MyISAM;</span><br><span class="line"><span class="keyword">SHOW</span> <span class="keyword">TABLE</span> STATUS <span class="keyword">LIKE</span> <span class="string">&#x27;courses&#x27;</span>;</span><br></pre></td></tr></table></figure>
-<p>查看表的索引:     </p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SHOW</span> INDEXES <span class="keyword">FROM</span> tb_name; </span><br></pre></td></tr></table></figure>
-<ol start="2">
-<li>从其他表中查询出数据，并以之创建新表；</li>
-</ol>
-<p>CREATE TABLE testcourses SELECT * FROM courses WHERE CID&lt;&#x3D;2;</p>
-<ol start="3">
-<li>以其他表为模板创建一个空表；<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> test <span class="keyword">LIKE</span> courses;</span><br></pre></td></tr></table></figure></li>
-<li>修改表定义:<blockquote>
-<p>添加、删除、修改字段<br>添加、删除、修改索引<br>改表名<br>修改表属性</p>
-</blockquote>
-</li>
-</ol>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> test <span class="keyword">ADD</span> <span class="keyword">UNIQUE</span> KEY(courses);</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> test <span class="keyword">ADD</span> starttime <span class="type">date</span> <span class="keyword">default</span> <span class="string">&#x27;2013-04-12&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> test CHANGE Couse Course <span class="type">VARCHAR</span>(<span class="number">50</span>)<span class="keyword">NOT</span> <span class="keyword">NULL</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> testcourses;</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> test RENAME <span class="keyword">TO</span> testcourses;</span><br></pre></td></tr></table></figure>
-<h2 id="删除表"><a href="#删除表" class="headerlink" title="删除表"></a>删除表</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> </span><br></pre></td></tr></table></figure>
-<h2 id="组合查询"><a href="#组合查询" class="headerlink" title="组合查询"></a>组合查询</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> student(SID TINYINT UNSIGNED <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT <span class="keyword">PRIMARY</span> KEY,Name <span class="type">VARCHAR</span>(<span class="number">30</span>),CID TINYINT <span class="keyword">NOT</span> <span class="keyword">NULL</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> student(Name,CID)<span class="keyword">VALUES</span>(<span class="string">&#x27;Zhangsan&#x27;</span>,<span class="number">2</span>),(<span class="string">&#x27;Xiao lizi&#x27;</span>,<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> courses(CID TINYINT UNSIGNED <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT <span class="keyword">PRIMARY</span> KEY,Course <span class="type">VARCHAR</span>(<span class="number">30</span>)<span class="keyword">NOT</span> <span class="keyword">NULL</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> courses(CID,Course)<span class="keyword">VALUES</span>(<span class="number">1</span>,<span class="string">&#x27;Chinese&#x27;</span>),(<span class="number">2</span>,<span class="string">&#x27;Math&#x27;</span>),(<span class="number">3</span>,<span class="string">&#x27;English&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> student.Name,courses.Course  <span class="keyword">FROM</span> student,courses <span class="keyword">WHERE</span> student.CID<span class="operator">=</span>courses.CID;</span><br></pre></td></tr></table></figure>
-
-<p>如果选择的课程不在课表中，怎么定义，这个时候应该使用外键;<br>但是MyASIM不支持外键，需要把已经创建的表的引擎修改为InnoDB;<br>ALTER TABLE courses ENGINE&#x3D;InnoDB;<br>使用外键:<br>ALTER TABLE student ADD FOREIGN KEY(CID) REFERENCES courses(CID);</p>
-<p>SHOW INDEXES FROM students;</p>
-<p>INSERT INTO student(name,cid)VALUES(‘chen jialuo’,5);<br>就会报错，没法创建课表以外的课程；</p>
-<p>一般情况下不要使用外键，会大量消耗系统资源；</p>
-<h2 id="约束"><a href="#约束" class="headerlink" title="约束"></a>约束</h2><ol>
-<li>约束保证数据的完整性和唯一性</li>
-<li>约束分为表级约束和列级约束</li>
-<li>约束类型包括:<blockquote>
-<p>NOT NULL(非空约束)<br>PRIMARY KEY(主键约束)<br>UNIQUE KEY(唯一约束)<br>DEFAULT(默认约束)<br>FOREIGN KEY(外键约束)</p>
-</blockquote>
-</li>
-</ol>
-<p>外键约束的参照操作:</p>
-<ol>
-<li>CASCADE:从父表删除或更新且自动删除或更新子表中匹配的行</li>
-<li>SET NULL:从父表删除或更新行，并设置子表中的外键列为NULL，如果使用此选项，必须保证子表列没有指定NOT NULL；</li>
-<li>RESTRICT:拒绝对父表的删除或更新操作</li>
-<li>NO ACTION:标准的SQL的关键字，在MySQL中与RESTRICT相同</li>
-</ol>
-<p>外键约束的要求:</p>
-<ol>
-<li>父表和子表必须使用相同的存储引擎，而且禁止使用临时表；</li>
-<li>数据表的存储引擎只能是InnoDB；</li>
-<li>外键列和参照列必须具有相似的数据类型，其中数字的长度或是否有符号位必须相同，而字符的长度则可以不同；</li>
-<li>外键列和参照列必须创建索引，如果外键列不存在索引的话，MySQL将自动创建索引<br>索引:<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">CREATE</span> INDEX index_name <span class="keyword">ON</span> tb_name(col1,...);</span><br><span class="line">    <span class="keyword">DROP</span> INDEX index_name <span class="keyword">On</span> tb_name;</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> INDEX name_on_student <span class="keyword">ON</span> student (Name) <span class="keyword">USING</span> BTREE;(默认使用BTree，可不写)；</span><br></pre></td></tr></table></figure></li>
-</ol>
-<p>说明:<br>    由于第一次接触数据库，所以很多写的无章法，以后将会重头再来一遍。<br>    需要说明的是，本文章或者说数据库知识我参考了幕课网的三个讲解MySQL数据库。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/07/06/33-02-MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%85%ADMySQL%E7%AE%A1%E7%90%86%E8%A1%A8%E5%92%8C%E7%B4%A2%E5%BC%95/">展开全文 >></a>
         </p>
       
 

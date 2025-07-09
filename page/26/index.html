@@ -206,6 +206,161 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-11-04linux网络配置之四ifconfig及ip命令详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/24/11-04linux%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E4%B9%8B%E5%9B%9Bifconfig%E5%8F%8Aip%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/">11_04linux网络配置之四ifconfig及ip命令详解</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/24/11-04linux%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E4%B9%8B%E5%9B%9Bifconfig%E5%8F%8Aip%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/" class="archive-article-date">
+  	<time datetime="2015-02-24T15:05:04.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-24</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>lo:本地回环<br>ethx:以太网网卡 </p>
+<p>linux:网络属于内核的功能 </p>
+<p>RHEL5: &#x2F;etc&#x2F;modprobe.conf </p>
+<p>RHEL6: &#x2F;etc&#x2F;udev&#x2F;rules.d&#x2F;70-persistent-net.rules </p>
+<p>ifconfig: </p>
+<blockquote>
+<p>-a:显示所有接口的配置信息<br>up:激活端口<br>down:停止端口<br>broadcast [广播地址]:设定广播地址<br>netmask   [网络掩码]:设定网络掩码<br>io_addr  [I&#x2F;O地址]:设定网卡的输入&#x2F;输出地址<br>irq_addr  [中断号]:设定网卡中断号<br>ifconfig ethX IP&#x2F;MASK<br>ifconfig eth1 192.168.1.168&#x2F;24<br>ifconfig eth1 192.168.1.168 netmask 255.255.255.0<br>ifconfig ehtX [up|down]<br>ifconfig eth1 up<br>配置的地址立即生效，但重启网络服务或关机，都失效 </p>
+</blockquote>
+<p>网络服务:<br>RHEL5:<br> &#x2F;etc&#x2F;init.d&#x2F;network <br>RHEL6:<br> &#x2F;etc&#x2F;init.d&#x2F;NetworkManger </p>
+<p>网关:<br> &#x2F;sbin&#x2F;route配置主机的路由表信息。<br> route [选项] [命令[参数]]<br>Destination Gateway Genmask Flags Metric Ref Use iface<br>192.168.1.0 * 255.255.255.0 U 0 0 0 eth0<br>路由的终点 数据包到达终点前需要经历的网关 路由掩码 标志信息 到达终点的距离 引用次数 内核寻找路由所需的时间 数据包的传输接口<br> 标志信息:U(路由可用)、H(目标为一台主机)和G(使用网关，即数据包不直接传送至本条路由的终点，而是传送给网关)<br> 引用次数在linux系统中不可用，在UNIX和类UNIX中可用。<br>route<br> add:添加<br> –host:主机路由<br> -net   :网络路由<br> 增加到网络192.168.2.0&#x2F;24的路由 </p>
+<blockquote>
+<p>route add -net 192.168.2.0&#x2F;24 dev eth0<br> 增加到主机192.168.2.100的路由<br>route add -host 192.168.2.100 gw 192.168.1.111<br> 设定默认网关为192.168.1.1<br>route add default gw 192.168.10.1<br> 例如:<br> 我把eth0的IP地址给改了<br>ifconfig eth0 192.168.1.124&#x2F;24<br> 这个时候，ping <a target="_blank" rel="noopener" href="http://www.baidu.com不同,ping自己可以,这个时候如果想上网,可以route/">www.baidu.com不同，ping自己可以，这个时候如果想上网，可以route</a> add default gw 192.168.1.1即可.<br> 或者&#x2F;etc&#x2F;init.d&#x2F;NetworkManger restart.<br> del:删除<br> –host<br> -net<br> 删除到192.168.2.0&#x2F;24的路由<br>route del 192.168.2.0&#x2F;24 dev eth0<br> 删除缺省的<br>route del default </p>
+</blockquote>
+<p>网络配置文件: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">/etc/sysconfig/network-scripts/ifcfg-INTERFACE_NAME </span><br><span class="line">[root@localhost ~]# vi /etc/sysconfig/network-scripts/ifcfg-eth0 </span><br><span class="line">DEVICE=eth0         //指定网卡设备名称为：eth0 </span><br><span class="line">HWADDR=00:0c:29:f9:67:5b //指定物理网卡地址为：00:0c:29:f9:67:5b  </span><br><span class="line">NM_CONTROLLED=yes  //设备eth0是否可以由Network Manager图形管理工具托管 </span><br><span class="line">ONBOOT=no  //开机时是否自动激活此网络接口 </span><br><span class="line">BOOTPROTO=&#123;dhcp|static|none|bootp&#125; //引导协议:要使用静态:static或none。 </span><br><span class="line">TYPE=Ethernet   //网络类型为以太网模式 </span><br><span class="line">USERCTL=&#123;yes|no&#125;：是否允许普通用户控制此接口    </span><br><span class="line">PEERDNS=&#123;yes|no&#125;:是否在BOOTPROTP为dhcp时接受有DHCP服务器指定的DNS地址 </span><br><span class="line">IPV6INIT=no </span><br><span class="line">*IPADDR=:ip地址 </span><br><span class="line">*NETWORK=:子网掩码 </span><br><span class="line">*GATAWAY=:设定默认网关 </span><br><span class="line">不会立即生效，但重启网络服务或主机会生效。 </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>路由: </p>
+<blockquote>
+<p>&#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;route-ethX<br> 添加格式一: </p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">DEST via NEXTHOP </span><br><span class="line">vim route-eth1 </span><br><span class="line">192.168.10.0/24 via 10.10.10.254 </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p> 添加格式二: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"> ADDRESS0=192.168.10.0 </span><br><span class="line"> NETMASK0=255.255.255.0 </span><br><span class="line"> GATEWAY0=10.10.10.254 </span><br><span class="line">```  </span><br><span class="line"></span><br><span class="line"> DNS服务器制定方法: </span><br><span class="line"> /etc/resolv.conf </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p> nameserver DNS_IP_1<br> nameserver  DNS_IP_2 </p>
+<pre><code>
+IProute2: 
+--&gt;ip:  
+link:配置网络接口属性 
+addr:协议地址 
+route:路由 
+ 
+link: 
+show: 
+ip link show 
+ip -s(显示统计信息) link show  
+set: 
+ 
+addr: 
+add 
+&gt; ip addr add  address dev name 
+&gt; ip addr add 10.2.2.2/8 dev eth1 
+&gt; ip addr add 10.3.3.3/8 dev eth1 label eth1:1 
+del: 
+&gt; ip addr del address dev name 
+&gt; ip addr del 10.2.2.2/8 dev eth1 
+show: 
+&gt; ip addr show dev DEV to PREFIX 
+flush: 
+&gt; ip addr flush  dev DEV　to PREFIX 
+route: 
+show 
+&gt; ip route show 
+add 
+&gt; ip route add to 10.0.0.0/8 dev eth0 via 172.16.0.1 
+ 
+一块网卡可以使用多个别名: 
+eth0 
+ethX:X, eth0:0, eth0:1, ... 
+ifconfig eth0:0 192.168.1.100/24 
+非主要地址不能使用DHCP动态获取 
+ 
+ 
+traceroute: 
+-n 不进行主机域名解析，直接使用IP，这可以加快侦测速度 
+-w  超时时间，超过这个时间认为此节点无回应，默认5s 
+-i  如果有多个网络接口，则需要这个参数指定使用哪个接口 
+-g 指定使用默认网关 
+ 
+</code></pre>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/24/11-04linux%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E4%B9%8B%E5%9B%9Bifconfig%E5%8F%8Aip%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-11-02Linux网络配置之二IP报文" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1091,109 +1246,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/02/15/09-01%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%B8%89/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-08-04磁盘及文件系统管理详解之二" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/15/08-04%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%BA%8C/">08_04磁盘及文件系统管理详解之二</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/15/08-04%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%BA%8C/" class="archive-article-date">
-  	<time datetime="2015-02-14T16:28:54.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-15</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>设备文件: 都在&#x2F;dev目录下，用于设备的访问入口的；<br> 对于设备的访问入口这句话的理解: </p>
-<blockquote>
-<p>tty<br> &#x2F;dev&#x2F;tty1<br> 换一个:<br>tty<br> &#x2F;dev&#x2F;tty2<br> tty1下：<br>echo “hello” &gt;&gt; &#x2F;dev&#x2F;tty2<br> tty2下：<br> 就会显示#hello </p>
-</blockquote>
-<p> b:(block)按块为单位，随机访问的设备<br> c:(character)按字符为单位，线性设备<br> b:硬盘<br> c:键盘<br> ls -l &#x2F;dev<br> crw-rw—-,1 root root 7, 1 Feb ….<br> 7：是主设备号(用于标识设备的类型)<br> 1：次设备号(用于标识同一种类型中不同设备) </p>
-<p>设备文件的创建:<br>mknod <br> -m 模型(MODE)<br> mknod &#x2F;dev&#x2F;mydev  b 66 0 块设备 主设备号 此设备号 </p>
-<p>硬盘设备的设备文件名:<br> IDE,ATA:hd开头<br> SATA:sd开头<br> SCSI:sd开头<br> USB:sd开头<br> 使用a,b,c…进行区分同一种类型的不同设备<br> IDE：<br> 第一个IDE口:主&#x2F;从<br> &#x2F;dev&#x2F;hda &#x2F;dev&#x2F;hdb<br> 第二个IDE口：主&#x2F;从<br> &#x2F;dev&#x2F;hdc &#x2F;dev&#x2F;hdd </p>
-<p> sda,sdb,sdc… </p>
-<p>查看硬盘信息:<br> fdisk -l  </p>
-<p>低级格式化：格式化磁道<br>高级格式化：创建文件系统， mkfs </p>
-<p>VFS：<br>例如mkdir的原作者想要创建mkdir命令，但是为了能够在不同的文件系统上<br>创建目录，就需要根据不同的文件系统的接口写代码以支持不同的我呢见系统，<br>这样做就会使开发难度增加，所以，为了能够简化这种开发难度，linux上有个<br>VFS(virtual filesystem)来统一出来不同文件系统的接口，只需要根据这个接口，<br>就可以简单实现不同文件系统的操作。。 </p>
-<blockquote>
-<p>FAT32(linux下叫vfat)<br>NTFS<br>ISO9660<br>CIFS(windows下)<br>NFS（linux下）<br>ext2<br>ext3<br>ext4<br>xfs<br>reiserfs<br>jfs(日志文件系统IBM)<br>ocfs2<br>gfs2 </p>
-</blockquote>
-<p>每一个分区都可以使用不同的文件系统，最终归于根目录下； </p>
-<p>fdisk  </p>
-<blockquote>
-<p>p:显示<br>n:创建新分区<br>d:删除<br>w:保存退出<br>t:分区类型<br>q:不保存退出<br>l:显示所支持的所有类型<br>partprobe:redhat5用，redhat6使用其他的，不过也可以用<br>通知内核重读硬盘分区表<br>这个会在分区完会自动提示这个命令，那个暂时忘了，到时补充。</p>
-</blockquote>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/15/08-04%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%BA%8C/">展开全文 >></a>
         </p>
       
 
