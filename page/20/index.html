@@ -206,6 +206,111 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-33-03MySQL系列之七－单表查询、多表查询和子查询" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/07/06/33-03MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%83%EF%BC%8D%E5%8D%95%E8%A1%A8%E6%9F%A5%E8%AF%A2%E3%80%81%E5%A4%9A%E8%A1%A8%E6%9F%A5%E8%AF%A2%E5%92%8C%E5%AD%90%E6%9F%A5%E8%AF%A2/">33_03MySQL系列之七－单表查询、多表查询和子查询</a>
+    </h1>
+  
+
+        
+        <a href="/2015/07/06/33-03MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%83%EF%BC%8D%E5%8D%95%E8%A1%A8%E6%9F%A5%E8%AF%A2%E3%80%81%E5%A4%9A%E8%A1%A8%E6%9F%A5%E8%AF%A2%E5%92%8C%E5%AD%90%E6%9F%A5%E8%AF%A2/" class="archive-article-date">
+  	<time datetime="2015-07-06T01:14:12.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-07-06</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>SELECT语句: </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> tb_name; </span><br><span class="line"><span class="keyword">SELECT</span> field1,field2 <span class="keyword">FROM</span> tb_name; 投影 </span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> <span class="keyword">WHERE</span>  tb_name <span class="keyword">WHERE</span> qualification;选择 </span><br></pre></td></tr></table></figure>
+<p>WHERE字句:要查询的关系<br>    &#x3D; &gt; &lt; &gt;&#x3D; &lt;&#x3D;<br>逻辑关系:<br>    AND<br>    OR<br>    NOT<br>    BETWEEN … AND …<br>    LIKE<br>        %:任意长度任意字符<br>        _:任意单个字符<br>    REGEXP,RLIKE  支持正则表达式<br>    IN(18,20,22)  离散取值<br>    IS NULL<br>    IS NOT NULL<br>正则表达式:<br>    .:表示正则表达式语言中的特殊字符<br>    |:OR<br>    []:匹配多个字符中的一个<br>    <br>拼接字段:<br>    concat(拼接):将值连接起来(通过追加的方式)，构成一个单一的更长的值；<br>    rtrim:去掉值右边的所有的空格 </p>
+<p>执行全文本搜索<br>例如: </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> productnotes </span><br><span class="line">( </span><br><span class="line">    note_id <span class="type">int</span> <span class="keyword">not</span> <span class="keyword">null</span> auto_increment, </span><br><span class="line">    prod_id <span class="type">char</span>(<span class="number">10</span>) <span class="keyword">not</span> <span class="keyword">null</span>, </span><br><span class="line">    note_data datetime <span class="keyword">not</span> <span class="keyword">null</span>, </span><br><span class="line">    note_text text <span class="keyword">not</span> <span class="keyword">null</span>, </span><br><span class="line">    <span class="keyword">primary</span> key(note_id), </span><br><span class="line">    fulltext(note_text) </span><br><span class="line">    )engine<span class="operator">=</span>Maria; </span><br></pre></td></tr></table></figure>
+<p>需要注意的是，应该在导入完数据后，进行修改note_text支持全文索引，因为导入数据时还要进行建立索引，会消耗大量时间。 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> productnotes <span class="keyword">add</span> fulltext(note_text); </span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">建立索引之后，使用两个函数进行全文本搜索，<span class="keyword">match</span>()指定需要搜索的列，against()指定需要使用的搜索的搜索表达式 </span><br><span class="line"></span><br><span class="line"><span class="keyword">select</span> note_text <span class="keyword">from</span> productnotes <span class="keyword">where</span> <span class="keyword">match</span>(note_text) against(<span class="string">&#x27;rabbit&#x27;</span>); </span><br><span class="line">查询扩展: </span><br><span class="line"><span class="keyword">select</span> note_text <span class="keyword">from</span> productnotes <span class="keyword">where</span> <span class="keyword">match</span>(note_text) against(<span class="string">&#x27;anvils&#x27;</span>); </span><br><span class="line"><span class="keyword">select</span> note_text <span class="keyword">from</span> productnotes <span class="keyword">where</span> <span class="keyword">match</span>(note_text) against(<span class="string">&#x27;anvils&#x27;</span> <span class="keyword">WITH</span> QUERY EXPANSION); </span><br><span class="line"> </span><br><span class="line"><span class="keyword">ROLLUP</span>:可将选择出来的数据进行汇总 </span><br><span class="line">    <span class="keyword">SELECT</span> vend_id,<span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">AS</span> num_prods <span class="keyword">FROM</span> products <span class="keyword">GROUP</span> <span class="keyword">BY</span> vend_id <span class="keyword">WITH</span> <span class="keyword">ROLLUP</span>; </span><br><span class="line">     </span><br><span class="line"><span class="keyword">SELECT</span> concat(vend_name,<span class="string">&#x27; (&#x27;</span>,vend_country,<span class="string">&#x27;)&#x27;</span>) <span class="keyword">FROM</span> vendors <span class="keyword">ORDER</span> <span class="keyword">BY</span> vend_name; </span><br><span class="line"><span class="keyword">SELECT</span> concat(rtrim(vend_name),<span class="string">&#x27; (&#x27;</span>,rtrim(vend_country),<span class="string">&#x27;)&#x27;</span>) <span class="keyword">FROM</span> vendors <span class="keyword">ORDER</span> <span class="keyword">BY</span> vend_name; </span><br><span class="line"> </span><br><span class="line"><span class="keyword">SELECT</span> prod_name <span class="keyword">FROM</span> products <span class="keyword">WHERE</span> prod_name REGEXP <span class="string">&#x27;[123] Ton&#x27;</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span> prod_name; </span><br><span class="line"> </span><br><span class="line"><span class="keyword">SELECT</span> Name <span class="keyword">FROM</span> students <span class="keyword">WHERE</span> Name RLIKE <span class="string">&#x27;^[MNY].*$&#x27;</span>; </span><br><span class="line"><span class="keyword">SELECT</span> Name <span class="keyword">FROM</span> students <span class="keyword">WHERE</span> Name <span class="keyword">LIKE</span> <span class="string">&#x27;y%&#x27;</span>; </span><br><span class="line"><span class="keyword">SELECT</span> Name <span class="keyword">FROM</span> students <span class="keyword">WHERE</span> Name <span class="keyword">LIKE</span> <span class="string">&#x27;y____&#x27;</span>; </span><br><span class="line"><span class="keyword">SELECT</span> Name,Age <span class="keyword">FROM</span> students <span class="keyword">WHERE</span> Age<span class="operator">&gt;=</span><span class="number">20</span> <span class="keyword">AND</span> Age <span class="operator">&lt;=</span><span class="number">25</span>; </span><br><span class="line"><span class="keyword">SELECT</span> Name,Age <span class="keyword">FROM</span> students <span class="keyword">WHERE</span> Age <span class="keyword">BETWEEN</span> <span class="number">20</span> <span class="keyword">AND</span> <span class="number">25</span>; </span><br><span class="line"><span class="keyword">SELECT</span> Name,Age <span class="keyword">FROM</span> students <span class="keyword">WHERE</span> Age <span class="keyword">IN</span>(<span class="number">18</span>,<span class="number">20</span>,<span class="number">22</span>); </span><br></pre></td></tr></table></figure>
+<p>查询后的语句进行排序:<br>ORDER BY  field_name [DESC|ASC]<br>    DESC:降序<br>    ASC:生序（默认） </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> Name,Age <span class="keyword">FROM</span> students <span class="keyword">WHERE</span> Age<span class="operator">&gt;=</span><span class="number">20</span> <span class="keyword">AND</span> Age <span class="operator">&lt;=</span><span class="number">25</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span> Name <span class="keyword">DESC</span>; </span><br></pre></td></tr></table></figure>
+<p>字段别名:  AS </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> Name <span class="keyword">AS</span> Student_name <span class="keyword">FROM</span> students; </span><br></pre></td></tr></table></figure>
+<p>LIMIT [offset,]count </p>
+<p>SELECT * FROM tb_name WHERE Age LIMIT 2;<br>SELECT * FROM tb_name WHERE Age LIMIT 2,3; </p>
+<p>聚合运算:<br>    AVG()<br>    SUM()<br>    MIN()<br>    MAX()<br>    COUNT() </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">计算男同学的平均年龄:     </span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">AVG</span>(Age) <span class="keyword">FROM</span> students <span class="keyword">WHERE</span> Gender<span class="operator">=</span><span class="string">&#x27;M&#x27;</span>; </span><br><span class="line">计算女同学的平均年龄: </span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">AVG</span>(Age) <span class="keyword">FROM</span> students <span class="keyword">WHERE</span> Gender<span class="operator">=</span><span class="string">&#x27;F&#x27;</span>; </span><br></pre></td></tr></table></figure>
+<p>计算男女同学的平均年龄: </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span>:分组 </span><br><span class="line">    <span class="keyword">HAVING</span> qualification </span><br><span class="line">        用于将<span class="keyword">group</span> <span class="keyword">by</span>选取的规则再次过滤，只能和<span class="keyword">group</span> <span class="keyword">by</span>合作使用； </span><br><span class="line">     </span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">AVG</span>(Age) <span class="keyword">FROM</span> students <span class="keyword">GROUP</span> <span class="keyword">BY</span> Gender； </span><br><span class="line"><span class="keyword">SELECT</span> <span class="built_in">COUNT</span>(CID1) <span class="keyword">AS</span> Persion,CID1  <span class="keyword">FROM</span> students <span class="keyword">GROUP</span> <span class="keyword">BY</span> Gender <span class="keyword">HAVING</span> Persion <span class="operator">&gt;=</span><span class="number">2</span>; </span><br></pre></td></tr></table></figure>
+<p>例如:<br>    SELECT sex FROM users GROUP BY 1 HAVING age &gt; 35; </p>
+<p>多表查询: </p>
+<p>    连接:<br>        交叉连接:也叫笛卡尔乘积<br>        自然连接:仅保留具有等值关系的<br>        <br>    SELECT prod_name FROM vendors INNER JOIN products ON vendors.vend_id&#x3D; products.vend_id WHERE vend_name&#x3D;’ACME’;<br>        外连接:        <br>            左外连接:…LEFT JOIN…ON…<br>            右外连接:…RIGHT JOIN…ON…<br>        自连接:<br>        <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">        <span class="keyword">SELECT</span> student.Name,course.Cname <span class="keyword">FROM</span> students <span class="keyword">AS</span> s <span class="keyword">LEFT</span> <span class="keyword">JOIN</span> courses <span class="keyword">AS</span> c <span class="keyword">ON</span> s.CID1<span class="operator">=</span>c.CID; </span><br><span class="line">        <span class="keyword">SELECT</span> student.Name,course.Cname <span class="keyword">FROM</span> students <span class="keyword">AS</span> s <span class="keyword">RIGHT</span> <span class="keyword">JOIN</span> courses <span class="keyword">AS</span> c <span class="keyword">ON</span> s.CID1<span class="operator">=</span>c.CID; </span><br></pre></td></tr></table></figure><br>子查询:<br>比较操作中使用子查询:子查询只能返回单个值； </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">SELECT</span> Name <span class="keyword">FROM</span> students <span class="keyword">WHERE</span> Age <span class="operator">&gt;</span> (<span class="keyword">SELECT</span> <span class="built_in">AVG</span>(age)<span class="keyword">FROM</span> students); </span><br><span class="line"></span><br><span class="line">    <span class="keyword">IN</span>():使用子查询； </span><br><span class="line"></span><br><span class="line">    <span class="keyword">SELECT</span> Name <span class="keyword">FROM</span> students <span class="keyword">WHERE</span> Age <span class="keyword">IN</span> (<span class="keyword">SELECT</span> Age <span class="keyword">FROM</span> tutors); </span><br><span class="line"></span><br><span class="line">    在<span class="keyword">FROM</span>中使用子查询； </span><br><span class="line">    <span class="keyword">SELECT</span> Name,Age <span class="keyword">FROM</span> (<span class="keyword">SELECT</span> Name,Age <span class="keyword">FROM</span> students)<span class="keyword">AS</span> t <span class="keyword">WHERE</span> t.Age<span class="operator">&gt;=</span><span class="number">20</span>; </span><br><span class="line">     </span><br><span class="line">    <span class="keyword">UNION</span>:联合查询 </span><br><span class="line"></span><br><span class="line">    (<span class="keyword">SELECT</span> Name,Age <span class="keyword">FROM</span> students)<span class="keyword">UNION</span>(<span class="keyword">SELECT</span> Tname,Age <span class="keyword">FROM</span> tutors);</span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/07/06/33-03MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%83%EF%BC%8D%E5%8D%95%E8%A1%A8%E6%9F%A5%E8%AF%A2%E3%80%81%E5%A4%9A%E8%A1%A8%E6%9F%A5%E8%AF%A2%E5%92%8C%E5%AD%90%E6%9F%A5%E8%AF%A2/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-33-02-MySQL系列之六MySQL管理表和索引" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1091,105 +1196,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/05/10/30-03nss/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-29-03samba之一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/05/07/29-03samba%E4%B9%8B%E4%B8%80/">29_03samba之一</a>
-    </h1>
-  
-
-        
-        <a href="/2015/05/07/29-03samba%E4%B9%8B%E4%B8%80/" class="archive-article-date">
-  	<time datetime="2015-05-07T08:20:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-05-07</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Linux&#x2F;Unix通过NFS来共享远端主机的磁盘，而samba让Linux&#x2F;UNIX主机与windows的SMB&#x2F;CIFS协议做共享，这种服务与ftp服务不同之处在于:可以直接操作远端主机的磁盘，而ftp只能修改后上传与下载，这个是不同之处。<br>CIFS&#x2F;SMB:windows平台共享文件协议 </p>
-<p>NetBIOS:network basic input output system(基于广播，向其他主机请求主机名，获得其他主机)<br>    由IBM开发，作用是互联局域网中的计算机，由于并非针对大型网络涉及，所以NETBIOS并不能跨路由，但是它在局域网中的应用是较为有效和便利的，但是也要明白缺点。<br>    当然samba也是基于NETBIOS协议。。<br>Winbindd:让Linux做成windows下的域控制器,结合LDAP<br>LDAP:(Openldap)<br>    CIFS:Common Internet File System(网络文件共享系统)<br>    SMB:Service Message Block(服务器消息区块)<br>    NetBIOS:(WINNS)由于NetBIOS会向网络中进行广播，所以第一次打开的时候会相当的慢，因为它这种实现方式(向网络中发送大量广播包)不合理性，所以出现了WINNS,类似DNS，但是只是基于windows。<br>        格式:UNC:\IP\Shared_Path\ </p>
-<p>在运行这NETBIOS的主机之间的通信，需要通过他们的NetBIOS名称来定位对方。通信流程:<br>    首先互通的主机需要工作在一个工作组中(Workgroup)内，然后通过NetBIOS名称识别找到对方主机，接下来就是进行连接及身份和权限方面的验证。。 </p>
-<p>sanba有两个守护进程，分别做NetBIOS名称解析和权限验证:<br>    nmbd:此守护进程用于对工作组和NetBIOS名称的判断和解析，它监听在UDP的137和138端口。<br>    smbd:此守护进程管理着服务器上的文件、目录和打印机。资料传输时使用TCP协议，它监听139和445端口。。 </p>
-<p>vim &#x2F;etc&#x2F;samba&#x2F;smb.conf </p>
-<p>#:纯注释<br>;:表示可启用的选项     </p>
-<p>————————Global Setting———————–<br>[global]<br>    workgroup &#x3D; MYGROUP<br>    server string &#x3D; Samba Server Version %v<br>———————–Logging Options———————–<br>    log file &#x3D; &#x2F;var&#x2F;log&#x2F;samba&#x2F;log.%m 每一个来访用户都会有对应的日志文件记录%m表示的就是来访的username<br>    max log size &#x3D; 50(KB) 超出后日志会滚动<br>———————–Standalone Server Options——————<br>    security &#x3D; user 安全级别<br>    passdb backend &#x3D; tdbsam  存放的格式<br>————————Printing options————————–<br>    load printers &#x3D; yes  (表示默认加载打印机)<br>    cups options &#x3D; raw (cup:common unix printer ,使用raw打印机制)<br>———————-Share Definitions————————-     </p>
-<p>    [homes]<br>        comment &#x3D; Home Directories（注释）<br>        browseable &#x3D; no(是否能被浏览到)<br>        writable &#x3D; yes（是否具有写权限）<br>        vaild users &#x3D; %S<br>        vaild users &#x3D; MYDOMAIN%S<br>       <br>    [printers]<br>        comment &#x3D; All Printers<br>        path &#x3D; &#x2F;var&#x2F;spool&#x2F;samba<br>        browseable &#x3D; no<br>        guest ok &#x3D; no<br>        writable &#x3D; no<br>        printable &#x3D; yes </p>
-<p>基本格式:<br>[share_name]<br>comment &#x3D;<br>path &#x3D;<br>browseable &#x3D;<br>public &#x3D;<br>read only &#x3D;<br>writable &#x3D;<br>write list &#x3D; user1,user2 定义可写用户列表<br>            @group,+group<br>valid users &#x3D;<br>invalid users &#x3D;     <br>    <br>    <br>    <br>mkdir &#x2F;share&#x2F;test -pv<br>[tools]<br>    comment &#x3D; share testing<br>    path &#x3D; &#x2F;share&#x2F;test<br>    public &#x3D; yes<br>    writable &#x3D; yes<br>    <br>#testparm 这个命令专门可以用来判断是否有语法错误，然后敲enter可以看看配置信息。。(这个相当方便) </p>
-<p>#setfacl -m u:smbtest:rwx &#x2F;share&#x2F;test </p>
-<p>#smbpasswd -a smbtest<br>\192.168.100.12\tools </p>
-<p>部分参考:《完美应用红帽企业版Linux》<br>更多可直接参学本书 </p>
-<p>错误1:<br>Failed to add entry for user jack.<br>这种原因是由于没有相应的系统用户，添加系统用户后在添加到smb上，就可以。。 </p>
-<p>错误2:<br>smbclient -L 10.0.2.15<br>session setup failed: NT_STATUS_LOGON_FAILURE </p>
-<p>要确保这个用户存在于系统和samba中。。 </p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/05/07/29-03samba%E4%B9%8B%E4%B8%80/">展开全文 >></a>
         </p>
       
 

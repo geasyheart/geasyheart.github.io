@@ -206,6 +206,145 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-让YOLOv11秒懂口罩-手套-防护服：CPPE5数据集实战指南" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2025/08/06/%E8%AE%A9YOLOv11%E7%A7%92%E6%87%82%E5%8F%A3%E7%BD%A9-%E6%89%8B%E5%A5%97-%E9%98%B2%E6%8A%A4%E6%9C%8D%EF%BC%9ACPPE5%E6%95%B0%E6%8D%AE%E9%9B%86%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97/">让YOLOv11秒懂口罩/手套/防护服：CPPE5数据集实战指南</a>
+    </h1>
+  
+
+        
+        <a href="/2025/08/06/%E8%AE%A9YOLOv11%E7%A7%92%E6%87%82%E5%8F%A3%E7%BD%A9-%E6%89%8B%E5%A5%97-%E9%98%B2%E6%8A%A4%E6%9C%8D%EF%BC%9ACPPE5%E6%95%B0%E6%8D%AE%E9%9B%86%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97/" class="archive-article-date">
+  	<time datetime="2025-08-06T09:02:42.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2025-08-06</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>目标检测的事儿，咱们不绕弯子了。这篇文章就是教你一件事：</p>
+<blockquote>
+<p>3分钟教你用YOLOv11检测口罩、手套、防护服，工业、医疗、安防一网打尽。</p>
+</blockquote>
+<p>这篇文章不会深究模型原理，而是手把手带你跑通全流程训练与推理，使用的数据是HuggingFace上经典的CPPE-5数据集，涵盖多种个人防护装备（PPE）目标检测任务。</p>
+<h3 id="✳️什么是-CPPE-5？"><a href="#✳️什么是-CPPE-5？" class="headerlink" title="✳️什么是 CPPE-5？"></a>✳️什么是 CPPE-5？</h3><p>这里采用<a target="_blank" rel="noopener" href="https://huggingface.co/datasets/rishitdagli/cppe-5">rishitdagli&#x2F;cppe-5</a>公开数据集，含以下5类标签：</p>
+<table>
+<thead>
+<tr>
+<th>类别英文</th>
+<th>中文含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Coverall</td>
+<td>防护服 &#x2F; 连体衣</td>
+</tr>
+<tr>
+<td>Face_Shield</td>
+<td>面罩 &#x2F; 防护面屏</td>
+</tr>
+<tr>
+<td>Gloves</td>
+<td>手套</td>
+</tr>
+<tr>
+<td>Goggles</td>
+<td>护目镜</td>
+</tr>
+<tr>
+<td>Mask</td>
+<td>口罩</td>
+</tr>
+</tbody></table>
+<p>共1000张图片，真实复杂场景，适合目标检测实战测试。</p>
+<p>🚀 快速开始（带你跑通）</p>
+<h3 id="1-下载数据集"><a href="#1-下载数据集" class="headerlink" title="1. 下载数据集"></a>1. 下载数据集</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget https://huggingface.co/datasets/rishitdagli/cppe-5/resolve/main/data/test-00000-of-00001.parquet</span><br><span class="line"></span><br><span class="line">wget https://huggingface.co/datasets/rishitdagli/cppe-5/resolve/main/data/train-00000-of-00001.parquet</span><br></pre></td></tr></table></figure>
+<h3 id="2-转换成yolo格式"><a href="#2-转换成yolo格式" class="headerlink" title="2. 转换成yolo格式"></a>2. 转换成yolo格式</h3><h4 id="2-1-数据预处理脚本"><a href="#2-1-数据预处理脚本" class="headerlink" title="2.1 数据预处理脚本"></a>2.1 数据预处理脚本</h4><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> pathlib</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> datasets <span class="keyword">import</span> load_dataset</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image, ImageDraw</span><br><span class="line"><span class="keyword">from</span> sympy <span class="keyword">import</span> im</span><br><span class="line"></span><br><span class="line"><span class="comment"># 这里路径根据实际路径来</span></span><br><span class="line">cppe5 = load_dataset(</span><br><span class="line">    <span class="string">&#x27;parquet&#x27;</span>,</span><br><span class="line">    data_files=&#123;</span><br><span class="line">        <span class="string">&quot;train&quot;</span>: pathlib.Path(__file__).parent.parent.joinpath(<span class="string">&quot;train-00000-of-00001.parquet&quot;</span>).__str__(),</span><br><span class="line">        <span class="string">&quot;test&quot;</span>: pathlib.Path(__file__).parent.parent.joinpath(<span class="string">&quot;test-00000-of-00001.parquet&quot;</span>).__str__()</span><br><span class="line">    &#125;</span><br><span class="line">)</span><br><span class="line">categories = cppe5[<span class="string">&quot;train&quot;</span>].features[<span class="string">&quot;objects&quot;</span>].feature[<span class="string">&quot;category&quot;</span>].names</span><br><span class="line">id2label = &#123;index: x <span class="keyword">for</span> index, x <span class="keyword">in</span> <span class="built_in">enumerate</span>(categories, start=<span class="number">0</span>)&#125;</span><br><span class="line">label2id = &#123;v: k <span class="keyword">for</span> k, v <span class="keyword">in</span> id2label.items()&#125;</span><br><span class="line"><span class="comment"># [&#x27;Coverall&#x27;, &#x27;Face_Shield&#x27;, &#x27;Gloves&#x27;, &#x27;Goggles&#x27;, &#x27;Mask&#x27;]</span></span><br><span class="line"><span class="built_in">print</span>(categories)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">cppe5_to_yolo_format</span>(<span class="params">examples, data_type=<span class="string">&#x27;train&#x27;</span></span>):</span><br><span class="line">    <span class="comment"># 注意这里，images/train放的是训练图片，images/test放的是测试图片</span></span><br><span class="line">    <span class="comment"># 同理，labels/train放的是对应图片标签</span></span><br><span class="line">    pathlib.Path(__file__).parent.joinpath(</span><br><span class="line">        <span class="string">f&quot;images/<span class="subst">&#123;data_type&#125;</span>&quot;</span>).mkdir(exist_ok=<span class="literal">True</span>, parents=<span class="literal">True</span>)</span><br><span class="line">    pathlib.Path(__file__).parent.joinpath(</span><br><span class="line">        <span class="string">f&quot;labels/<span class="subst">&#123;data_type&#125;</span>&quot;</span>).mkdir(exist_ok=<span class="literal">True</span>, parents=<span class="literal">True</span>)</span><br><span class="line">    <span class="keyword">for</span> index, sample <span class="keyword">in</span> <span class="built_in">enumerate</span>(examples):</span><br><span class="line">        image = sample[<span class="string">&quot;image&quot;</span>].convert(<span class="string">&quot;RGB&quot;</span>)</span><br><span class="line">        yolo_labels = []</span><br><span class="line"></span><br><span class="line">        <span class="comment"># draw = ImageDraw.ImageDraw(image)</span></span><br><span class="line">        <span class="comment"># for bbox, category in zip(sample[&quot;objects&quot;][&quot;bbox&quot;], sample[&quot;objects&quot;][&quot;category&quot;]):</span></span><br><span class="line">        <span class="comment">#     x, y, w, h = tuple(bbox)</span></span><br><span class="line">        <span class="comment">#     if max(bbox) &gt; 1.0:</span></span><br><span class="line">        <span class="comment">#         x1, y1 = int(x), int(y)</span></span><br><span class="line">        <span class="comment">#         x2, y2 = int(x + w), int(y + h)</span></span><br><span class="line">        <span class="comment">#     else:</span></span><br><span class="line">        <span class="comment">#         raise NotImplementedError</span></span><br><span class="line">        <span class="comment">#     draw.rectangle((x1, y1, x2, y2), outline=&quot;red&quot;)</span></span><br><span class="line">        <span class="comment">#     draw.text((x1, y1), str(id2label[category]), fill=&quot;red&quot;)</span></span><br><span class="line">        <span class="comment"># image.show()</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> bbox, category <span class="keyword">in</span> <span class="built_in">zip</span>(sample[<span class="string">&quot;objects&quot;</span>][<span class="string">&quot;bbox&quot;</span>], sample[<span class="string">&quot;objects&quot;</span>][<span class="string">&quot;category&quot;</span>]):</span><br><span class="line"></span><br><span class="line">            x, y, w, h = <span class="built_in">tuple</span>(bbox)</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">max</span>(bbox) &gt; <span class="number">1.0</span>:</span><br><span class="line">                x1, y1 = <span class="built_in">int</span>(x), <span class="built_in">int</span>(y)</span><br><span class="line">                x2, y2 = <span class="built_in">int</span>(x + w), <span class="built_in">int</span>(y + h)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">raise</span> NotImplementedError</span><br><span class="line">            img_w, img_h = image.size</span><br><span class="line">            x_center = (x1 + x2) / <span class="number">2.0</span> / img_w</span><br><span class="line">            y_center = (y1 + y2) / <span class="number">2.0</span> / img_h</span><br><span class="line">            width = (x2 - x1) / img_w</span><br><span class="line">            height = (y2 - y1) / img_h</span><br><span class="line">            yolo_labels.append(</span><br><span class="line">                <span class="string">f&#x27;<span class="subst">&#123;category&#125;</span> <span class="subst">&#123;x_center&#125;</span> <span class="subst">&#123;y_center&#125;</span> <span class="subst">&#123;width&#125;</span> <span class="subst">&#123;height&#125;</span>&#x27;</span></span><br><span class="line">            )</span><br><span class="line">        image.save(pathlib.Path(__file__).parent.joinpath(</span><br><span class="line">            <span class="string">f&quot;images/<span class="subst">&#123;data_type&#125;</span>/<span class="subst">&#123;index&#125;</span>.jpg&quot;</span>))</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(pathlib.Path(__file__).parent.joinpath(<span class="string">f&quot;labels/<span class="subst">&#123;data_type&#125;</span>/<span class="subst">&#123;index&#125;</span>.txt&quot;</span>), <span class="string">&quot;w&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">            f.write(<span class="string">&quot;\n&quot;</span>.join(yolo_labels))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">cppe5_train = cppe5_to_yolo_format(cppe5[<span class="string">&quot;train&quot;</span>], data_type=<span class="string">&#x27;train&#x27;</span>)</span><br><span class="line">cppe5_test = cppe5_to_yolo_format(cppe5[<span class="string">&quot;test&quot;</span>], data_type=<span class="string">&#x27;test&#x27;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="2-2-配置文件data-yaml"><a href="#2-2-配置文件data-yaml" class="headerlink" title="2.2 配置文件data.yaml"></a>2.2 配置文件<code>data.yaml</code></h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">train:</span> <span class="string">/object_detection/yolo_impl/images/train</span></span><br><span class="line"><span class="attr">val:</span> <span class="string">/object_detection/yolo_impl/images/test</span></span><br><span class="line"><span class="attr">nc:</span> <span class="number">5</span></span><br><span class="line"><span class="attr">names:</span> [<span class="string">&quot;Coverall&quot;</span>, <span class="string">&quot;Face_Shield&quot;</span>, <span class="string">&quot;Gloves&quot;</span>, <span class="string">&quot;Goggles&quot;</span>, <span class="string">&quot;Mask&quot;</span>]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="3-启动YOLOv11模型训练"><a href="#3-启动YOLOv11模型训练" class="headerlink" title="3. 启动YOLOv11模型训练"></a>3. 启动YOLOv11模型训练</h3><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> os.path</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> ultralytics <span class="keyword">import</span> YOLO</span><br><span class="line"></span><br><span class="line">os.environ[<span class="string">&#x27;WANDB_DISABLED&#x27;</span>] = <span class="string">&#x27;true&#x27;</span></span><br><span class="line">os.environ[<span class="string">&#x27;YOLO_OFFLINE&#x27;</span>] = <span class="string">&#x27;true&#x27;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">model_path = <span class="string">&#x27;/object_detection/yolo_impl/yolo11n.pt&#x27;</span></span><br><span class="line"><span class="keyword">assert</span> os.path.exists(model_path)</span><br><span class="line"></span><br><span class="line">model = YOLO(model_path)</span><br><span class="line"></span><br><span class="line">model.train(</span><br><span class="line">    data=os.path.join(os.path.dirname(__file__), <span class="string">&#x27;data.yaml&#x27;</span>),</span><br><span class="line">    epochs=<span class="number">100</span>,             <span class="comment"># 训练轮数</span></span><br><span class="line">    imgsz=<span class="number">640</span>,              <span class="comment"># 输入图像尺寸</span></span><br><span class="line">    batch=<span class="number">64</span>,               <span class="comment"># 批量大小，根据显存可调</span></span><br><span class="line">    workers=<span class="number">4</span>,              <span class="comment"># 数据加载线程数</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 优化器与学习率</span></span><br><span class="line">    lr0=<span class="number">0.001</span>,              <span class="comment"># 初始学习率</span></span><br><span class="line">    lrf=<span class="number">0.01</span>,               <span class="comment"># 最低学习率（cosine decay 最终值）</span></span><br><span class="line">    optimizer=<span class="string">&#x27;SGD&#x27;</span>,        <span class="comment"># 优化器</span></span><br><span class="line">    weight_decay=<span class="number">0.0005</span>,    <span class="comment"># 权重衰减</span></span><br><span class="line">    warmup_epochs=<span class="number">3</span>,        <span class="comment"># 热身轮数</span></span><br><span class="line">    patience=<span class="number">20</span>,            <span class="comment"># 提前停止的容忍度</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 增强与正则</span></span><br><span class="line">    augment=<span class="literal">True</span>,           <span class="comment"># 启用数据增强</span></span><br><span class="line">    mosaic=<span class="number">1.0</span>,</span><br><span class="line">    mixup=<span class="number">0.1</span>,</span><br><span class="line">    hsv_h=<span class="number">0.015</span>,</span><br><span class="line">    hsv_s=<span class="number">0.7</span>,</span><br><span class="line">    hsv_v=<span class="number">0.4</span>,</span><br><span class="line">    scale=<span class="number">0.5</span>,</span><br><span class="line">    translate=<span class="number">0.1</span>,</span><br><span class="line">    degrees=<span class="number">0.0</span>,            <span class="comment"># 不启用旋转</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 损失函数超参</span></span><br><span class="line">    box=<span class="number">7.5</span>,                <span class="comment"># 边界框损失权重</span></span><br><span class="line">    cls=<span class="number">0.5</span>,                <span class="comment"># 类别损失权重</span></span><br><span class="line"></span><br><span class="line">    iou=<span class="number">0.2</span>,                <span class="comment"># IoU 阈值（用于损失计算）</span></span><br><span class="line"></span><br><span class="line">    device=<span class="number">0</span>                <span class="comment"># 使用GPU:0</span></span><br><span class="line"></span><br><span class="line">)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>📊 训练效果如下（示例）：</p>
+<img src="/2025/08/06/%E8%AE%A9YOLOv11%E7%A7%92%E6%87%82%E5%8F%A3%E7%BD%A9-%E6%89%8B%E5%A5%97-%E9%98%B2%E6%8A%A4%E6%9C%8D%EF%BC%9ACPPE5%E6%95%B0%E6%8D%AE%E9%9B%86%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97/image.png" class="训练结果">
+
+<h3 id="4-推理预测"><a href="#4-推理预测" class="headerlink" title="4. 推理预测"></a>4. 推理预测</h3><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> pathlib</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> ultralytics <span class="keyword">import</span> YOLO</span><br><span class="line"></span><br><span class="line">model = YOLO(pathlib.Path(__file__).parent.joinpath(</span><br><span class="line">    <span class="string">&quot;runs/detect/train/weights/best.pt&quot;</span></span><br><span class="line">    )</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">results = model.predict(</span><br><span class="line"></span><br><span class="line">    source=<span class="string">&#x27;/object_detection/yolo_impl/images/test&#x27;</span>,</span><br><span class="line">    save=<span class="literal">True</span></span><br><span class="line"></span><br><span class="line">)</span><br><span class="line"><span class="comment"># 处理结果</span></span><br><span class="line"><span class="keyword">for</span> result <span class="keyword">in</span> results:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;检测到的对象数量: <span class="subst">&#123;<span class="built_in">len</span>(result.boxes)&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">for</span> box, conf, cls <span class="keyword">in</span> <span class="built_in">zip</span>(result.boxes.xyxy, result.boxes.conf, result.boxes.cls):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;类别: <span class="subst">&#123;result.names[<span class="built_in">int</span>(cls)]&#125;</span>, 置信度: <span class="subst">&#123;conf:<span class="number">.2</span>f&#125;</span>, 坐标: <span class="subst">&#123;box&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;类别: <span class="subst">&#123;result.names[<span class="built_in">int</span>(cls)]&#125;</span>, 置信度: <span class="subst">&#123;conf:<span class="number">.2</span>f&#125;</span>, 坐标: <span class="subst">&#123;box&#125;</span>&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>🔍 示例结果：</p>
+<table>
+<thead>
+<tr>
+<th><img src="/2025/08/06/%E8%AE%A9YOLOv11%E7%A7%92%E6%87%82%E5%8F%A3%E7%BD%A9-%E6%89%8B%E5%A5%97-%E9%98%B2%E6%8A%A4%E6%9C%8D%EF%BC%9ACPPE5%E6%95%B0%E6%8D%AE%E9%9B%86%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97/0.jpg" class="" title="0.jpg"></th>
+<th><img src="/2025/08/06/%E8%AE%A9YOLOv11%E7%A7%92%E6%87%82%E5%8F%A3%E7%BD%A9-%E6%89%8B%E5%A5%97-%E9%98%B2%E6%8A%A4%E6%9C%8D%EF%BC%9ACPPE5%E6%95%B0%E6%8D%AE%E9%9B%86%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97/28.jpg" class="" title="28.jpg"></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>预测结果1</td>
+<td>预测结果2</td>
+</tr>
+</tbody></table>
+<h3 id="✅-总结"><a href="#✅-总结" class="headerlink" title="✅ 总结"></a>✅ 总结</h3><p>恭喜你，现在你已经掌握了如何用YOLOv11快速完成PPE检测模型训练与推理，下一步可以尝试：</p>
+<ul>
+<li>加入你的实际工业&#x2F;医疗图像</li>
+<li>微调超参数</li>
+<li>部署模型到边缘设备</li>
+</ul>
+<p>📬 有问题欢迎评论交流，觉得有用记得一键三连 🙌！</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2025/08/06/%E8%AE%A9YOLOv11%E7%A7%92%E6%87%82%E5%8F%A3%E7%BD%A9-%E6%89%8B%E5%A5%97-%E9%98%B2%E6%8A%A4%E6%9C%8D%EF%BC%9ACPPE5%E6%95%B0%E6%8D%AE%E9%9B%86%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-从LLM自主探索到LangGraph流程驱动：深度研究的两种范式" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1139,86 +1278,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2024/06/19/SHAP%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E8%A7%A3%E9%87%8A/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-DPO" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2024/05/08/DPO/">DPO</a>
-    </h1>
-  
-
-        
-        <a href="/2024/05/08/DPO/" class="archive-article-date">
-  	<time datetime="2024-05-08T03:03:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-05-08</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>DPO全称Direct Preference Optimization，它是RLHF算法的一种，相比PPO算法来讲，它只需要actor和ref model,少了critic和reward model。其核心期望为good loss - bad loss越来越大， 这点和排序模型中的rank loss很相似，但是又不希望和ref model偏差太多。</p>
-<h2 id="最小实现代码"><a href="#最小实现代码" class="headerlink" title="最小实现代码"></a>最小实现代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">from</span> copy <span class="keyword">import</span> deepcopy</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> AutoModelForCausalLM, LlamaForCausalLM, LlamaConfig</span><br><span class="line"></span><br><span class="line">torch.manual_seed(<span class="number">0</span>)</span><br><span class="line"><span class="comment"># 超参数</span></span><br><span class="line">beta = <span class="number">0.1</span></span><br><span class="line"><span class="comment"># 加载模型</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># data</span></span><br><span class="line">prompt_ids = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]</span><br><span class="line">good_response_ids = [<span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>]</span><br><span class="line"><span class="comment"># 对loss稍加修改可以应对一个good和多个bad的情况</span></span><br><span class="line">bad_response_ids_list = [[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">0</span>], [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">0</span>]]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换成模型输入</span></span><br><span class="line">input_ids = torch.LongTensor(</span><br><span class="line">    [prompt_ids + good_response_ids, *[prompt_ids + bad_response_ids <span class="keyword">for</span> bad_response_ids <span class="keyword">in</span> bad_response_ids_list]]</span><br><span class="line">)</span><br><span class="line"><span class="comment"># labels 提前做个shift</span></span><br><span class="line">labels = torch.LongTensor(</span><br><span class="line">    [</span><br><span class="line">        [-<span class="number">100</span>] * <span class="built_in">len</span>(prompt_ids) + good_response_ids,</span><br><span class="line">        *[[-<span class="number">100</span>] * <span class="built_in">len</span>(prompt_ids) + bad_response_ids <span class="keyword">for</span> bad_response_ids <span class="keyword">in</span> bad_response_ids_list]</span><br><span class="line">    ]</span><br><span class="line">)[:, <span class="number">1</span>:]</span><br><span class="line">loss_mask = (labels != -<span class="number">100</span>)</span><br><span class="line">labels[labels == -<span class="number">100</span>] = <span class="number">0</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">policy_model = LlamaForCausalLM(config=LlamaConfig(vocab_size=<span class="number">1000</span>, num_hidden_layers=<span class="number">1</span>, hidden_size=<span class="number">128</span>))</span><br><span class="line">reference_model = deepcopy(policy_model)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算 policy model的log prob</span></span><br><span class="line">logits = policy_model(input_ids)[<span class="string">&quot;logits&quot;</span>][:, :-<span class="number">1</span>, :]</span><br><span class="line">per_token_logps = torch.gather(logits.log_softmax(-<span class="number">1</span>), dim=<span class="number">2</span>, index=labels.unsqueeze(<span class="number">2</span>)).squeeze(<span class="number">2</span>)</span><br><span class="line">all_logps = (per_token_logps * loss_mask).<span class="built_in">sum</span>(-<span class="number">1</span>)</span><br><span class="line"><span class="comment"># 暂时写死第一个是good response的概率</span></span><br><span class="line">policy_good_logps, policy_bad_logps = all_logps[:<span class="number">1</span>], all_logps[<span class="number">1</span>:]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算 reference model的log prob</span></span><br><span class="line"><span class="keyword">with</span> torch.no_grad():</span><br><span class="line">    logits = reference_model(input_ids)[<span class="string">&quot;logits&quot;</span>][:, :-<span class="number">1</span>, :]</span><br><span class="line">    per_token_logps = torch.gather(logits.log_softmax(-<span class="number">1</span>), dim=<span class="number">2</span>, index=labels.unsqueeze(<span class="number">2</span>)).squeeze(<span class="number">2</span>)</span><br><span class="line">    all_logps = (per_token_logps * loss_mask).<span class="built_in">sum</span>(-<span class="number">1</span>)</span><br><span class="line">    <span class="comment"># 暂时写死第一个是good response的概率</span></span><br><span class="line">    reference_good_logps, reference_bad_logps = all_logps[:<span class="number">1</span>], all_logps[<span class="number">1</span>:]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算loss，会自动进行广播</span></span><br><span class="line">logits = (policy_good_logps - reference_good_logps) - (policy_bad_logps - reference_bad_logps)</span><br><span class="line">loss = -F.logsigmoid(beta * logits).mean()</span><br><span class="line"><span class="built_in">print</span>(loss)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
-<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/642569664">知乎介绍1</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/huggingface/trl/blob/3b4c24946b7d5580fd354b0e3800fc1047b82a41/trl/trainer/dpo_trainer.py#L965">trl dpo loss计算</a></li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2024/05/08/DPO/">展开全文 >></a>
         </p>
       
 

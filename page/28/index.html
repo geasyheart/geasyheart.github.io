@@ -206,6 +206,111 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-06-02sed命令" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/09/06-02sed%E5%91%BD%E4%BB%A4/">06_02sed命令</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/09/06-02sed%E5%91%BD%E4%BB%A4/" class="archive-article-date">
+  	<time datetime="2015-02-09T15:19:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-09</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>grep&#x2F;sed&#x2F;awk </p>
+<p>sed(流编辑器)： </p>
+<blockquote>
+<p>stream edittor<br>行编辑器 vim：全屏编辑器<br>逐行处理<br>sed：模式空间<br>默认情况下不编辑原文件，仅对模式空间中的数据做处理，<br>而后，处理结束后，将模式空间打印到屏幕上；<br>sed [options]”AddressCommand“ file…<br>-n:静默模式，不再默认显示模式空间中的内容<br>-i：直接修改原文件<br>-e：SCRIPT -e SCRIPT：可以同时-e ‘AddressCommand’ -e ‘AddressCommand’<br>-f: &#x2F;PATH&#x2F;TO&#x2F;SED_SCRIPT<br>sed -f &#x2F;path&#x2F;to&#x2F;script file (就是拿路径下的脚本对file进行操作)<br>-r：表示使用扩展正则表达式<br>或者：<br> sed ‘AddressCommand’ file…(两者的区别，在于需不需要转义)<br>Address: </p>
+</blockquote>
+<ol>
+<li>StartLine,EndLine<br> 比如1，100 </li>
+<li>&#x2F;RegExp&#x2F;<br> &#x2F;^root&#x2F; </li>
+<li>&#x2F;pattern1&#x2F;,&#x2F;pattern2&#x2F;<br> 第一次被pattern匹配到的行开始，至第一次被pattern2匹配到的行结束， </li>
+<li>LineNumber<br> 指定的行 </li>
+<li>StartLine，+N<br> 从startline开始，向后的N行</li>
+</ol>
+<p>Command：<br> d:删除符合条件的行；<br> (比如删除&#x2F;etc&#x2F;fstab的前两行 sed “1,2d” &#x2F;etc&#x2F;fstab)<br> (比如删除第3行至最后一行，sed ‘3,$d’ &#x2F;etc&#x2F;fstab，，(补充，换成“”就会出错))<br> （比如包含dev的行都给删除掉，sed ‘&#x2F;dev&#x2F;d’ &#x2F;etc&#x2F;fstab）<br> (比如删除从第1行往后两行，sed ‘1,+2d’ &#x2F;etc&#x2F;fstab)<br> (比如删除含有&#x2F;dev的行， sed ‘&#x2F;dev/&#x2F;d’ &#x2F;etc&#x2F;fstab)<br> (比如删除含有&#x2F;dev&#x2F;的行，sed ‘&#x2F;/dev/&#x2F;d’ &#x2F;etc&#x2F;fstab(补充，如这两个，要进行转义))<br> p:显示符合条件的行<br> (比如显示文件中(a.txt只有a,b,c,d)中的a， sed ‘&#x2F;a&#x2F;p’ a.txt,会把符合条件的显示两遍，<br> 而不符合的，也会显示出来，这个就叫做在模式空间中符合条件的打印出来，但同时也会把原文件打印出来，<br> 而删除会在模式空间中把文件中符合条件的删除后进行显示，所以不会有这种情况，所以，为了只显示符合条件<br> 的内容，使用-n选项，即上面说的静默模式)<br> a \string：在指定的行后面追加新行，内容为”string”<br> (比如最前面是&#x2F;的前面添加# hello world以及换行添加hello Easy,sed ‘&#x2F;^/&#x2F;a # hello world \n hello Easy ‘ &#x2F;etc&#x2F;fstab)<br> i \string:在指定的行前面添加新行，内容为string<br> r filename:将指定的文件的内容添加至符合条件的行处 <br> (比如，将&#x2F;etc&#x2F;login.defs文件内容添加至&#x2F;etc&#x2F;fstab的第2行处，sed ‘2r &#x2F;etc&#x2F;login.defs’ &#x2F;etc&#x2F;fstab)<br> （比如，添加到最后，sed ‘$r &#x2F;etc&#x2F;login.defs’ &#x2F;etc&#x2F;fstab）<br> w filename:将指定范围内的内容另存至指定的文件中；<br> (比如，将&#x2F;etc&#x2F;fstab 中含有oot行存至&#x2F;tmp&#x2F;oot.txt,,sed ‘&#x2F;oot&#x2F;w &#x2F;tmp&#x2F;oot.txt’ &#x2F;etc&#x2F;fstab)<br> s &#x2F;pattern&#x2F;string&#x2F;:查找并替换每一行中第一次被模式匹配到的串<br> (查找&#x2F;etc&#x2F;fstab中含有oot的字符换为OOT，，sed ‘s&#x2F;oot&#x2F;OOT’ &#x2F;etc&#x2F;fstab)<br> 如果每一行中所有含有oot的都替换，可以加<br> 修饰符：<br> g(全局替换) sed ‘s&#x2F;oot&#x2F;OOT&#x2F;g’ &#x2F;etc&#x2F;fstab<br> i(忽略大小写)<br> (比如要替换文件中凡是含有l..e的字符替换成l..er,(如like要替换成liker) sed ‘s&#x2F;l..e&#x2F;&amp;r&#x2F;g’ &#x2F;etc&#x2F;fstab)<br> (比如要替换所有l..e的字符替换成L..e(like换成Like) sed ‘s&#x2F;l(..e)\L\1&#x2F;g’ &#x2F;etc&#x2F;fstab)(后项引用) </p>
+<p>练习： </p>
+<ol>
+<li>删除&#x2F;etc&#x2F;grub.conf文件中行首的空白符 </li>
+<li>替换&#x2F;etc&#x2F;inittab文件中”id：3：initdefault：“一行中的数字5 </li>
+<li>删除&#x2F;etc&#x2F;inittab文件中的空白行 </li>
+<li>删除&#x2F;etc&#x2F;inittab文件中开头的#号 </li>
+<li>取出一个文件路径的目录名称</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/09/06-02sed%E5%91%BD%E4%BB%A4/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-06-01bash脚本编程之四-整数测试及特殊变量" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     

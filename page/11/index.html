@@ -206,6 +206,84 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-tmux后台运行" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/01/11/tmux%E5%90%8E%E5%8F%B0%E8%BF%90%E8%A1%8C/">tmux后台运行</a>
+    </h1>
+  
+
+        
+        <a href="/2020/01/11/tmux%E5%90%8E%E5%8F%B0%E8%BF%90%E8%A1%8C/" class="archive-article-date">
+  	<time datetime="2020-01-10T21:27:26.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-01-11</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>假设训练GPU不在自己机子上（悲伤脸），远程连接后，直接<code>python train.py</code>，但是如果一旦网络不稳定导致ssh断了，那这训练了一两天的心血可就白费了，所以需要一种简便的方式来后台运行，实现方式有多种，作为一个守护进程，比如supervisor或者systemctl那一些，但是对于算法人员来说这些都太复杂而不简单使用，所以此处推荐tmux。</p>
+<p>使用步骤：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ tmux</span><br><span class="line">$(tmux) <span class="built_in">source</span> venv/bin/activate</span><br><span class="line">$(tmux) python train.py</span><br><span class="line">$(tmux) 快捷键 `ctrl + b`，然后不松开按`d`</span><br><span class="line">0: 1 windows (created .....) [215x57]</span><br><span class="line">$ tmux <span class="built_in">ls</span></span><br><span class="line">0: 1 windows (created .....) [215x57]</span><br><span class="line"></span><br><span class="line">$ tmux attach -t 0 <span class="comment"># 进入到tmux</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>万事大吉，退出ssh后训练保持运行。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2020/01/11/tmux%E5%90%8E%E5%8F%B0%E8%BF%90%E8%A1%8C/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-转-谈爬虫反爬虫套路" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1578,91 +1656,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2018/12/06/%E4%B8%8A%E6%B5%B7%E8%B1%AB%E5%9B%AD/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-挤成狗" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/11/05/%E6%8C%A4%E6%88%90%E7%8B%97/">挤成狗</a>
-    </h1>
-  
-
-        
-        <a href="/2018/11/05/%E6%8C%A4%E6%88%90%E7%8B%97/" class="archive-article-date">
-  	<time datetime="2018-11-05T04:05:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-11-05</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <img src="/2018/11/05/%E6%8C%A4%E6%88%90%E7%8B%97/IMG_20181105_074917.jpg" class="" title="1...">
-<img src="/2018/11/05/%E6%8C%A4%E6%88%90%E7%8B%97/IMG_20181105_074920.jpg" class="" title="2...">
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">小桥流水人家</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/小桥流水人家//" class="article-tag-list-link color2">小桥流水人家</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/11/05/%E6%8C%A4%E6%88%90%E7%8B%97/">展开全文 >></a>
         </p>
       
 

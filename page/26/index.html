@@ -206,6 +206,110 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-13-03linux进程管理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/25/13-03linux%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86/">13_03linux进程管理</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/25/13-03linux%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86/" class="archive-article-date">
+  	<time datetime="2015-02-25T14:25:05.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-25</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="第一部分"><a href="#第一部分" class="headerlink" title="第一部分"></a>第一部分</h2><p>线性内存<br>物理内存<br>内存空间分成两段:内核空间和用户空间<br>关于更多，可参考这个:<br><a target="_blank" rel="noopener" href="http://blog.csdn.net/fengyv/article/details/721694">http://blog.csdn.net/fengyv/article/details/721694</a> </p>
+<p>进程状态<br>父子关系<br>优先级关系<br> 0<del>139(140个运行级别，数字越小runlevel越高)<br> 0</del>99:内核调整的<br> 100<del>139:用户控制的<br> 优先级越高，意味着:<br> 1、获得更多的CPU运行时间<br> 2、更优先获得运行的机会<br> 100</del>139:<br> nice值:优雅的，友好的<br> -20<del>19对应100</del>139<br> 默认的是0<br> 普通用户仅能够调大自己的进程的nice值<br> 而系统员可以随意调整<br>init:进程号为1<br>PID:Process ID<br> &#x2F;proc目录下以数字命名的文件表示一个PID(number)进程。<br> cat cmdline可以查看哪个进程 </p>
+<h2 id="第二部分"><a href="#第二部分" class="headerlink" title="第二部分"></a>第二部分</h2><p>ps:Process State<br> SysV风格:-<br> e:<br> l<br> F<br> BSD风格:<br> a:BSD风格,显示所有与终端有关的进程<br> u:显示运行进程的用户<br> x:显示所有与终端无关的进程 </p>
+<p> 进程的分类:<br> 跟终端相关的进程<br> 跟终端无关的进程<br> 进程状态:<br> D:不可中断的睡眠<br> R:运行或就绪<br> S:可中断的睡眠<br> T:停止<br> Z:僵死<br> &lt;:高优先级进程<br> N:低优先级进程<br> +:前台进程组的进程<br> l:多线程进程<br> s:会话进程<br><a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/Ps_(Unix)%E5%8F%AF%E5%8F%82%E8%80%83%E4%B8%8B%E8%BF%99%E4%B8%AA">http://zh.wikipedia.org/wiki/Ps_(Unix)可参考下这个</a><br>USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND<br>用户 虚拟内存集 常驻内存集 进程状态 启动时间 运行时常 []的进程表示内核的线程 </p>
+<h2 id="第三部分"><a href="#第三部分" class="headerlink" title="第三部分"></a>第三部分</h2><p>pstree:显示进程树<br>pgrep: ps和grep结合<br>pkill: ps和kill结合<br>pidof:根据程序名称，查找其相关进程的ID号。 </p>
+<h2 id="第四部分"><a href="#第四部分" class="headerlink" title="第四部分"></a>第四部分</h2><p>关于top的详解可直接参考:<a target="_blank" rel="noopener" href="http://baike.baidu.com/link?url=6wRKY-hOdHNh0c_5BUm3NCBx8dpRX3V5ZlC51XFaslspdIzBe2xLo97w5AoeszYqAYE0rMKb4PfB1pEooy5bXq">http://baike.baidu.com/link?url=6wRKY-hOdHNh0c_5BUm3NCBx8dpRX3V5ZlC51XFaslspdIzBe2xLo97w5AoeszYqAYE0rMKb4PfB1pEooy5bXq</a><br>top:<br>先敲top，再敲选项 </p>
+<blockquote>
+<p>M:根据memory使用<br>P:根据CPU使用百分比进行排序<br>T:根据累计时间进行排序<br>l:根据显示平均负载和启动时间<br>t:是否显示进行和CPU状态相关信息<br>m:是否显示内存相关信息<br>c:是否显示完整的命令行信息<br>q:退出top<br>k:终止某个进程<br>1:多U多核逻辑CPU监控<br>top <br> -d :刷新时常<br> -b:批模式<br> -n #:在批模式下，共显示多少批 </p>
+</blockquote>
+<h2 id="第五部分"><a href="#第五部分" class="headerlink" title="第五部分"></a>第五部分</h2><p>进程间通信(IPC:Inter Process Communication)<br> 共享内存<br> 信号:signal<br> Semaphore:旗语 </p>
+<p>重要的信号:<br>1:SIGHUP:让一个进程不用重启，就可以重读其配置信息，并让新的配置信息生效<br>2:SIGINT:终止 如:Ctrl +c<br>9:SIGKILL:杀死一个进程<br>15:SIGTERM:终止一个进程 </p>
+<p>指定一个信号:<br> 信号号码:kill -l<br> 信号名称:kill -SIGKILL<br> 信号名称简写:kill -KILL </p>
+<p>kill PID<br>killall COMMAND </p>
+<p>调整nice值:<br>调整已经启动的进程的nice值:<br> renice NI　PID<br> renice 3 3704<br> renice -3 3704<br>调整没有启动的进程的nice值:<br> nice -n NI COMMAND </p>
+<p>前台作业:占据了命令提示符<br>后台作业:启动之后，释放命令提示符，后续的操作在后台完成 </p>
+<p>前台–&gt;后台:<br> Ctrl +z :把正在前台作业的转向后台<br> fg:将后台的作业调回前台<br> COMMAND &amp; :让命令在后台执行 </p>
+<p>bg:让后台的停止作业继续运行 </p>
+<p>jobs:查看后台的所有作业<br> 作业号，不同于进程号<br> +:命令将默认操作的作业<br> kill %JOBID 终止某作业<br> -:命令将第二个默认操作的作业 </p>
+<p>如：vim test.txt<br>this is a test!!<br>Ctrl +z 将其转到后台运行<br>然后使用jobs可查看后台运行的作业<br>fg会使其转到前台作业上。 </p>
+<h2 id="第六部分"><a href="#第六部分" class="headerlink" title="第六部分"></a>第六部分</h2><p>vmstat:系统状态查看命令<br>vmstat 命令报告关于内核线程、虚拟内存、磁盘、陷阱和 CPU 活动的统计信息。<br>由 vmstat 命令生成的报告可以用于平衡系统负载活动。<br>更多可参考这个:<br> <a target="_blank" rel="noopener" href="http://baike.baidu.com/view/1839408.htm">http://baike.baidu.com/view/1839408.htm</a>  </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/25/13-03linux%E8%BF%9B%E7%A8%8B%E7%AE%A1%E7%90%86/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-11-04linux网络配置之四ifconfig及ip命令详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1152,100 +1256,6 @@ traceroute:
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/02/15/09-02%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E5%9B%9B/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-09-01磁盘及文件系统管理详解之三" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/15/09-01%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%B8%89/">09_01磁盘及文件系统管理详解之三</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/15/09-01%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%B8%89/" class="archive-article-date">
-  	<time datetime="2015-02-14T16:28:55.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-15</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>用户模式:用户空间<br>内核模式: </p>
-<p>文件系统是内核的功能<br>由于VFS的存在，使linux支持多种文件系统 </p>
-<p>磁盘一部分存元数据，(matadata):inode;另外存放数据. </p>
-<p>块的大小(block size):<br> 1KB 2KB 4KB   2^n次方大小 </p>
-<p>inode的大小还要由块的大小来决定  </p>
-<p>软链接一般不会需要block<br>设备文件不会用到block </p>
-<p>bitmap:查找数据的一种重要方式<br> inode bitmap<br> block bitmap </p>
-<p>ext2 和 ext3的最大区别是:<br> ext3是日志文件系统(journal file system) </p>
-<p>Super block： 可以使用dumpe2fs -h进行查看<br>它是硬盘分区开头——开头的第一个byte是byte 0，<br>从 byte 1024开始往后的一部分数据。<br>由于 block size最小是 1024 bytes，所以super block可能是在block 1中（此时block 的大小正好是 1024 bytes），<br>也可能是在block 0中。 超级块中的数据其实就是文件卷的控制信息部分，<br>也可以说它是卷资源表，有关文件卷的大部分信息都保存在这里。<br>例如：硬盘分区中每个block的大小、硬盘分区上一共有多少个<br>block group、以及每个block group中有多少个inode。<br>摘自:<br><a target="_blank" rel="noopener" href="http://baike.baidu.com/link?url=vkyx7jTxTT5yBt_I29X13auWsh9vRO8dD2LRf4-VYSJEpJhy-Z035-awqti-5udLRTB9m8Bd3a8Wk5-4n2Fc9q">http://baike.baidu.com/link?url=vkyx7jTxTT5yBt_I29X13auWsh9vRO8dD2LRf4-VYSJEpJhy-Z035-awqti-5udLRTB9m8Bd3a8Wk5-4n2Fc9q</a> 
- </p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/15/09-01%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%B8%89/">展开全文 >></a>
         </p>
       
 

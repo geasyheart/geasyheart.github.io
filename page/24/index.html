@@ -206,6 +206,135 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-18-01-2-防火墙的基本概念" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/03/26/18-01-2-%E9%98%B2%E7%81%AB%E5%A2%99%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/">18_01_2_防火墙的基本概念</a>
+    </h1>
+  
+
+        
+        <a href="/2015/03/26/18-01-2-%E9%98%B2%E7%81%AB%E5%A2%99%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/" class="archive-article-date">
+  	<time datetime="2015-03-26T14:51:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-26</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>说明：《Linux网络安全技术与实现》<br>以下内容均来自此书第1章，因好奇，故摘取一部分，如果有需要，均可直接参阅此书，无需读以下内容。 </p>
+<p>TCP&#x2F;IP的基本概念:</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/TCP/IP%E5%8D%8F%E8%AE%AE%E6%97%8F(%E5%8F%AF%E7%9B%B4%E6%8E%A5%E5%8F%82%E8%80%83%E8%BF%99%E4%B8%AA)">http://zh.wikipedia.org/wiki/TCP/IP%E5%8D%8F%E8%AE%AE%E6%97%8F(可直接参考这个)</a> </p>
+</blockquote>
+<ol>
+<li>应用层(Application Layer) </li>
+<li>传输层(Transport Layer) <blockquote>
+<p>传输层用于定义数据传输方法，传输层主要定义了两种通信协议，分别是TCP协议和UDP协议 </p>
+</blockquote>
+</li>
+<li>网络层(Network Layer) <blockquote>
+<p>使用IP(Internet Protocol)地址来定位网络上的每一台计算机，并采用路由(Routing)方法决定数据传输路径，将数据传输到正确的目的端 </p>
+</blockquote>
+</li>
+<li>链路层(Link Layer) <blockquote>
+<p>链路层又称数据链路层(Data Link)或网络接入层(Network Interface)，也就是网络的基础设施，它可能是以太网(Ethernet)&#x2F;光纤(Fiber)&#x2F;无线网络(Wireless)&#x2F;帧中继(Frame Relay)或者点对点(PPP)等实体网络。</p>
+</blockquote>
+</li>
+</ol>
+<p>TCP&#x2F;IP&#x2F;Socket之间的关系 </p>
+<blockquote>
+<p>Socket是指一个上面有很多“洞”的东西，而Socket上面的这些洞，则称为端口。在OS的网络系统中会有两个Socket，分别是TCP Socket及UDP Socket，Socket上各有65536个洞，由0开始算起，<br>其范围是0<del>65535,称之为Port 0 ~ Port 65535.<br>公认的端口:0</del>1023<br>注册的端口:1024<del>49151<br>动态端口:49152</del>65535 </p>
+</blockquote>
+<p>注册的端口 </p>
+<blockquote>
+<p>可以到IANA的网站上，选用一个没有其他应用程序在使用的端口，并将其注册下来。 </p>
+</blockquote>
+<p>动态端口 </p>
+<blockquote>
+<p>通常供临时使用，例如:几乎所有客户端应用程序都会使用动态端口，当客户端应用程序启动时，系统就会分配一个“动态端口”给该应用程序来使用，当应用程序结束时，即会把占用的端口归还给系统。 </p>
+</blockquote>
+<p>防火墙: </p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/%E9%98%B2%E7%81%AB%E5%A2%99%EF%BC%88%E5%8F%AF%E7%9B%B4%E6%8E%A5%E5%8F%82%E8%80%83%E8%BF%99%E4%B8%AA%EF%BC%89">http://zh.wikipedia.org/wiki/%E9%98%B2%E7%81%AB%E5%A2%99（可直接参考这个）</a><br>规则(rule)：转发或者不转发，过滤或者不过滤<br>数据包过滤(Packet Level Filter)防火墙<br>应用层(Application Level Filter)防火墙 </p>
+</blockquote>
+<p>常见的防火墙结构: </p>
+<blockquote>
+<p>单机防火墙:<br>ADSL–&gt;NAT–&gt;内部网络<br>   –&gt;开放的环境(公网IP主机)<br>如如果企业选择ADSL上网，第一个公网IP通常会分配给网络地址转换器(Network Address Translation,NAT)来使用，而整个企业的内部网络就隐藏在NAT之后，另外的公网IP就直接给企业的服务主机使用。由于公网的主机没有架设防火墙，使其直接暴露在因特网上，任何来自互联网的攻击行为，均有其自己承担。所以这种方式相当不安全。 </p>
+<p>网关式防火墙1:<br>ADSL–&gt;防火墙–&gt;企业内部网络<br>由于所有主机(包括对外提供的主机和内部主机)均在防火墙后，也许会好奇因特网上的用户怎么访问内网的主机，这个叫做一对一NAT：即在防火墙主机上设置3（两台对外主机）个ISP所分配的IP，而内部之使用192.168.1.0&#x2F;24这个私有IP段，并且设置Mail和web主机上设置192.168.1.1和192.168.1.2两个私有IP，然后在防火墙主机上设置如果访问mail就直接转到1.1主机上，&gt;如果访问web，就转到1.2主机上。<br>由于均在内网，当用户访问web服务器即在内网，就会造成私有主机有很大的安全性，这种方式不会使用。 </p>
+<p>网关式防火墙2：<br>多加一块网卡，使网关式防火墙1的对外主机和私有内部主机不在同一IP段内。 </p>
+<p>网关式防火墙3:<br>ADSL–&gt;防火墙1–&gt;对外服务器<br>    –&gt;防火墙2–&gt;内部主机<br>这种方式由于采用两台防火墙，安全性也就相对提升，不过，务必选用两家不同的产品。 </p>
+<p>透明防火墙:<br>由于在网关式防火墙中，不管哪一种类型，防火墙本身就是一个路由器，因此在部署防火墙时，必须考虑路由问题。<br>透明防火墙就是一个网桥设备，并且在网桥设备上赋予了过滤器(Filter)功能，因为网桥是工作在OSI第二层的网络设备，因此不存在任何路由设备，并且网桥上可以不需要设置任何IP，如此就没有路由的问题，又因为防火墙主机本身无需设置IP，所以透明防火墙的部署能力相当强，隐蔽性相当高，即便黑客要攻击这个防火墙，也可能会因为没有目的段IP而无功而返。 
+ </p>
+</blockquote>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/03/26/18-01-2-%E9%98%B2%E7%81%AB%E5%A2%99%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-17-03sudo详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1236,126 +1365,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/03/20/17-01-2-PXE%E8%87%AA%E5%8A%A8%E5%8C%96%E5%AE%89%E8%A3%85/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-16-03-2-Linux日志文件系统rsyslog以及logrotate" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/19/16-03-2-Linux%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9Frsyslog%E4%BB%A5%E5%8F%8Alogrotate/">16_03_2_Linux日志文件系统rsyslog以及logrotate</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/19/16-03-2-Linux%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9Frsyslog%E4%BB%A5%E5%8F%8Alogrotate/" class="archive-article-date">
-  	<time datetime="2015-03-19T02:55:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-19</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Rsyslog:<br>本篇文章更多参考(如有需要，可直接参阅原文):<br><a target="_blank" rel="noopener" href="http://zm10.sm-img2.com/?src=http://w.gdu.me/wiki/Linux/rsyslog_logrotate.html&uid=841f32121bbc0a168eee69bf5ffa880b&hid=6af25f4f8c2beab005677505e0e448b7&pos=8&cid=9&time=1426647358140&from=click&restype=1&pagetype=0000000000000402&uc_param_str=pidi">http://zm10.sm-img2.com/?src=http%3A%2F%2Fw.gdu.me%2Fwiki%2FLinux%2Frsyslog_logrotate.html&amp;uid=841f32121bbc0a168eee69bf5ffa880b&amp;hid=6af25f4f8c2beab005677505e0e448b7&amp;pos=8&amp;cid=9&amp;time=1426647358140&amp;from=click&amp;restype=1&amp;pagetype=0000000000000402&amp;uc_param_str=pidi</a> </p>
-<p>补充:rsyslog为了在使用上能够和syslog保持一致，很多地方可直接参考syslog。。 </p>
-<p>目前RHEL6+已經使用的是rsyslog，是syslogd的多线程增强版。<br>rsyslog负责写入日志，logrotate负责备份和删除旧日志，以及更新日志文件&#x2F;日志分割等。。 </p>
-<p>測試環境:centos 6.5 </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">#rsyslogd -v </span><br><span class="line">rsyslogd 5.8.10, compiled with: </span><br><span class="line"> FEATURE_REGEXP: Yes </span><br><span class="line"> FEATURE_LARGEFILE: No </span><br><span class="line"> GSSAPI Kerberos 5 support: Yes </span><br><span class="line"> FEATURE_DEBUG (debug build, slow code): No </span><br><span class="line"> 32bit Atomic operations supported: Yes </span><br><span class="line"> 64bit Atomic operations supported: Yes </span><br><span class="line"> Runtime Instrumentation (slow code): No </span><br><span class="line"> </span><br><span class="line">See http://www.rsyslog.com for more information. </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
-
-<p>rsyslog: </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#service rsyslog status 默认是开启的 </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>配置文件: </p>
-<blockquote>
-<p>&#x2F;etc&#x2F;sysconfig&#x2F;rsyslog<br>&#x2F;etc&#x2F;rsyslog.conf </p>
-</blockquote>
-<p>&#x2F;etc&#x2F;sysconfig&#x2F;rsyslog </p>
-<blockquote>
-<p>rsyslog处理大量日志接收时，总是会延迟，说有dns解析的问题。然后man了下rsyslogd，发现有-Q -x参数可以屏蔽dns解析。改下启动脚本<br>SYSLOGD_OPTIONS&#x3D;”-c 5 -Q -x”<br>-Q do not resolve hostnames during ACL processing(需要说明，这个可以直接参考syslog，不过在这有个好奇，就是在syslog文章中指出为了不进行解析，使用-x选项，man rsyslogd 得到-Q解释，不知其意义何在，如有幸得告知，请留言说明，谢谢。) </p>
-</blockquote>
-<p>&#x2F;etc&#x2F;rsyslog.conf </p>
-<blockquote>
-<p> Provides UDP syslog reception<br> 允许514端口接收使用UDP协议转发过来的日志<br>$ModLoad imudp.so<br>$UDPServerRun 514<br> <br> Provides TCP syslog reception<br> 允许514端口接收使用TCP协议转发过来的日志<br>$ModLoad imtcp.so<br>$InputTCPServerRun 514 </p>
-</blockquote>
-<p> @@表示通过tcp协议发送  @表示通过udp进行转发 </p>
-<h2 id="实例-remote-log-远程发送与接收"><a href="#实例-remote-log-远程发送与接收" class="headerlink" title="实例: remote log 远程发送与接收"></a>实例: remote log 远程发送与接收</h2><blockquote>
-<p>只要在rsyslog.conf中加入 </p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">*.* @192.168.0.10 </span><br><span class="line">*.* @192.168.0.10:10514     # 带端口号(如果修改了端口) </span><br><span class="line">*.* @@192.168.0.10          # TCP </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
-<ol>
-<li>參考一:关于rsyslog队列介绍及配置<br><a target="_blank" rel="noopener" href="http://blog.chinaunix.net/uid-773723-id-3900229.html">http://blog.chinaunix.net/uid-773723-id-3900229.html</a> </li>
-<li>参考二:rsyslog日志服务安装与写入到MySQL数据库<br><a target="_blank" rel="noopener" href="http://www.linuxidc.com/Linux/2014-06/103364.htm">http://www.linuxidc.com/Linux/2014-06/103364.htm</a></li>
-</ol>
-<p>logrotate:<br> &#x2F;etc&#x2F;logrotate.conf<br>logrotate服务<br>    rotate 轮换,日志切换<br>  logrotate是一个日志管理程序，用来把旧的日志文件删除（备份），并创建新的日志文件，这个过程称为”转储”。我们可以根据日志的大小，或者根据其使用的天数来转储。<br>    logrotate启动方式<br> logrotate 的执行由crond服务实现。在&#x2F;etc&#x2F;cron.daily目录中，有个文件logrotate，它实际上是个shell script，用来启动logrotate。logrotate程序每天由cron在指定的时间（&#x2F;etc&#x2F;crontab）启动。<br> 因此，使用ps是无法查看到logrotate的。如果它没有起来，就要查看一下crond服务有没有在运行。<br> 在执行logrotate时，需要指定其配置文件&#x2F;etc&#x2F;logrotate.conf<br> 这个配置文件的注释写得很清楚，没有必要再罗嗦了。只想强调下面这行，它的作用包含存放在&#x2F;etc&#x2F;logrotate.d目录下面的配置文件，不可或缺。如果你安装了一个新的服务，它的日志转储的规则可以建立一个专门的配置文件，放在&#x2F;etc&#x2F;logrotate.d下面。它其实也因为下面的这句话，在 logrotate服务启动时被读取。<br> 每个存放在&#x2F;etc&#x2F;logrotate.d目录里的文件，都有上面格式的配置信息。在{}中定义的规则，如果与logrotate.conf中的冲突，以&#x2F;etc&#x2F;logrotatate.d&#x2F;中的文件定义的为准。<br> logrotate启动脚本放在 &#x2F;etc&#x2F;cron.daily&#x2F;logrotate 中，可人工执行命令进行测试：<br> &#x2F;usr&#x2F;sbin&#x2F;logrotate-f &#x2F;etc&#x2F;logrotate.conf<br> dateext表示转储文件会以日期来结束* </p>
- <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">/etc/logrotate.conf </span><br><span class="line"> # see &quot;man logrotate&quot; for details </span><br><span class="line"> # rotate log files weekly </span><br><span class="line"> </span><br><span class="line"> weekly          #–每周轮转一次 </span><br><span class="line"> # keep 4 weeks worth of backlogs </span><br><span class="line"> rotate 4        #–保留四个 </span><br><span class="line"> </span><br><span class="line"> # create new (empty) log files after rotating old ones </span><br><span class="line"> create          #–rotate后，创建一个新的空文件 </span><br><span class="line"> </span><br><span class="line"> # uncomment this if you want your log files compressed </span><br><span class="line"> #compress       #–默认是不压缩的 </span><br><span class="line"> </span><br><span class="line"> # RPM packages drop log rotation information into this directory </span><br><span class="line"> include /etc/logrotate.d    #–这个目录下面配置文件生效 </span><br><span class="line">   </span><br><span class="line"> # no packages own wtmp - we&#x27;ll rotate them here </span><br><span class="line"> /var/log/wtmp&#123;         #–定义/var/log/wtmp这个日志文件 </span><br><span class="line">    monthly                 #–每月轮转一次，取代了上面的全局设定的每周轮转一次 </span><br><span class="line">    minsize 1M              #–定义日志必须要大于1M大小才会去轮转 </span><br><span class="line">    create 0664 root utmp   #–新的日志文件的权限，属主，属主 </span><br><span class="line">    rotate 1                #–保留一个，取代了上面的全局设定的保留四个 </span><br><span class="line"> &#125; </span><br><span class="line">   </span><br><span class="line"> /var/log/btmp&#123; </span><br><span class="line">    missingok       #-如果日志丢失, 不报错 </span><br><span class="line">    monthly </span><br><span class="line">    create 0600 root utmp </span><br><span class="line">    rotate 1 </span><br><span class="line"> &#125; </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
-<p>范例一: </p>
-<blockquote>
-<p> sample logrotate configuration file </p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">compress     # 全局设置, 压缩 </span><br><span class="line">  </span><br><span class="line">/var/log/messages&#123; </span><br><span class="line">    rotate 5     # 保留5份日志 </span><br><span class="line">    weekly       # 每周轮换一次 </span><br><span class="line">    postrotate   # 轮换之后重启syslogd服务 </span><br><span class="line">    /usr/bin/killall-HUP syslogd </span><br><span class="line">    # rhel6中为:/bin/kill -HUP `cat /var/run/syslogd.pid 2&gt; /dev/null` 2&gt; /dev/null || true </span><br><span class="line">    # 可查看/etc/logrotate.d/下的配置文件 </span><br><span class="line">    endscript </span><br><span class="line">&#125; </span><br><span class="line">  </span><br><span class="line">&quot;/var/log/httpd/access.log&quot;/var/log/httpd/error.log &#123;   #  指定多个文件, 如果有特殊字符需要用单引号 </span><br><span class="line">    rotate 5 </span><br><span class="line">    mail www@my.org </span><br><span class="line">    size 100k        # 超过100k后切换日志, 并把老的日志发送邮件给www@my.org </span><br><span class="line">    sharedscripts    # 共享脚本.下面的postrotate脚本只运行一次. </span><br><span class="line">    postrotate </span><br><span class="line">    /usr/bin/killall-HUP httpd </span><br><span class="line">    endscript </span><br><span class="line">&#125; </span><br><span class="line">  </span><br><span class="line">/var/log/news/* &#123;    # 少用通配符, 因会它会包括已经切换过的日志, 要用的话最好在*号后加上扩展名, 如*.log </span><br><span class="line">    monthly </span><br><span class="line">    rotate 2 </span><br><span class="line">    olddir /var/log/news/old </span><br><span class="line">    missingok </span><br><span class="line">    postrotate </span><br><span class="line">    kill-HUP &#x27;cat /var/run/inn.pid&#x27; </span><br><span class="line">    endscript </span><br><span class="line">    nocompress </span><br><span class="line">&#125; </span><br><span class="line">  </span><br><span class="line">/var/log/ipwall/messages.log &#123;   #日志路径一定要和rsyslog定义的日志文件路径一致 </span><br><span class="line">    rotate 65535             #滚动65535次 </span><br><span class="line">    create 0777 syslog adm   #设置权限，方便windows连接samba服务器 </span><br><span class="line">    compress                 #采用压缩 </span><br><span class="line">    size 50M                 #文件大小50M以上的分割日志 </span><br><span class="line">    dateext </span><br><span class="line">    dateformat .%s           #定义文件切割后的文件名，必须配合dateext使用 </span><br><span class="line">  </span><br><span class="line">    #posrotate/endscript这段脚本使rsyslog程序重新读取配置文件，程序释放对messages.log文件持有的文件描述符 </span><br><span class="line">    postrotate </span><br><span class="line">    /bin/kill-HUP $(/bin/cat/var/run/rsyslogd.pid 2&gt;/dev/null)&amp; &gt;/dev/null </span><br><span class="line">    endscript </span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/19/16-03-2-Linux%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9Frsyslog%E4%BB%A5%E5%8F%8Alogrotate/">展开全文 >></a>
         </p>
       
 

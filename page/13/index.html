@@ -206,6 +206,139 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-SQLAlchemy示例-AdjacencyList-单向链接列表" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/20/SQLAlchemy%E7%A4%BA%E4%BE%8B-AdjacencyList-%E5%8D%95%E5%90%91%E9%93%BE%E6%8E%A5%E5%88%97%E8%A1%A8/">SQLAlchemy示例:AdjacencyList,单向链接列表</a>
+    </h1>
+  
+
+        
+        <a href="/2018/04/20/SQLAlchemy%E7%A4%BA%E4%BE%8B-AdjacencyList-%E5%8D%95%E5%90%91%E9%93%BE%E6%8E%A5%E5%88%97%E8%A1%A8/" class="archive-article-date">
+  	<time datetime="2018-04-20T02:41:04.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-20</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这里说的 AdjacencyList , 就是最常用来在关系数据库中表示树结构的,<code>parent</code>方式:</p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>name</th>
+<th>parent</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>一</td>
+<td>null</td>
+</tr>
+<tr>
+<td>2</td>
+<td>二</td>
+<td>1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>三</td>
+<td>2</td>
+</tr>
+</tbody></table>
+<p>上面的数据, 表示的结构就是:<br>一<br>  |- 二<br>    |- 三<br>模型定义很好做:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> create_engine</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.ext.declarative <span class="keyword">import</span> declarative_base</span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> Column, ForeignKey</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.types <span class="keyword">import</span> Integer, Unicode</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> relationship, sessionmaker, joinedload</span><br><span class="line"></span><br><span class="line">BaseModel = declarative_base()</span><br><span class="line">Engine = create_engine(<span class="string">&#x27;sqlite://&#x27;</span>, echo=<span class="literal">True</span>)</span><br><span class="line">Session = sessionmaker(Engine)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Node</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;node&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, autoincrement=<span class="literal">True</span>, primary_key=<span class="literal">True</span>)</span><br><span class="line">    name = Column(Unicode(<span class="number">32</span>), nullable=<span class="literal">False</span>, server_default=<span class="string">&#x27;&#x27;</span>)</span><br><span class="line">    parent = Column(Integer, ForeignKey(<span class="string">&#x27;node.id&#x27;</span>), index=<span class="literal">True</span>,</span><br><span class="line">                    nullable=<span class="literal">False</span>, server_default=<span class="string">&#x27;0&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>这里不让<code>parent</code>字段有<code>null</code>, 而使用<code>0</code>代替.<br>这个例子在关系上, 有一个纠结的地方, 因为 <code>node</code> 这个表, 它是自关联的, 所以如果想要<code>children</code> 和 <code>parent_obj</code> 这两个关系时:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">children = relationship(<span class="string">&#x27;Node&#x27;</span>)</span><br><span class="line">parent_obj = relationship(<span class="string">&#x27;Node&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>呃, 尴尬了.<br>如果是两个表, 那么 SQLAlchemy 可以通过外键在哪张表这个信息, 来确定关系的方向:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Blog</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    ...</span><br><span class="line">    user = Column(Integer, ForeignKey(<span class="string">&#x27;user.id&#x27;</span>))</span><br><span class="line">    user_obj = relationship(<span class="string">&#x27;User&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">User</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    ...</span><br><span class="line">    blog_list = relationship(<span class="string">&#x27;Blog&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>因为外键在 <code>Blog</code> 中, 所以 <code>Blog -&gt; User</code> 的 <code>user_obj</code> 是一个 <code>N -&gt; 1</code>关系.<br>反之, <code>User -&gt; Blog</code> 的 <code>blog_list</code> 则是一个 <code>1 -&gt; N</code> 的关系.<br>而自相关的 <code>Node</code> 无法直接判断方向, 所以 <code>SQLAlchemy</code> 会按 <code>1 -&gt; N</code> 处理, 那么:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">children = relationship(<span class="string">&#x27;Node&#x27;</span>)</span><br><span class="line">parent_obj = relationship(<span class="string">&#x27;Node&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>这两条之中, <code>children</code> 是正确的, 是我们想要的. 要定义 <code>parent_obj</code> 则需要在 <code>relationship</code> 中通过参数明确表示方向:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">parent_obj = relationship(<span class="string">&#x27;Node&#x27;</span>, remote_side=[<span class="built_in">id</span>])</span><br></pre></td></tr></table></figure>
+<p>这种方式就定义了一个, “到 id” 的 <code>N -&gt; 1</code> 关系.<br>现在完整的模型定义是:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Node</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;node&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, autoincrement=<span class="literal">True</span>, primary_key=<span class="literal">True</span>)</span><br><span class="line">    name = Column(Unicode(<span class="number">32</span>), nullable=<span class="literal">False</span>, server_default=<span class="string">&#x27;&#x27;</span>)</span><br><span class="line">    parent = Column(Integer, ForeignKey(<span class="string">&#x27;node.id&#x27;</span>), index=<span class="literal">True</span>,</span><br><span class="line">                    nullable=<span class="literal">False</span>, server_default=<span class="string">&#x27;0&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    children = relationship(<span class="string">&#x27;Node&#x27;</span>) <span class="comment"># 1 -&gt; N</span></span><br><span class="line">    parent_obj = relationship(<span class="string">&#x27;Node&#x27;</span>, remote_side=[<span class="built_in">id</span>])</span><br></pre></td></tr></table></figure>
+<p>查询方面没什么特殊的了, 不过我发现在自相关的模型关系, <code>lazy</code> 选项不起作用:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">children = relationship(<span class="string">&#x27;Node&#x27;</span>, lazy=<span class="string">&quot;joined&quot;</span>)</span><br><span class="line">parent_obj = relationship(<span class="string">&#x27;Node&#x27;</span>, remote_side=[<span class="built_in">id</span>], lazy=<span class="string">&quot;joined&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>都是无效的, 只有在查询时, 手动使用 <code>options()</code> 定义:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">n = session.query(Node).<span class="built_in">filter</span>(Node.name==<span class="string">u&#x27;一&#x27;</span>)\</span><br><span class="line">           .options(joinedload(<span class="string">&#x27;parent_obj&#x27;</span>)).first()</span><br></pre></td></tr></table></figure>
+<p>如果要一次查出多级的子节点:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">n = session.query(Node).<span class="built_in">filter</span>(Node.name==<span class="string">u&#x27;一&#x27;</span>)\</span><br><span class="line">           .options(joinedload(<span class="string">&#x27;children&#x27;</span>).joinedload(<span class="string">&#x27;children&#x27;</span>)).first()</span><br><span class="line"><span class="built_in">print</span> n.name, n.children, n.children[<span class="number">0</span>].children</span><br></pre></td></tr></table></figure>
+<p>多个 <code>joinedload()</code> 串连的话, 可以使用 <code>joinedload_all()</code> 来整合:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> joinedload_all</span><br><span class="line"></span><br><span class="line">n = session.query(Node).<span class="built_in">filter</span>(Node.name==<span class="string">u&#x27;一&#x27;</span>)\</span><br><span class="line">           .options(joinedload_all(<span class="string">&#x27;children&#x27;</span>, <span class="string">&#x27;children&#x27;</span>)).first()</span><br></pre></td></tr></table></figure>
+<p>在修改方面, 删除的话, 配置了 <code>cascade</code> , 删除父节点, 则子节点也会自动删除:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">children = relationship(<span class="string">&#x27;Node&#x27;</span>, lazy=<span class="string">&#x27;joined&#x27;</span>, cascade=<span class="string">&#x27;all&#x27;</span>) <span class="comment"># 1 -&gt; N</span></span><br><span class="line">node = session.query(Node).<span class="built_in">filter</span>(Node.name == <span class="string">u&#x27;一&#x27;</span>).first()</span><br><span class="line">session.delete(node)</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
+<p>如果只删除子节点, 那么 <code>delete-orphan</code> 选项就很好用了:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">children = relationship(<span class="string">&#x27;Node&#x27;</span>, lazy=<span class="string">&#x27;joined&#x27;</span>, cascade=<span class="string">&#x27;all, delete-orphan&#x27;</span>) <span class="comment"># 1 -&gt; N</span></span><br><span class="line">node = session.query(Node).<span class="built_in">filter</span>(Node.name == <span class="string">u&#x27;一&#x27;</span>).first()</span><br><span class="line">node.children = []</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">SQLAlchemy</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/SQLAlchemy//" class="article-tag-list-link color1">SQLAlchemy</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/04/20/SQLAlchemy%E7%A4%BA%E4%BE%8B-AdjacencyList-%E5%8D%95%E5%90%91%E9%93%BE%E6%8E%A5%E5%88%97%E8%A1%A8/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-关于Python的mock" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1370,134 +1503,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2018/03/25/%E8%BF%81%E7%A7%BB%E5%8D%9A%E5%AE%A2%E5%96%BD/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-SQLAlchemy模型使用" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/22/SQLAlchemy%E6%A8%A1%E5%9E%8B%E4%BD%BF%E7%94%A8/">SQLAlchemy模型使用</a>
-    </h1>
-  
-
-        
-        <a href="/2018/03/22/SQLAlchemy%E6%A8%A1%E5%9E%8B%E4%BD%BF%E7%94%A8/" class="archive-article-date">
-  	<time datetime="2018-03-22T11:52:09.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="SQLAlchemy-模型使用"><a href="#SQLAlchemy-模型使用" class="headerlink" title="SQLAlchemy 模型使用"></a>SQLAlchemy 模型使用</h2><h3 id="模型定义"><a href="#模型定义" class="headerlink" title="模型定义"></a>模型定义</h3><p>对于 Table 的定义, 本来是直接的实例化调用, 通过 <code>declarative</code> 的包装, 可以像”定义类”这样的更直观的方式来完成.</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">user = Table(<span class="string">&#x27;user&#x27;</span>, metadata,</span><br><span class="line">    Column(<span class="string">&#x27;user_id&#x27;</span>, Integer, primary_key = <span class="literal">True</span>),</span><br><span class="line">    Column(<span class="string">&#x27;user_name&#x27;</span>, String(<span class="number">16</span>), nullable = <span class="literal">False</span>),</span><br><span class="line">    Column(<span class="string">&#x27;email_address&#x27;</span>, String(<span class="number">60</span>)),</span><br><span class="line">    Column(<span class="string">&#x27;password&#x27;</span>, String(<span class="number">20</span>), nullable = <span class="literal">False</span>)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> create_engine</span><br><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> Column</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.types <span class="keyword">import</span> String, Integer, CHAR, BIGINT</span><br><span class="line"><span class="keyword">from</span> sqlalchemy.ext.declarative <span class="keyword">import</span> declarative_base</span><br><span class="line">BaseModel = declarative_base()</span><br><span class="line">Engine = create_engine(<span class="string">&#x27;postgresql://test@localhost:5432/test&#x27;</span>, echo=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Blog</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;blog&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(CHAR(<span class="number">32</span>), primary_key=<span class="literal">True</span>)</span><br><span class="line">    title = Column(String(<span class="number">64</span>), server_default=<span class="string">&#x27;&#x27;</span>, nullable=<span class="literal">False</span>)</span><br><span class="line">    text = Column(String, server_default=<span class="string">&#x27;&#x27;</span>, nullable=<span class="literal">False</span>)</span><br><span class="line">    user = Column(CHAR(<span class="number">32</span>), index=<span class="literal">True</span>, server_default=<span class="string">&#x27;&#x27;</span>, nullable=<span class="literal">False</span>)</span><br><span class="line">    create = Column(BIGINT, index=<span class="literal">True</span>, server_default=<span class="string">&#x27;0&#x27;</span>, nullable=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">User</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;user&#x27;</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">id</span> = Column(CHAR(<span class="number">32</span>), primary_key=<span class="literal">True</span>)</span><br><span class="line">    name = Column(String(<span class="number">32</span>), server_default=<span class="string">&#x27;&#x27;</span>, nullable=<span class="literal">False</span>)</span><br><span class="line">    username = Column(String(<span class="number">32</span>), index=<span class="literal">True</span>, server_default=<span class="string">&#x27;&#x27;</span>, nullable=<span class="literal">False</span>)</span><br><span class="line">    password = Column(String(<span class="number">64</span>), server_default=<span class="string">&#x27;&#x27;</span>, nullable=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">init_db</span>():</span><br><span class="line">    BaseModel.metadata.create_all(Engine)</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">drop_db</span>():</span><br><span class="line">    BaseModel.metadata.drop_all(Engine)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    <span class="comment">#init_db()</span></span><br><span class="line">    drop_db()</span><br><span class="line">    <span class="comment">#BaseModel.metadata.tables[&#x27;user&#x27;].create(Engine, checkfirst=True)</span></span><br><span class="line">    <span class="comment">#BaseModel.metadata.tables[&#x27;user&#x27;].drop(Engine, checkfirst=False)</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">session = Session()</span><br><span class="line">session.add(User(<span class="built_in">id</span>=uuid.uuid4().<span class="built_in">hex</span>))</span><br><span class="line">session.add(Blog(<span class="built_in">id</span>=uuid.uuid4().<span class="built_in">hex</span>))</span><br><span class="line">session.add_all([</span><br><span class="line">    User(<span class="built_in">id</span>=uuid.uuid4().<span class="built_in">hex</span>),</span><br><span class="line">    Blog(<span class="built_in">id</span>=uuid.uuid4().<span class="built_in">hex</span>)</span><br><span class="line">])</span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
-
-<p>执行的顺序并不一定会和代码顺序一致, SQLAlchemy 自己会整合逻辑再执行.</p>
-<h3 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h3><p>SQLAlchemy 实现的查询非常强大, 写起来有一种随心所欲的感觉.<br>查询的结果, 有几种不同的类型, 这个需要注意, 像是:</p>
-<ol>
-<li>instance</li>
-<li>instance of list</li>
-<li>keyed tuple of list</li>
-<li>value of list</li>
-</ol>
-<h4 id="基本查询"><a href="#基本查询" class="headerlink" title="基本查询"></a>基本查询</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">session.query(User).filter_by(username=<span class="string">&#x27;abc&#x27;</span>).<span class="built_in">all</span>()</span><br><span class="line">session.query(User).<span class="built_in">filter</span>(User.username==<span class="string">&#x27;abc&#x27;</span>).<span class="built_in">all</span>()</span><br><span class="line">session.query(Blog).<span class="built_in">filter</span>(Blog.create &gt;= <span class="number">0</span>).<span class="built_in">all</span>()</span><br><span class="line">session.query(Blog).<span class="built_in">filter</span>(Blog.create &gt;= <span class="number">0</span>).first()</span><br><span class="line">session.query(Blog).<span class="built_in">filter</span>(Blog.create &gt;= <span class="number">0</span> | Blog.title == <span class="string">&#x27;A&#x27;</span>).first()</span><br><span class="line">session.query(Blog).<span class="built_in">filter</span>(Blog.create &gt;= <span class="number">0</span> &amp; Blog.title == <span class="string">&#x27;A&#x27;</span>).first()</span><br><span class="line">session.query(Blog).<span class="built_in">filter</span>(Blog.create &gt;= <span class="number">0</span>).offset(<span class="number">1</span>).limit(<span class="number">1</span>).scalar()</span><br><span class="line">session.query(User).<span class="built_in">filter</span>(User.username ==  <span class="string">&#x27;abc&#x27;</span>).scalar()</span><br><span class="line">session.query(User.<span class="built_in">id</span>).<span class="built_in">filter</span>(User.username ==  <span class="string">&#x27;abc&#x27;</span>).scalar()</span><br><span class="line">session.query(Blog.<span class="built_in">id</span>).<span class="built_in">filter</span>(Blog.create &gt;= <span class="number">0</span>).<span class="built_in">all</span>()</span><br><span class="line">session.query(Blog.<span class="built_in">id</span>).<span class="built_in">filter</span>(Blog.create &gt;= <span class="number">0</span>).<span class="built_in">all</span>()[<span class="number">0</span>].<span class="built_in">id</span></span><br><span class="line"><span class="built_in">dict</span>(session.query(Blog.<span class="built_in">id</span>, Blog.title).<span class="built_in">filter</span>(Blog.create &gt;= <span class="number">0</span>).<span class="built_in">all</span>())</span><br><span class="line">session.query(Blog.<span class="built_in">id</span>, Blog.title).<span class="built_in">filter</span>(Blog.create &gt;= <span class="number">0</span>).first().title</span><br><span class="line">session.query(User.<span class="built_in">id</span>).order_by(<span class="string">&#x27;id desc&#x27;</span>).<span class="built_in">all</span>()</span><br><span class="line">session.query(User.<span class="built_in">id</span>).order_by(<span class="string">&#x27;id&#x27;</span>).first()</span><br><span class="line">session.query(User.<span class="built_in">id</span>).order_by(User.<span class="built_in">id</span>).first()</span><br><span class="line">session.query(User.<span class="built_in">id</span>).order_by(-User.<span class="built_in">id</span>).first()</span><br><span class="line">session.query(<span class="string">&#x27;id&#x27;</span>, <span class="string">&#x27;username&#x27;</span>).select_from(User).<span class="built_in">all</span>()</span><br><span class="line">session.query(User).get(<span class="string">&#x27;16e19a64d5874c308421e1a835b01c69&#x27;</span>)</span><br></pre></td></tr></table></figure>
-
-<h4 id="多表查询"><a href="#多表查询" class="headerlink" title="多表查询"></a>多表查询</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">session.query(Blog, User).<span class="built_in">filter</span>(Blog.user == User.<span class="built_in">id</span>).first().User.username</span><br><span class="line">session.query(Blog, User.<span class="built_in">id</span>, User.username).<span class="built_in">filter</span>(Blog.user == User.<span class="built_in">id</span>).first().<span class="built_in">id</span></span><br><span class="line">session.query(Blog.<span class="built_in">id</span>,</span><br><span class="line">              User.<span class="built_in">id</span>,</span><br><span class="line">              User.username).<span class="built_in">filter</span>(Blog.user == User.<span class="built_in">id</span>).first().keys()</span><br></pre></td></tr></table></figure>
-
-<h4 id="条件查询"><a href="#条件查询" class="headerlink" title="条件查询"></a>条件查询</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> or_, not_</span><br><span class="line"></span><br><span class="line">session.query(User).<span class="built_in">filter</span>(or_(User.<span class="built_in">id</span> == <span class="string">&#x27;&#x27;</span>,</span><br><span class="line">                               User.<span class="built_in">id</span> == <span class="string">&#x27;16e19a64d5874c308421e1a835b01c69&#x27;</span>)).<span class="built_in">all</span>()</span><br><span class="line">session.query(User).<span class="built_in">filter</span>(not_(User.<span class="built_in">id</span> == <span class="string">&#x27;16e19a64d5874c308421e1a835b01c69&#x27;</span>)).<span class="built_in">all</span>()</span><br><span class="line">session.query(User).<span class="built_in">filter</span>(User.<span class="built_in">id</span>.in_([<span class="string">&#x27;16e19a64d5874c308421e1a835b01c69&#x27;</span>])).<span class="built_in">all</span>()</span><br><span class="line">session.query(User).<span class="built_in">filter</span>(User.<span class="built_in">id</span>.like(<span class="string">&#x27;16e19a%&#x27;</span>)).<span class="built_in">all</span>()</span><br><span class="line">session.query(User).<span class="built_in">filter</span>(User.<span class="built_in">id</span>.startswith(<span class="string">&#x27;16e19a&#x27;</span>)).<span class="built_in">all</span>()</span><br><span class="line"><span class="built_in">dir</span>(User.<span class="built_in">id</span>)</span><br></pre></td></tr></table></figure>
-
-<h4 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> func</span><br><span class="line">session.query(func.count(<span class="string">&#x27;1&#x27;</span>)).select_from(User).scalar()</span><br><span class="line">session.query(func.count(<span class="string">&#x27;1&#x27;</span>), func.<span class="built_in">max</span>(User.username)).select_from(User).first()</span><br><span class="line">session.query(func.count(<span class="string">&#x27;1&#x27;</span>)).select_from(User).scalar()</span><br><span class="line">session.query(func.md5(User.username)).select_from(User).<span class="built_in">all</span>()</span><br><span class="line">session.query(func.current_timestamp()).scalar()</span><br><span class="line">session.query(User).count()</span><br></pre></td></tr></table></figure>
-
-<h3 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h3><p>还是通常的两种方式:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">session.query(User).<span class="built_in">filter</span>(User.username == <span class="string">&#x27;abc&#x27;</span>).update(&#123;<span class="string">&#x27;name&#x27;</span>: <span class="string">&#x27;123&#x27;</span>&#125;)</span><br><span class="line">session.commit()</span><br><span class="line"></span><br><span class="line">user = session.query(User).filter_by(username=<span class="string">&#x27;abc&#x27;</span>).scalar()</span><br><span class="line">user.name = <span class="string">&#x27;223&#x27;</span></span><br><span class="line">session.commit()</span><br></pre></td></tr></table></figure>
-
-<p>如果涉及对属性原值的引用, 则要考虑<code>synchronize_session</code>这个参数.</p>
-<ol>
-<li><code>evaluate</code> 默认值, 会同时修改当前 session 中的对象属性.</li>
-<li><code>fetch</code> 修改前, 会先通过 select 查询条目的值.</li>
-<li><code>False</code>不修改当前 session 中的对象属性.</li>
-</ol>
-<p>在默认情况下, 因为会有修改当前会话中的对象属性, 所以如果语句中有 SQL 函数, 或者”原值引用”, 那是无法完成的操作, 自然也会报错, 比如:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> func</span><br><span class="line">session.query(User).update(&#123;User.name: func.trim(<span class="string">&#x27;123 &#x27;</span>)&#125;)</span><br><span class="line">session.query(User).update(&#123;User.name: User.name + <span class="string">&#x27;x&#x27;</span>&#125;)</span><br></pre></td></tr></table></figure>
-
-<p>这种情况下, 就不能要求 SQLAlchemy 修改当前 session 的对象属性了, 而是直接进行数据库的交互, 不管当前会话值:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">session.query(User).update(&#123;User.name: User.name + <span class="string">&#x27;x&#x27;</span>&#125;, synchronize_session=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
-<p>是否修改当前会话的对象属性, 涉及到当前会话的状态. 如果当前会话过期, 那么在获取相关对象的属性值时, SQLAlchemy 会自动作一次数据库查询, 以便获取正确的值:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">user = session.query(User).filter_by(username=<span class="string">&#x27;abc&#x27;</span>).scalar()</span><br><span class="line"><span class="built_in">print</span> user.name</span><br><span class="line">session.query(User).update(&#123;User.name: <span class="string">&#x27;new&#x27;</span>&#125;, synchronize_session=<span class="literal">False</span>)</span><br><span class="line"><span class="built_in">print</span> user.name</span><br><span class="line">session.commit()</span><br><span class="line"><span class="built_in">print</span> user.name</span><br></pre></td></tr></table></figure>
-
-<p>执行了<code>update</code>之后, 虽然相关对象的实际的属性值已变更, 但是当前会话中的对象属性值并没有改变. 直到<code>session.commit()</code>之后, 当前会话变成”过期”状态, 再次获取<code>user.name</code>时, SQLAlchemy 通过<code>user</code>的 <code>id</code> 属性, 重新去数据库查询了新值. (如果 user 的 id 变了呢? 那就会出事了啊.)<br><code>synchronize_session</code> 设置成 <code>fetch</code> 不会有这样的问题, 因为在做 update 时已经修改了当前会话中的对象了.<br>不管 <code>synchronize_session</code> 的行为如何, <code>commit</code> 之后 <code>session</code> 都会过期, 再次获取相关对象值时, 都会重新作一次查询.</p>
-<h3 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">session.query(User).filter_by(username=<span class="string">&#x27;abc&#x27;</span>).delete()</span><br><span class="line"></span><br><span class="line">user = session.query(User).filter_by(username=<span class="string">&#x27;abc&#x27;</span>).first()</span><br><span class="line">session.delete(user)</span><br></pre></td></tr></table></figure>
-<p>删除同样有像修改一样的 synchronize_session 参数的问题, 影响当前会话的状态.</p>
-<h3 id="JOIN"><a href="#JOIN" class="headerlink" title="JOIN"></a>JOIN</h3><p>SQLAlchemy 可以很直观地作 join 的支持:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">r = session.query(Blog, User).join(User, Blog.user == User.<span class="built_in">id</span>).<span class="built_in">all</span>()</span><br><span class="line"><span class="keyword">for</span> blog, user <span class="keyword">in</span> r:</span><br><span class="line">    <span class="built_in">print</span> blog.<span class="built_in">id</span>, blog.user, user.<span class="built_in">id</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">r = session.query(Blog, User.name, User.username).join(User, Blog.user == User.<span class="built_in">id</span>).<span class="built_in">all</span>()</span><br><span class="line"><span class="built_in">print</span> r</span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">SQLAlchemy</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/SQLAlchemy//" class="article-tag-list-link color1">SQLAlchemy</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/03/22/SQLAlchemy%E6%A8%A1%E5%9E%8B%E4%BD%BF%E7%94%A8/">展开全文 >></a>
         </p>
       
 

@@ -206,6 +206,90 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-bert网络结构" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/06/23/bert%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84/">bert网络结构</a>
+    </h1>
+  
+
+        
+        <a href="/2021/06/23/bert%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84/" class="archive-article-date">
+  	<time datetime="2021-06-23T05:37:46.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-23</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这里以BertForMaskedLM为例，记录下BertModel的网络结构和一些思考，cls那部分网络结构不涉及，即BertOnlyMLMHead那部分。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">BertForMaskedLM(</span><br><span class="line">  (bert): BertModel(</span><br><span class="line">    (embeddings): BertEmbeddings(</span><br><span class="line">      (word_embeddings): Embedding(21128, 768, padding_idx=0)</span><br><span class="line">      (position_embeddings): Embedding(512, 768)</span><br><span class="line">      (token_type_embeddings): Embedding(2, 768)</span><br><span class="line">      (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)</span><br><span class="line">      (dropout): Dropout(p=0.1, inplace=False)</span><br><span class="line">    )</span><br><span class="line">    (encoder): BertEncoder(</span><br><span class="line">      (layer): ModuleList(</span><br><span class="line">        (0): BertLayer(</span><br><span class="line">          (attention): BertAttention(</span><br><span class="line">            (self): BertSelfAttention(</span><br><span class="line">              (query): Linear(in_features=768, out_features=768, bias=True)</span><br><span class="line">              (key): Linear(in_features=768, out_features=768, bias=True)</span><br><span class="line">              (value): Linear(in_features=768, out_features=768, bias=True)</span><br><span class="line">              (dropout): Dropout(p=0.1, inplace=False)</span><br><span class="line">            )</span><br><span class="line">            (output): BertSelfOutput(</span><br><span class="line">              (dense): Linear(in_features=768, out_features=768, bias=True)</span><br><span class="line">              (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)</span><br><span class="line">              (dropout): Dropout(p=0.1, inplace=False)</span><br><span class="line">            )</span><br><span class="line">          )</span><br><span class="line">          (intermediate): BertIntermediate(</span><br><span class="line">            (dense): Linear(in_features=768, out_features=3072, bias=True)</span><br><span class="line">          )</span><br><span class="line">          (output): BertOutput(</span><br><span class="line">            (dense): Linear(in_features=3072, out_features=768, bias=True)</span><br><span class="line">            (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)</span><br><span class="line">            (dropout): Dropout(p=0.1, inplace=False)</span><br><span class="line">          )</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        # 这里重复11次，一共12层结构。</span><br><span class="line">      )</span><br><span class="line">    )</span><br><span class="line">  )</span><br><span class="line">  (cls): BertOnlyMLMHead(</span><br><span class="line">    (predictions): BertLMPredictionHead(</span><br><span class="line">      (transform): BertPredictionHeadTransform(</span><br><span class="line">        (dense): Linear(in_features=768, out_features=768, bias=True)</span><br><span class="line">        (LayerNorm): LayerNorm((768,), eps=1e-12, elementwise_affine=True)</span><br><span class="line">      )</span><br><span class="line">      (decoder): Linear(in_features=768, out_features=21128, bias=True)</span><br><span class="line">    )</span><br><span class="line">  )</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-position-embedding和transformer里面的位置编码不一样"><a href="#1-position-embedding和transformer里面的位置编码不一样" class="headerlink" title="1. position_embedding和transformer里面的位置编码不一样"></a>1. position_embedding和transformer里面的位置编码不一样</h3><p>transformer里面的positional embedding，是正余弦绝对位置编码，对于sequence分配不同的position id。而bert是学习出来的，分配一个(512,768)embedding。</p>
+<p>随后word_embedding，positional embedding, token_type_embedding进行相加，然后经过LN、dropout获得最终embedding。</p>
+<h3 id="2-BertIntermediate是用来干嘛的"><a href="#2-BertIntermediate是用来干嘛的" class="headerlink" title="2. BertIntermediate是用来干嘛的"></a>2. BertIntermediate是用来干嘛的</h3><p>在transformer结构里，是没有这个<code>中间层</code>的，细看下，是将768扩大4倍，随后在BertOutput那里又降维到768。那bert加这一个linear的作用是干嘛的呢？</p>
+<p>搜了下网上的看法，很少关注或者没有相关思考。但是这这篇论文：<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2012.11881">Undivided Attention: Are Intermediate Layers Necessary for BERT?
+</a>给出了自己的解释。作者观点如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">In recent times, BERT-based models have been extremely successful in solving a variety of natural language processing (NLP) tasks such as reading comprehension, natural language inference, sentiment analysis, etc. All BERT-based architectures have a self-attention block followed by a block of intermediate layers as the basic building component. However, a strong justification for the inclusion of these intermediate layers remains missing in the literature. In this work we investigate the importance of intermediate layers on the overall network performance of downstream tasks. We show that reducing the number of intermediate layers and modifying the architecture for BERT-Base results in minimal loss in fine-tuning accuracy for downstream tasks while decreasing the number of parameters and training time of the model. Additionally, we use the central kernel alignment (CKA) similarity metric and probing classifiers to demonstrate that removing intermediate layers has little impact on the learned self-attention representations.</span><br></pre></td></tr></table></figure>
+
+<p>结论就是实验后发现降低网络复杂度后，同时也能保持微调任务的准确性。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/06/23/bert%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-mlm数据处理实现解读" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1081,84 +1165,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2020/01/19/2020%E6%84%9F%E6%83%B3/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-tmux后台运行" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/01/11/tmux%E5%90%8E%E5%8F%B0%E8%BF%90%E8%A1%8C/">tmux后台运行</a>
-    </h1>
-  
-
-        
-        <a href="/2020/01/11/tmux%E5%90%8E%E5%8F%B0%E8%BF%90%E8%A1%8C/" class="archive-article-date">
-  	<time datetime="2020-01-10T21:27:26.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-01-11</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>假设训练GPU不在自己机子上（悲伤脸），远程连接后，直接<code>python train.py</code>，但是如果一旦网络不稳定导致ssh断了，那这训练了一两天的心血可就白费了，所以需要一种简便的方式来后台运行，实现方式有多种，作为一个守护进程，比如supervisor或者systemctl那一些，但是对于算法人员来说这些都太复杂而不简单使用，所以此处推荐tmux。</p>
-<p>使用步骤：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ tmux</span><br><span class="line">$(tmux) <span class="built_in">source</span> venv/bin/activate</span><br><span class="line">$(tmux) python train.py</span><br><span class="line">$(tmux) 快捷键 `ctrl + b`，然后不松开按`d`</span><br><span class="line">0: 1 windows (created .....) [215x57]</span><br><span class="line">$ tmux <span class="built_in">ls</span></span><br><span class="line">0: 1 windows (created .....) [215x57]</span><br><span class="line"></span><br><span class="line">$ tmux attach -t 0 <span class="comment"># 进入到tmux</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>万事大吉，退出ssh后训练保持运行。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/01/11/tmux%E5%90%8E%E5%8F%B0%E8%BF%90%E8%A1%8C/">展开全文 >></a>
         </p>
       
 

@@ -206,6 +206,103 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-静态词向量之FFNN训练词向量" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/12/24/%E9%9D%99%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8BFFNN%E8%AE%AD%E7%BB%83%E8%AF%8D%E5%90%91%E9%87%8F/">静态词向量之FFNN训练词向量</a>
+    </h1>
+  
+
+        
+        <a href="/2021/12/24/%E9%9D%99%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8BFFNN%E8%AE%AD%E7%BB%83%E8%AF%8D%E5%90%91%E9%87%8F/" class="archive-article-date">
+  	<time datetime="2021-12-24T03:43:03.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-24</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>本文分享几个好玩的知识点：</p>
+<ol>
+<li>前馈神经网络</li>
+<li>bag of words(词袋)</li>
+<li>使用ffnn获取词向量</li>
+</ol>
+<h2 id="前馈神经网络"><a href="#前馈神经网络" class="headerlink" title="前馈神经网络"></a>前馈神经网络</h2><p>什么叫前馈神经网络呢，emmm，自个去看百度百科定义<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E5%89%8D%E9%A6%88%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/7580523">前馈神经网络</a>。简单来说，就是两个linear加一个激活函数，简单结构如下:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">FFNN</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        self.linear1 = nn.Linear()</span><br><span class="line">        self.active_func = F.relu</span><br><span class="line">        self.linear2 = nn.Linear()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        <span class="keyword">return</span> self.linear2(self.active_func(self.linear1(x)))</span><br></pre></td></tr></table></figure>
+
+<p>其中大名鼎鼎的transformer中也用到了FFNN，所以要认真对待每一种结构哦。</p>
+<h2 id="bag-of-words-词袋"><a href="#bag-of-words-词袋" class="headerlink" title="bag of words(词袋)"></a>bag of words(词袋)</h2><p>啥叫词袋呢，emmmm，这个咋解释呢？就是从一堆词取context_size大小的词回来。它没有顺序，所以叫做词袋。比如unigram, bigram, trigram，ngram，都是属于词袋。</p>
+<p>而大名鼎鼎的word2vec也是属于词袋这种的哦！这里画重点。</p>
+<h2 id="使用ffnn获取词向量"><a href="#使用ffnn获取词向量" class="headerlink" title="使用ffnn获取词向量"></a>使用ffnn获取词向量</h2><p>这里就不难理解了，就是换一种方式来实现词向量的获取方式。我在这两采用了两种方式，第一种是以前面两个词为准，获取当前词，这叫做用过去的词来预测未来的词。嘿嘿，如果脑洞大开点的话，是不是有种transformer encoder的感觉😂😂😂。</p>
+<h3 id="1-使用过去词预测当前词"><a href="#1-使用过去词预测当前词" class="headerlink" title="1. 使用过去词预测当前词"></a>1. 使用过去词预测当前词</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Defined in Section 5.3.1.2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"><span class="keyword">import</span> torch.optim <span class="keyword">as</span> optim</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> Dataset</span><br><span class="line"><span class="keyword">from</span> tqdm.auto <span class="keyword">import</span> tqdm</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> utils <span class="keyword">import</span> BOS_TOKEN, EOS_TOKEN</span><br><span class="line"><span class="keyword">from</span> utils <span class="keyword">import</span> load_reuters, save_pretrained, get_loader, init_weights</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">cal_similar</span>(<span class="params">w</span>):</span><br><span class="line">    v = model.embeddings.weight[vocab[w]]</span><br><span class="line">    values, indices = torch.mm(model.embeddings.weight, v.view(-<span class="number">1</span>, <span class="number">1</span>)).topk(dim=<span class="number">0</span>, k=<span class="number">3</span>)</span><br><span class="line">    similar_tokens = vocab.convert_ids_to_tokens(indices.view(-<span class="number">1</span>).tolist())</span><br><span class="line">    <span class="keyword">return</span> similar_tokens</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">demos</span>():</span><br><span class="line">    tokens = [<span class="string">&#x27;china&#x27;</span>, <span class="string">&#x27;august&#x27;</span>, <span class="string">&#x27;good&#x27;</span>, <span class="string">&#x27;paris&#x27;</span>]</span><br><span class="line">    <span class="keyword">for</span> token <span class="keyword">in</span> tokens:</span><br><span class="line">        s = cal_similar(token)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&#x27;<span class="subst">&#123;token&#125;</span>: <span class="subst">&#123;s&#125;</span>&#x27;</span>)</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">NGramDataset</span>(<span class="title class_ inherited__">Dataset</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, corpus, vocab, context_size=<span class="number">2</span></span>):</span><br><span class="line">        self.data = []</span><br><span class="line">        self.bos = vocab[BOS_TOKEN]</span><br><span class="line">        self.eos = vocab[EOS_TOKEN]</span><br><span class="line">        <span class="keyword">for</span> sentence <span class="keyword">in</span> tqdm(corpus, desc=<span class="string">&quot;Dataset Construction&quot;</span>):</span><br><span class="line">            <span class="comment"># 插入句首句尾符号</span></span><br><span class="line">            sentence = [self.bos] + sentence + [self.eos]</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">len</span>(sentence) &lt; context_size:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(context_size, <span class="built_in">len</span>(sentence)):</span><br><span class="line">                <span class="comment"># here，只取之前的词</span></span><br><span class="line">                <span class="comment"># 模型输入：长为context_size的上文</span></span><br><span class="line">                context = sentence[i-context_size:i]</span><br><span class="line">                <span class="comment"># 模型输出：当前词</span></span><br><span class="line">                target = sentence[i]</span><br><span class="line">                self.data.append((context, target))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__len__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">len</span>(self.data)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__getitem__</span>(<span class="params">self, i</span>):</span><br><span class="line">        <span class="keyword">return</span> self.data[i]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">collate_fn</span>(<span class="params">self, examples</span>):</span><br><span class="line">        <span class="comment"># 从独立样本集合中构建batch输入输出</span></span><br><span class="line">        inputs = torch.tensor([ex[<span class="number">0</span>] <span class="keyword">for</span> ex <span class="keyword">in</span> examples], dtype=torch.long)</span><br><span class="line">        targets = torch.tensor([ex[<span class="number">1</span>] <span class="keyword">for</span> ex <span class="keyword">in</span> examples], dtype=torch.long)</span><br><span class="line">        <span class="keyword">return</span> (inputs, targets)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">FeedForwardNNLM</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, vocab_size, embedding_dim, context_size, hidden_dim</span>):</span><br><span class="line">        <span class="built_in">super</span>(FeedForwardNNLM, self).__init__()</span><br><span class="line">        <span class="comment"># 词嵌入层</span></span><br><span class="line">        self.embeddings = nn.Embedding(vocab_size, embedding_dim)</span><br><span class="line">        <span class="comment"># 线性变换：词嵌入层-&gt;隐含层</span></span><br><span class="line">        self.linear1 = nn.Linear(context_size * embedding_dim, hidden_dim)</span><br><span class="line">        <span class="comment"># 线性变换：隐含层-&gt;输出层</span></span><br><span class="line">        self.linear2 = nn.Linear(hidden_dim, vocab_size)</span><br><span class="line">        <span class="comment"># 使用ReLU激活函数</span></span><br><span class="line">        self.activate = F.relu</span><br><span class="line">        init_weights(self)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, inputs</span>):</span><br><span class="line">        embeds = self.embeddings(inputs).view((inputs.shape[<span class="number">0</span>], -<span class="number">1</span>))</span><br><span class="line">        hidden = self.activate(self.linear1(embeds))</span><br><span class="line">        output = self.linear2(hidden)</span><br><span class="line">        <span class="comment"># 根据输出层（logits）计算概率分布并取对数，以便于计算对数似然</span></span><br><span class="line">        <span class="comment"># 这里采用PyTorch库的log_softmax实现</span></span><br><span class="line">        log_probs = F.log_softmax(output, dim=<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> log_probs</span><br><span class="line"></span><br><span class="line">embedding_dim = <span class="number">64</span></span><br><span class="line">context_size = <span class="number">2</span></span><br><span class="line">hidden_dim = <span class="number">128</span></span><br><span class="line">batch_size = <span class="number">1024</span></span><br><span class="line">num_epoch = <span class="number">10</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 读取文本数据，构建FFNNLM训练数据集（n-grams）</span></span><br><span class="line">corpus, vocab = load_reuters()</span><br><span class="line">dataset = NGramDataset(corpus, vocab, context_size)</span><br><span class="line">data_loader = get_loader(dataset, batch_size)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 负对数似然损失函数</span></span><br><span class="line">nll_loss = nn.NLLLoss()</span><br><span class="line"><span class="comment"># 构建FFNNLM，并加载至device</span></span><br><span class="line">device = torch.device(<span class="string">&#x27;cuda&#x27;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&#x27;cpu&#x27;</span>)</span><br><span class="line">model = FeedForwardNNLM(<span class="built_in">len</span>(vocab), embedding_dim, context_size, hidden_dim)</span><br><span class="line">model.to(device)</span><br><span class="line"><span class="comment"># 使用Adam优化器</span></span><br><span class="line">optimizer = optim.Adam(model.parameters(), lr=<span class="number">0.001</span>)</span><br><span class="line"></span><br><span class="line">model.train()</span><br><span class="line">total_losses = []</span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epoch):</span><br><span class="line">    total_loss = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> batch <span class="keyword">in</span> tqdm(data_loader, desc=<span class="string">f&quot;Training Epoch <span class="subst">&#123;epoch&#125;</span>&quot;</span>):</span><br><span class="line">        inputs, targets = [x.to(device) <span class="keyword">for</span> x <span class="keyword">in</span> batch]</span><br><span class="line">        optimizer.zero_grad()</span><br><span class="line">        log_probs = model(inputs)</span><br><span class="line">        loss = nll_loss(log_probs, targets)</span><br><span class="line">        loss.backward()</span><br><span class="line">        optimizer.step()</span><br><span class="line">        total_loss += loss.item()</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Loss: <span class="subst">&#123;total_loss:<span class="number">.2</span>f&#125;</span>&quot;</span>)</span><br><span class="line">    total_losses.append(total_loss)</span><br><span class="line">    demos()</span><br><span class="line"><span class="comment"># 保存词向量（model.embeddings）</span></span><br><span class="line">save_pretrained(vocab, model.embeddings.weight.data, <span class="string">&quot;ffnnlm.vec&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-使用过去和未来的词预测当前词"><a href="#2-使用过去和未来的词预测当前词" class="headerlink" title="2. 使用过去和未来的词预测当前词"></a>2. 使用过去和未来的词预测当前词</h3><p>是不是像cbow～</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># Defined in Section 5.3.1.2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"><span class="keyword">import</span> torch.optim <span class="keyword">as</span> optim</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> Dataset</span><br><span class="line"><span class="keyword">from</span> tqdm.auto <span class="keyword">import</span> tqdm</span><br><span class="line"><span class="keyword">from</span> utils <span class="keyword">import</span> BOS_TOKEN, EOS_TOKEN</span><br><span class="line"><span class="keyword">from</span> utils <span class="keyword">import</span> load_reuters, save_pretrained, get_loader, init_weights</span><br><span class="line"><span class="keyword">from</span> torch.optim.lr_scheduler <span class="keyword">import</span> ExponentialLR</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">cal_similar</span>(<span class="params">w</span>):</span><br><span class="line">    v = model.embeddings.weight[vocab[w]]</span><br><span class="line">    values, indices = torch.mm(model.embeddings.weight, v.view(-<span class="number">1</span>, <span class="number">1</span>)).topk(dim=<span class="number">0</span>, k=<span class="number">3</span>)</span><br><span class="line">    similar_tokens = vocab.convert_ids_to_tokens(indices.view(-<span class="number">1</span>).tolist())</span><br><span class="line">    <span class="keyword">return</span> similar_tokens</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">demos</span>():</span><br><span class="line">    tokens = [<span class="string">&#x27;china&#x27;</span>, <span class="string">&#x27;august&#x27;</span>, <span class="string">&#x27;good&#x27;</span>, <span class="string">&#x27;paris&#x27;</span>]</span><br><span class="line">    <span class="keyword">for</span> token <span class="keyword">in</span> tokens:</span><br><span class="line">        s = cal_similar(token)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&#x27;<span class="subst">&#123;token&#125;</span>: <span class="subst">&#123;s&#125;</span>&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">NGramDataset</span>(<span class="title class_ inherited__">Dataset</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, corpus, vocab, context_size=<span class="number">2</span></span>):</span><br><span class="line">        self.data = []</span><br><span class="line">        self.bos = vocab[BOS_TOKEN]</span><br><span class="line">        self.eos = vocab[EOS_TOKEN]</span><br><span class="line">        <span class="keyword">for</span> sentence <span class="keyword">in</span> tqdm(corpus, desc=<span class="string">&quot;Dataset Construction&quot;</span>):</span><br><span class="line">            <span class="comment"># 插入句首句尾符号</span></span><br><span class="line">            sentence = [self.bos] + sentence + [self.eos]</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">len</span>(sentence) &lt; context_size:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(context_size, <span class="built_in">len</span>(sentence) - context_size):</span><br><span class="line">                <span class="comment"># 就这里哦</span></span><br><span class="line">                <span class="comment"># 模型输入：长为context_size的上文</span></span><br><span class="line">                left_context = sentence[i-context_size:i]</span><br><span class="line">                right_context = sentence[i+<span class="number">1</span>: i+context_size + <span class="number">1</span>]</span><br><span class="line">                context = [*left_context, *right_context]</span><br><span class="line">                <span class="comment"># 模型输出：当前词</span></span><br><span class="line">                target = sentence[i]</span><br><span class="line">                self.data.append((context, target))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__len__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">len</span>(self.data)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__getitem__</span>(<span class="params">self, i</span>):</span><br><span class="line">        <span class="keyword">return</span> self.data[i]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">collate_fn</span>(<span class="params">self, examples</span>):</span><br><span class="line">        <span class="comment"># 从独立样本集合中构建batch输入输出</span></span><br><span class="line">        inputs = torch.tensor([ex[<span class="number">0</span>] <span class="keyword">for</span> ex <span class="keyword">in</span> examples], dtype=torch.long)</span><br><span class="line">        targets = torch.tensor([ex[<span class="number">1</span>] <span class="keyword">for</span> ex <span class="keyword">in</span> examples], dtype=torch.long)</span><br><span class="line">        <span class="keyword">return</span> (inputs, targets)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">FeedForwardNNLM</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, vocab_size, embedding_dim, context_size, hidden_dim</span>):</span><br><span class="line">        <span class="built_in">super</span>(FeedForwardNNLM, self).__init__()</span><br><span class="line">        <span class="comment"># 词嵌入层</span></span><br><span class="line">        self.embeddings = nn.Embedding(vocab_size, embedding_dim)</span><br><span class="line">        <span class="comment"># 线性变换：词嵌入层-&gt;隐含层</span></span><br><span class="line">        self.linear1 = nn.Linear(context_size * embedding_dim * <span class="number">2</span>, hidden_dim)</span><br><span class="line">        <span class="comment"># 线性变换：隐含层-&gt;输出层</span></span><br><span class="line">        self.linear2 = nn.Linear(hidden_dim, vocab_size)</span><br><span class="line">        <span class="comment"># 使用ReLU激活函数</span></span><br><span class="line">        self.activate = F.relu</span><br><span class="line">        <span class="comment"># init_weights(self)</span></span><br><span class="line">        self.dp = nn.Dropout(<span class="number">0.1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, inputs</span>):</span><br><span class="line">        embeds = self.embeddings(inputs).view((inputs.shape[<span class="number">0</span>], -<span class="number">1</span>))</span><br><span class="line">        hidden = self.activate(self.linear1(embeds))</span><br><span class="line">        output = self.linear2(hidden)</span><br><span class="line">        <span class="comment"># 根据输出层（logits）计算概率分布并取对数，以便于计算对数似然</span></span><br><span class="line">        <span class="comment"># 这里采用PyTorch库的log_softmax实现</span></span><br><span class="line">        <span class="comment"># output = self.dp(output)</span></span><br><span class="line">        log_probs = F.log_softmax(output, dim=<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> log_probs</span><br><span class="line"></span><br><span class="line">embedding_dim = <span class="number">64</span></span><br><span class="line">context_size = <span class="number">2</span></span><br><span class="line">hidden_dim = <span class="number">128</span></span><br><span class="line">batch_size = <span class="number">10240</span></span><br><span class="line">num_epoch = <span class="number">10</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 读取文本数据，构建FFNNLM训练数据集（n-grams）</span></span><br><span class="line">corpus, vocab = load_reuters()</span><br><span class="line">dataset = NGramDataset(corpus, vocab, context_size)</span><br><span class="line">data_loader = get_loader(dataset, batch_size)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 负对数似然损失函数</span></span><br><span class="line">nll_loss = nn.NLLLoss()</span><br><span class="line"><span class="comment"># 构建FFNNLM，并加载至device</span></span><br><span class="line">device = torch.device(<span class="string">&#x27;cuda&#x27;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&#x27;cpu&#x27;</span>)</span><br><span class="line">model = FeedForwardNNLM(<span class="built_in">len</span>(vocab), embedding_dim, context_size, hidden_dim)</span><br><span class="line">model.to(device)</span><br><span class="line"><span class="comment"># 使用Adam优化器</span></span><br><span class="line">optimizer = optim.Adam(model.parameters(), lr=<span class="number">0.01</span>)</span><br><span class="line">scheduler = ExponentialLR(optimizer, gamma=<span class="number">0.9</span>)</span><br><span class="line">model.train()</span><br><span class="line">total_losses = []</span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epoch):</span><br><span class="line">    total_loss = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> batch <span class="keyword">in</span> tqdm(data_loader, desc=<span class="string">f&quot;Training Epoch <span class="subst">&#123;epoch&#125;</span>&quot;</span>):</span><br><span class="line">        inputs, targets = [x.to(device) <span class="keyword">for</span> x <span class="keyword">in</span> batch]</span><br><span class="line">        optimizer.zero_grad()</span><br><span class="line">        log_probs = model(inputs)</span><br><span class="line">        loss = nll_loss(log_probs, targets)</span><br><span class="line">        loss.backward()</span><br><span class="line">        optimizer.step()</span><br><span class="line"></span><br><span class="line">        total_loss += loss.item()</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Loss: <span class="subst">&#123;total_loss:<span class="number">.2</span>f&#125;</span>, LR: <span class="subst">&#123;scheduler.get_last_lr()[<span class="number">0</span>]&#125;</span>&quot;</span>)</span><br><span class="line">    scheduler.step()</span><br><span class="line">    demos()</span><br><span class="line">    total_losses.append(total_loss)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 保存词向量（model.embeddings）</span></span><br><span class="line">save_pretrained(vocab, model.embeddings.weight.data, <span class="string">&quot;ffnnlm.vec&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这两者之间就以下几点不同：</p>
+<ol>
+<li>NGramDataset那里在获取context_size的词时不一样</li>
+<li>训练时linear1的in_feature大小变了。</li>
+</ol>
+<p>其余都一样哦，可以自己跑一跑呢。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/12/24/%E9%9D%99%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8BFFNN%E8%AE%AD%E7%BB%83%E8%AF%8D%E5%90%91%E9%87%8F/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-静态词向量之word2vec-skipgram" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -2109,599 +2206,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2021/10/30/%E5%85%B3%E7%B3%BB%E6%8A%BD%E5%8F%96-%E5%AD%A6%E6%9C%AF%E7%95%8C/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-关系抽取调研-工业界" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/10/30/%E5%85%B3%E7%B3%BB%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/">关系抽取调研-工业界</a>
-    </h1>
-  
-
-        
-        <a href="/2021/10/30/%E5%85%B3%E7%B3%BB%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/" class="archive-article-date">
-  	<time datetime="2021-10-30T12:04:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-30</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="关系抽取调研——工业界"><a href="#关系抽取调研——工业界" class="headerlink" title="关系抽取调研——工业界"></a>关系抽取调研——工业界</h1><h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
-<li><p><a href="#1-%E4%BB%BB%E5%8A%A1">1. 任务</a></p>
-<ul>
-<li><a href="#11-%E4%BB%BB%E5%8A%A1%E5%AE%9A%E4%B9%89">1.1. 任务定义</a></li>
-<li><a href="#12-%E6%95%B0%E6%8D%AE%E9%9B%86">1.2. 数据集</a></li>
-<li><a href="#13-%E8%AF%84%E6%B5%8B%E6%A0%87%E5%87%86">1.3. 评测标准</a></li>
-</ul>
-</li>
-<li><p><a href="#2-%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93">2. 方法总结</a></p>
-<ul>
-<li><a href="#21-%E5%9F%BA%E4%BA%8E%E6%A8%A1%E6%9D%BF%E7%9A%84%E6%96%B9%E6%B3%95">2.1. 基于模板的方法</a><ul>
-<li><a href="#211-%E5%9F%BA%E4%BA%8E%E8%A7%A6%E5%8F%91%E8%AF%8D/%E5%AD%97%E7%AC%A6%E4%B8%B2">2.1.1. 基于触发词&#x2F;字符串</a></li>
-<li><a href="#212-%E5%9F%BA%E4%BA%8E%E4%BE%9D%E5%AD%98%E5%8F%A5%E6%B3%95">2.1.2. 基于依存句法</a></li>
-</ul>
-</li>
-<li><a href="#22-%E7%9B%91%E7%9D%A3%E5%AD%A6%E4%B9%A0">2.2. 监督学习</a><ul>
-<li><a href="#221-%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0">2.2.1. 机器学习</a></li>
-<li><a href="#222-%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0">2.2.2. 深度学习 Pipeline vs Joint Model</a></li>
-</ul>
-</li>
-<li><a href="#23-%E5%8D%8A%E7%9B%91%E7%9D%A3/%E6%97%A0%E7%9B%91%E7%9D%A3%E6%96%B9%E6%B3%95">2.3. 半监督&#x2F;无监督方法</a><ul>
-<li><a href="#231-Bootstrapping">2.3.1. Bootstrapping</a></li>
-<li><a href="#232-%E5%9F%BA%E4%BA%8E%E8%BF%9C%E7%A8%8B%E7%9B%91%E7%9D%A3%E7%9A%84%E6%96%B9%E6%B3%95">2.3.2. 基于远程监督的方法</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p><a href="#3-%E6%8A%BD%E5%8F%96%E5%B7%A5%E5%85%B7%E5%BA%94%E7%94%A8">3. 抽取工具应用</a></p>
-<ul>
-<li><a href="#31-TextRunner">3.1. TextRunner</a></li>
-<li><a href="#32-OLLIE">3.2. OLLIE：开放三元组知识抽取</a></li>
-<li><a href="#33-IEPY">3.3. IEPY</a></li>
-<li><a href="#34-spaCy">3.4. spaCy</a></li>
-<li><a href="#35-NELL">3.5. NELL</a></li>
-<li><a href="#36-Deepdive">3.6. Deepdive</a></li>
-<li><a href="#37-Standford">3.7. Standford</a></li>
-</ul>
-</li>
-<li><p><a href="#4-%E7%9B%B8%E5%85%B3%E6%96%87%E7%8C%AE">4.相关文献</a></p>
-</li>
-<li><p><a href="#5-%E5%8F%82%E8%80%83%E8%B5%84%E6%BA%90">5.参考资源</a></p>
-</li>
-</ul>
-<h2 id="1-任务"><a href="#1-任务" class="headerlink" title="1. 任务"></a>1. 任务</h2><h3 id="1-1-任务定义"><a href="#1-1-任务定义" class="headerlink" title="1.1. 任务定义"></a>1.1. 任务定义</h3><p>自动识别句子中实体之间具有的某种语义关系。根据参与实体的多少可以分为二元关系抽取（两个实体）和多元关系抽取（三个及以上实体）。</p>
-<p>通过关注两个实体间的语义关系，可以得到（arg1, relation, arg2）三元组，其中arg1和arg2表示两个实体，relation表示实体间的语义关系。</p>
-<p>根据处理数据源的不同，关系抽取可以分为以下三种：</p>
-<ul>
-<li>面向结构化文本的关系抽取：包括表格文档、XML文档、数据库数据等。</li>
-<li>面向非结构化文本的关系抽取：纯文本。</li>
-<li>面向半结构化文本的关系抽取：介于结构化和非结构化之间。</li>
-</ul>
-<p>根据抽取文本的范围不同，关系抽取可以分为以下两种：</p>
-<ul>
-<li>句子级关系抽取：从一个句子中判别两个实体间是何种语义关系。</li>
-<li>语料（篇章）级关系抽取：不限定两个目标实体所出现的上下文。</li>
-</ul>
-<p>根据所抽取领域的划分，关系抽取又可以分为以下两种：</p>
-<ul>
-<li>限定域关系抽取：在一个或者多个限定的领域内对实体间的语义关系进行抽取，限定关系的类别，可看成是一个文本分类任务。</li>
-<li>开放域关系抽取：不限定关系的类别。</li>
-</ul>
-<p>限定域关系抽取方法：</p>
-<ul>
-<li>基于模板的关系抽取方法：通过人工编辑或者学习得到的模板对文本中的实体关系进行抽取和判别，受限于模板的质量和覆盖度，可扩张性不强。</li>
-<li>基于机器学习的关系抽取方法：将关系抽取看成是一个分类问题。</li>
-</ul>
-<h3 id="1-2-常见数据集"><a href="#1-2-常见数据集" class="headerlink" title="1.2. 常见数据集"></a>1.2. 常见数据集</h3><h4 id="工业界数据集"><a href="#工业界数据集" class="headerlink" title="工业界数据集"></a>工业界数据集</h4><p>由于工业界的数据集通常来自其自身业务的记录，并不对外公开，故以下只举例介绍相关比赛中出现的数据集（下载链接因版权原因，随时删除）：</p>
-<h5 id="2019全国知识图谱与语义计算大会"><a href="#2019全国知识图谱与语义计算大会" class="headerlink" title="2019全国知识图谱与语义计算大会"></a><a target="_blank" rel="noopener" href="https://conference.bj.bcebos.com/ccks2019/eval/webpage/index.html">2019全国知识图谱与语义计算大会</a></h5><p>​	<a target="_blank" rel="noopener" href="https://pan.baidu.com/s/1v5m5yIxIufmz5lXoDWcZ6A">数据集 提取码：ta8z</a></p>
-<ul>
-<li><p><strong>任务目标</strong></p>
-<ul>
-<li>在本次任务中，我们重点关注人物之间的关系抽取研究，简称IPRE（Inter-Personal Relationship Extraction）。给定一组人物实体对和包含该实体对的句子，找出给定实体对在已知关系表中的关系。我们将从以下两个方面进行评测：</li>
-<li>Sent-Track:从句子级别上根据给定句子预测给定人物实体对的关系<ul>
-<li>输入：一组人物实体对和包含该实体对的一个句子</li>
-<li>输出：该人物实体对的关系</li>
-<li>样例一：</li>
-<li>输入：</li>
-<li>贾玲\t冯巩\t贾玲，80后相声新秀，师承中国著名相声表演艺术家冯巩。</li>
-<li>输出：</li>
-<li>人物关系&#x2F;师生关系&#x2F;老师</li>
-</ul>
-</li>
-<li>Bag-Track:从包级别上根据给定句子集合预测给定人物实体对的关系<ul>
-<li>输入：一组人物实体对和包含该实体对的若干句子</li>
-<li>输出：该人物实体对的关系</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p><strong>数据来源</strong></p>
-<ul>
-<li>主要来源于互联网网页文本，其中验证集和测试集是通过人工进行标注的，而训练集是通过远程监督（Distant Supervision）自动生成的。</li>
-<li>总共有34类人物关系，包括一类特殊关系NA</li>
-<li>本次竞赛使用的SKE数据集是业界规模最大的基于schema的中文信息抽取数据集，其包含超过43万三元组数据、21万中文句子及50个已定义好的schema，表1中展示了SKE数据集中包含的50个schema及对应的例子。数据集中的句子来自百度百科和百度信息流文本。数据集划分为17万训练集，2万验证集和2万测试集。其中训练集和验证集用于训练，可供自由下载，测试集分为两个，测试集1供参赛者在平台上自主验证，测试集2在比赛结束前一周发布，不能在平台上自主验证，并将作为最终的评测排名。</li>
-</ul>
-</li>
-<li><p><strong>评价指标</strong>：</p>
-<ul>
-<li>精确率（Precision, P）、召回率（Recall, R）和F1值（F1-measure, F1），分为Sent-Track和Bag-Track的两个部分，每部分按F1值分别排名。只统计预测结果中非NA的数目。</li>
-<li>F1最终结果越接近1分数越高。</li>
-</ul>
-</li>
-<li><p><strong>解决方案</strong></p>
-<ul>
-<li>top1评测论文：<a target="_blank" rel="noopener" href="https://conference.bj.bcebos.com/ccks2019/eval/webpage/pdfs/eval_paper_3_2.pdf">https://conference.bj.bcebos.com/ccks2019/eval/webpage/pdfs/eval_paper_3_2.pdf</a></li>
-</ul>
-</li>
-</ul>
-<p><a target="_blank" rel="noopener" href="http://lic2019.ccf.org.cn/kg">2019语言与智能技术竞赛</a></p>
-<ul>
-<li><p><a target="_blank" rel="noopener" href="https://pan.baidu.com/s/14Z94JLc6vkcVoYb3OBMG3A">数据集  提取码：dk4n</a></p>
-</li>
-<li><p><strong>任务目标</strong></p>
-<ul>
-<li>给定<em>schema</em>约束集合及句子<em>sent</em>，其中<em>schema</em>定义了关系<em>P</em>以及其对应的主体<em>S</em>和客体<em>O</em>的类别，例如<em>（S_TYPE:人物，P:妻子，O_TYPE:人物）、（S_TYPE:公司，P:创始人，O_TYPE:人物）</em>等。 任务要求参评系统自动地对句子进行分析，输出句子中所有满足<em>schema</em>约束的<em>SPO</em>三元组知识*Triples&#x3D;[(S1, P1, O1), (S2, P2, O2)…]*。</li>
-<li><strong>输入&#x2F;输出:</strong></li>
-<li><em>(1)</em> 输入:<em>schema</em>约束集合及句子<em>sent</em></li>
-<li><em>(2)</em> 输出:句子<em>sent</em>中包含的符合给定<em>schema</em>约束的三元组知识<em>Triples</em></li>
-</ul>
-</li>
-<li><p><strong>数据集说明</strong></p>
-</li>
-<li><p>使用的SKE数据集是业界规模最大的基于schema的中文信息抽取数据集，其包含超过43万三元组数据、21万中文句子及50个已定义好的schema，表1中展示了SKE数据集中包含的50个schema及对应的例子。数据集中的句子来自百度百科和百度信息流文本。数据集划分为17万训练集，2万验证集和2万测试集。其中训练集和验证集用于训练，可供自由下载，测试集分为两个，测试集1供参赛者在平台上自主验证，测试集2在比赛结束前一周发布，不能在平台上自主验证，并将作为最终的评测排名。</p>
-</li>
-<li><p>具体说明：<a target="_blank" rel="noopener" href="https://www.biendata.com/competition/chip2019/data/">https://www.biendata.com/competition/chip2019/data/</a></p>
-</li>
-<li><p><strong>评价指标</strong></p>
-<ul>
-<li>Precision、Recall、F1值</li>
-</ul>
-</li>
-<li><p><strong>top1方案及结果</strong></p>
-<ul>
-<li>解决方案：<a target="_blank" rel="noopener" href="https://github.com/yuanxiaosc/Entity-Relation-Extraction/blob/master/Schema%E7%BA%A6%E6%9D%9F%E7%9A%84%E7%9F%A5%E8%AF%86%E6%8A%BD%E5%8F%96%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%EF%BC%88%22%E4%BF%A1%E6%81%AF%E6%8A%BD%E5%8F%96%22%E4%BB%BB%E5%8A%A1%E5%86%A0%E5%86%9B%E9%98%9F%E4%BC%8D%E6%8A%A5%E5%91%8A%EF%BC%89.pdf">Schema约束的知识抽取系统架构（“信息抽取”任务冠军队伍报告）</a></li>
-<li>最高得分：89.3% F1 在测试集，投入使用效果 87.1% F1。</li>
-<li>其他方案：<ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/baidu/information-extraction">Baidu Official Baseline Model(Python2.7)</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/yuanxiaosc/information-extraction">Baseline Model(Python3)</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/yuanxiaosc/Multiple-Relations-Extraction-Only-Look-Once">Multiple-Relations-Extraction-Only-Look-Once</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/yuanxiaosc/Schema-based-Knowledge-Extraction">Schema-based-Knowledge-Extraction</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<p><a target="_blank" rel="noopener" href="https://aistudio.baidu.com/aistudio/competition/detail/31?isFromCcf=true">2020语言与智能技术竞赛</a></p>
-<ul>
-<li><p><a target="_blank" rel="noopener" href="https://pan.baidu.com/s/1pK6MSA5fCqYs_Y_RpRmiCA">数据集 提取码：8ccx</a></p>
-</li>
-<li><p><strong>任务目标</strong>：</p>
-<ul>
-<li><p>在给定的文本句子中，根据预先定义的schema集合，抽取出所有满足 schema 约束的 SPO 三元组。schema 定义了关系 P 以及其对应的主体 S 和客体 O 的类别，根据 O 类型的复杂程度可以划分为以下两种：</p>
-<ol>
-<li><p><strong>简单 O 值</strong>：也就是说 O 是一个单一的文本。简单 O 值是最常见关系类型，去年竞赛中所发布的所有 schema 都属于这种类型。为了保持格式统一，简单 O 值类型的 schema 定义通过结构体保存，结构体中只有一个 @value 字段存放真正的 O 值类型。例如，「妻子」关系的 schema 定义为：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    S_TYPE: 人物,</span><br><span class="line">    P: 妻子,</span><br><span class="line">    O_TYPE: &#123;</span><br><span class="line">        @value: 人物</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>复杂 O 值</strong>：也就是说 O 是一个结构体，由多个语义明确的文本共同组成，多个文本对应了结构体中的多个槽位（slot）。在复杂 O 值类型的定义中，@value 槽位可以认为是该关系的默认 O 值槽位，对于该关系不可或缺，其他槽位均可缺省。例如，「饰演」关系中 O 值有两个槽位 @value 和 inWork，分别表示「饰演的角色是什么」以及「在哪部影视作品中发生的饰演关系」，其 schema 定义为：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    S_TYPE: 娱乐人物,</span><br><span class="line">    P: 饰演,</span><br><span class="line">    O_TYPE: &#123;</span><br><span class="line">        @value: 角色</span><br><span class="line">        inWork: 影视作品</span><br><span class="line">    &#125;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure></li>
-</ol>
-</li>
-<li><p><strong>输入&#x2F;输出</strong>：</p>
-<ul>
-<li>输入：schema约束集合及句子sent</li>
-<li>输出： 句子sent中包含的符合给定schema约束的三元组知识Triples</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p><strong>数据集说明</strong>：</p>
-<ul>
-<li>使用的DuIE2.0数据集是业界规模最大的基于schema的中文信息抽取数据集，其包含超过21万中文句子及48个已定义好的schema，<a target="_blank" rel="noopener" href="https://ai.baidu.com/file/18FAC5D981664C07B7314731229C214B">表1</a> 中展示了DuIE2.0数据集中包含的43个简单知识的schema及对应的例子，<a target="_blank" rel="noopener" href="https://ai.baidu.com/file/7660F27FA19E43D2AC6CF2CBD6A2D271">表2</a> 中展示了DuIE2.0数据集中包含的5个复杂知识的schema及对应的例子。数据集中的句子来自百度百科、百度贴吧和百度信息流文本。数据集划分为17万训练集，2万验证集和2万测试集。</li>
-</ul>
-</li>
-<li><p><strong>评估方法</strong>：</p>
-<ul>
-<li>对测试集上给出的 SPO 结果和人工标注的 SPO 结果进行精准匹配，采用 Precision，Recall 和 F1 值作为评价指标。对于复杂 O 值类型的 SPO，必须所有槽位都精确匹配才认为该 SPO 抽取正确。</li>
-</ul>
-</li>
-<li><p><strong>基线系统 Baseline Systems</strong></p>
-<ul>
-<li>GitHub 基线系统<br><a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/Research/tree/master/KG/DuIE_Baseline">https://github.com/PaddlePaddle/Research/tree/master/KG/DuIE_Baseline</a></li>
-<li>百度AI Studio 基线系统示例<br><a target="_blank" rel="noopener" href="https://aistudio.baidu.com/aistudio/projectdetail/357344">https://aistudio.baidu.com/aistudio/projectdetail/357344</a></li>
-</ul>
-</li>
-</ul>
-<h3 id="1-3-评测标准"><a href="#1-3-评测标准" class="headerlink" title="1.3. 评测标准"></a>1.3. 评测标准</h3><ul>
-<li><p>P:  准确率</p>
-</li>
-<li><p>R：召回率</p>
-</li>
-<li><p>F1:  2 P*R&#x2F;(P+R)</p>
-</li>
-</ul>
-<h2 id="2-方法总结"><a href="#2-方法总结" class="headerlink" title="2. 方法总结"></a>2. 方法总结</h2><h3 id="2-1-基于模板的方法"><a href="#2-1-基于模板的方法" class="headerlink" title="2.1. 基于模板的方法"></a>2.1. 基于模板的方法</h3><p><strong>模板匹配</strong>：是关系分类中最常见的方法，使用一个模板库对输入文本两个给定实体进行上下文匹配，如果满足模板对应关系，则作为实体对之间的关系。常见的模板匹配方法主要包括：</p>
-<ul>
-<li><strong>人工模板</strong>：主要用于判断实体间是否存在上下位关系。上下位关系的自然语言表达方式相对有限，采用人工模板就可以很好完成关系分类。但对于自然语言表达形式非常多的关系类型而言，这就需要采取统计模板。</li>
-<li><strong>统计模板</strong>：无须人工构建，主要基于搜索引擎进行统计模板抽取。具体地，将已知实体对作为查询语句，抓取搜索引擎返回的前n个结果文档并保留包含该实体对的句子集合，寻找包含实体对的最长字串作为统计模板，保留置信度较高的模板用于关系分类。</li>
-</ul>
-<h4 id="2-1-1-基于触发词-字符串"><a href="#2-1-1-基于触发词-字符串" class="headerlink" title="2.1.1. 基于触发词&#x2F;字符串"></a>2.1.1. 基于触发词&#x2F;字符串</h4><p>例：句子中上下位关系，比如hyponym(China; Asia countries)。从下面两个句子中都可以抽取出这种关系：</p>
-<p>Asia countries, especially China, Japan, and India…</p>
-<p>Asia countries, such as China, Japan, and India…</p>
-<p>两个实体之间的especially和such as可以看做这种关系的特征。寻找更多表达这种关系的句子，构造规则模板，即可用于抽取构成上下位关系的实体，从而发现新的三元组。</p>
-<h4 id="2-1-2-基于依存句法"><a href="#2-1-2-基于依存句法" class="headerlink" title="2.1.2. 基于依存句法"></a>2.1.2. 基于依存句法</h4><p>使用NLP工具获取句子相关特征，对处理结果一般进行如下处理：</p>
-<ol>
-<li>对输入句子进行分词、词性标注、命名实体识别、依存分析等处理</li>
-<li>根据句子依存句法树结构进行规则匹配，每匹配一条规则就生成一个三元组</li>
-<li>根据扩展规则对抽取到的三元组进行扩展</li>
-<li>对三元组实体和触发词进一步处理抽取出关系</li>
-</ol>
-<h4 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h4><p>手写规则的 <strong>优点</strong> ：</p>
-<ul>
-<li>人工规则有高准确率(high-precision)</li>
-<li>可以为特定领域定制(tailor)</li>
-<li>在小规模数据集上容易实现，构建简单</li>
-</ul>
-<p><strong>缺点</strong>：</p>
-<ul>
-<li>低召回率(low-recall)</li>
-<li>特定领域的模板需要专家构建，要考虑周全所有可能的 pattern 很难，也很费时间精力</li>
-<li>需要为每条关系来定义 pattern</li>
-<li>难以维护</li>
-<li>可移植性差</li>
-</ul>
-<h3 id="2-2-监督学习"><a href="#2-2-监督学习" class="headerlink" title="2.2. 监督学习"></a>2.2. 监督学习</h3><p>有监督的关系抽取方法：</p>
-<ul>
-<li>基于特征工程的方法：需要显示地将关系实例转换成分类器可以接受的特征向量</li>
-<li>基于核函数的方法：直接以结构树为处理对象，在计算关系之间距离的时候不再使用特征向量的内积而是用核函数</li>
-<li>基于神经网络的方法：直接从输入的文本中自动学习有效的特征表示，是一个端到端的过程</li>
-</ul>
-<h4 id="2-2-1-机器学习"><a href="#2-2-1-机器学习" class="headerlink" title="2.2.1. 机器学习"></a>2.2.1. 机器学习</h4><p>将关系抽取看成是一个基于构造特征的分类问题</p>
-<p><strong>常见特征</strong>：</p>
-<ul>
-<li><p>实体特征，包括实体前后的词，实体类型，实体之间的距离等</p>
-</li>
-<li><p>chunk，如 NP，VP，PP 这类短语</p>
-</li>
-<li><p>实体间的依存关系，实体间树结构的距离，及其他特定的结构信息</p>
-</li>
-</ul>
-<p><strong>标准流程</strong>：</p>
-<ul>
-<li>预先定义提取的关系集合</li>
-<li>选择相关命名实体集合</li>
-<li>寻找并标注数据</li>
-<li>选择有代表性的语料库</li>
-<li>标记命名实体</li>
-<li>人工标注实体间关系</li>
-<li>分割训练、开发、测试集</li>
-<li>设计特征</li>
-<li>选择并训练分类器</li>
-<li>评估结果</li>
-</ul>
-<p>通常会训练两个分类器，第一个分类器是 yes&#x2F;no 的二分类，判断命名实体间是否有关系，如果有关系，再送到第二个分类器，给实体分配关系类别。这样做的好处是通过排除大多数的实体对来加快分类器的训练过程，另一方面，对每个任务可以使用基于具体任务的特征集。常用的分类器包括 <strong>MaxEnt、Naive Bayes、SVM</strong> 等。</p>
-<h4 id="2-2-2-深度学习-Pipeline-vs-Joint-Model"><a href="#2-2-2-深度学习-Pipeline-vs-Joint-Model" class="headerlink" title="2.2.2. 深度学习 Pipeline vs Joint Model"></a>2.2.2. 深度学习 Pipeline vs Joint Model</h4><p><strong>Pipeline</strong></p>
-<p>Pipeline方法先在句子中抽取实体、而后再抽取关系。即把实体识别和关系分类作为两个完全独立的过程，互不影响，关系的识别依赖于实体识别的效果。</p>
-<p><strong>Joint Model</strong></p>
-<p>现有联合抽取模型总体上有两大类：</p>
-<p>1、<strong>共享参数</strong>的联合抽取模型</p>
-<p>通过共享参数（共享输入特征或者内部隐层状态）实现联合，此种方法对子模型没有限制，但是由于使用独立的解码算法，导致实体模型和关系模型之间交互不强。</p>
-<p>2、<strong>联合解码</strong>的联合抽取模型</p>
-<p>为了加强实体模型和关系模型的交互，复杂的联合解码算法被提出来，比如整数线性规划等。这种情况下<strong>需要对子模型特征的丰富性以及联合解码的精确性之间做权衡</strong>：</p>
-<ul>
-<li>一方面如果设计精确的联合解码算法，往往需要对特征进行限制，例如用条件随机场建模，使用维特比解码算法可以得到全局最优解，但是往往需要限制特征的阶数。</li>
-<li>另一方面如果使用近似解码算法，比如集束搜索，在特征方面可以抽取任意阶的特征，但是解码得到的结果是不精确的。</li>
-</ul>
-<p>因此，需要一个算法可以在不影响子模型特征丰富性的条件下加强子模型之间的交互。</p>
-<p>此外，很多方法再进行实体抽取时并没有直接用到关系的信息，然而这种信息是很重要的。需要一个方法可以<strong>同时考虑一个句子中所有实体、实体与关系、关系与关系之间的交互</strong>。</p>
-<p><strong>Pipeline对比 Joint Model</strong>：</p>
-<p>相比于传统的Pipeline方法，联合抽取能获得更好的性能。虽然Pipeline方法易于实现，这两个抽取模型的灵活性高，实体模型和关系模型可以使用独立的数据集，并不需要同时标注实体和关系的数据集。但存在以下缺点：</p>
-<ol>
-<li>误差积累：实体抽取的错误会影响下一步关系抽取的性能。</li>
-<li>实体冗余：由于先对抽取的实体进行两两配对，然后再进行关系分类，没有关系的候选实体对所带来的冗余信息，会提升错误率、增加计算复杂度。</li>
-<li>交互缺失：忽略了这两个任务之间的内在联系和依赖关系。</li>
-</ol>
-<h3 id="2-3-半监督-无监督方法"><a href="#2-3-半监督-无监督方法" class="headerlink" title="2.3. 半监督&#x2F;无监督方法"></a>2.3. 半监督&#x2F;无监督方法</h3><h4 id="2-3-1-Bootstrapping"><a href="#2-3-1-Bootstrapping" class="headerlink" title="2.3.1.  Bootstrapping"></a>2.3.1.  Bootstrapping</h4><p><strong>Bootstrapping</strong>：利用少量的实例作为初始种子集合，然后在种子集合上学习获得关系抽取的模板，再利用模板抽取更多的实例，加入种子集合中并不断迭代。Bootstrapping的优点构建成本低，适合大规模的关系任务并且具备发现新关系的能力，但也存在对初始种子较为敏感、存在语义漂移、准确率等问题。Bootstrapping 如今在工业界中依旧是快速构建大规模知识图谱的重要方法。在实际使用中，可以考虑结合基于深度语义模型的关系抽取方法，进一步提高图谱召回。</p>
-<p><strong>工业应用</strong>：</p>
-<p>bootstrapping比较常见的方法有<strong>DIPRE</strong>和<strong>Snowball</strong>。和<strong>DIPRE</strong>相比，<strong>Snowball</strong>通过对获得的模板pattern进行置信度计算，一定程度上可以保证抽取结果质量。</p>
-<p><strong>DIPRE: Dual Iterative Pattern Expansion</strong></p>
-<p>DIPRE是从HTML文档集合中提取结构化关系（或表格）的一种方法。 该方法在类似Web的环境下效果最好，其中的表格要提取的tuples往往会在反复出现在集合文档中一致的context内。 DIPRE利用这种集合冗余和内在的结构以提取目标关系并简化训练。</p>
-<p><strong>DIPRE Pipeline</strong></p>
-<p>DIPRE pattern由5-tuple <em>&lt;order, urlprefix, left, middle, right&gt;<em>组成，并通过将具有相等字符串分隔实体（</em>middle</em>）的共现种子tuples group在一起生成，然后将 <em>left</em> 字符串和 <em>right</em> 字符串分别设置为实体左侧和右侧上下文的最长公共子字符串。 <em>order</em> 反映了实体出现的顺序，<em>urlprefix</em> 设置为发现了 tuples 的源URL的最长公共子串。在从最初的种子 tuples 中生成一些 pattern 之后，DIPRE扫描包含 pattern 可匹配的文本片段的可用文档。随后，DIPRE生成新的tuples，并将它们用作新的“种子”。DIPRE反复迭代以上过程找到文档中的新 tuples 以识别新的可靠 patterns。</p>
-<p>伪代码：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">收集具有关系R的一组种子tuples</span><br><span class="line"></span><br><span class="line">迭代： </span><br><span class="line">1.找到包含这些种子tuples的句子 </span><br><span class="line">2.查看种子tuples之间或周围的上下文，并泛化该上下文以生成patterns</span><br><span class="line">3.用这些patterns找到更多种子tuples</span><br></pre></td></tr></table></figure>
-
-<p><strong>DIPRE样例</strong></p>
-<!-- ![img](https://github.com/BDBC-KG-NLP/IE-Survey/blob/master/image/dipre_demo.png) -->
-
-<img src="/2021/10/30/%E5%85%B3%E7%B3%BB%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/dipre_demo.png" class="" title="img">
-
-<p>从 5 个种子 tuples 开始，找到包含种子的实例，替换关键词，形成 pattern，迭代匹配，就为 (author,book) 抽取到了 relation pattern，<em><strong>x, by y</strong></em>, 和 <em><strong>x, one of y’s</strong></em>。</p>
-<p><strong>DIPRE利弊</strong></p>
-<p><strong>优点：</strong></p>
-<ol>
-<li>能够从非结构化文本中抽取出结构化的关系</li>
-<li>训练成本低，每个新场景只需要少量种子tuples。</li>
-</ol>
-<p><strong>缺点：</strong></p>
-<ol>
-<li>依赖 HTML 标签</li>
-<li>缺少对新 pattern 和 tuples 的评估</li>
-<li>抽取结果噪声较多</li>
-<li>抽取结果 Recall 较低</li>
-</ol>
-<h4 id="2-3-2-基于远程监督的方法"><a href="#2-3-2-基于远程监督的方法" class="headerlink" title="2.3.2.  基于远程监督的方法"></a>2.3.2.  基于远程监督的方法</h4><p>远程监督算法基于一个非常重要的假设：<strong>对于一个已有的知识图谱中的一个三元组（由一对实体和一个关系构成），外部文档库中任何包含这对实体的句子，在一定程度上都反映了这种关系。</strong>基于这个假设，远程监督算法可以基于一个标注好的小型知识图谱，给外部文档库中的句子标注关系标签，相当于做了样本的自动标注，因此是一种半监督的算法。</p>
-<p><strong>（1）多示例学习</strong>：主要基于Bag的特征进行关系分类，主要代表文献包括PCNN[1]、Selective Attention over Instances[2]、Multi-label CNNs[3]、APCNNs[4]，其中Bag的表示主要方式和池化方式为：</p>
-<p><a target="_blank" rel="noopener" href="https://camo.githubusercontent.com/d363bf0e22b90c0aa36841a715d1074363b64e65/68747470733a2f2f706963332e7a68696d672e636f6d2f38302f76322d39393633303831346162626437363862653564363132333665656464316131365f31343430772e706e67"><img src="https://camo.githubusercontent.com/d363bf0e22b90c0aa36841a715d1074363b64e65/68747470733a2f2f706963332e7a68696d672e636f6d2f38302f76322d39393633303831346162626437363862653564363132333665656464316131365f31343430772e706e67" alt="img"></a></p>
-<p><strong>（2）强化学习</strong>：在采用多示例学习策略时，可能会出现整个Bag包含大量噪声的情况。基于强化学习的CNN+RL[5]比句子级别和Bag级别的关系分类模型取得更好效果。</p>
-<p>模型主要由样例选择器和关系分类器构成。样例选择器负责从样例中选择高质量的句子，采取强化学习方式在考虑当前句子的选择状态下选择样例；关系分类器向样例选择器反馈，改进选择策略。</p>
-<!-- [![img](https://github.com/BDBC-KG-NLP/IE-Survey/blob/master/image/CNN%2BRL.png) -->
-
-
-
-<p><strong>（3）预训练机制</strong>：采取“Matching the Blank[6]”方法，首次在预训练过程中引入关系分类目标，但仍然是自监督的，没有引入知识库和额外的人工标注，将实体metion替换为「BLANK」标识符。</p>
-<ul>
-<li>该方法认为包含相同实体对的句子对为正样本，而实体对不一样的句子对为负样本。如图，rA和rB构成正样本，rA和rC构成rB和rC构负样本。</li>
-<li>不同于传统的远程监督，该方法训练中不使用关系标签，采用二元分类器对句子对进行相似度计算。预训练的损失包含2部分：MLM loss 和 二元交叉熵关系损失。</li>
-<li>在FewRel数据集上，不进行任何tuning就已经超过了有监督的结果。</li>
-</ul>
-<p><a target="_blank" rel="noopener" href="https://camo.githubusercontent.com/29dfe763b28ca39cd2878098025c5ae4b376b601/68747470733a2f2f706963312e7a68696d672e636f6d2f38302f76322d39383831393332666538623737613939623066663536376139353835303035305f31343430772e706e67"><img src="https://camo.githubusercontent.com/29dfe763b28ca39cd2878098025c5ae4b376b601/68747470733a2f2f706963312e7a68696d672e636f6d2f38302f76322d39383831393332666538623737613939623066663536376139353835303035305f31343430772e706e67" alt="img"></a></p>
-<h2 id="3-抽取工具应用"><a href="#3-抽取工具应用" class="headerlink" title="3. 抽取工具应用"></a>3. 抽取工具应用</h2><h3 id="3-1-TextRunner"><a href="#3-1-TextRunner" class="headerlink" title="3.1. TextRunner"></a>3.1. TextRunner</h3><p><strong>TEXTRUNNER</strong>三个关键步骤：</p>
-<p>Open Information Extraction from the Web(TextRunner, 2007，华盛顿大学)</p>
-<ul>
-<li><strong>Self-Supervised Learner</strong>：构造训练数据集，学习一个贝叶斯分类器，判断(e*i, relation words, e_*j)是否是可信的关系</li>
-<li><strong>Single-Pass Extractor</strong>：输入一句话，产生所有可能的候选三元组，使用分类器判别，保留可信的三元组</li>
-<li><strong>Redundancy-Based Assessor</strong>：统计(e_*i, relation words, e_*j)发生在不同句子中的频次，保留高频词的结果作为最终结果</li>
-</ul>
-<p><strong>Self-Supervised Learner</strong>:</p>
-<ul>
-<li><p><strong>parsing</strong> :在一个小的数据集进行<strong>语法解析</strong>，解析句子中的名词短语</p>
-</li>
-<li><p><strong>构造三元组</strong>：将名词短语作为可能的实体e_i，两个名词短语之间的词语作为关系，构成三元组候选集合</p>
-</li>
-<li><p><strong>使用约束构造正负样本</strong>： 满足下述三个条件的作为正样本</p>
-</li>
-<li><ul>
-<li>e<em>i e_j存在依赖路径，并且路径长度小于一定的值</em></li>
-<li>The path from ei to ej along the syntax tree does not cross a sentence-like boundary (e.g. relative clauses)</li>
-<li>e<em>i e</em>j都不是代词</li>
-</ul>
-</li>
-<li><p><strong>训练分类器</strong>：三元组 <img src="https://www.zhihu.com/equation?tex=(e_i,+r_%7Bi,j%7D,+e_j)" alt="[公式]"> ,将三元组特征化，训练一个贝叶斯分类器；特征有</p>
-</li>
-<li><ul>
-<li>presence of part-of-speech tag sequences in the relation <img src="https://www.zhihu.com/equation?tex=r_%7Bi,j%7D" alt="[公式]"></li>
-<li>the number of tokens in <img src="https://www.zhihu.com/equation?tex=r_%7Bi,j%7D" alt="[公式]"></li>
-<li>the number of stopwords in <img src="https://www.zhihu.com/equation?tex=r_%7Bi,j%7D" alt="[公式]"></li>
-<li>whether or not an object e is found to be a proper noun</li>
-<li>the part-of-speech tag to the left of ei</li>
-<li>the part-of-speech tag to the right of ej .</li>
-</ul>
-</li>
-</ul>
-<p><strong>Single-Pass Extractor</strong>:</p>
-<p>输入一个句子，处理过程如下</p>
-<ul>
-<li><strong>先进行词性标注</strong>，然后使用lightweight noun phrase chunker识别名词短语</li>
-<li>识别<strong>名词短语之间的词语</strong>作为关系表示</li>
-<li>使用分类器进行分类，判别这个三元组候选是否可信</li>
-</ul>
-<p><strong>Redundancy-based Assessor</strong>：</p>
-<ul>
-<li>会通过启发式的规则归一化关系短语，比如去除不必要的修饰词语</li>
-<li>统计三元组的频数，如果这个三元组是从k个不同的句子中抽取得到的话</li>
-</ul>
-<h3 id="3-2-OLLIE"><a href="#3-2-OLLIE" class="headerlink" title="3.2. OLLIE"></a>3.2. OLLIE</h3><p>OLLIE支持基于语法依赖树的关系抽取。流程图如下，主要包含三个步骤</p>
-<ul>
-<li><strong>Constructing a Bootstrapping Set</strong>：使用REVERB已经抽取到的高质量的三元组作为Seed Tuples，使用Seed Tuple抽取包含这些seed tuple的句子，构造一个比较大的训练数据集</li>
-<li><strong>Open Pattern Learning</strong>：基于语法解析，使用训练数据集学习open pattern templates&#x2F;抽取模式模板</li>
-<li><strong>Pattern Matching for Extraction</strong>：使用学习到的open pattern templates来抽取新的三元组</li>
-</ul>
-<!-- ![img](https://github.com/BDBC-KG-NLP/IE-Survey/blob/master/image/OOLLIE.png) -->
-
-<img src="/2021/10/30/%E5%85%B3%E7%B3%BB%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/OOLLIE.png" class="" title="img">
-
-<h3 id="3-3-IEPY"><a href="#3-3-IEPY" class="headerlink" title="3.3. IEPY"></a>3.3. IEPY</h3><p>开源项目：<a target="_blank" rel="noopener" href="https://github.com/machinalis/iepy">https://github.com/machinalis/iepy</a></p>
-<p>主要做关系抽取：IEPY is an open source tool for Information Extraction focused on Relation Extraction. </p>
-<p><strong>工具特征</strong>：</p>
-<ol>
-<li><p>带web-UI的语料标注⼯具。</p>
-</li>
-<li><p>基于主动学习的关系抽取的工具。</p>
-</li>
-<li><p>基于规则的关系抽取工具。</p>
-</li>
-<li><p>有web-UI帮助使用：</p>
-<p> 1)方便非专业用户使用部分功能。</p>
-<p> 2)允许分布式的用户输入。</p>
-</li>
-<li><p>通过斯坦福CoreNLP做共指解析。</p>
-</li>
-<li><p>可以基于开源代码作二次开发。</p>
-</li>
-</ol>
-<h4 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h4><p><strong>安装</strong>：</p>
-<p>作为Python包安装，pip install iepy, 并下载第三方数据 iepy –download-third-party-data </p>
-<p>使⽤：</p>
-<p><strong>1</strong> 创建项目</p>
-<p>iepy –create <project_name> </p>
-<p><strong>2</strong> 导⼊要抽取的语料</p>
-<p>python bin&#x2F;csv_to_iepy.py data.csv </p>
-<p><strong>3</strong> 数据预处理（ text tokenization, sentence splitting, lemmatization, part-of-speech tagging, and named entity recognition）</p>
-<p>python bin&#x2F;preprocess.py </p>
-<p><strong>4</strong> 启动<strong>web-ui</strong>查看项⽬</p>
-<p>python bin&#x2F;manage.py runserver </p>
-<p><strong>5</strong> 进行<strong>active learning</strong>(需要自己再依据工具提示标一些数据)或<strong>rule-based</strong>(写规则)关系抽取</p>
-<p><strong>6</strong> 在界面上标⼀些测试集来验证抽取效果。</p>
-<!-- ![image-20200917104922545](https://github.com/BDBC-KG-NLP/IE-Survey/blob/master/image/NELL.png) -->
-<img src="/2021/10/30/%E5%85%B3%E7%B3%BB%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/NELL.png" class="" title="img">
-
-<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p><strong>功能</strong>：</p>
-<p>对于要处理的语料导⼊到项目里，提供前面的预处理和两种方式的关系抽取。Active Learning的需要自己定义关系和标⼀些数据。Rule-based的需要自己写规则。也封装好了⼀些脚本⽅便的做导⼊数据、预处理、规则检查等。</p>
-<p><strong>使用方式</strong>：</p>
-<p>python包 + webUI，类似pyspider。可以用界面来定义关系和查看抽取结果、标注测试集等。不过还是需要⽤命令行来load数据，预处理等，这部分其实也可以在界面实现。</p>
-<p><strong>评价</strong>：</p>
-<p>由于开发的时间早，抽取的方法不新，也没有预先在⼤数据集上训练得到通用领域关系抽取的模型，需要用户自己定义关系并标注数据。每⼀个抽取任务创建⼀个project，使⽤web界面方便操作和可视化，感觉我们做领域迁移也可以采用这种⽅法，把流程固定，然后通过创建不同的project，导⼊不同的数据，定义不同的关系，然后⽤webUI进⾏可视化和人工操作。</p>
-<h3 id="3-4-spaCy"><a href="#3-4-spaCy" class="headerlink" title="3.4. spaCy"></a>3.4. spaCy</h3><p><strong>3.4.1</strong> 介绍</p>
-<p>工业级的NLP工具：功能很强⼤，不⽌是做Information Extraction，⽤Cython优化，各种处理超级快（官网fastest in the world），能⽤于在真实场景和产品里的。适合对用于Deep Learning的⽂本进行预处理。能和TensorFlow, PyTorch, scikit-learn, Gensim 等深度学习框架无缝衔接。</p>
-<p><strong>3.4.2 工具特点</strong>：</p>
-<ul>
-<li>无损的tokenization </li>
-<li>命名实体识别</li>
-<li>⽀持53+语言</li>
-<li>支持11种语言上的17个统计模型</li>
-<li>预训练好的词向量</li>
-<li>SOTA的速度</li>
-<li>方便与深度学习集成</li>
-<li>POS标注</li>
-<li>带标记的依存句法分析</li>
-<li>句法驱动的句子分割</li>
-<li>内置用于语法和NER的可视化工具</li>
-<li>方便的字符串-&gt;哈希值映射</li>
-<li>导出到numpy数组</li>
-<li>高效的⼆进制序列化</li>
-<li>方便的模型打包和部署</li>
-<li>稳健，经过严格评估的准确性</li>
-</ul>
-<h4 id="3-4-3-总结"><a href="#3-4-3-总结" class="headerlink" title="3.4.3 总结"></a>3.4.3 总结</h4><p>并非专门做信息抽取，也没有抽取关系的功能。封装了NLP相关的基础工作，并优化了速度以用于真实产品。</p>
-<p>同时也允许用户自己训练模型load后使⽤。</p>
-<p>使用方式：</p>
-<p>python包+load下载的模型。</p>
-<p><strong>评价</strong>：</p>
-<p>功能很多很实用，定位在于做深度学习前面的文本预处理，且优化速度。使用方式和很多⼯具⼀样，使用python包，封装好各种通用功能和接口，再通过加载不同的模型实现使⽤在不同领域、语言或者应对方法改进的情况。</p>
-<h3 id="3-5-NELL"><a href="#3-5-NELL" class="headerlink" title="3.5 NELL"></a>3.5 NELL</h3><p><strong>3.5.1</strong> 介绍</p>
-<p>永恒语⾔学习：</p>
-<p>Never-ending Language Learning。不断学习语⾔知识，2010年提出。</p>
-<p><strong>architecture</strong>：</p>
-<!-- ![image-20200917110152465](https://github.com/BDBC-KG-NLP/IE-Survey/blob/master/image/NELL_ARC.png) -->
-<img src="/2021/10/30/%E5%85%B3%E7%B3%BB%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/NELL_ARC.png" class="" title="img">
-
-<!-- ![image-20200917111521876](https://github.com/BDBC-KG-NLP/IE-Survey/blob/master/image/NELL_PRO.png) -->
-<img src="/2021/10/30/%E5%85%B3%E7%B3%BB%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/NELL_PRO.png" class="" title="img">
-
-
-
-<p><strong>流程</strong>：</p>
-<p>利⽤少量标记样本集合训练学习模型, 然后⽤该模型去标记更多样本。（需要偶尔人工标注）。运⽤多视角学习(multi-view learning)分别从文本背景信息、网页结构信息、构词法特征以及规则学习4个角度进行新知识抽取和知识库的扩充。</p>
-<p><strong>3.5.2 总结</strong></p>
-<p>评价：</p>
-<p>可以借鉴这种方式扩充构建好的知识库，对于通用领域知识库可以在网页文本上抽取，特定领域的可以喂相关领域的文档或者爬取到的网页文本。信息抽取工具应该不包含这个功能，而是通过这个⼯具的使用能够实现这种功能。</p>
-<h3 id="3-6-Deepdive"><a href="#3-6-Deepdive" class="headerlink" title="3.6 Deepdive"></a>3.6 Deepdive</h3><p>官网地址：<a target="_blank" rel="noopener" href="http://deepdive.stanford.edu/">http://deepdive.stanford.edu/</a></p>
-<p><a target="_blank" rel="noopener" href="http://deepdive.stanford.edu/">Deepdive</a>是stanford大学InfoLab实验室开发的一个开源知识抽取系统，它通过弱监督学习，从非结构化的文本中提取结构化的关系数据。DeepDive用于提取实体之间的复杂关系并推断涉及这些实体的事实。在使用Deepdive进行关系抽取的时候，使用者不需要关心算法，只需要指定实体的特征，Deepdive通过联合推理，即可得出两个实体之间有关系的概率。</p>
-<p>Deepdive的优点如下：<br>（1）可以处理带噪声的数据，用户可以通过对断言设置置信度来矫正噪声<br>（2）可以通过使用已有的领域知识来指导推理结果，通过用户反馈的结果来提高预测的准确率<br>（3）使用远监督技术，不需要或仅需要少量数据即可完成抽取</p>
-<p>抽取流程如下：</p>
-<!-- ![image](https://github.com/BDBC-KG-NLP/IE-Survey/blob/master/image/deepdive.jpg) -->
-<img src="/2021/10/30/%E5%85%B3%E7%B3%BB%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/deepdive.jpg" class="" title="img">
-
-
-<p>一个中文抽取示例：股权抽取 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/43143663">https://zhuanlan.zhihu.com/p/43143663</a></p>
-<h3 id="3-7-Stanford"><a href="#3-7-Stanford" class="headerlink" title="3.7 Stanford"></a>3.7 Stanford</h3><p>官网地址：<a target="_blank" rel="noopener" href="https://stanfordnlp.github.io/CoreNLP/">https://stanfordnlp.github.io/CoreNLP</a></p>
-<p>Stanford CoreNLP是斯坦福大学提供的自然语言处理工具，是由Java写成的，可通过使用Web服务与CoreNLP进行交互，从而使用python等其他语言进行编程，目前提供python接口可直接安装使用，支持多种语言。</p>
-<p>Open IE（开放信息提取）是指从纯文本中提取关系元组，与其他提取不同的是，Open IE 不需要提前定义schema，主要利用语言结构进行开放领域信息抽取。Stanford Open IE是Stanford CoreNLP包中的一个开放领域信息抽取模块，该模块的抽取思路如下：</p>
-<p>1、先将句子分成几个子句（学习一个分类器）</p>
-<p>2、最大程度地缩短每个子句，产生一组所需的句子片段</p>
-<p>3、从片段中提取三元组（自然逻辑）</p>
-<p>相关论文链接：<a target="_blank" rel="noopener" href="https://nlp.stanford.edu/pubs/2015angeli-openie.pdf">https://nlp.stanford.edu/pubs/2015angeli-openie.pdf</a></p>
-<p>Relation Extractor（关系抽取）是Stanford CoreNLP中的另一个处理模块，用于抽取特定领域的关系。目前支持Live_In, Located_In, OrgBased_In, Work_For, and None这几种关系。用户可以使用提供的接口使用自己的数据集训练自己的模型，从而实现特定领域的关系抽取。该模块的抽取思路如下：</p>
-<p>1、数据预处理：tokenization，part of speech tagging</p>
-<p>2、实体识别（标注）</p>
-<p>3、使用多类逻辑回归分类器对关系进行分类</p>
-<p>Stanford Open IE&amp; Relation Extractor对比</p>
-<table>
-<thead>
-<tr>
-<th>模块</th>
-<th>领域</th>
-<th>使用方法</th>
-<th>用户使用</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Open IE</td>
-<td>开放领域</td>
-<td>下载StandfordCoreNLP包</td>
-<td>可以使用java或者其他语言进行服务器与来进行编码</td>
-</tr>
-<tr>
-<td>Relation Extractor</td>
-<td>特定领域</td>
-<td>下载StandfordCoreNLP包，用户可自行训练特定领域的模型</td>
-<td>可以使用java或者其他语言与服务器交互来进行编码</td>
-</tr>
-</tbody></table>
-<h2 id="4-相关文献"><a href="#4-相关文献" class="headerlink" title="4. 相关文献"></a>4. 相关文献</h2><ol>
-<li>Distant Supervision for Relation Extraction via Piecewise Convolutional Neural Networks. EMNLP</li>
-<li>Attention over Instances (Lin 2016)</li>
-<li>Relation Extraction with Multi-instance Multi-label Convolutional Neural Networks.</li>
-<li>Distant Supervision for Relation Extraction with Sentence-Level Attention and Entity Descriptions</li>
-<li>Reinforcement Learning for Relation Classification from Noisy Data</li>
-<li><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1906.03158.pdf">Matching the Blanks: Distributional Similarity for Relation Learning</a></li>
-<li>Riedel, Sebastian, Limin Yao, and Andrew McCallum. “Modeling relations and their mentions without labeled text.”<em>Joint European Conference on Machine Learning and Knowledge Discovery in Databases</em>. Springer, Berlin, Heidelberg, 2010.</li>
-</ol>
-<h2 id="5-参考资源"><a href="#5-参考资源" class="headerlink" title="5. 参考资源"></a>5. 参考资源</h2><p><a target="_blank" rel="noopener" href="https://github.com/BDBC-KG-NLP/IE-Survey">收录文章</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/139485679">https://zhuanlan.zhihu.com/p/139485679</a></p>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/77868938">https://zhuanlan.zhihu.com/p/77868938</a></p>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/189831468">SemEval-2020自由文本关系抽取冠军方案解读</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/WindChimeRan/NREPapers2019">https://github.com/WindChimeRan/NREPapers2019</a></p>
-<p><a target="_blank" rel="noopener" href="https://paperswithcode.com/sota">https://paperswithcode.com/sota</a></p>
-<p><a target="_blank" rel="noopener" href="http://www.ccks2019.cn/">2019全国知识图谱与语义计算大会</a></p>
-<p><a target="_blank" rel="noopener" href="https://yuanxiaosc.github.io/categories/%E8%AE%BA%E6%96%87/%E4%BF%A1%E6%81%AF%E6%8A%BD%E5%8F%96/">望江人工智库 信息抽取</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/yuanxiaosc/Entity-Relation-Extraction">https://github.com/yuanxiaosc/Entity-Relation-Extraction</a></p>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/145812779">https://zhuanlan.zhihu.com/p/145812779</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/10/30/%E5%85%B3%E7%B3%BB%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/">展开全文 >></a>
         </p>
       
 

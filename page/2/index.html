@@ -206,6 +206,86 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-DPO" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2024/05/08/DPO/">DPO</a>
+    </h1>
+  
+
+        
+        <a href="/2024/05/08/DPO/" class="archive-article-date">
+  	<time datetime="2024-05-08T03:03:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-05-08</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>DPO全称Direct Preference Optimization，它是RLHF算法的一种，相比PPO算法来讲，它只需要actor和ref model,少了critic和reward model。其核心期望为good loss - bad loss越来越大， 这点和排序模型中的rank loss很相似，但是又不希望和ref model偏差太多。</p>
+<h2 id="最小实现代码"><a href="#最小实现代码" class="headerlink" title="最小实现代码"></a>最小实现代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">from</span> copy <span class="keyword">import</span> deepcopy</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> AutoModelForCausalLM, LlamaForCausalLM, LlamaConfig</span><br><span class="line"></span><br><span class="line">torch.manual_seed(<span class="number">0</span>)</span><br><span class="line"><span class="comment"># 超参数</span></span><br><span class="line">beta = <span class="number">0.1</span></span><br><span class="line"><span class="comment"># 加载模型</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># data</span></span><br><span class="line">prompt_ids = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]</span><br><span class="line">good_response_ids = [<span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>]</span><br><span class="line"><span class="comment"># 对loss稍加修改可以应对一个good和多个bad的情况</span></span><br><span class="line">bad_response_ids_list = [[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">0</span>], [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">0</span>]]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换成模型输入</span></span><br><span class="line">input_ids = torch.LongTensor(</span><br><span class="line">    [prompt_ids + good_response_ids, *[prompt_ids + bad_response_ids <span class="keyword">for</span> bad_response_ids <span class="keyword">in</span> bad_response_ids_list]]</span><br><span class="line">)</span><br><span class="line"><span class="comment"># labels 提前做个shift</span></span><br><span class="line">labels = torch.LongTensor(</span><br><span class="line">    [</span><br><span class="line">        [-<span class="number">100</span>] * <span class="built_in">len</span>(prompt_ids) + good_response_ids,</span><br><span class="line">        *[[-<span class="number">100</span>] * <span class="built_in">len</span>(prompt_ids) + bad_response_ids <span class="keyword">for</span> bad_response_ids <span class="keyword">in</span> bad_response_ids_list]</span><br><span class="line">    ]</span><br><span class="line">)[:, <span class="number">1</span>:]</span><br><span class="line">loss_mask = (labels != -<span class="number">100</span>)</span><br><span class="line">labels[labels == -<span class="number">100</span>] = <span class="number">0</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">policy_model = LlamaForCausalLM(config=LlamaConfig(vocab_size=<span class="number">1000</span>, num_hidden_layers=<span class="number">1</span>, hidden_size=<span class="number">128</span>))</span><br><span class="line">reference_model = deepcopy(policy_model)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算 policy model的log prob</span></span><br><span class="line">logits = policy_model(input_ids)[<span class="string">&quot;logits&quot;</span>][:, :-<span class="number">1</span>, :]</span><br><span class="line">per_token_logps = torch.gather(logits.log_softmax(-<span class="number">1</span>), dim=<span class="number">2</span>, index=labels.unsqueeze(<span class="number">2</span>)).squeeze(<span class="number">2</span>)</span><br><span class="line">all_logps = (per_token_logps * loss_mask).<span class="built_in">sum</span>(-<span class="number">1</span>)</span><br><span class="line"><span class="comment"># 暂时写死第一个是good response的概率</span></span><br><span class="line">policy_good_logps, policy_bad_logps = all_logps[:<span class="number">1</span>], all_logps[<span class="number">1</span>:]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算 reference model的log prob</span></span><br><span class="line"><span class="keyword">with</span> torch.no_grad():</span><br><span class="line">    logits = reference_model(input_ids)[<span class="string">&quot;logits&quot;</span>][:, :-<span class="number">1</span>, :]</span><br><span class="line">    per_token_logps = torch.gather(logits.log_softmax(-<span class="number">1</span>), dim=<span class="number">2</span>, index=labels.unsqueeze(<span class="number">2</span>)).squeeze(<span class="number">2</span>)</span><br><span class="line">    all_logps = (per_token_logps * loss_mask).<span class="built_in">sum</span>(-<span class="number">1</span>)</span><br><span class="line">    <span class="comment"># 暂时写死第一个是good response的概率</span></span><br><span class="line">    reference_good_logps, reference_bad_logps = all_logps[:<span class="number">1</span>], all_logps[<span class="number">1</span>:]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 计算loss，会自动进行广播</span></span><br><span class="line">logits = (policy_good_logps - reference_good_logps) - (policy_bad_logps - reference_bad_logps)</span><br><span class="line">loss = -F.logsigmoid(beta * logits).mean()</span><br><span class="line"><span class="built_in">print</span>(loss)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/642569664">知乎介绍1</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/huggingface/trl/blob/3b4c24946b7d5580fd354b0e3800fc1047b82a41/trl/trainer/dpo_trainer.py#L965">trl dpo loss计算</a></li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2024/05/08/DPO/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-RLHF-Actor-Critic" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1120,106 +1200,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-ChatGLM微调记录" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2023/10/01/ChatGLM%E5%BE%AE%E8%B0%83%E8%AE%B0%E5%BD%95/">ChatGLM微调记录</a>
-    </h1>
-  
-
-        
-        <a href="/2023/10/01/ChatGLM%E5%BE%AE%E8%B0%83%E8%AE%B0%E5%BD%95/" class="archive-article-date">
-  	<time datetime="2023-10-01T06:27:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-10-01</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>以ChatGLM-6B ptuning提供的微调代码来进行测试，整体代码<a target="_blank" rel="noopener" href="https://github.com/THUDM/ChatGLM-6B/tree/main/ptuning">在此</a>。</p>
-<h2 id="训练和推理"><a href="#训练和推理" class="headerlink" title="训练和推理"></a>训练和推理</h2><p>训练就直接使用<a target="_blank" rel="noopener" href="https://github.com/THUDM/ChatGLM-6B/blob/main/ptuning/train.sh">官方代码</a>啦，<a target="_blank" rel="noopener" href="https://github.com/THUDM/ChatGLM-6B/blob/main/ptuning/evaluate.sh">推理</a>也是滴，整体流程跑通都很顺畅，整体是采用<code>quantization_bit=4</code>，所以单卡（5~6G显存）就能跑的起来。</p>
-<p>记录几个有意思的点。</p>
-<h3 id="1-p-tuning"><a href="#1-p-tuning" class="headerlink" title="1. p-tuning"></a>1. p-tuning</h3><p>这个是众多Parameter Efficient fine-tune实现方式之一，其发展历程简单理解有两个阶段，一是人工构造template，二是机器自己学习一个template。</p>
-<p>比如一开始做分类，例如“这个沙发怎么样”,那就在这句话前面（当然也可以放到后面）加上一个template，比如<code>情感分析，这个沙发怎么样</code>，<code>你觉得这句话是正向还是负向：这个沙发怎么样</code>，那训练时只对这个template进行微调，因为微调seq_len很少，所以速度杠杠滴。不过另外还有一个比较重要的点，贴和预训练模型任务。比如bert采用了mask方式来做预训练，但是你这里明明后面接个二分类，咋说也说不通啊，那为了贴和预训练任务，构造也可以这样：<code>情感分析，这个沙发怎么样&lt;mask&gt;</code>,那由bert来预测<code>&lt;mask&gt;</code>位置的值，比如“好”或者“坏”,或者设置一堆和“好”或者“坏”同义的词（amaze、bad）。但是这个呢，又不能解决通用，比如NER任务，“张三和李四谁更漂亮？”，那总不能先知道几个<code>&lt;mask&gt;</code>吧，以及bert的<code>&lt;mask&gt;</code>是字粒度的。</p>
-<p>emmmm,扯远了，总结来说第一个阶段的peft可理解为人工构造一个template，但是呢，它是显性的，谁知道哪个template会更好。所以咱也不猜了，让模型自己去学去吧。</p>
-<p>所以这里引入了第二个阶段：模型自己来学习合适的template。</p>
-<p>p-tuning v2采用引入一个pre_seq_len，也就是PrefixEncoder，比如2, 8, 16(只要不超长都可以)，那只对这一部分进行微调，bert本身不参与微调哦，从而达成了不自己抓脑袋想一个有效的template，从而也完成了一个通用的目的。</p>
-<p>关于p-tuning v2实现，可以参考<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/459305102">这里</a>。</p>
-<h3 id="2-速度"><a href="#2-速度" class="headerlink" title="2. 速度"></a>2. 速度</h3><p>这个真是牙痒痒，明明已经使用p-tuning了，明明也量化到4bit了，明明还使用了GPU，还这么慢，不得提前吐槽一下。。。</p>
-<p>关于速度慢，一个点是更长的上下文计算attention不可能不慢，新的技术<a target="_blank" rel="noopener" href="https://github.com/Dao-AILab/flash-attention">flash-attention</a>（torch2已经原生支持了哦，现在很多大模型都在torch2上跑了哦）更为有效解决这个问题，不过这个不是在算法本身做了优化，所以跳过。</p>
-<p>建议使用v2或v3, 如果非用这个，建议推理时采用stream_chat,或是采用Lora微调。</p>
-<h3 id="3-效果"><a href="#3-效果" class="headerlink" title="3. 效果"></a>3. 效果</h3><p>比如采用下面脚本看微调后的效果，会遇到几个比较值得注意的点。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> set_seed, AutoConfig, AutoModel, AutoTokenizer</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">set_seed(<span class="number">42</span>)</span><br><span class="line"></span><br><span class="line">model_name_or_path = <span class="string">&#x27;chatglm-6b&#x27;</span></span><br><span class="line">ptuning_checkpoint = <span class="string">&#x27;ptuning/output/adgen-chatglm-6b-pt-128-0.02/checkpoint-3000&#x27;</span></span><br><span class="line"></span><br><span class="line">config = AutoConfig.from_pretrained(model_name_or_path, trust_remote_code=<span class="literal">True</span>)</span><br><span class="line">config.pre_seq_len = <span class="number">128</span></span><br><span class="line">config.prefix_projection = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, trust_remote_code=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">model = AutoModel.from_pretrained(model_name_or_path, config=config, trust_remote_code=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">prefix_state_dict = torch.load(os.path.join(ptuning_checkpoint, <span class="string">&quot;pytorch_model.bin&quot;</span>), map_location=<span class="string">&#x27;cpu&#x27;</span>)</span><br><span class="line">new_prefix_state_dict = &#123;&#125;</span><br><span class="line"><span class="keyword">for</span> k, v <span class="keyword">in</span> prefix_state_dict.items():</span><br><span class="line">    <span class="keyword">if</span> k.startswith(<span class="string">&quot;transformer.prefix_encoder.&quot;</span>):</span><br><span class="line">        new_prefix_state_dict[k[<span class="built_in">len</span>(<span class="string">&quot;transformer.prefix_encoder.&quot;</span>):]] = v</span><br><span class="line">model.transformer.prefix_encoder.load_state_dict(new_prefix_state_dict)</span><br><span class="line">model = model.quantize(<span class="number">4</span>)</span><br><span class="line"></span><br><span class="line">model.to(<span class="string">&quot;cuda:0&quot;</span>)</span><br><span class="line">model = model.half()</span><br><span class="line">model.transformer.prefix_encoder.<span class="built_in">float</span>()</span><br><span class="line">model.<span class="built_in">eval</span>()</span><br><span class="line">start_time = time.time()</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">30</span>):</span><br><span class="line">    response, history = model.chat(tokenizer, <span class="string">&quot;你好&quot;</span>, history=[])</span><br><span class="line">    <span class="built_in">print</span>(response)</span><br><span class="line">    response, history = model.chat(tokenizer, <span class="string">&quot;晚上睡不着应该怎么办&quot;</span>, history=history)</span><br><span class="line">    <span class="built_in">print</span>(response)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># CUDA_VISIBLE_DEVICES=0 python run_finetuned_demo.py</span></span><br><span class="line"></span><br><span class="line">    response, history = model.chat(tokenizer, <span class="string">&quot;请根据以下标签为商品编写一段广告\n类型#裤*版型#显瘦*颜色#黑色*风格#简约*裤长#九分裤&quot;</span>, history=[])</span><br><span class="line">    <span class="built_in">print</span>(response)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(time.time() - start_time)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h4 id="1-出现和重复"><a href="#1-出现和重复" class="headerlink" title="1. 出现&lt;UNK&gt;和重复"></a>1. 出现<code>&lt;UNK&gt;</code>和重复</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">一件&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,&lt;UNK&gt;,</span><br><span class="line">BRAND这款&lt;UNK&gt;的裤子，在设计上很注重细节，衣袖和裤腿处都是&lt;UNK&gt;的&lt;UNK&gt;,&lt;UNK&gt;和&lt;UNK&gt;,&lt;UNK&gt;和&lt;UNK&gt;,&lt;UNK&gt;和&lt;UNK&gt;,&lt;UNK&gt;和&lt;UNK&gt;,</span><br><span class="line">简约修身的版型设计，上身十分显瘦，而且穿着十分有型。黑色款式设计，简约大气，时尚百搭，适合各种场合穿着。九分裤的长度设计，露出脚踝，视觉上显瘦。</span><br><span class="line">设计师对细节的把控是很高的，这样可以让整体看上去更加有设计感。而设计师在设计的同时对颜色的选择也是特别用心的，这样可以让整体看上去更加有格调，并且可以更好的展现出一种高端大气的格调。</span><br><span class="line">睡眠是身体和心灵都需要得到放松的，而晚上睡不着，可以做一些舒缓身心的活动，比如&lt;UNK&gt;，释放身心压力，缓解身心疲劳。而晚上睡不着，还可以去&lt;UNK&gt;,&lt;UNK&gt;音乐，让身心都得到放松。此外，可以做一些轻松的瑜伽，</span><br><span class="line">简约的黑色，上身更显帅气与利落，时尚修身的剪裁，穿着舒适，尽显女性魅力。九分的长度，轻松露出纤细的脚踝，更显腿长，拉长身材比例。</span><br><span class="line">采用优质的面料，使宝贝穿着舒适，保持柔软亲肤。搭配精致小立领，凸显宝贝脸型，彰显气质。搭配精致的包边工艺，使宝贝穿着舒适，方便宝贝穿脱。</span><br><span class="line">选用优质的面料，柔软亲肤，穿着舒适，穿着方便。精致小立领设计，凸显宝贝脸型，凸显宝贝气质。精致的包边工艺，方便穿脱。搭配精致的小立领，彰显宝贝气质。穿着舒适，柔软亲肤，穿着方便，穿着舒适。</span><br><span class="line">经典简约的黑色调，搭配九分裤的设计，不仅显瘦还修饰腿部曲线，上身更显腿长。修身的版型设计，展现女性优美的腿部曲线，尽显优雅气质。</span><br><span class="line">小宝贝在婴儿时期就接受了优质的营养，所以宝宝的身体健康状况良好。宝宝从婴儿时期就接受了优质的营养，因此宝宝身体健康状况良好，没有&lt;UNK&gt;。宝宝在婴儿时期就接受了优质的营养，所以宝宝身体健康。</span><br><span class="line">小宝贝从婴儿时期就接受了优质的营养，身体健康状况良好，没有&lt;UNK&gt;。小宝贝从婴儿时期就接受了优质的营养，身体健康状况良好，没有&lt;UNK&gt;。小宝贝从婴儿时期就接受了优质的营养，身体健康状况良好，没有&lt;UNK&gt;。小宝贝从婴儿</span><br><span class="line">黑色修身的九分裤，能更好的修饰腿型，让双腿显得更加修长，凸显女性的高挑。简约的修身版型，穿起来更显笔直修长。九分裤的长度，可以更好的修饰腿型，让双腿显得更加修长，显瘦效果也更好。</span><br><span class="line">非常可爱的小萌宝，可爱又甜美，非常符合儿童的审美。可爱的小萌宝，大大的眼睛，大大的眼睛，大大的眼睛，很迷人。小萌宝，小萌宝，非常可爱，非常可爱。</span><br><span class="line">儿童睡觉不踏实，晚上睡不着，是困扰许多家长的问题。在儿童睡眠中，儿童喜欢甜甜地睡觉，而且儿童喜欢甜美可爱的形象。儿童喜欢甜美可爱的形象，喜欢可爱可爱的儿童，喜欢甜美可爱的儿童。儿童喜欢甜美可爱的儿童，喜欢甜美可爱的儿童。甜美可爱的</span><br><span class="line">这条黑色的修身九分裤，简约时尚，轻松穿出帅气的感觉，上身之后非常显瘦。而且裤脚采用了松紧的设计，穿起来更加舒适。九分的长度，轻松露出纤细的脚踝，显得双腿修长又笔直。</span><br><span class="line">一件&lt;UNK&gt;的衬衫是很多人衣橱里必不可少的单品，穿着舒适，上身效果出色。而这款衬衫的面料采用的是&lt;UNK&gt;面料，柔软舒适，穿着不紧绷。</span><br><span class="line">衬衫作为女性衣橱里的必备单品，穿起来舒适又百搭，让你轻松穿出女神范。而这款衬衫选用的是柔软舒适的面料，穿着舒适又透气。而且面料表面带有&lt;UNK&gt;的纹理，看起来质感丰富。穿着舒适不紧绷，上身效果出色。而且衬衫的衣领</span><br><span class="line">一款简约而不简单的休闲裤，黑色的色调，经典百搭，彰显时尚气质。修身的版型，展现窈窕身材，搭配九分裤长，彰显干练气质。</span><br><span class="line">采用&lt;UNK&gt;面料，&lt;UNK&gt;工艺，面料轻盈舒适，不易变形。&lt;UNK&gt;面料，&lt;UNK&gt;面料，&lt;UNK&gt;面料，&lt;UNK&gt;面料，&lt;UNK&gt;面料，&lt;UNK&gt;面料，&lt;UNK&gt;面料，&lt;UNK&gt;面料，&lt;UNK&gt;</span><br><span class="line">轻薄的面料，轻盈舒适，不会引起的任何不适。面料柔软舒适，不易变形，穿着舒适，不易褶皱。采用&lt;UNK&gt;工艺，不易变形，不会引起的任何不适。面料轻盈舒适，不易变形，不会引起的任何不适。&lt;UNK&gt;面料，&lt;UNK&gt;面料，</span><br><span class="line">黑色百搭又显瘦，在裤子的设计上，设计师采用简约大方的九分裤型，上身显瘦又显腿长。腰部采用了松紧的设计，不勒腰，穿脱方便。</span><br><span class="line">来自&lt;UNK&gt;的这款儿童儿童&lt;UNK&gt;儿童儿童&lt;UNK&gt;儿童儿童&lt;UNK&gt;儿童儿童&lt;UNK&gt;儿童儿童&lt;UNK&gt;儿童儿童&lt;UNK&gt;儿童儿童儿童&lt;UNK&gt;儿童儿童&lt;UNK&gt;儿童儿童&lt;UNK&gt;儿童儿童儿童&lt;UNK&gt;儿童儿童&lt;</span><br><span class="line">儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童儿童</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<p>按理说这6B大模型不应该啊！！按理说即使不做超参调整或者说generate时做重复惩罚，也应该效果好是不是～～～</p>
-<h4 id="2-灾难性遗忘"><a href="#2-灾难性遗忘" class="headerlink" title="2. 灾难性遗忘"></a>2. 灾难性遗忘</h4><p>首先这是一个现象，其issue里也讨论了蛮多关于这个话题。有人说p-tuning不就干这个的嘛，你推理时都加了p-tuning这部分参数，那肯定的啊。还有人说Lora虽然也有这个现象，但是比p-tuning要好的多。反正婆说婆有理。</p>
-<p>官方给的improve，比如在官方示例前面添加描述性文本”请根据以下标签为商品编写一段广告\n“，最终训练数据类似下面这样：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">请根据以下标签为商品编写一段广告\n类型#裤*版型#显瘦*颜色#黑色*风格#简约*裤长#九分裤</span><br></pre></td></tr></table></figure>
-
-<p>但是我训练完还是会这样。</p>
-<p>也有人说把学习率调的更低一些，还有说官方给了10几w的训练样本，只用1～2k试试。</p>
-<p>这个本身还是有方法可以解决的，比如base大模型不动，可以在上面添加很多的prefx_encoder嘛～～～</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>多来点A100～</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2023/10/01/ChatGLM%E5%BE%AE%E8%B0%83%E8%AE%B0%E5%BD%95/">展开全文 >></a>
         </p>
       
 
