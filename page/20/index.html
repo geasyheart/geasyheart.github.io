@@ -206,6 +206,107 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-33-04MySQL系列之八－多表查询、子查询及视图" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/07/06/33-04MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%85%AB%EF%BC%8D%E5%A4%9A%E8%A1%A8%E6%9F%A5%E8%AF%A2%E3%80%81%E5%AD%90%E6%9F%A5%E8%AF%A2%E5%8F%8A%E8%A7%86%E5%9B%BE/">33_04MySQL系列之八－多表查询、子查询及视图</a>
+    </h1>
+  
+
+        
+        <a href="/2015/07/06/33-04MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%85%AB%EF%BC%8D%E5%A4%9A%E8%A1%A8%E6%9F%A5%E8%AF%A2%E3%80%81%E5%AD%90%E6%9F%A5%E8%AF%A2%E5%8F%8A%E8%A7%86%E5%9B%BE/" class="archive-article-date">
+  	<time datetime="2015-07-06T01:15:13.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-07-06</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>视图: </p>
+<blockquote>
+<p>存储下来的SELECT语句；<br>基于基表的查询结果;<br>重用SQL语句；<br>简化复杂的SQL操作；<br>暴露表中的一部分，而不是全部；<br>保证数据安全；<br>视图不能建立索引，他们也不能拥有触发器或者关联的默认值； </p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">VIEW</span> view_name <span class="keyword">AS</span> <span class="keyword">SELECT</span> Name,Cname,Tname <span class="keyword">FROM</span> students,courses,tutors <span class="keyword">WHERE</span> students.CID1 <span class="operator">=</span> courses.CID <span class="keyword">AND</span> courses.TID<span class="operator">=</span>tutors.TID; </span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">VIEW</span> view_name; </span><br><span class="line">```                 </span><br><span class="line">物化视图:可以将查询结果缓存下来 </span><br><span class="line"> </span><br><span class="line">不建议在MySQL上使用视图，但可在安全控制上使用 </span><br><span class="line"> </span><br><span class="line"> mysql  <span class="operator">-</span>e <span class="string">&#x27;CREATE DATABASE edb;&#x27;</span>    可用来在shell中之行<span class="keyword">SQL</span>语句 </span><br><span class="line">     </span><br><span class="line">例如: </span><br><span class="line"></span><br><span class="line">```<span class="keyword">sql</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> mysql_test( </span><br><span class="line">        ID TINYINT UNSIGNED <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT <span class="keyword">PRIMARY</span> KEY， </span><br><span class="line">        RANDOM <span class="type">INT</span> </span><br><span class="line">        ); </span><br><span class="line">         </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim mysql_test.sh </span></span><br><span class="line">     </span><br><span class="line">    <span class="comment">#!/bin/bash </span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">true</span>;<span class="keyword">do</span> </span><br><span class="line">    A=<span class="variable">$RANDOM</span> </span><br><span class="line">    mysql -e <span class="string">&quot;INSERT INTO testdb.mysql_test(RANDOM)VALUES(<span class="variable">$A</span>);&quot;</span> </span><br><span class="line">    <span class="keyword">done</span> </span><br></pre></td></tr></table></figure>
+<p>    <br>如果想让范围更大，可以把TINYINT改为INT; </p>
+<p>补充:<br>TRUNCATE：<br>    TRUNCATE tb_name<br>    清空表，并重置AUTO_INCREMENT计数器； </p>
+<p>例如，有张表students，我把其删除:<br>DELETE  FROM students;<br>如果我再往里面添加数据，如表结构有ID AUTO_INCREMENT;那么ID则会从上次删除的最后ID进行再次插入，<br>如果想让计数器从零开始计数，那么<br>TRUNCATE  students; </p>
+<p>准确来说:TRUNCATE tb_name是删除整个表，然后重新创建这个表，以代替单独的删除每一行这种方法，如果要删除表中的所有记录，建议使用TRUNCATE； </p>
+<p>多表更新:  —–摘自其他地方 </p>
+<ol>
+<li>INSERT INTO … SELECT …</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> customers( </span><br><span class="line">            cust_id, </span><br><span class="line">            cust_contact, </span><br><span class="line">            cust_email, </span><br><span class="line">            cust_name, </span><br><span class="line">            cust_address, </span><br><span class="line">            cust_city, </span><br><span class="line">            cust_state, </span><br><span class="line">            cust_zip, </span><br><span class="line">            cust_country) </span><br><span class="line">    <span class="keyword">SELECT</span> </span><br><span class="line">            cust_id, </span><br><span class="line">            cust_contact, </span><br><span class="line">            cust_email, </span><br><span class="line">            cust_name, </span><br><span class="line">            cust_address, </span><br><span class="line">            cust_city, </span><br><span class="line">            cust_state, </span><br><span class="line">            cust_zip, </span><br><span class="line">            cust_country </span><br><span class="line">    <span class="keyword">FROM</span> custnew; </span><br></pre></td></tr></table></figure>
+<p>    <br>2. CREATE TABLE … SELECT … </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> custnew( </span><br><span class="line">        cust_id <span class="type">int</span> unsigned <span class="keyword">not</span> <span class="keyword">null</span>, </span><br><span class="line">        cust_name <span class="type">varchar</span>(<span class="number">15</span>)) </span><br><span class="line">    <span class="keyword">SELECT</span> </span><br><span class="line">    cust_id, </span><br><span class="line">    cust_name </span><br><span class="line">    <span class="keyword">FROM</span> customers; </span><br><span class="line">```     </span><br><span class="line"> </span><br><span class="line"><span class="number">3.</span> <span class="keyword">UPDATE</span> .. <span class="keyword">ON</span> ... <span class="keyword">SET</span> </span><br><span class="line"> </span><br><span class="line">```<span class="keyword">sql</span></span><br><span class="line">    <span class="keyword">UPDATE</span> agit <span class="keyword">AS</span> A <span class="keyword">INNER</span> <span class="keyword">JOIN</span> xueyuan <span class="keyword">AS</span> B </span><br><span class="line">    <span class="keyword">ON</span> A.xueyuan <span class="operator">=</span> B.xueyuan </span><br><span class="line">    <span class="keyword">SET</span> A.xueyuan<span class="operator">=</span>B.ID;</span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/07/06/33-04MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%85%AB%EF%BC%8D%E5%A4%9A%E8%A1%A8%E6%9F%A5%E8%AF%A2%E3%80%81%E5%AD%90%E6%9F%A5%E8%AF%A2%E5%8F%8A%E8%A7%86%E5%9B%BE/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-33-03MySQL系列之七－单表查询、多表查询和子查询" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1101,101 +1202,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/05/10/30-04nss/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-30-03nss" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/05/10/30-03nss/">30_03nss</a>
-    </h1>
-  
-
-        
-        <a href="/2015/05/10/30-03nss/" class="archive-article-date">
-  	<time datetime="2015-05-10T15:09:03.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-05-10</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Authentication:认证<br>Authorized:授权<br>例如:当你登录一个服务器，输入用户名和密码，这个时候服务器要Authentication,登录进去后<br>能够完成什么事以及其他什么的，要Authorized。所以往下两篇文章将会介绍Linux上的NIS和pam。 </p>
-<p>NIS:<a target="_blank" rel="noopener" href="http://linux.vbird.org/linux_server/0430nis.php">http://linux.vbird.org/linux_server/0430nis.php</a> </p>
-<p>PAM:<br>&#x2F;etc&#x2F;pam.conf(这个文件不存在)<br>    Service type control module-path module-arguments<br>        service<br>        this filename must be in lower case(服务名必须小写)<br>    <br>&#x2F;etc&#x2F;pam.d&#x2F;service(必须小写)<br>    type control module-path module-arguments </p>
-<p>type 验证类型<br> auth        :authentication,主要用来检验用户的身份验证<br> account    :authorization,主要完成授权<br> session    :session管理的是用户在这次登录期间PAM所给予的环境设置<br> password    :主要就是修改&#x2F;更改密码<br> <br> <br> <br>example:<br>    这四个验证通常是有顺序的，不过也有例外。通常:先经过验证身份(auth)后，系统才能够通过用户的身份给予适当的授权与权限设置(account),而且登录与注销期间的环境才需要设置，才需要记录登录与注销的信息(session)，如果在运行期间需要更改密码，才给予password的类型。 </p>
-<p>control<br>    required:若成功则带有success的标志，失败则带有failure标志，但不论成功与失败都会继续后续的验证流程<br>    requisite:如果失败则终止后续的验证流程，这点是和required的不同<br>    sufficient:如果成功，则终止后续的查询，如果失败，则继续后续的认证，和requisite相反<br>    optional:只是个可选的<br>    include:我把这个权力移交给其他人<br>    substack<br>    <br>such as:<br>ok: this modules passed,keep checking<br>done:this modules passed,and return the final result to the application now<br>bad:the result is failed,keep checking<br>die:the result is failed,and return the failure result to the application now<br>ignore:the result will not affect the overall result<br>reset:ignore any results that have already been collected in the final result </p>
-<p>EXAMPLE:<br>required     [success&#x3D;ok new_authtok_reqd&#x3D;ok ignore&#x3D;ignore default&#x3D;bad]<br>requisite    [success&#x3D;ok new_authtok_reqd&#x3D;ok ignore&#x3D;ignore default&#x3D;die]<br>sufficient  [success&#x3D;done new_authtok_reqd&#x3D;done default&#x3D;ignore]<br>optional     [success&#x3D;ok new_authtok_reqd&#x3D;ok default&#x3D;ignore] </p>
-<p>module-path </p>
-<p>&#x2F;etc&#x2F;pam.d&#x2F;other:定义默认规则 </p>
-<p>更多直接参考《鸟哥的Linux私房菜》 </p>
-<p>ldap:<a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/%E8%BD%BB%E5%9E%8B%E7%9B%AE%E5%BD%95%E8%AE%BF%E9%97%AE%E5%8D%8F%E8%AE%AE">http://zh.wikipedia.org/wiki/%E8%BD%BB%E5%9E%8B%E7%9B%AE%E5%BD%95%E8%AE%BF%E9%97%AE%E5%8D%8F%E8%AE%AE</a> </p>
-<p>gentent:<a target="_blank" rel="noopener" href="http://blog.chinaunix.net/uid-7761148-id-2044672.html">http://blog.chinaunix.net/uid-7761148-id-2044672.html</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/05/10/30-03nss/">展开全文 >></a>
         </p>
       
 

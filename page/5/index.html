@@ -206,6 +206,119 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-讯飞2020年事件提取比赛第一名-属性提取" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/08/09/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E5%B1%9E%E6%80%A7%E6%8F%90%E5%8F%96/">讯飞2020年事件提取比赛第一名-属性提取</a>
+    </h1>
+  
+
+        
+        <a href="/2022/08/09/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E5%B1%9E%E6%80%A7%E6%8F%90%E5%8F%96/" class="archive-article-date">
+  	<time datetime="2022-08-09T08:11:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-09</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>这是第三篇文章，和第二篇本质没有顺序之分，上一篇是<a href="/2022/08/08/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E4%B8%BB%E5%AE%A2%E4%BD%93%E6%8F%90%E5%8F%96/" title="讯飞2020年事件提取比赛第一名-主客体提取">讯飞2020年事件提取比赛第一名-主客体提取</a>。</p>
+<h3 id="1-跑通代码"><a href="#1-跑通代码" class="headerlink" title="1. 跑通代码"></a>1. 跑通代码</h3><p>只需要改动task_type，如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">args = TrainArgs().get_parser()</span><br><span class="line">args.gpu_ids = <span class="string">&#x27;0&#x27;</span></span><br><span class="line">args.mode = <span class="string">&quot;train&quot;</span></span><br><span class="line">args.raw_data_dir = <span class="string">&#x27;./data/final/raw_data&#x27;</span></span><br><span class="line">args.mid_data_dir = <span class="string">&#x27;./data/final/mid_data&#x27;</span></span><br><span class="line">args.aux_data_dir = <span class="string">&quot;./data/final/preliminary_clean&quot;</span></span><br><span class="line">args.bert_dir = <span class="string">&#x27;/home/yuzhang/PycharmProjects/xf_event_extraction2020Top1/bert/torch_roberta_wwm&#x27;</span></span><br><span class="line">args.output_dir = <span class="string">&#x27;./out&#x27;</span></span><br><span class="line">args.bert_type = <span class="string">&#x27;roberta_wwm&#x27;</span></span><br><span class="line">args.task_type = <span class="string">&#x27;attribution&#x27;</span></span><br><span class="line">args.max_seq_len = <span class="number">320</span></span><br><span class="line">args.train_epochs = <span class="number">6</span></span><br><span class="line">args.train_batch_size = <span class="number">3</span></span><br><span class="line">args.lr = <span class="number">2e-5</span></span><br><span class="line">args.other_lr = <span class="number">2e-4</span></span><br><span class="line">args.attack_train = <span class="string">&quot;pgd&quot;</span></span><br><span class="line">args.swa_start = <span class="number">4</span></span><br><span class="line">args.eval_model = <span class="literal">True</span></span><br><span class="line">args.enhance_data = <span class="literal">True</span></span><br><span class="line">args.use_trigger_distance = <span class="literal">True</span></span><br><span class="line">args.use_distant_trigger = <span class="literal">True</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-模型结构"><a href="#2-模型结构" class="headerlink" title="2. 模型结构"></a>2. 模型结构</h3><img src="/2022/08/09/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E5%B1%9E%E6%80%A7%E6%8F%90%E5%8F%96/attribution.png" class="" title="模型结构">
+
+<h3 id="3-模型结构"><a href="#3-模型结构" class="headerlink" title="3. 模型结构"></a>3. 模型结构</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">AttributionClassifier(</span><br><span class="line">  (bert_module): BertModel()</span><br><span class="line">  (dropout_layer): Dropout(p=0.1, inplace=False)</span><br><span class="line">  (pooling_layer): AdaptiveMaxPool1d(output_size=1)</span><br><span class="line">  (tense_classifier): Linear(in_features=2304, out_features=4, bias=True)</span><br><span class="line">  (polarity_classifier): Linear(in_features=2304, out_features=3, bias=True)</span><br><span class="line">  (criterion): CrossEntropyLoss()</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-整体流程"><a href="#4-整体流程" class="headerlink" title="4. 整体流程"></a>4. 整体流程</h3><p>根据<a target="_blank" rel="noopener" href="http://challenge.xfyun.cn/topic/info?type=hotspot">挑战</a>可知事件属性抽取分成两部分：</p>
+<ol>
+<li>极性分为：肯定、否定、可能；</li>
+<li>时态分为：过去、现在、将来、其他。</li>
+</ol>
+<p>这俩分别对应<code>tense_classifier</code>和<code>polarity_classifier</code>。</p>
+<h4 id="1-输入句子，拿到bert-output"><a href="#1-输入句子，拿到bert-output" class="headerlink" title="1. 输入句子，拿到bert output"></a>1. 输入句子，拿到bert output</h4><h4 id="2、做动态池化"><a href="#2、做动态池化" class="headerlink" title="2、做动态池化"></a>2、做动态池化</h4><p>在<code>属性分类优化</code>ppt那页，作者认为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">能决定事件属性的词大多存在触发词左右，故舍弃CLS中的全局特征，采用trigger左右两端动态池化特征作为全局特征；</span><br></pre></td></tr></table></figure>
+
+<p>具体做法即以触发词所在位置为准，设置window_size&#x3D;20，只考虑这个范围内的bert output。</p>
+<p>示例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 假设爱是trigger word。</span></span><br><span class="line"><span class="built_in">input</span> = [<span class="string">&#x27;我&#x27;</span>, <span class="string">&#x27;爱&#x27;</span>, <span class="string">&#x27;你&#x27;</span>, <span class="string">&#x27;北&#x27;</span>, <span class="string">&#x27;京&#x27;</span>, <span class="string">&#x27;。&#x27;</span>, ..., <span class="string">&#x27;你&#x27;</span>, <span class="string">&#x27;好&#x27;</span>, <span class="string">&#x27;呀&#x27;</span>]</span><br><span class="line">mask =  [<span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, ..., <span class="number">0</span>, <span class="number">0</span>,<span class="number">0</span>] <span class="comment"># 超过window_size就设置为0</span></span><br><span class="line"><span class="comment"># 即除这些mask外的都设置为-math.inf</span></span><br><span class="line">bert_output.fill(~mask, -math.inf)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="3、获取window-size内最大的feature"><a href="#3、获取window-size内最大的feature" class="headerlink" title="3、获取window_size内最大的feature"></a>3、获取window_size内最大的feature</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># 下面三步就是这面示例</span></span><br><span class="line">seq_out = torch.transpose(seq_out, -<span class="number">1</span>, -<span class="number">2</span>)  <span class="comment"># (bs, hidden, seq_len)</span></span><br><span class="line">pooling_masks = torch.unsqueeze(pooling_masks, <span class="number">1</span>)</span><br><span class="line">seq_out = seq_out + (<span class="number">1</span> - pooling_masks) * (-<span class="number">1e7</span>)  <span class="comment"># mask 无关区域</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 这里拿到max,这里看备忘那里的AdaptiveMaxPool1d</span></span><br><span class="line">pooled_out = self.pooling_layer(seq_out).squeeze(-<span class="number">1</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="4、和trigger-feature进行concat"><a href="#4、和trigger-feature进行concat" class="headerlink" title="4、和trigger feature进行concat"></a>4、和trigger feature进行concat</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">logits = torch.cat([pooled_out, trigger_label_feature], dim=-<span class="number">1</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="5、整体forward代码"><a href="#5、整体forward代码" class="headerlink" title="5、整体forward代码"></a>5、整体forward代码</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">bert_outputs = self.bert_module(</span><br><span class="line">    input_ids=token_ids,</span><br><span class="line">    attention_mask=attention_masks,</span><br><span class="line">    token_type_ids=token_type_ids</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">seq_out = bert_outputs[<span class="number">0</span>]</span><br><span class="line"><span class="comment"># 拿到trigger feature</span></span><br><span class="line">trigger_label_feature = self._batch_gather(seq_out, trigger_index)</span><br><span class="line"></span><br><span class="line">trigger_label_feature = trigger_label_feature.view([trigger_label_feature.size()[<span class="number">0</span>], -<span class="number">1</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 做动态池化</span></span><br><span class="line">seq_out = torch.transpose(seq_out, -<span class="number">1</span>, -<span class="number">2</span>)  <span class="comment"># (bs, hidden, seq_len)</span></span><br><span class="line">pooling_masks = torch.unsqueeze(pooling_masks, <span class="number">1</span>)</span><br><span class="line">seq_out = seq_out + (<span class="number">1</span> - pooling_masks) * (-<span class="number">1e7</span>)  <span class="comment"># mask 无关区域</span></span><br><span class="line"></span><br><span class="line">pooled_out = self.pooling_layer(seq_out).squeeze(-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 合并两个feature</span></span><br><span class="line">logits = torch.cat([pooled_out, trigger_label_feature], dim=-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">polarity_logits = self.polarity_classifier(self.dropout_layer(logits))</span><br><span class="line">tense_logits = self.tense_classifier(self.dropout_layer(logits))</span><br><span class="line"></span><br><span class="line">out = (torch.softmax(polarity_logits, dim=-<span class="number">1</span>), torch.softmax(tense_logits, dim=-<span class="number">1</span>),)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> labels <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">    labels = labels.long()</span><br><span class="line"></span><br><span class="line">    tense_loss = self.criterion(tense_logits, labels[:, <span class="number">0</span>])</span><br><span class="line">    polarity_loss = self.criterion(polarity_logits, labels[:, <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">    loss = polarity_loss + tense_loss</span><br><span class="line"></span><br><span class="line">    out = (loss,) + out</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> out</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="5、值得注意的点"><a href="#5、值得注意的点" class="headerlink" title="5、值得注意的点"></a>5、值得注意的点</h3><p>核心在于作者的这句话：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">能决定事件属性的词大多存在触发词左右，故舍弃CLS中的全局特征，采用trigger左右两端动态池化特征作为全局特征；</span><br></pre></td></tr></table></figure>
+
+<p>比如我们可以这么做，直接拿[CLS]位置，然后输入两个linear(一个极性，一个时态)，分别拿到各自loss，就ok了。</p>
+<p>但是作者这里没有拿[CLS]来代表整个句子，因为作者认为<code>能决定事件属性的词大多存在触发词左右</code>。所以他这里采用了以trigger左右window_size&#x3D;20来缩减范围。</p>
+<p>从个人角度来讲，他这种方式第一能加快速度，第二是可能会有更好的泛化效果。</p>
+<p>因为打比赛这种东西，恨不得啥奇淫巧技都上。但是这种思想可以借鉴。</p>
+<h3 id="备忘"><a href="#备忘" class="headerlink" title="备忘"></a>备忘</h3><p>关于<code>AdaptiveMaxPool1d</code>的用法</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">a = torch.arange(<span class="number">24</span>, dtype=torch.float32).view(<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>)</span><br><span class="line">a</span><br><span class="line">Out[<span class="number">11</span>]: </span><br><span class="line">tensor([[[ <span class="number">0.</span>,  <span class="number">1.</span>,  <span class="number">2.</span>,  <span class="number">3.</span>],</span><br><span class="line">         [ <span class="number">4.</span>,  <span class="number">5.</span>,  <span class="number">6.</span>,  <span class="number">7.</span>],</span><br><span class="line">         [ <span class="number">8.</span>,  <span class="number">9.</span>, <span class="number">10.</span>, <span class="number">11.</span>]],</span><br><span class="line">        [[<span class="number">12.</span>, <span class="number">13.</span>, <span class="number">14.</span>, <span class="number">15.</span>],</span><br><span class="line">         [<span class="number">16.</span>, <span class="number">17.</span>, <span class="number">18.</span>, <span class="number">19.</span>],</span><br><span class="line">         [<span class="number">20.</span>, <span class="number">21.</span>, <span class="number">22.</span>, <span class="number">23.</span>]]])</span><br><span class="line"></span><br><span class="line">torch.functional.F.max_pool1d(a,kernel_size=<span class="number">4</span>)</span><br><span class="line">Out[<span class="number">12</span>]: </span><br><span class="line">tensor([[[ <span class="number">3.</span>],</span><br><span class="line">         [ <span class="number">7.</span>],</span><br><span class="line">         [<span class="number">11.</span>]],</span><br><span class="line">        [[<span class="number">15.</span>],</span><br><span class="line">         [<span class="number">19.</span>],</span><br><span class="line">         [<span class="number">23.</span>]]])</span><br><span class="line">torch.nn.AdaptiveMaxPool1d(<span class="number">1</span>)(a)</span><br><span class="line">Out[<span class="number">13</span>]: </span><br><span class="line">tensor([[[ <span class="number">3.</span>],</span><br><span class="line">         [ <span class="number">7.</span>],</span><br><span class="line">         [<span class="number">11.</span>]],</span><br><span class="line">        [[<span class="number">15.</span>],</span><br><span class="line">         [<span class="number">19.</span>],</span><br><span class="line">         [<span class="number">23.</span>]]])</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/08/09/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E5%B1%9E%E6%80%A7%E6%8F%90%E5%8F%96/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-讯飞2020年事件提取比赛第一名-主客体提取" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1331,183 +1444,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2022/03/10/%E8%81%94%E9%82%A6%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-pycorrector源码阅读和纠错一些思考" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/02/23/pycorrector%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E5%92%8C%E7%BA%A0%E9%94%99%E4%B8%80%E4%BA%9B%E6%80%9D%E8%80%83/">pycorrector源码阅读和纠错一些思考</a>
-    </h1>
-  
-
-        
-        <a href="/2022/02/23/pycorrector%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E5%92%8C%E7%BA%A0%E9%94%99%E4%B8%80%E4%BA%9B%E6%80%9D%E8%80%83/" class="archive-article-date">
-  	<time datetime="2022-02-23T12:49:19.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-02-23</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>这篇文章主要对pycorrector默认使用规则的代码进行debug和理解，不论怎样，应先读下作者的readme，有个充分的理解先。</p>
-<h3 id="初始化工作"><a href="#初始化工作" class="headerlink" title="初始化工作"></a>初始化工作</h3><p>初始化主要做了三件事：</p>
-<ol>
-<li>初始化一些词典，用于后面纠错用。</li>
-<li>加载kenlm模型。</li>
-<li>初始化jieba分词器。</li>
-</ol>
-<h4 id="1-初始化一些词典等"><a href="#1-初始化一些词典等" class="headerlink" title="1. 初始化一些词典等"></a>1. 初始化一些词典等</h4><ul>
-<li>加载常用的汉字列表、加载同音字列表、加载形似字</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">check_corrector_initialized()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_initialize_corrector</span>(<span class="params">self</span>):</span><br><span class="line">    <span class="comment"># chinese common char 加载常用的汉字列表，这里大概3000多个常见的汉字。</span></span><br><span class="line">    self.cn_char_set = self.load_set_file(self.common_char_path)</span><br><span class="line">    <span class="comment"># same pinyin 加载同音的列表，自定义</span></span><br><span class="line">    self.same_pinyin = self.load_same_pinyin(self.same_pinyin_text_path)</span><br><span class="line">    <span class="comment"># same stroke 加载形似字，比如&#123;坐:[座, ...]&#125;， 自定义</span></span><br><span class="line">    self.same_stroke = self.load_same_stroke(self.same_stroke_text_path)</span><br><span class="line">    self.initialized_corrector = <span class="literal">True</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<ul>
-<li>转unicode</li>
-</ul>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 编码统一，utf-8 to unicode</span></span><br><span class="line">text = convert_to_unicode(text)</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>长句分短句</li>
-</ul>
-<p>额外插句：单从<code>re_han</code>这里就可以看出，作者至少对jieba很熟悉。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">split_2_short_text</span>(<span class="params">text, include_symbol=<span class="literal">False</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    长句切分为短句</span></span><br><span class="line"><span class="string">    :param text: str</span></span><br><span class="line"><span class="string">    :param include_symbol: bool</span></span><br><span class="line"><span class="string">    :return: (sentence, idx)</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    result = []</span><br><span class="line">    blocks = re_han.split(text)</span><br><span class="line">    start_idx = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> blk <span class="keyword">in</span> blocks:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> blk:</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        <span class="keyword">if</span> include_symbol:</span><br><span class="line">            result.append((blk, start_idx))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">if</span> re_han.<span class="keyword">match</span>(blk):</span><br><span class="line">                result.append((blk, start_idx))</span><br><span class="line">        start_idx += <span class="built_in">len</span>(blk)</span><br><span class="line">    <span class="keyword">return</span> result</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="2-加载kenlm模型"><a href="#2-加载kenlm模型" class="headerlink" title="2. 加载kenlm模型"></a>2. 加载kenlm模型</h4><p>关于kenlm，网上搜了下，除了纠错基本很少有人用到（而且还是针对pycorrector～），只有<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/270516015">这篇文章</a>说的还有点意思，而且看<a target="_blank" rel="noopener" href="https://github.com/kpu/kenlm">Github kenlm</a>介绍，作者也是十分任性，只强调速度，没有强调用处。。。</p>
-<p>简单来讲，kenlm是基于n-gram训练出来的一个预训练模型，它的更多用法可看<a target="_blank" rel="noopener" href="https://github.com/kpu/kenlm/blob/master/python/example.py">Example</a>。</p>
-<h4 id="3-初始化jieba"><a href="#3-初始化jieba" class="headerlink" title="3. 初始化jieba"></a>3. 初始化jieba</h4><ul>
-<li><p>加载词频<br>（这个我看了下，和jieba自带的那个dict.txt基本没关系，相当于作者自己训练了一个词频词典）<br>~~ * 自定义混淆集（空的，所以忽略这步）~~</p>
-</li>
-<li><p>自定义切词词典<br>（默认是空，个人感觉可以把jieba那个dict.txt加进去，哈哈哈）</p>
-</li>
-<li><p>一些特定词典<br>人名词典词频、place词典词频、停用词词典词频、将这些词典词频合并到一起</p>
-</li>
-</ul>
-<p>对于人名和place这种词典，不如使用现成了命名实体模型，这种词典的方式总之是无法完全枚举的。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment"># 词、频数dict, <span class="doctag">TODO:</span> 这里虽然有，但是貌似没有用到</span></span><br><span class="line">self.word_freq = self.load_word_freq_dict(self.word_freq_path)</span><br><span class="line"><span class="comment"># 自定义混淆集</span></span><br><span class="line">self.custom_confusion = self._get_custom_confusion_dict(self.custom_confusion_path)</span><br><span class="line"><span class="comment"># 自定义切词词典</span></span><br><span class="line">self.custom_word_freq = self.load_word_freq_dict(self.custom_word_freq_path)</span><br><span class="line">self.person_names = self.load_word_freq_dict(self.person_name_path)</span><br><span class="line">self.place_names = self.load_word_freq_dict(self.place_name_path)</span><br><span class="line">self.stopwords = self.load_word_freq_dict(self.stopwords_path)</span><br><span class="line"><span class="comment"># 合并切词词典及自定义词典</span></span><br><span class="line">self.custom_word_freq.update(self.person_names)</span><br><span class="line">self.custom_word_freq.update(self.place_names)</span><br><span class="line">self.custom_word_freq.update(self.stopwords)</span><br><span class="line">self.word_freq.update(self.custom_word_freq) <span class="comment"># <span class="doctag">TODO:</span>这里</span></span><br><span class="line">self.tokenizer = Tokenizer(dict_path=self.word_freq_path, custom_word_freq_dict=self.custom_word_freq,</span><br><span class="line">                            custom_confusion_dict=self.custom_confusion)</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="错字识别"><a href="#错字识别" class="headerlink" title="错字识别"></a>错字识别</h3><h4 id="1-基于word级别的错字识别"><a href="#1-基于word级别的错字识别" class="headerlink" title="1. 基于word级别的错字识别"></a>1. 基于word级别的错字识别</h4><p>这部分使用jieba的search模式进行分词。</p>
-<p>它的实现原理是：先使用hmm进行分词，比如<code>少先队员因该为老人让坐</code>，它的分词结果是<code>[&quot;少先队员&quot;, &quot;因该&quot;, &quot;为&quot;, &quot;老人&quot;, &quot;让&quot;, &quot;坐&quot;]</code>，然后对每个词再用2阶gram和3阶gram进行切分，在<code>self.FREQ</code>中进行查找是否存在，得到的结果如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">(<span class="string">&#x27;队员&#x27;</span>, <span class="number">2</span>, <span class="number">4</span>)</span><br><span class="line">(<span class="string">&#x27;少先队&#x27;</span>, <span class="number">0</span>, <span class="number">3</span>)</span><br><span class="line">(<span class="string">&#x27;少先队员&#x27;</span>, <span class="number">0</span>, <span class="number">4</span>)</span><br><span class="line">(<span class="string">&#x27;因该&#x27;</span>, <span class="number">4</span>, <span class="number">6</span>)</span><br><span class="line">(<span class="string">&#x27;为&#x27;</span>, <span class="number">6</span>, <span class="number">7</span>)</span><br><span class="line">(<span class="string">&#x27;老人&#x27;</span>, <span class="number">7</span>, <span class="number">9</span>)</span><br><span class="line">(<span class="string">&#x27;让&#x27;</span>, <span class="number">9</span>, <span class="number">10</span>)</span><br><span class="line">(<span class="string">&#x27;坐&#x27;</span>, <span class="number">10</span>, <span class="number">11</span>)</span><br></pre></td></tr></table></figure>
-
-<p>分完词后，按词粒度判断是否在词典里，符号，英文则跳过,否则则认为是可能错的。</p>
-<p>到这里识别出<code>因该</code>是可能错误的。</p>
-<h4 id="2-基于kenlm级别的错字识别"><a href="#2-基于kenlm级别的错字识别" class="headerlink" title="2. 基于kenlm级别的错字识别"></a>2. 基于kenlm级别的错字识别</h4><p>取bigram和trigram，通过kenlm获取对应的score，然后求平均获取和句子长度一致的score。</p>
-<p>比如：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sent_scores = [-<span class="number">5.629326581954956</span>, -<span class="number">6.566553155581156</span>, -<span class="number">6.908517241477966</span>, -<span class="number">7.255491574605306</span>, -<span class="number">7.401519060134888</span>, -<span class="number">7.489806890487671</span>, -<span class="number">7.1438290278116865</span>, -<span class="number">6.559153278668722</span>, -<span class="number">6.858733296394348</span>, -<span class="number">7.7903218269348145</span>, -<span class="number">8.28114366531372</span>]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>然后通过这个<code>sent_scores</code>取判断哪些index是错的。</p>
-<p>那作者是怎么判断的呢？</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_get_maybe_error_index</span>(<span class="params">scores, ratio=<span class="number">0.6745</span>, threshold=<span class="number">2</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    取疑似错字的位置，通过平均绝对离差（MAD）</span></span><br><span class="line"><span class="string">    :param scores: np.array</span></span><br><span class="line"><span class="string">    :param ratio: 正态分布表参数</span></span><br><span class="line"><span class="string">    :param threshold: 阈值越小，得到疑似错别字越多</span></span><br><span class="line"><span class="string">    :return: 全部疑似错误字的index: list</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    result = []</span><br><span class="line">    scores = np.array(scores)</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(scores.shape) == <span class="number">1</span>:</span><br><span class="line">        scores = scores[:, <span class="literal">None</span>]</span><br><span class="line">    median = np.median(scores, axis=<span class="number">0</span>)  <span class="comment"># get median of all scores</span></span><br><span class="line">    margin_median = np.<span class="built_in">abs</span>(scores - median).flatten()  <span class="comment"># deviation from the median</span></span><br><span class="line">    <span class="comment"># 平均绝对离差值</span></span><br><span class="line">    med_abs_deviation = np.median(margin_median)</span><br><span class="line">    <span class="keyword">if</span> med_abs_deviation == <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line">    y_score = ratio * margin_median / med_abs_deviation</span><br><span class="line">    <span class="comment"># 打平</span></span><br><span class="line">    scores = scores.flatten()</span><br><span class="line">    maybe_error_indices = np.where((y_score &gt; threshold) &amp; (scores &lt; median))</span><br><span class="line">    <span class="comment"># 取全部疑似错误字的index</span></span><br><span class="line">    result = [<span class="built_in">int</span>(i) <span class="keyword">for</span> i <span class="keyword">in</span> maybe_error_indices[<span class="number">0</span>]]</span><br><span class="line">    <span class="keyword">return</span> result</span><br></pre></td></tr></table></figure>
-
-
-<ol>
-<li>按照<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E5%B9%B3%E5%9D%87%E7%BB%9D%E5%AF%B9%E7%A6%BB%E5%B7%AE/7624189">百度百科平均绝对离差</a>的定义：<code>平均绝对离差定义为各数据与平均值的离差的绝对值的平均数</code>，那作者这里的计算方式貌似就不一样了。</li>
-<li>作者这里的计算方式不是求平均值，而是每个值减去中位数，然后再求中位数，这样做的好处更多是防止数据分布比较大，就比如大家的平均工资都很高～</li>
-<li>作者接着使用两个比较，（1）ratio * np.abs(score - median) &#x2F; 平均绝对离差<br>(2)scores 小于 中位数的，这地方看的迷迷糊糊，总有种凭经验的感觉。</li>
-<li>获取对应的错字index。</li>
-</ol>
-<p>至此获取到的可能错误列表是：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[[<span class="string">&#x27;因该&#x27;</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="string">&#x27;word&#x27;</span>], [<span class="string">&#x27;坐&#x27;</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="string">&#x27;char&#x27;</span>]]</span><br></pre></td></tr></table></figure>
-
-<h3 id="纠错"><a href="#纠错" class="headerlink" title="纠错"></a>纠错</h3><h4 id="1-获取纠错候选集"><a href="#1-获取纠错候选集" class="headerlink" title="1. 获取纠错候选集"></a>1. 获取纠错候选集</h4><p>假设当前输入word是<code>因该</code>：</p>
-<ul>
-<li>一、获取词粒度的候选集</li>
-</ul>
-<ol>
-<li>获取相同拼音的（不包含声调） <code>_confusion_word_set</code></li>
-<li>自定义混淆集 <code>_confusion_custom_set</code></li>
-</ol>
-<p>他这个获取相同拼音的写法就让我觉得emo，直接在self.known(自定义词典)里找长度相同，然后判断拼音一样不就得了～</p>
-<p>自定义混淆集就是自定义一些经验进行。比如{“因该”: “应该”}这种，增大候选集。</p>
-<ul>
-<li>二、获取基于字粒度的候选集</li>
-</ul>
-<p>这地方分成三部分：</p>
-<ol>
-<li>如果word的长度等于1。获取相同拼音的<code>same pinyin 加载同音的列表</code>，以及加载形似字<code>same stroke 加载形似字</code>。</li>
-<li>如果word的长度等于2。截取第一个字符，如<code>因</code>，然后获取相同拼音的<code>same pinyin 加载同音的列表</code>，以及加载形似字<code>same stroke 加载形似字</code>，然后和<code>该</code>进行拼接，获取新的候选集。第二个字<code>该</code>执行相同操作。</li>
-<li>如果word的长度大于2。同理上述操作，只不过粒度不同（此处忽略）。</li>
-</ol>
-<ul>
-<li>三、对候选集进行排序，以word_freq进行排序，然后只截取前K个候选集</li>
-</ul>
-<h4 id="2-从候选集里面进行筛选"><a href="#2-从候选集里面进行筛选" class="headerlink" title="2. 从候选集里面进行筛选"></a>2. 从候选集里面进行筛选</h4><p>这个地方就有意思了，如何获取最正确的那个呢？看下面代码。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">get_lm_correct_item</span>(<span class="params">self, cur_item, candidates, before_sent, after_sent, threshold=<span class="number">57</span>, cut_type=<span class="string">&#x27;char&#x27;</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    通过语言模型纠正字词错误</span></span><br><span class="line"><span class="string">    :param cur_item: 当前词</span></span><br><span class="line"><span class="string">    :param candidates: 候选词</span></span><br><span class="line"><span class="string">    :param before_sent: 前半部分句子</span></span><br><span class="line"><span class="string">    :param after_sent: 后半部分句子</span></span><br><span class="line"><span class="string">    :param threshold: ppl阈值, 原始字词替换后大于该ppl值则认为是错误</span></span><br><span class="line"><span class="string">    :param cut_type: 切词方式, 字粒度</span></span><br><span class="line"><span class="string">    :return: str, correct item, 正确的字词</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    result = cur_item</span><br><span class="line">    <span class="keyword">if</span> cur_item <span class="keyword">not</span> <span class="keyword">in</span> candidates:</span><br><span class="line">        candidates.append(cur_item)</span><br><span class="line">    <span class="comment"># 对每个候选集进行拼接成新句子，然后进行计算ppl_score。</span></span><br><span class="line">    ppl_scores = &#123;i: self.ppl_score(segment(before_sent + i + after_sent, cut_type=cut_type)) <span class="keyword">for</span> i <span class="keyword">in</span> candidates&#125;</span><br><span class="line">    sorted_ppl_scores = <span class="built_in">sorted</span>(ppl_scores.items(), key=<span class="keyword">lambda</span> d: d[<span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 增加正确字词的修正范围，减少误纠</span></span><br><span class="line">    top_items = []</span><br><span class="line">    top_score = <span class="number">0.0</span></span><br><span class="line">    <span class="keyword">for</span> i, v <span class="keyword">in</span> <span class="built_in">enumerate</span>(sorted_ppl_scores):</span><br><span class="line">        v_word = v[<span class="number">0</span>]</span><br><span class="line">        v_score = v[<span class="number">1</span>]</span><br><span class="line">        <span class="keyword">if</span> i == <span class="number">0</span>:</span><br><span class="line">            top_score = v_score</span><br><span class="line">            top_items.append(v_word)</span><br><span class="line">        <span class="comment"># 通过阈值修正范围</span></span><br><span class="line">        <span class="keyword">elif</span> v_score &lt; top_score + threshold:</span><br><span class="line">            top_items.append(v_word)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">if</span> cur_item <span class="keyword">not</span> <span class="keyword">in</span> top_items:</span><br><span class="line">        result = top_items[<span class="number">0</span>]</span><br><span class="line">    <span class="keyword">return</span> result</span><br></pre></td></tr></table></figure>
-
-<p>核心的地方在<code>self.ppl_score</code>那里，代码如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">ppl_score</span>(<span class="params">self, words</span>):</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    words比如：[&#x27;少&#x27;, &#x27;先&#x27;, &#x27;队&#x27;, &#x27;员&#x27;, &#x27;应&#x27;, &#x27;该&#x27;, &#x27;为&#x27;, &#x27;老&#x27;, &#x27;人&#x27;, &#x27;让&#x27;, &#x27;坐&#x27;]</span></span><br><span class="line"><span class="string">    取语言模型困惑度得分，越小句子越通顺</span></span><br><span class="line"><span class="string">    :param words: list, 以词或字切分</span></span><br><span class="line"><span class="string">    :return:</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    self.check_detector_initialized()</span><br><span class="line">    <span class="keyword">return</span> self.lm.perplexity(<span class="string">&#x27; &#x27;</span>.join(words))</span><br></pre></td></tr></table></figure>
-
-<p>看作者注释，说的很明白了，如果这个句子越是流畅的，那么他的score就会更高。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">pprint(sorted_ppl_scores)</span><br><span class="line">[(<span class="string">&#x27;应该&#x27;</span>, <span class="number">144.39704182754554</span>),</span><br><span class="line"> (<span class="string">&#x27;因改&#x27;</span>, <span class="number">236.80615502078768</span>),</span><br><span class="line"> (<span class="string">&#x27;因该&#x27;</span>, <span class="number">284.14769660593794</span>),</span><br><span class="line"> (<span class="string">&#x27;听该&#x27;</span>, <span class="number">357.8835799332408</span>),</span><br><span class="line"> (<span class="string">&#x27;因盖&#x27;</span>, <span class="number">360.68106481988417</span>),</span><br><span class="line"> (<span class="string">&#x27;因核&#x27;</span>, <span class="number">365.9438178618582</span>),</span><br><span class="line"> <span class="comment"># 这里只截取一部分！！</span></span><br><span class="line">]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>最后一步，作者以score最高的那个加了一个threshold，如果得分在这个阈值内的，添加到候选的top_items里面。<br>如果当前的cur_item,即<code>因该</code>不在这个候选集里，那么取第一个<code>top_items</code>，如果在，那么就返回当前的cur_item。</p>
-<p>这步的目的在于防止误判。</p>
-<h3 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h3><ol>
-<li>对于时间日期、人名这种，个人感觉应该先用命名实体剔除掉。</li>
-<li>自定义词典、形近词那里会是个问题，比如量少或者有歧义怎么解决，另外<code>因该</code>也是有可能作为一个单独的词，只是出现的可能性较小。</li>
-<li>默认加载的是5-gram，关于这里为什么用5-gram没细研究。</li>
-<li>关于字粒度纠错，那里我感觉真统计。。。</li>
-<li>不过我喜欢纠错那里，方式简单直接。不过候选集那里可能会是个瓶颈。</li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/02/23/pycorrector%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E5%92%8C%E7%BA%A0%E9%94%99%E4%B8%80%E4%BA%9B%E6%80%9D%E8%80%83/">展开全文 >></a>
         </p>
       
 

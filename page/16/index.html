@@ -206,6 +206,91 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-base64遇到的一些坑" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/26/base64%E9%81%87%E5%88%B0%E7%9A%84%E4%B8%80%E4%BA%9B%E5%9D%91/">base64遇到的一些坑</a>
+    </h1>
+  
+
+        
+        <a href="/2017/03/26/base64%E9%81%87%E5%88%B0%E7%9A%84%E4%B8%80%E4%BA%9B%E5%9D%91/" class="archive-article-date">
+  	<time datetime="2017-03-26T06:54:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-03-26</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>之前IOS同事告诉我，说二维码加密的字符串包含&#x2F;等url敏感字符，需要改动这个BUG，我看了下之前写的代码，就是使用b64encode&#x2F;b64decode进行编码／解码，方便对加密后的字符串进行HTTP的一些操作。 我一想把它改成urlsafe的不就行了么，我这边本地写完然后测下没问题，但是到测试环境的时候发现二维码还是解不开，此处涉及到两个方面，1)对原来二维码的加解密，2)对新码的加解密。由于我做了适配，就是解码先用urlsafe_b64decode进行解码，如果遇到问题，还使用原来的方式，加密的话则使用新的方式。但是线上最终还是出问题了，唉，可恶的unicode编码问题。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/03/26/base64%E9%81%87%E5%88%B0%E7%9A%84%E4%B8%80%E4%BA%9B%E5%9D%91/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-git工具使用" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1198,100 +1283,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/10/31/47-02Tomcat%E7%B3%BB%E5%88%97%E4%B9%8Bapache%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E8%AF%B7%E6%B1%82%E8%87%B3tomcat%E5%8F%8ADeltamanager%E7%9A%84%E4%BD%BF%E7%94%A8/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-46-03-实验-JDK-Tomcat-Nginx实现jsp服务器" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/10/30/46-03-%E5%AE%9E%E9%AA%8C-JDK-Tomcat-Nginx%E5%AE%9E%E7%8E%B0jsp%E6%9C%8D%E5%8A%A1%E5%99%A8/">46_03_实验_JDK+Tomcat+Nginx实现jsp服务器</a>
-    </h1>
-  
-
-        
-        <a href="/2015/10/30/46-03-%E5%AE%9E%E9%AA%8C-JDK-Tomcat-Nginx%E5%AE%9E%E7%8E%B0jsp%E6%9C%8D%E5%8A%A1%E5%99%A8/" class="archive-article-date">
-  	<time datetime="2015-10-30T14:24:05.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-30</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>实验环境：<br>192.168.122.220  <a target="_blank" rel="noopener" href="http://www.123.com/">www.123.com</a> </p>
-<p>安装jdk： </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#chmod +x jdk-6u45-linux-x64-rpm.bin </span></span><br><span class="line"><span class="comment">#./jdk-6u45-linux-x64-rpm.bin </span></span><br><span class="line"> </span><br><span class="line">生成的文件在:/usr/java/目录下； </span><br><span class="line"> </span><br><span class="line">[root@node1 java]<span class="comment">#vim /etc/profile.d/java.sh </span></span><br><span class="line"><span class="built_in">export</span> JAVA_HOME=/usr/java/jdk1.6.0_21 </span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:<span class="variable">$JAVA_HOME</span>/bin </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">安装Tomcat： </span><br><span class="line">[root@node1 ~]<span class="comment"># tar xf apache-tomcat-7.0.62.tar.gz -C /usr/local </span></span><br><span class="line">[root@node1 ~]<span class="comment"># cd /usr/local </span></span><br><span class="line">[root@node1 <span class="built_in">local</span>]<span class="comment"># ln -sv apache-tomcat-7.0.62/ tomcat </span></span><br><span class="line">[root@node1 <span class="built_in">local</span>]<span class="comment">#vim /etc/profile.d/tomcat.sh </span></span><br><span class="line"><span class="built_in">export</span> CATALINA_HOME=/usr/local/tomcat </span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:<span class="variable">$CATALINA_HOME</span>/bin </span><br><span class="line"> </span><br><span class="line">增加一个虚拟主机： </span><br><span class="line">[root@node1 html]<span class="comment"># vim /usr/local/tomcat/conf/server.xml </span></span><br><span class="line"> </span><br><span class="line">&lt;Host name=<span class="string">&quot;www.123.com&quot;</span> appBase=<span class="string">&quot;/usr/share/nginx/html&quot;</span> </span><br><span class="line">    unpackWARs=<span class="string">&quot;true&quot;</span> autoDeploy=<span class="string">&quot;true&quot;</span>&gt; </span><br><span class="line">    &lt;Context path=<span class="string">&quot;&quot;</span> docBase=<span class="string">&quot;.&quot;</span> /&gt; </span><br><span class="line">&lt;/Host&gt; </span><br><span class="line"> </span><br><span class="line">[root@node1 html]<span class="comment"># catalina.sh start </span></span><br><span class="line"> </span><br><span class="line">配置Nginx将jsp等转到tomcat上进行处理； </span><br><span class="line">[root@node1 html]<span class="comment"># vim /etc/nginx/conf.d/default.conf </span></span><br><span class="line">    location ~ \.(jsp|jspx|<span class="keyword">do</span>)?$ &#123; </span><br><span class="line">        proxy_set_header Host <span class="variable">$host</span>;　　　　　　　　　　　　　　　　　<span class="comment">#这个必须有，否则会跳转到webapps目录下的位置； </span></span><br><span class="line">        proxy_set_header X-Real-IP <span class="variable">$remote_addr</span>; </span><br><span class="line">        proxy_pass http://127.0.0.1:8080; </span><br><span class="line">    &#125; </span><br><span class="line"> </span><br><span class="line">测试： </span><br><span class="line">[root@node1 html]<span class="comment"># vim /usr/share/nginx/html/hello.jsp </span></span><br><span class="line">&lt;html&gt;&lt;body&gt;&lt;center&gt; </span><br><span class="line">now time is: &lt;%=new java.util.Date()%&gt; </span><br><span class="line">&lt;/center&gt;&lt;/body&gt;&lt;/html&gt; </span><br><span class="line"> </span><br><span class="line">http://www.123.com/hello.jsp </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">添加自启动： </span><br><span class="line">[root@node1 html]<span class="comment"># chkconfig nignx on </span></span><br><span class="line">[root@node1 html]<span class="comment"># vim /etc/rc.local </span></span><br><span class="line">catalina.sh start </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
-<p>在没安装nginx之前，对tomcat进行测试： </p>
-<p>      <Host name="localhost"  appBase="webapps" 
-            unpackWARs="true" autoDeploy="true"> </p>
-<p>这个是默认的，如果想要访问的话，不能通过网站名字进行访问，只能例如<a href="http://192.168.122.220:8080进行访问；">http://192.168.122.220:8080进行访问；</a> </p>
-<p>自己添加虚拟主机，如下所示:<br>     <Host name="www.test.com" appBase="/web" 
-     unpackWARs="true"  autoDeploy="true"><br>    <Context  path="" docBase="webapps" reLoadable="true" /><br></Host><br>那么在进行访问tomcat的时候，必须是<a target="_blank" rel="noopener" href="http://www.test.com:8080/**.jsp%EF%BC%8C%E5%90%A6%E5%88%99%E5%B0%86%E4%B8%8D%E4%BC%9A%E8%AE%BF%E9%97%AE%E5%BE%97%E5%88%B0%EF%BC%8C%E8%BF%99%E4%B8%AA%E8%A6%81%E6%B3%A8%E6%84%8F%EF%BC%9B%EF%BC%9B%EF%BC%9B">www.test.com:8080/**.jsp，否则将不会访问得到，这个要注意；；；</a> </p>
-<p>关于tomcat调整：<br><a target="_blank" rel="noopener" href="https://blog.linuxeye.com/413.html">https://blog.linuxeye.com/413.html</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/10/30/46-03-%E5%AE%9E%E9%AA%8C-JDK-Tomcat-Nginx%E5%AE%9E%E7%8E%B0jsp%E6%9C%8D%E5%8A%A1%E5%99%A8/">展开全文 >></a>
         </p>
       
 

@@ -206,6 +206,124 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-多模态-CLIP" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/">多模态-CLIP</a>
+    </h1>
+  
+
+        
+        <a href="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/" class="archive-article-date">
+  	<time datetime="2023-10-11T08:10:42.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-10-11</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>多模态如何做融合，本文是对CLIP模型理解做个记录。</p>
+<h3 id="前提"><a href="#前提" class="headerlink" title="前提"></a>前提</h3><p>目前业界有中文开源版本的，例如<a target="_blank" rel="noopener" href="https://github.com/OFA-Sys/Chinese-CLIP">Chinese-CLIP</a>以及<a target="_blank" rel="noopener" href="https://fengshenbang-doc.readthedocs.io/zh/latest/docs/%E5%A4%AA%E4%B9%99%E7%B3%BB%E5%88%97/index.html">IDEA&#x2F;Fengshenbang-LM太乙系列</a>，本文采用<a target="_blank" rel="noopener" href="https://github.com/OFA-Sys/Chinese-CLIP">Chinese-CLIP</a>来梳理其流程。</p>
+<p>数据集采用<a target="_blank" rel="noopener" href="https://wukong-dataset.github.io/wukong-dataset/">wukong-dataset</a>，预训练模型使用<a target="_blank" rel="noopener" href="https://huggingface.co/OFA-Sys/chinese-clip-vit-base-patch16">chinese-clip-vit-base-patch16</a>来进行实验。</p>
+<h3 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h3><h4 id="1-文本处理"><a href="#1-文本处理" class="headerlink" title="1. 文本处理"></a>1. 文本处理</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">from</span> datasets <span class="keyword">import</span> Dataset</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> ChineseCLIPProcessor, ChineseCLIPModel, Trainer, TrainingArguments</span><br><span class="line"></span><br><span class="line">model_name_or_path = <span class="string">&quot;chinese-clip-vit-base-patch16&quot;</span></span><br><span class="line"></span><br><span class="line">model = ChineseCLIPModel.from_pretrained(model_name_or_path)</span><br><span class="line">processor = ChineseCLIPProcessor.from_pretrained(model_name_or_path)</span><br><span class="line"></span><br><span class="line">text_str = [<span class="string">&#x27;中国&#x27;</span>, <span class="string">&#x27;哈哈哈，我在这里&#x27;</span>]</span><br><span class="line">text_res = processor(text=text_str)</span><br><span class="line"><span class="built_in">print</span>(text_res)</span><br></pre></td></tr></table></figure>
+
+<p>基于<a target="_blank" rel="noopener" href="https://github.com/OFA-Sys/Chinese-CLIP">ChineseClip官方说明</a>，知道其text-encoder部分都使用了<code>chinese-roberta-wwm</code>，另外一个可验证点是其<code>vocab.txt</code>的md5值和<code>chinese-roberta-wwm</code>是一样的。所以文本处理，就是找了中文版的bert来做中文的支持，故这部分到此就结束啦～</p>
+<h4 id="2-图像处理"><a href="#2-图像处理" class="headerlink" title="2. 图像处理"></a>2. 图像处理</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">from</span> datasets <span class="keyword">import</span> Dataset</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> ChineseCLIPProcessor, ChineseCLIPModel, Trainer, TrainingArguments</span><br><span class="line"></span><br><span class="line">model_name_or_path = <span class="string">&quot;chinese-clip-vit-base-patch16&quot;</span></span><br><span class="line"></span><br><span class="line">model = ChineseCLIPModel.from_pretrained(model_name_or_path)</span><br><span class="line">processor = ChineseCLIPProcessor.from_pretrained(model_name_or_path)</span><br><span class="line"></span><br><span class="line">image_str = <span class="string">&#x27;00010405-0083.jpg&#x27;</span></span><br><span class="line">image_input = Image.<span class="built_in">open</span>(image_str)</span><br><span class="line">img_res = processor(images=image_input)</span><br><span class="line"><span class="built_in">print</span>(img_res)</span><br></pre></td></tr></table></figure>
+
+<p>其流程如下所示，包括转RGB、resize、rescale、normalize、然后转CHW通道。</p>
+<img src="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/p1.png" class="">
+
+<p>注意resize那里将图片调整为(224, 224)，这里对后面处理有用。</p>
+<h4 id="3-融合"><a href="#3-融合" class="headerlink" title="3. 融合"></a>3. 融合</h4><p>重点来喽～</p>
+<p>其整理流程如下所示。</p>
+<img src="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/p2.png" class="">
+
+<h5 id="3-1-vision-model"><a href="#3-1-vision-model" class="headerlink" title="3.1  vision model"></a>3.1  vision model</h5><p>其vision_model下获取embedding如下。</p>
+<img src="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/p3.png" class="">
+
+<p>其<code>patch_embeds</code>经过conv2d，转成成了<code>torch.Size([10, 768, 14, 14])</code><strong>(224-16)&#x2F;16+1</strong>，接着<br><a target="_blank" rel="noopener" href="https://github.com/huggingface/transformers/blob/1e3c9ddacc7fc4142253bc9ddcba85c4d5b977e7/src/transformers/models/chinese_clip/modeling_chinese_clip.py#L201">201行代码</a>为：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">patch_embeds = patch_embeds.flatten(<span class="number">2</span>).transpose(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><code>14*14=196</code>,最终转换成了<code>(10, 196, 768)</code>，到这里就清晰了～</p>
+<p>不过在patch_embeds结束后，引入了一个class_embeds，这个就是类似bert中的[CLS]位置，用以做下游分类的。</p>
+<p>在拿到vision embedding之后，后面就是encoder部分啦，这里对应<code>ChineseCLIPVisionEncoder</code>，这部分本文先忽略。</p>
+<h5 id="3-2-text-model"><a href="#3-2-text-model" class="headerlink" title="3.2 text model"></a>3.2 text model</h5><p>这部分就是bert处理流程了，作者也写的很明白，就是bert那一套。</p>
+<img src="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/p4.png" class="">
+
+
+<h5 id="3-3-融合"><a href="#3-3-融合" class="headerlink" title="3.3 融合"></a>3.3 融合</h5><p>至此拿到vision_outputs和text_outputs，其vision_outputs为：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">last_hidden_state=(<span class="number">10</span>, <span class="number">197</span>, <span class="number">768</span>)</span><br><span class="line">pooler_output=(<span class="number">10</span>, <span class="number">768</span>)</span><br></pre></td></tr></table></figure>
+
+<p>其text_outputs为:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">last_hidden_state=(<span class="number">10</span>, <span class="number">64</span>, <span class="number">768</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>好奇：至此768维已经对齐了，为啥还要各自经过一个<code>self.visual_projection</code>和<code>self.text_projection</code>将其转为512维。。。</strong></p>
+<h5 id="3-4-计算loss"><a href="#3-4-计算loss" class="headerlink" title="3.4 计算loss"></a>3.4 计算loss</h5><img src="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/l1.png" class="">
+
+<p>这里处理跟<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/d1e060fa88c147495572d5ffc23675d858b8d9d8/examples/text_matching/simcse/model.py#L102">simcse计算loss流程</a>蛮类似的，不过这里计算loss还是蛮有意思的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">chinese_clip_loss</span>(<span class="params">similarity: torch.Tensor</span>) -&gt; torch.Tensor:</span><br><span class="line">    caption_loss = contrastive_loss(similarity)</span><br><span class="line">    image_loss = contrastive_loss(similarity.t())</span><br><span class="line">    <span class="keyword">return</span> (caption_loss + image_loss) / <span class="number">2.0</span></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>正常来讲，我们只需要计算一次即可，这里分别进行计算，也算是一个有意思的点。</p>
+<p>至此，模型整体流程大致完成。能够用来基于文本找图像。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 备忘</span></span><br><span class="line">new_steps = (steps - kernel_size + 2padding) / strides + 1</span><br></pre></td></tr></table></figure>
+
+<p><strong>那是否有一种文本跟图像语义对齐的呢？留给以后～</strong></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-ChatGLM微调记录" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1224,85 +1342,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2022/12/12/layoutLM%E5%BE%AE%E8%B0%83FUNSD%E6%95%B0%E6%8D%AE%E9%9B%86/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-求合理路径" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/11/18/%E6%B1%82%E5%90%88%E7%90%86%E8%B7%AF%E5%BE%84/">求合理路径</a>
-    </h1>
-  
-
-        
-        <a href="/2022/11/18/%E6%B1%82%E5%90%88%E7%90%86%E8%B7%AF%E5%BE%84/" class="archive-article-date">
-  	<time datetime="2022-11-18T01:45:52.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-11-18</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>今天在群里看到有人问了这么一道题，如下图所示。瞬间让我大呼这不就是我之前想出的一道面试题么，不过有可能是我当时没有表达清楚，发现小伙伴们理解的不是很透彻。</p>
-<img src="/2022/11/18/%E6%B1%82%E5%90%88%E7%90%86%E8%B7%AF%E5%BE%84/a1.png" class="" title="a1">
-
-
-<p>那我的方法就是基于每个元素的position，构成一个有向图即可。</p>
-<p>代码如下（也方便未来自己再重新写😂）</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="keyword">import</span> math</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">List</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">trace_path</span>(<span class="params">vec, pathes</span>):</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> vec:</span><br><span class="line">        <span class="keyword">return</span> pathes</span><br><span class="line">    valid_pathes = []</span><br><span class="line">    <span class="keyword">for</span> item <span class="keyword">in</span> vec[<span class="number">0</span>]:</span><br><span class="line">        <span class="keyword">for</span> path <span class="keyword">in</span> pathes:</span><br><span class="line">            <span class="keyword">if</span> item &gt; path[-<span class="number">1</span>]:</span><br><span class="line">                valid_pathes.append([*path, item])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> trace_path(vec=vec[<span class="number">1</span>:], pathes=valid_pathes)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_all_valid_path</span>(<span class="params">vec: <span class="type">List</span>[<span class="type">List</span>[<span class="built_in">int</span>]]</span>) -&gt; <span class="type">List</span>[<span class="type">List</span>[<span class="built_in">int</span>]]:</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> vec: <span class="keyword">return</span> []</span><br><span class="line">    <span class="keyword">for</span> v <span class="keyword">in</span> vec:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> v:</span><br><span class="line">            <span class="keyword">return</span> []</span><br><span class="line">    <span class="keyword">return</span> trace_path(vec=vec[<span class="number">1</span>:], pathes=[[i] <span class="keyword">for</span> i <span class="keyword">in</span> vec[<span class="number">0</span>]])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_sub_sum</span>(<span class="params">path: <span class="type">List</span>[<span class="built_in">int</span>]</span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line">    _<span class="built_in">sum</span> = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> index, item <span class="keyword">in</span> <span class="built_in">enumerate</span>(path):</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            next_item = path[index + <span class="number">1</span>]</span><br><span class="line">            _<span class="built_in">sum</span> += (next_item - item)</span><br><span class="line">        <span class="keyword">except</span> IndexError:</span><br><span class="line">            <span class="keyword">pass</span></span><br><span class="line">    <span class="keyword">return</span> _<span class="built_in">sum</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_shortest_path</span>(<span class="params">vec: <span class="type">List</span>[<span class="type">List</span>[<span class="built_in">int</span>]]</span>) -&gt; <span class="type">List</span>[<span class="built_in">int</span>]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    输出最短的那个路径</span></span><br><span class="line"><span class="string">    :param vec:</span></span><br><span class="line"><span class="string">    :return:</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    pathes = get_all_valid_path(vec=vec)</span><br><span class="line">    short_path, short_sum = [], math.inf</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> path <span class="keyword">in</span> pathes:</span><br><span class="line">        _<span class="built_in">sum</span> = _sub_sum(path=path)</span><br><span class="line">        <span class="keyword">if</span> short_sum &gt; _<span class="built_in">sum</span>:</span><br><span class="line">            short_path = path</span><br><span class="line">            short_sum = _<span class="built_in">sum</span></span><br><span class="line">    <span class="keyword">return</span> short_path</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    <span class="comment"># 结果</span></span><br><span class="line">    <span class="comment"># 1, 2, 6</span></span><br><span class="line">    <span class="comment"># 1, 2, 7</span></span><br><span class="line">    <span class="comment"># 1, 4, 6</span></span><br><span class="line">    <span class="comment"># 1, 4, 7</span></span><br><span class="line">    <span class="comment"># 3, 4, 6</span></span><br><span class="line">    <span class="comment"># 3, 4, 7</span></span><br><span class="line">    <span class="comment"># 我这里的vec代表元素的position～</span></span><br><span class="line">    vec = [</span><br><span class="line">        [<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>],</span><br><span class="line">        [<span class="number">2</span>, <span class="number">4</span>],</span><br><span class="line">        [<span class="number">6</span>, <span class="number">7</span>]</span><br><span class="line">    ]</span><br><span class="line">    <span class="built_in">print</span>(get_all_valid_path(vec))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/11/18/%E6%B1%82%E5%90%88%E7%90%86%E8%B7%AF%E5%BE%84/">展开全文 >></a>
         </p>
       
 

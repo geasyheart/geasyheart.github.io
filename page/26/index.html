@@ -206,6 +206,116 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-14-01Linux系统启动流程详解之一-运行级别及grub" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/26/14-01Linux%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%B8%80-%E8%BF%90%E8%A1%8C%E7%BA%A7%E5%88%AB%E5%8F%8Agrub/">14_01Linux系统启动流程详解之一-运行级别及grub</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/26/14-01Linux%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%B8%80-%E8%BF%90%E8%A1%8C%E7%BA%A7%E5%88%AB%E5%8F%8Agrub/" class="archive-article-date">
+  	<time datetime="2015-02-25T16:12:25.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-26</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>.&#x2F;configure<br> 检查编译环境，编译工具，库，头文件<br> 设定编译安装选项<br> 结果:结果Makefile.in生成makefile<br>make<br>make install </p>
+</blockquote>
+<p>启动顺序： </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">POST--&gt;BIOS--&gt;MBR(boot loader，446)--&gt;kernel--&gt;initrd(rootfs)--&gt;/sbin/init(/etc/inittab) </span><br></pre></td></tr></table></figure>
+<p>kernel做例如下的工作: </p>
+<blockquote>
+<p>文件系统<br>进程管理<br>内存管理<br>网络管理<br>安全功能<br>驱动程序 </p>
+</blockquote>
+<p>redhat5:ramdisk–&gt;initrd(初始化RAM磁盘)<br><a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/Initrd">http://zh.wikipedia.org/wiki/Initrd</a><br>redhat6:ramfs–&gt;initramfs </p>
+<p>内核设计风格: </p>
+<p>核心:动态加载 内核模块<br> 如:du -sh &#x2F;lib&#x2F;modules&#x2F;<code>uname -r</code>可以看到内核的大小<br> 而:ls &#x2F;boot&#x2F;vmlinuz -lh可以看到核心非常小，<br> 即需要时进行加载，而不编译进内核<br>内核:&#x2F;lib&#x2F;modules&#x2F;<del>内核版本号命令的目录</del>&#x2F;<br>关于设计风格:<br><a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/%E6%95%B4%E5%A1%8A%E6%80%A7%E6%A0%B8%E5%BF%83">http://zh.wikipedia.org/wiki/%E6%95%B4%E5%A1%8A%E6%80%A7%E6%A0%B8%E5%BF%83</a> </p>
+<blockquote>
+<p>单(宏)内核:Linux(LWP:轻量级进程)<br>核心:ko(Kernel Object)<br>模块:so(Share Object)<br>微内核:Windows,Solaris(线程) </p>
+</blockquote>
+<p>chroot:<br>例如我要chroot到&#x2F;test&#x2F;virroot目录下: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">chroot /test/virroot </span><br><span class="line">会提示没有/bin/bash </span><br><span class="line">然后肯定会: </span><br><span class="line">cp /bin/bash /test/virroot/bin </span><br><span class="line">不过这样再chroot还是会提示no such file or directorory </span><br><span class="line">这个时候就要解决库依赖关系: </span><br><span class="line">ldd /bin/bash  (显示二进制程序所依赖的库文件) </span><br><span class="line">可以看到所依赖的库: </span><br><span class="line">mkdir /test/virroot/lib </span><br><span class="line">cp /lib/** /test/virroot/lib实验时是四个，有路径 </span><br><span class="line">即可完成，这个时候有两个目录/lib 和 /bin ,而这个时候的命令 </span><br><span class="line">只有核心内有的。 </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>启动的服务不同:<br> 运行级别:0~6 </p>
+<blockquote>
+<p>0:halt<br>1:single user mode,直接以管理员身份切入<br>2:multi user mode,不启用NFS<br>3:multi user mode,test mode <br>4:reserved(保留级别)<br>5:multi user mode,graphic mode <br>6:reboot </p>
+</blockquote>
+<p>bootloader: </p>
+<blockquote>
+<p>LILO(Linux Loader):不支持大磁盘，嵌入式用的多<br>grub(Grand Unified Bootloader)<br>stage1:MBR<br>stage2:&#x2F;boot&#x2F;grub </p>
+</blockquote>
+<p>关于grub的配置选项,可简单参考:<br><a target="_blank" rel="noopener" href="http://www.2cto.com/os/201212/176572.html">http://www.2cto.com/os/201212/176572.html</a>  </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/26/14-01Linux%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E8%AF%A6%E8%A7%A3%E4%B9%8B%E4%B8%80-%E8%BF%90%E8%A1%8C%E7%BA%A7%E5%88%AB%E5%8F%8Agrub/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-13-03linux进程管理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1136,126 +1246,6 @@ traceroute:
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/02/15/09-04linux%E5%8E%8B%E7%BC%A9%E4%B8%8E%E5%BD%92%E6%A1%A3/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-09-02磁盘及文件系统管理详解之四" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/15/09-02%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E5%9B%9B/">09_02磁盘及文件系统管理详解之四</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/15/09-02%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E5%9B%9B/" class="archive-article-date">
-  	<time datetime="2015-02-14T16:29:56.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-15</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>分区完成后，查看 &#x2F;proc&#x2F;partitions可能没有得到新的磁盘分区情况，<br>可以执行partprobe命令<br>partprobe:redhat5用，redhat6使用其他的，不过也可以用<br> 通知内核重读硬盘分区表 </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#cat /proc/partitions </span><br><span class="line">#partprobe /dev/sdx </span><br></pre></td></tr></table></figure>
-
-<p>创建文件系统: </p>
-<blockquote>
-<p>cat &#x2F;proc&#x2F;filesystems <br>查看系统所支持的文件系统<br>或者mkfs双tab查看 </p>
-<p>mkfs <br>-t fstype </p>
-<p>mkfs.ext2&#x2F;3&#x2F;4 </p>
-<p>mkfs -t ext2 &#x3D; mkfs.ext2<br>即mkfs -t 调用mkfs.ext(x)。。。 </p>
-</blockquote>
-<p>专门管理ext系列文件: </p>
-<blockquote>
-<p>mke2fs<br>-j:ext3<br>mke2fs -j &#x2F;dev&#x2F;sda5 (ext3)<br>mke2fs &#x2F;dev&#x2F;sda5(ext2)<br>-t fstype：ext2&#x2F;ext3&#x2F;ext4<br>-b:指定block size，默认为4096，可用取值为1024，2048，4096    ！！！！！！！！！！！！<br>-L:指定分区卷标(label),<br>mke2fs -L mydata &#x2F;dev&#x2F;sda5<br>-m:指定预留给超级用户的块数百分比，默认%5..<br>mke2fs -m 3 &#x2F;dev&#x2F;sda5 预留%3<br>-i:默认8K块一个inode；<br>mke2fs -i 4096 &#x2F;dev&#x2F;sda5<br>-N:指定要创建的inode的个数<br>-F:强制创建文件系统<br>-E:用于指定额外的文件系统属性 </p>
-</blockquote>
-<h2 id="blkid-查看磁盘分区的相关属性"><a href="#blkid-查看磁盘分区的相关属性" class="headerlink" title="blkid:查看磁盘分区的相关属性"></a>blkid:查看磁盘分区的相关属性</h2><blockquote>
-<p>UUID:系统生成用于唯一指明磁盘设备的身份<br>TYPE:查看文件系统类型<br>LABEL:查看卷标 </p>
-</blockquote>
-<p>e2label:用于查看或定义卷标<br>e2label 设备文件  卷标:设定卷标 </p>
-<h2 id="tune2fs-调整文件系统的相关属性"><a href="#tune2fs-调整文件系统的相关属性" class="headerlink" title="tune2fs:调整文件系统的相关属性"></a>tune2fs:调整文件系统的相关属性</h2><blockquote>
-<p>-j:升级文件系统ext2 到 ext3<br>tune2fs -j &#x2F;dev&#x2F;sda5<br>blkid &#x2F;dev&#x2F;sda5 查看就是ext3了；<br>这个无损创建(即不损坏原来的数据)<br>-L:设定卷标<br>tune2fs -L  mydata &#x2F;dev&#x2F;sda5(设定或修改卷标)<br>-m:调整预留百分比(和上面一样用法)<br>-r：指定预留块数<br>-o：设定默认挂载选项<br>acl:Enable Access control list </p>
-</blockquote>
-<h2 id="以下这两个很重要"><a href="#以下这两个很重要" class="headerlink" title="以下这两个很重要"></a>以下这两个很重要</h2><blockquote>
-<p>（在分区时会提示挂载20次或者使用180时会进行自检，而<br>当服务器上的磁盘有几个T大小时，自检就会消耗大量的资源，这个<br>时候，可使其关闭)<br>-c #:指定挂载次数达到#次之后进行自检(0或-1表示关闭此功能)<br>-i #:每挂载多少天后进行自检(0或-1表示关闭此功能表示关闭此功能) </p>
-</blockquote>
-<h2 id="dumpe2fs-显示文件属性信息-这个很重要，可以查看分区的详细信息，以及碎片"><a href="#dumpe2fs-显示文件属性信息-这个很重要，可以查看分区的详细信息，以及碎片" class="headerlink" title="dumpe2fs:显示文件属性信息(这个很重要，可以查看分区的详细信息，以及碎片)"></a>dumpe2fs:显示文件属性信息(这个很重要，可以查看分区的详细信息，以及碎片)</h2><blockquote>
-<p> -h:只显示超级块信息  superbpock<br> dumpe2fs -h &#x2F;dev&#x2F;sda5 </p>
-<p>fsck:检查并修复Linux文件系统<br> -t fstype：指定文件系统属性(可以不指定，系统会调用blkid)<br> -a 自动修复 </p>
-<p>e2fsck:检查ext2和ext3和ext4文件系统<br> -f：强制检查<br> -p:自动修复 </p>
-</blockquote>
-<p>挂载:将新的文件系统关联至当前根文件系统<br>卸载:将某文件系统与根文件系统的关联关系予以移除 </p>
-<p>mount 设备 挂载点<br> 设备:<br> 设备文件 : &#x2F;dev&#x2F;sda5<br> 卷标 : LABEL&#x3D;””<br> UUID : UUID&#x3D;””<br> 挂载点:目录<br> 要求: </p>
-<ol>
-<li>此目录没有被其他进程使用 </li>
-<li>目录得事先存在 </li>
-<li>目录中的原有的文件将会暂时隐蔽<br> mount 不带选项就会显示当前系统的设备及挂载点<br> -a:表示&#x2F;etc&#x2F;fstab文件中所有的文件系统<br> -n:默认情况下，mount每挂载一个设备，都会把挂载的设备信息存至&#x2F;etc&#x2F;mtab文件，<br> 使用-n选项意味着挂载设备时，不会把信息写入&#x2F;etc&#x2F;mtab文件，<br> -t：fstype：指定当前挂载设备上的文件系统的类型，默认情况下不使用-t会识别的也会识别很好<br> -r：只读挂载(这个挂载光盘时可使用)<br> -w：读写挂载<br> -o：指定额外的挂载选项，也即指定文件系统<br> async<br> atime(如果服务器比较繁忙，没必要使用这个)<br> noexec(禁止二进制文件直接执行，这个在U盘上很重要，防止病毒自动执行)<br> suid(启用suid，这个一定要注意，坚决禁止外来设备使用此选项)<br> netdev如果挂载的设备是一个网络设备，如果开机时没法ping的到，就会跳过，然后挂载其他的，这个在&#x2F;etc&#x2F;fstab中很重要<br> ro:挂载为只读<br> rw:读写挂载<br> remount：重新挂载<br> mount -o ro,remount &#x2F;dev&#x2F;sda5<br>umount:<br> 卸载注意事项:<br> 要求:<br> 1&#x2F;挂载的设备没有被进程使用</li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/15/09-02%E7%A3%81%E7%9B%98%E5%8F%8A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E8%AF%A6%E8%A7%A3%E4%B9%8B%E5%9B%9B/">展开全文 >></a>
         </p>
       
 

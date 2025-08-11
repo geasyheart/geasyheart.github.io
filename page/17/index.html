@@ -206,6 +206,100 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-46-03-实验-JDK-Tomcat-Nginx实现jsp服务器" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/10/30/46-03-%E5%AE%9E%E9%AA%8C-JDK-Tomcat-Nginx%E5%AE%9E%E7%8E%B0jsp%E6%9C%8D%E5%8A%A1%E5%99%A8/">46_03_实验_JDK+Tomcat+Nginx实现jsp服务器</a>
+    </h1>
+  
+
+        
+        <a href="/2015/10/30/46-03-%E5%AE%9E%E9%AA%8C-JDK-Tomcat-Nginx%E5%AE%9E%E7%8E%B0jsp%E6%9C%8D%E5%8A%A1%E5%99%A8/" class="archive-article-date">
+  	<time datetime="2015-10-30T14:24:05.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-30</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>实验环境：<br>192.168.122.220  <a target="_blank" rel="noopener" href="http://www.123.com/">www.123.com</a> </p>
+<p>安装jdk： </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#chmod +x jdk-6u45-linux-x64-rpm.bin </span></span><br><span class="line"><span class="comment">#./jdk-6u45-linux-x64-rpm.bin </span></span><br><span class="line"> </span><br><span class="line">生成的文件在:/usr/java/目录下； </span><br><span class="line"> </span><br><span class="line">[root@node1 java]<span class="comment">#vim /etc/profile.d/java.sh </span></span><br><span class="line"><span class="built_in">export</span> JAVA_HOME=/usr/java/jdk1.6.0_21 </span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:<span class="variable">$JAVA_HOME</span>/bin </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">安装Tomcat： </span><br><span class="line">[root@node1 ~]<span class="comment"># tar xf apache-tomcat-7.0.62.tar.gz -C /usr/local </span></span><br><span class="line">[root@node1 ~]<span class="comment"># cd /usr/local </span></span><br><span class="line">[root@node1 <span class="built_in">local</span>]<span class="comment"># ln -sv apache-tomcat-7.0.62/ tomcat </span></span><br><span class="line">[root@node1 <span class="built_in">local</span>]<span class="comment">#vim /etc/profile.d/tomcat.sh </span></span><br><span class="line"><span class="built_in">export</span> CATALINA_HOME=/usr/local/tomcat </span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:<span class="variable">$CATALINA_HOME</span>/bin </span><br><span class="line"> </span><br><span class="line">增加一个虚拟主机： </span><br><span class="line">[root@node1 html]<span class="comment"># vim /usr/local/tomcat/conf/server.xml </span></span><br><span class="line"> </span><br><span class="line">&lt;Host name=<span class="string">&quot;www.123.com&quot;</span> appBase=<span class="string">&quot;/usr/share/nginx/html&quot;</span> </span><br><span class="line">    unpackWARs=<span class="string">&quot;true&quot;</span> autoDeploy=<span class="string">&quot;true&quot;</span>&gt; </span><br><span class="line">    &lt;Context path=<span class="string">&quot;&quot;</span> docBase=<span class="string">&quot;.&quot;</span> /&gt; </span><br><span class="line">&lt;/Host&gt; </span><br><span class="line"> </span><br><span class="line">[root@node1 html]<span class="comment"># catalina.sh start </span></span><br><span class="line"> </span><br><span class="line">配置Nginx将jsp等转到tomcat上进行处理； </span><br><span class="line">[root@node1 html]<span class="comment"># vim /etc/nginx/conf.d/default.conf </span></span><br><span class="line">    location ~ \.(jsp|jspx|<span class="keyword">do</span>)?$ &#123; </span><br><span class="line">        proxy_set_header Host <span class="variable">$host</span>;　　　　　　　　　　　　　　　　　<span class="comment">#这个必须有，否则会跳转到webapps目录下的位置； </span></span><br><span class="line">        proxy_set_header X-Real-IP <span class="variable">$remote_addr</span>; </span><br><span class="line">        proxy_pass http://127.0.0.1:8080; </span><br><span class="line">    &#125; </span><br><span class="line"> </span><br><span class="line">测试： </span><br><span class="line">[root@node1 html]<span class="comment"># vim /usr/share/nginx/html/hello.jsp </span></span><br><span class="line">&lt;html&gt;&lt;body&gt;&lt;center&gt; </span><br><span class="line">now time is: &lt;%=new java.util.Date()%&gt; </span><br><span class="line">&lt;/center&gt;&lt;/body&gt;&lt;/html&gt; </span><br><span class="line"> </span><br><span class="line">http://www.123.com/hello.jsp </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">添加自启动： </span><br><span class="line">[root@node1 html]<span class="comment"># chkconfig nignx on </span></span><br><span class="line">[root@node1 html]<span class="comment"># vim /etc/rc.local </span></span><br><span class="line">catalina.sh start </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+<p>在没安装nginx之前，对tomcat进行测试： </p>
+<p>      <Host name="localhost"  appBase="webapps" 
+            unpackWARs="true" autoDeploy="true"> </p>
+<p>这个是默认的，如果想要访问的话，不能通过网站名字进行访问，只能例如<a href="http://192.168.122.220:8080进行访问；">http://192.168.122.220:8080进行访问；</a> </p>
+<p>自己添加虚拟主机，如下所示:<br>     <Host name="www.test.com" appBase="/web" 
+     unpackWARs="true"  autoDeploy="true"><br>    <Context  path="" docBase="webapps" reLoadable="true" /><br></Host><br>那么在进行访问tomcat的时候，必须是<a target="_blank" rel="noopener" href="http://www.test.com:8080/**.jsp%EF%BC%8C%E5%90%A6%E5%88%99%E5%B0%86%E4%B8%8D%E4%BC%9A%E8%AE%BF%E9%97%AE%E5%BE%97%E5%88%B0%EF%BC%8C%E8%BF%99%E4%B8%AA%E8%A6%81%E6%B3%A8%E6%84%8F%EF%BC%9B%EF%BC%9B%EF%BC%9B">www.test.com:8080/**.jsp，否则将不会访问得到，这个要注意；；；</a> </p>
+<p>关于tomcat调整：<br><a target="_blank" rel="noopener" href="https://blog.linuxeye.com/413.html">https://blog.linuxeye.com/413.html</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/10/30/46-03-%E5%AE%9E%E9%AA%8C-JDK-Tomcat-Nginx%E5%AE%9E%E7%8E%B0jsp%E6%9C%8D%E5%8A%A1%E5%99%A8/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-47-01Tomcat系列之apache使用mod-proxy或mod-jk反向代理tomcat" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1513,131 +1607,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/10/03/42-04-2-mysql-proxy%E5%AE%9E%E9%AA%8C/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-42-04利用mysql-proxy实现读写分离-第一版" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/10/03/42-04%E5%88%A9%E7%94%A8mysql-proxy%E5%AE%9E%E7%8E%B0%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB-%E7%AC%AC%E4%B8%80%E7%89%88/">42_04利用mysql-proxy实现读写分离_第一版_</a>
-    </h1>
-  
-
-        
-        <a href="/2015/10/03/42-04%E5%88%A9%E7%94%A8mysql-proxy%E5%AE%9E%E7%8E%B0%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB-%E7%AC%AC%E4%B8%80%E7%89%88/" class="archive-article-date">
-  	<time datetime="2015-10-03T03:02:55.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-03</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>MySQL Proxy </p>
-<ul>
-<li><a target="_blank" rel="noopener" href="http://cdn.mysql.com/Downloads/MySQL-Proxy/mysql-proxy-0.8.5-linux-glibc2.3-x86-64bit.tar.gz">http://cdn.mysql.com/Downloads/MySQL-Proxy/mysql-proxy-0.8.5-linux-glibc2.3-x86-64bit.tar.gz</a></li>
-</ul>
-<ol>
-<li>源码安装时，MySQL　proxy的依赖关系:</li>
-</ol>
-<blockquote>
-<p>libevent 1.x or higher<br>lua 5.1.x or higher<br>glib2 2.6.0 or higher<br>pkg-config<br>libtool-1.5 or higher<br>MySQL 5.0.x or higher developer files </p>
-</blockquote>
-<ol start="2">
-<li><p>添加用户 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># useradd - r mysql-proxy </span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>安装 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#tar xf mysql-proxy-0.8.2.tar.gz -C /usr/local </span></span><br><span class="line"><span class="comment">#ln -sv mysql-proxy-0.8.2 mysql-proxy </span></span><br><span class="line"><span class="comment">#cd mysql-proxy </span></span><br><span class="line"><span class="comment">#./configure </span></span><br><span class="line"><span class="comment">#make </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#make check </span></span><br><span class="line">如果管理员有密码，上面的步骤则需要使用如下格式进行: </span><br><span class="line"><span class="comment">#MYSQL_PASSWORD=root_pwd make check </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#make install </span></span><br><span class="line"> </span><br><span class="line">默认情况下，mysql-proxy安装在/usr/local/sbin/mysql-proxy,而lua示例脚本安装在/usr/local/share目录中。 </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>添加环境变量脚本</p>
-</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#vim /etc/profile.d/mysql-proxy.sh </span></span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:/usr/local/mysql-proxy/bin </span><br></pre></td></tr></table></figure>
-
-<ol start="5">
-<li>配置指令 <blockquote>
-<p>mysql proxy的各配置参数请看官方文档:<a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/">http://dev.mysql.com/doc/refman/</a></p>
-</blockquote>
-</li>
-</ol>
-<p>四、安装配置 </p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#mysql-proxy --daemon --log-level=debug  --plugins=&quot;proxy&quot; --log-file=/var/log/mysql-proxy.log   --proxy-backend-addresses=&quot;172.16.100.106:3306&quot; --proxy-read-only-backend-addresses=&quot;172.16.100.107:3306&quot;; </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#tail /var/log/mysql-proxy.log </span></span><br><span class="line"> </span><br><span class="line">100.106: </span><br><span class="line">    &gt;GRANT ALL ON *.* TO <span class="string">&#x27;root&#x27;</span>@<span class="string">&#x27;172.16.%.%&#x27;</span> IDENTIFIED BY <span class="string">&#x27;redhat&#x27;</span>; </span><br><span class="line">    &gt;flush privileges; </span><br><span class="line"> </span><br><span class="line">100.107: </span><br><span class="line">    mysql -u root -p -h 172.16.100.201 --port=4040 </span><br><span class="line">    redhat </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="built_in">ls</span> /usr/local/share/doc/mysql-proxy/rw-splitting.lua  这个脚本实现读写分离 </span><br><span class="line"> </span><br><span class="line"><span class="comment">#mysql-proxy --daemon --log-level=debug  --plugins=&quot;proxy&quot; --log-file=/var/log/mysql-proxy.log   --proxy-backend-addresses=&quot;172.16.100.106:3306&quot; --proxy-read-only-backend-addresses=&quot;172.16.100.107:3306&quot;　--proxy-lua-script=&quot; /usr/local/mysql-proxy/share/doc/mysql-proxy/rw-splitting.lua &quot; </span></span><br><span class="line"> </span><br><span class="line"><span class="built_in">tail</span> /var/log/mysql-proxy.log </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">实现admin功能: </span><br><span class="line"> </span><br><span class="line">mysql-proxy --daemon --log-level=debug  --log-file=/var/log/mysql-proxy.log   --plugins=<span class="string">&quot;proxy&quot;</span> --proxy-backend-addresses=<span class="string">&quot;172.16.100.106:3306&quot;</span> --proxy-read-only-backend-addresses=<span class="string">&quot;172.16.100.107:3306&quot;</span>  --proxy-lua-script=<span class="string">&quot; /usr/local/mysql-proxy/share/doc/mysql-proxy/rw-splitting.lua &quot;</span>  --plugins=<span class="string">&quot;admin&quot;</span> --admin-username=<span class="string">&quot;admin&quot;</span> --admin-password=<span class="string">&quot;admin&quot;</span> --admin-lua-script=<span class="string">&quot;/usr/local/mysql-proxy/share/doc/mysql-proxy/admin.lua&quot;</span> </span><br><span class="line">说明，这个admin.lua没有提供 </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>107: </p>
-<blockquote>
-<p>mysql -uadmin -h 172.16.100.201 –port&#x3D;4041 -p<br>admin </p>
-</blockquote>
-<blockquote>
-<p>select * from backends;   用来查看有几个后端<br>会显示state是unknown状态；<br>mysql -u root -predhat -h 172.16.100.201 –port&#x3D;4040 -e ‘create database hellodb’;<br>会发现状态变成了up,说明操作是在代理上操作的，写到了后端服务器上； </p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># vim /etc/sysconfig/mysql-proxy </span></span><br><span class="line"> </span><br><span class="line">ADMIN_USER=<span class="string">&quot;admin&quot;</span> </span><br><span class="line">ADMIN_PASSWORD=<span class="string">&quot;admin&quot;</span> </span><br><span class="line">ADMIN_ADDRESS=<span class="string">&quot;&quot;</span> </span><br><span class="line">ADMIN_LUA_SCRIPT=<span class="string">&quot;/usr/local/mysql-proxy/share/doc/mysql-proxy/admin.lua&quot;</span> </span><br><span class="line">PROXY_ADDRESS=<span class="string">&quot;0.0.0.0:3306&quot;</span> </span><br><span class="line">PROXY_USER=<span class="string">&quot;mysql-proxy&quot;</span> </span><br><span class="line">PROXY_OPTIONS <span class="string">&quot;--daemon --log-level=info  --plugins=proxy --log-file=/var/log/mysql-proxy.log   --proxy-backend-addresses=172.16.100.106:3306 --proxy-read-only-backend-addresses=172.16.100.107:3306　--proxy-lua-script=/usr/local/mysql-proxy/share/doc/mysql-proxy/rw-splitting.lua &quot;</span> </span><br></pre></td></tr></table></figure>
-<h2 id="mysql-proxy的启动脚本"><a href="#mysql-proxy的启动脚本" class="headerlink" title="mysql-proxy的启动脚本"></a>mysql-proxy的启动脚本</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">#set default mysql-proxy configuration </span></span><br><span class="line">ADMIN_USER=<span class="string">&quot;admin&quot;</span> </span><br><span class="line">ADMIN_PASSWD=<span class="string">&quot;admin&quot;</span> </span><br><span class="line">ADMIN_LUA_SCRIPT=<span class="string">&quot;/usr/local/mysql-proxy/share/doc/mysql-proxy/admin.lua&quot;</span> </span><br><span class="line">PROXY_OPTIONS=<span class="string">&#x27;--daemon&#x27;</span> </span><br><span class="line">PROXY_PID=/var/run/mysql-proxy.pid </span><br><span class="line">PROXY_USER=<span class="string">&quot;mysql-proxy&quot;</span> </span><br><span class="line"> </span><br><span class="line"><span class="comment">#Source mysql-proxy configuraion. </span></span><br><span class="line"><span class="keyword">if</span> [ -f /etc/sysconfig/mysql-proxy ];<span class="keyword">then</span> </span><br><span class="line">    . /etc/sysconfig/mysql-proxy </span><br><span class="line"><span class="keyword">fi</span> </span><br><span class="line"> </span><br><span class="line">RETVAL=0 </span><br><span class="line"><span class="function"><span class="title">start</span></span>() &#123; </span><br><span class="line">    <span class="built_in">echo</span> -n $<span class="string">&quot;Stating <span class="variable">$prog</span>: &quot;</span> </span><br><span class="line">    daemon <span class="variable">$prog</span> <span class="variable">$PROXY_OPTIONS</span> --pid-file=<span class="variable">$PROXY_PID</span> --proxy-address=<span class="string">&quot;<span class="variable">$PROXY_ADDRESS</span>&quot;</span> --user=<span class="variable">$PROXY_USER</span> --admin-username=<span class="string">&quot;<span class="variable">$ADMIN_USER</span>&quot;</span> --admin-lua-script=<span class="string">&quot;<span class="variable">$ADMIN_LUA_SCRIPT</span>&quot;</span> --admin-password=<span class="string">&quot;<span class="variable">$ADMIN_PASSWORD</span>&quot;</span> </span><br><span class="line">    RETVAL=$? </span><br><span class="line">    <span class="built_in">echo</span> </span><br><span class="line">    <span class="keyword">if</span> [ <span class="variable">$RETVAL</span> -eq 0 ];<span class="keyword">then</span> </span><br><span class="line">        <span class="built_in">touch</span> /var/lock/subsys/mysql-proxy </span><br><span class="line">    <span class="keyword">fi</span> </span><br><span class="line">&#125; </span><br><span class="line"><span class="function"><span class="title">stop</span></span>() &#123; </span><br><span class="line">    <span class="built_in">echo</span> -n $<span class="string">&quot;Stopping <span class="variable">$prog</span>:&quot;</span> </span><br><span class="line">    killproc -p <span class="variable">$PROXY_PID</span> -d 3 <span class="variable">$prog</span> </span><br><span class="line">    RETVAL=$? </span><br><span class="line">    <span class="built_in">echo</span> </span><br><span class="line">    <span class="keyword">if</span> [ <span class="variable">$RETVAL</span> -eq 0 ];<span class="keyword">then</span> </span><br><span class="line">        <span class="built_in">rm</span> -f /var/lock/subsys/mysql-proxy </span><br><span class="line">        <span class="built_in">rm</span> -f <span class="variable">$PROXY_PID</span> </span><br><span class="line">    <span class="keyword">fi</span> </span><br><span class="line">&#125; </span><br><span class="line"><span class="comment">#See how we were called </span></span><br><span class="line"><span class="keyword">case</span> <span class="string">&quot;<span class="variable">$1</span>&quot;</span> <span class="keyword">in</span> </span><br><span class="line">    start) </span><br><span class="line">        start </span><br><span class="line">        ;; </span><br><span class="line">    stop) </span><br><span class="line">        stop </span><br><span class="line">        ;; </span><br><span class="line">    restart) </span><br><span class="line">        stop </span><br><span class="line">        start </span><br><span class="line">        ;; </span><br><span class="line">    condrestart|try-restart) </span><br><span class="line">        <span class="keyword">if</span> status -p <span class="variable">$PROXY_PIDFILE</span> <span class="variable">$porg</span> &amp;&gt;/dev/null;<span class="keyword">then</span> </span><br><span class="line">            stop </span><br><span class="line">            start </span><br><span class="line">        <span class="keyword">fi</span> </span><br><span class="line">        ;; </span><br><span class="line">    status) </span><br><span class="line">        status -p <span class="variable">$PROXY_PID</span> <span class="variable">$prog</span> </span><br><span class="line">        ;; </span><br><span class="line">    *) </span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;Usage: <span class="variable">$0</span> &#123;start|stop|restart|reload|status|condrestart|try-restart&#125;&quot;</span> </span><br><span class="line">        RETVAL=1 </span><br><span class="line">        ;; </span><br><span class="line"><span class="keyword">esac</span> </span><br><span class="line"><span class="built_in">exit</span> <span class="variable">$RETVAL</span> </span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment"># chmod +x /etc/rc.d/init.d/mysql-proxy </span></span><br><span class="line"><span class="comment"># chkconfig --add mysql-proxy </span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">## admin lua脚本</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> set_error(errmsg) </span><br><span class="line"> proxy.response = &#123; </span><br><span class="line"> <span class="built_in">type</span> = proxy.MYSQLD_PACKET_ERR, </span><br><span class="line"> errmsg = errmsg or <span class="string">&quot;error&quot;</span> </span><br><span class="line"> &#125; </span><br><span class="line"> end </span><br><span class="line"><span class="keyword">function</span> read_query(packet) </span><br><span class="line"> <span class="keyword">if</span> packet:byte() ~= proxy.COM_QUERY <span class="keyword">then</span> </span><br><span class="line"> set_error(<span class="string">&quot;[admin] we only handle text-based queries (COM_QUERY)&quot;</span>) </span><br><span class="line"> <span class="built_in">return</span> proxy.PROXY_SEND_RESULT </span><br><span class="line"> end </span><br><span class="line"> <span class="built_in">local</span> query = packet:sub(2) </span><br><span class="line"> <span class="built_in">local</span> rows = &#123; &#125; </span><br><span class="line"> <span class="built_in">local</span> fields = &#123; &#125; </span><br><span class="line"> <span class="keyword">if</span> query:lower() == <span class="string">&quot;select * from backends&quot;</span> <span class="keyword">then</span> </span><br><span class="line"> fields = &#123; </span><br><span class="line"> &#123; name = <span class="string">&quot;backend_ndx&quot;</span>,<span class="built_in">type</span> = proxy.MYSQL_TYPE_LONG &#125;, </span><br><span class="line"> &#123; name = <span class="string">&quot;address&quot;</span>,<span class="built_in">type</span> = proxy.MYSQL_TYPE_STRING &#125;, </span><br><span class="line"> &#123; name = <span class="string">&quot;state&quot;</span>,<span class="built_in">type</span> = proxy.MYSQL_TYPE_STRING &#125;, </span><br><span class="line"> &#123; name = <span class="string">&quot;type&quot;</span>,<span class="built_in">type</span> = proxy.MYSQL_TYPE_STRING &#125;, </span><br><span class="line"> &#123; name = <span class="string">&quot;uuid&quot;</span>,<span class="built_in">type</span> = proxy.MYSQL_TYPE_STRING &#125;, </span><br><span class="line"> &#123; name = <span class="string">&quot;connected_clients&quot;</span>,<span class="built_in">type</span> = proxy.MYSQL_TYPE_LONG &#125;, </span><br><span class="line"> &#125; </span><br><span class="line"> <span class="keyword">for</span> i = 1, <span class="comment">#proxy.global.backends do </span></span><br><span class="line"> <span class="built_in">local</span> states = &#123; </span><br><span class="line"> <span class="string">&quot;unknown&quot;</span>, </span><br><span class="line"> <span class="string">&quot;up&quot;</span>, </span><br><span class="line"> <span class="string">&quot;down&quot;</span>                      &#125; </span><br><span class="line"> <span class="built_in">local</span> types = &#123; </span><br><span class="line"> <span class="string">&quot;unknown&quot;</span>, </span><br><span class="line"> <span class="string">&quot;rw&quot;</span>, </span><br><span class="line"> <span class="string">&quot;ro&quot;</span> </span><br><span class="line"> &#125; </span><br><span class="line"> <span class="built_in">local</span> b = proxy.global.backends[i] </span><br><span class="line"> rows[<span class="comment">#rows + 1] = &#123; </span></span><br><span class="line"> i, </span><br><span class="line"> b.dst.name,          -- configured backend address </span><br><span class="line"> states[b.state + 1], -- the C-<span class="built_in">id</span> is pushed down starting at 0 </span><br><span class="line"> types[b.type + 1],   -- the C-<span class="built_in">id</span> is pushed down starting at 0 </span><br><span class="line"> b.uuid,              -- the MySQL Server<span class="string">&#x27;s UUID if it is managed </span></span><br><span class="line"><span class="string"> b.connected_clients  -- currently connected clients </span></span><br><span class="line"><span class="string"> &#125; </span></span><br><span class="line"><span class="string"> end </span></span><br><span class="line"><span class="string"> elseif query:lower() == &quot;select * from help&quot; then </span></span><br><span class="line"><span class="string"> fields = &#123; </span></span><br><span class="line"><span class="string"> &#123; name = &quot;command&quot;,type = proxy.MYSQL_TYPE_STRING &#125;, </span></span><br><span class="line"><span class="string"> &#123; name = &quot;description&quot;,type = proxy.MYSQL_TYPE_STRING &#125;, </span></span><br><span class="line"><span class="string"> &#125; </span></span><br><span class="line"><span class="string"> rows[#rows + 1] = &#123; &quot;SELECT * FROM help&quot;, &quot;shows this help&quot; &#125; </span></span><br><span class="line"><span class="string"> rows[#rows + 1] = &#123; &quot;SELECT * FROM backends&quot;, &quot;lists the backends and their state&quot; &#125; </span></span><br><span class="line"><span class="string"> else </span></span><br><span class="line"><span class="string"> set_error(&quot;use &#x27;</span>SELECT * FROM <span class="built_in">help</span><span class="string">&#x27; to see the supported commands&quot;) </span></span><br><span class="line"><span class="string"> return proxy.PROXY_SEND_RESULT </span></span><br><span class="line"><span class="string"> end </span></span><br><span class="line"><span class="string">proxy.response = &#123; </span></span><br><span class="line"><span class="string"> type = proxy.MYSQLD_PACKET_OK, </span></span><br><span class="line"><span class="string"> resultset = &#123; </span></span><br><span class="line"><span class="string"> fields = fields, </span></span><br><span class="line"><span class="string"> rows = rows </span></span><br><span class="line"><span class="string"> &#125; </span></span><br><span class="line"><span class="string"> &#125; </span></span><br><span class="line"><span class="string"> return proxy.PROXY_SEND_RESULT </span></span><br><span class="line"><span class="string"> end </span></span><br><span class="line"><span class="string"></span></span><br></pre></td></tr></table></figure>
-<p>这个写的不错：<br><a target="_blank" rel="noopener" href="http://www.zhengdazhi.com/archives/923">http://www.zhengdazhi.com/archives/923</a> </p>
-<p>关于这一个，可以直接参考The Next;;;</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/10/03/42-04%E5%88%A9%E7%94%A8mysql-proxy%E5%AE%9E%E7%8E%B0%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB-%E7%AC%AC%E4%B8%80%E7%89%88/">展开全文 >></a>
         </p>
       
 

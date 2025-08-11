@@ -206,6 +206,101 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-30-03nss" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/05/10/30-03nss/">30_03nss</a>
+    </h1>
+  
+
+        
+        <a href="/2015/05/10/30-03nss/" class="archive-article-date">
+  	<time datetime="2015-05-10T15:09:03.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-05-10</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Authentication:认证<br>Authorized:授权<br>例如:当你登录一个服务器，输入用户名和密码，这个时候服务器要Authentication,登录进去后<br>能够完成什么事以及其他什么的，要Authorized。所以往下两篇文章将会介绍Linux上的NIS和pam。 </p>
+<p>NIS:<a target="_blank" rel="noopener" href="http://linux.vbird.org/linux_server/0430nis.php">http://linux.vbird.org/linux_server/0430nis.php</a> </p>
+<p>PAM:<br>&#x2F;etc&#x2F;pam.conf(这个文件不存在)<br>    Service type control module-path module-arguments<br>        service<br>        this filename must be in lower case(服务名必须小写)<br>    <br>&#x2F;etc&#x2F;pam.d&#x2F;service(必须小写)<br>    type control module-path module-arguments </p>
+<p>type 验证类型<br> auth        :authentication,主要用来检验用户的身份验证<br> account    :authorization,主要完成授权<br> session    :session管理的是用户在这次登录期间PAM所给予的环境设置<br> password    :主要就是修改&#x2F;更改密码<br> <br> <br> <br>example:<br>    这四个验证通常是有顺序的，不过也有例外。通常:先经过验证身份(auth)后，系统才能够通过用户的身份给予适当的授权与权限设置(account),而且登录与注销期间的环境才需要设置，才需要记录登录与注销的信息(session)，如果在运行期间需要更改密码，才给予password的类型。 </p>
+<p>control<br>    required:若成功则带有success的标志，失败则带有failure标志，但不论成功与失败都会继续后续的验证流程<br>    requisite:如果失败则终止后续的验证流程，这点是和required的不同<br>    sufficient:如果成功，则终止后续的查询，如果失败，则继续后续的认证，和requisite相反<br>    optional:只是个可选的<br>    include:我把这个权力移交给其他人<br>    substack<br>    <br>such as:<br>ok: this modules passed,keep checking<br>done:this modules passed,and return the final result to the application now<br>bad:the result is failed,keep checking<br>die:the result is failed,and return the failure result to the application now<br>ignore:the result will not affect the overall result<br>reset:ignore any results that have already been collected in the final result </p>
+<p>EXAMPLE:<br>required     [success&#x3D;ok new_authtok_reqd&#x3D;ok ignore&#x3D;ignore default&#x3D;bad]<br>requisite    [success&#x3D;ok new_authtok_reqd&#x3D;ok ignore&#x3D;ignore default&#x3D;die]<br>sufficient  [success&#x3D;done new_authtok_reqd&#x3D;done default&#x3D;ignore]<br>optional     [success&#x3D;ok new_authtok_reqd&#x3D;ok default&#x3D;ignore] </p>
+<p>module-path </p>
+<p>&#x2F;etc&#x2F;pam.d&#x2F;other:定义默认规则 </p>
+<p>更多直接参考《鸟哥的Linux私房菜》 </p>
+<p>ldap:<a target="_blank" rel="noopener" href="http://zh.wikipedia.org/wiki/%E8%BD%BB%E5%9E%8B%E7%9B%AE%E5%BD%95%E8%AE%BF%E9%97%AE%E5%8D%8F%E8%AE%AE">http://zh.wikipedia.org/wiki/%E8%BD%BB%E5%9E%8B%E7%9B%AE%E5%BD%95%E8%AE%BF%E9%97%AE%E5%8D%8F%E8%AE%AE</a> </p>
+<p>gentent:<a target="_blank" rel="noopener" href="http://blog.chinaunix.net/uid-7761148-id-2044672.html">http://blog.chinaunix.net/uid-7761148-id-2044672.html</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/05/10/30-03nss/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-29-03samba之一" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1050,102 +1145,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/04/22/24-02-2-%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85PHP/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-24-02编译安装之MySQL-通用二进制格式" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/04/22/24-02%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85%E4%B9%8BMySQL-%E9%80%9A%E7%94%A8%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%A0%BC%E5%BC%8F/">24_02编译安装之MySQL_通用二进制格式_</a>
-    </h1>
-  
-
-        
-        <a href="/2015/04/22/24-02%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85%E4%B9%8BMySQL-%E9%80%9A%E7%94%A8%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%A0%BC%E5%BC%8F/" class="archive-article-date">
-  	<time datetime="2015-04-22T02:43:46.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="mysql通用二进制格式"><a href="#mysql通用二进制格式" class="headerlink" title="mysql通用二进制格式"></a>mysql通用二进制格式</h2><p>根据官网要求，安装目录必须是：&#x2F;usr&#x2F;local&#x2F;mysql<br> <br>说明，在解压后有一个INSTALL-BINARY打开后有安装步骤； </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#tar xf mysql**** -C /usr/local </span></span><br><span class="line"><span class="comment">#ln -sv mysql*********  mysql </span></span><br><span class="line"><span class="comment">#groupadd -r(系统用户，不能登录) -g(指定组ID) 306    mysql </span></span><br><span class="line"><span class="comment">#useradd -r(系统用户，不能登录) -g 306 -u (用户ID) 306 mysql </span></span><br><span class="line"><span class="comment">#mkdir /mydata/data             (mydata建议使用LVM) </span></span><br><span class="line"><span class="comment">#chown -R　mysql.mysql /mydata/data </span></span><br><span class="line"><span class="comment">#chmod 750 /mydata/data </span></span><br><span class="line"><span class="comment">#scripts/mysql_install_db --user=mysql --datadir=/mydata/data(初始化) </span></span><br><span class="line"><span class="comment">#chown -R root.mysql /usr/local/mysql/* （防止数据库被攻破后获得系统权限） </span></span><br><span class="line"><span class="comment">#bin/mysqld_safe --user=mysql &amp;   这步不用执行，这步只有默认时有意义 </span></span><br><span class="line"><span class="built_in">cp</span> support-files/mysql.server /etc/init.d/mysqld </span><br><span class="line">chkconfig --add mysqld </span><br><span class="line">  </span><br><span class="line"><span class="built_in">cp</span> support-files/my-default.cnf /etc/my.cnf </span><br><span class="line">可以通过修改（可自定义配置文件my_large,my_huge） </span><br><span class="line">里面的内容来定义； </span><br><span class="line">vi /etc/my.cnf </span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>thread_concurrency&#x3D;8 进程并发量(CPU*2)<br>添加:<br>datadir &#x3D; &#x2F;mydata&#x2F;data(这个必须添加)##############<br>            我在这都弄好后，遇到一个问题，就是以localhost登陆时，发现&#x2F;tmp&#x2F;mysql.sock没有找到，<br>            我在my.cnf里填写位置为&#x2F;tmp&#x2F;mysql.sock&#x2F;结果还是不对，不过我重启了下，输入mysql，然后设置<br>            localhost密码，就可以登陆了；<br>            <br>如果敲mysql （commond not found） </p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/profile.d/mysql.sh </span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:/usr/local/mysql/bin/  保存退出，重新登录即可 </span><br><span class="line">  </span><br><span class="line">vi /etc/man.config帮助文档 </span><br><span class="line">MANPATH /usr/local/mysql/man(添加) </span><br><span class="line">  </span><br><span class="line">vi /etc/ld.so.conf.d/mysql.conf 库文件路径 </span><br><span class="line">/usr/local/mysql/lib(添加) </span><br><span class="line">ldconfig -v让系统重新建立库文件缓存,缓存在/etc/ld.so.cache </span><br><span class="line">  </span><br><span class="line"><span class="built_in">ln</span> -sv /usr/local/mysql/include /usr/include/mysql  输出头文件 </span><br><span class="line">  </span><br></pre></td></tr></table></figure>
-
-<p> <br>Mysql:配置文件格式，集中式配置文件，可以为多个程序提供配置； </p>
-<blockquote>
-<p>    &#x2F;etc&#x2F;my.cnf<br>    <br>配置文件会找这些：<br>&#x2F;etc&#x2F;my.cnf –&gt; &#x2F;etc&#x2F;mysql&#x2F;my.cnf –&gt; $BASEDIR&#x2F;my.cnf –&gt; ~&#x2F;.my.cnf    <br> <br>SHOW DATABASES：多了一个数据库performance_schema；系统状态收集库；<br> <br>Mysql服务器维护了两类变量：<br>    服务器变量：<br>        定义Mysql服务器运行属性；<br>            SHOW GLOBAL VARIABLES [LIKE ‘datadir’];<br>    状态变量：<br>        保存了Mysql服务器运行统计数据；<br>            SHOW GLOBAL STATUS [LIKE ‘STRING’];         
-  </p>
-</blockquote>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/04/22/24-02%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85%E4%B9%8BMySQL-%E9%80%9A%E7%94%A8%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%A0%BC%E5%BC%8F/">展开全文 >></a>
         </p>
       
 

@@ -206,6 +206,183 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-pycorrector源码阅读和纠错一些思考" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/02/23/pycorrector%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E5%92%8C%E7%BA%A0%E9%94%99%E4%B8%80%E4%BA%9B%E6%80%9D%E8%80%83/">pycorrector源码阅读和纠错一些思考</a>
+    </h1>
+  
+
+        
+        <a href="/2022/02/23/pycorrector%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E5%92%8C%E7%BA%A0%E9%94%99%E4%B8%80%E4%BA%9B%E6%80%9D%E8%80%83/" class="archive-article-date">
+  	<time datetime="2022-02-23T12:49:19.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-02-23</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>这篇文章主要对pycorrector默认使用规则的代码进行debug和理解，不论怎样，应先读下作者的readme，有个充分的理解先。</p>
+<h3 id="初始化工作"><a href="#初始化工作" class="headerlink" title="初始化工作"></a>初始化工作</h3><p>初始化主要做了三件事：</p>
+<ol>
+<li>初始化一些词典，用于后面纠错用。</li>
+<li>加载kenlm模型。</li>
+<li>初始化jieba分词器。</li>
+</ol>
+<h4 id="1-初始化一些词典等"><a href="#1-初始化一些词典等" class="headerlink" title="1. 初始化一些词典等"></a>1. 初始化一些词典等</h4><ul>
+<li>加载常用的汉字列表、加载同音字列表、加载形似字</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">check_corrector_initialized()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">_initialize_corrector</span>(<span class="params">self</span>):</span><br><span class="line">    <span class="comment"># chinese common char 加载常用的汉字列表，这里大概3000多个常见的汉字。</span></span><br><span class="line">    self.cn_char_set = self.load_set_file(self.common_char_path)</span><br><span class="line">    <span class="comment"># same pinyin 加载同音的列表，自定义</span></span><br><span class="line">    self.same_pinyin = self.load_same_pinyin(self.same_pinyin_text_path)</span><br><span class="line">    <span class="comment"># same stroke 加载形似字，比如&#123;坐:[座, ...]&#125;， 自定义</span></span><br><span class="line">    self.same_stroke = self.load_same_stroke(self.same_stroke_text_path)</span><br><span class="line">    self.initialized_corrector = <span class="literal">True</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<ul>
+<li>转unicode</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 编码统一，utf-8 to unicode</span></span><br><span class="line">text = convert_to_unicode(text)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>长句分短句</li>
+</ul>
+<p>额外插句：单从<code>re_han</code>这里就可以看出，作者至少对jieba很熟悉。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">split_2_short_text</span>(<span class="params">text, include_symbol=<span class="literal">False</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    长句切分为短句</span></span><br><span class="line"><span class="string">    :param text: str</span></span><br><span class="line"><span class="string">    :param include_symbol: bool</span></span><br><span class="line"><span class="string">    :return: (sentence, idx)</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    result = []</span><br><span class="line">    blocks = re_han.split(text)</span><br><span class="line">    start_idx = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> blk <span class="keyword">in</span> blocks:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> blk:</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        <span class="keyword">if</span> include_symbol:</span><br><span class="line">            result.append((blk, start_idx))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">if</span> re_han.<span class="keyword">match</span>(blk):</span><br><span class="line">                result.append((blk, start_idx))</span><br><span class="line">        start_idx += <span class="built_in">len</span>(blk)</span><br><span class="line">    <span class="keyword">return</span> result</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="2-加载kenlm模型"><a href="#2-加载kenlm模型" class="headerlink" title="2. 加载kenlm模型"></a>2. 加载kenlm模型</h4><p>关于kenlm，网上搜了下，除了纠错基本很少有人用到（而且还是针对pycorrector～），只有<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/270516015">这篇文章</a>说的还有点意思，而且看<a target="_blank" rel="noopener" href="https://github.com/kpu/kenlm">Github kenlm</a>介绍，作者也是十分任性，只强调速度，没有强调用处。。。</p>
+<p>简单来讲，kenlm是基于n-gram训练出来的一个预训练模型，它的更多用法可看<a target="_blank" rel="noopener" href="https://github.com/kpu/kenlm/blob/master/python/example.py">Example</a>。</p>
+<h4 id="3-初始化jieba"><a href="#3-初始化jieba" class="headerlink" title="3. 初始化jieba"></a>3. 初始化jieba</h4><ul>
+<li><p>加载词频<br>（这个我看了下，和jieba自带的那个dict.txt基本没关系，相当于作者自己训练了一个词频词典）<br>~~ * 自定义混淆集（空的，所以忽略这步）~~</p>
+</li>
+<li><p>自定义切词词典<br>（默认是空，个人感觉可以把jieba那个dict.txt加进去，哈哈哈）</p>
+</li>
+<li><p>一些特定词典<br>人名词典词频、place词典词频、停用词词典词频、将这些词典词频合并到一起</p>
+</li>
+</ul>
+<p>对于人名和place这种词典，不如使用现成了命名实体模型，这种词典的方式总之是无法完全枚举的。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment"># 词、频数dict, <span class="doctag">TODO:</span> 这里虽然有，但是貌似没有用到</span></span><br><span class="line">self.word_freq = self.load_word_freq_dict(self.word_freq_path)</span><br><span class="line"><span class="comment"># 自定义混淆集</span></span><br><span class="line">self.custom_confusion = self._get_custom_confusion_dict(self.custom_confusion_path)</span><br><span class="line"><span class="comment"># 自定义切词词典</span></span><br><span class="line">self.custom_word_freq = self.load_word_freq_dict(self.custom_word_freq_path)</span><br><span class="line">self.person_names = self.load_word_freq_dict(self.person_name_path)</span><br><span class="line">self.place_names = self.load_word_freq_dict(self.place_name_path)</span><br><span class="line">self.stopwords = self.load_word_freq_dict(self.stopwords_path)</span><br><span class="line"><span class="comment"># 合并切词词典及自定义词典</span></span><br><span class="line">self.custom_word_freq.update(self.person_names)</span><br><span class="line">self.custom_word_freq.update(self.place_names)</span><br><span class="line">self.custom_word_freq.update(self.stopwords)</span><br><span class="line">self.word_freq.update(self.custom_word_freq) <span class="comment"># <span class="doctag">TODO:</span>这里</span></span><br><span class="line">self.tokenizer = Tokenizer(dict_path=self.word_freq_path, custom_word_freq_dict=self.custom_word_freq,</span><br><span class="line">                            custom_confusion_dict=self.custom_confusion)</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="错字识别"><a href="#错字识别" class="headerlink" title="错字识别"></a>错字识别</h3><h4 id="1-基于word级别的错字识别"><a href="#1-基于word级别的错字识别" class="headerlink" title="1. 基于word级别的错字识别"></a>1. 基于word级别的错字识别</h4><p>这部分使用jieba的search模式进行分词。</p>
+<p>它的实现原理是：先使用hmm进行分词，比如<code>少先队员因该为老人让坐</code>，它的分词结果是<code>[&quot;少先队员&quot;, &quot;因该&quot;, &quot;为&quot;, &quot;老人&quot;, &quot;让&quot;, &quot;坐&quot;]</code>，然后对每个词再用2阶gram和3阶gram进行切分，在<code>self.FREQ</code>中进行查找是否存在，得到的结果如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">(<span class="string">&#x27;队员&#x27;</span>, <span class="number">2</span>, <span class="number">4</span>)</span><br><span class="line">(<span class="string">&#x27;少先队&#x27;</span>, <span class="number">0</span>, <span class="number">3</span>)</span><br><span class="line">(<span class="string">&#x27;少先队员&#x27;</span>, <span class="number">0</span>, <span class="number">4</span>)</span><br><span class="line">(<span class="string">&#x27;因该&#x27;</span>, <span class="number">4</span>, <span class="number">6</span>)</span><br><span class="line">(<span class="string">&#x27;为&#x27;</span>, <span class="number">6</span>, <span class="number">7</span>)</span><br><span class="line">(<span class="string">&#x27;老人&#x27;</span>, <span class="number">7</span>, <span class="number">9</span>)</span><br><span class="line">(<span class="string">&#x27;让&#x27;</span>, <span class="number">9</span>, <span class="number">10</span>)</span><br><span class="line">(<span class="string">&#x27;坐&#x27;</span>, <span class="number">10</span>, <span class="number">11</span>)</span><br></pre></td></tr></table></figure>
+
+<p>分完词后，按词粒度判断是否在词典里，符号，英文则跳过,否则则认为是可能错的。</p>
+<p>到这里识别出<code>因该</code>是可能错误的。</p>
+<h4 id="2-基于kenlm级别的错字识别"><a href="#2-基于kenlm级别的错字识别" class="headerlink" title="2. 基于kenlm级别的错字识别"></a>2. 基于kenlm级别的错字识别</h4><p>取bigram和trigram，通过kenlm获取对应的score，然后求平均获取和句子长度一致的score。</p>
+<p>比如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sent_scores = [-<span class="number">5.629326581954956</span>, -<span class="number">6.566553155581156</span>, -<span class="number">6.908517241477966</span>, -<span class="number">7.255491574605306</span>, -<span class="number">7.401519060134888</span>, -<span class="number">7.489806890487671</span>, -<span class="number">7.1438290278116865</span>, -<span class="number">6.559153278668722</span>, -<span class="number">6.858733296394348</span>, -<span class="number">7.7903218269348145</span>, -<span class="number">8.28114366531372</span>]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>然后通过这个<code>sent_scores</code>取判断哪些index是错的。</p>
+<p>那作者是怎么判断的呢？</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_get_maybe_error_index</span>(<span class="params">scores, ratio=<span class="number">0.6745</span>, threshold=<span class="number">2</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    取疑似错字的位置，通过平均绝对离差（MAD）</span></span><br><span class="line"><span class="string">    :param scores: np.array</span></span><br><span class="line"><span class="string">    :param ratio: 正态分布表参数</span></span><br><span class="line"><span class="string">    :param threshold: 阈值越小，得到疑似错别字越多</span></span><br><span class="line"><span class="string">    :return: 全部疑似错误字的index: list</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    result = []</span><br><span class="line">    scores = np.array(scores)</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(scores.shape) == <span class="number">1</span>:</span><br><span class="line">        scores = scores[:, <span class="literal">None</span>]</span><br><span class="line">    median = np.median(scores, axis=<span class="number">0</span>)  <span class="comment"># get median of all scores</span></span><br><span class="line">    margin_median = np.<span class="built_in">abs</span>(scores - median).flatten()  <span class="comment"># deviation from the median</span></span><br><span class="line">    <span class="comment"># 平均绝对离差值</span></span><br><span class="line">    med_abs_deviation = np.median(margin_median)</span><br><span class="line">    <span class="keyword">if</span> med_abs_deviation == <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line">    y_score = ratio * margin_median / med_abs_deviation</span><br><span class="line">    <span class="comment"># 打平</span></span><br><span class="line">    scores = scores.flatten()</span><br><span class="line">    maybe_error_indices = np.where((y_score &gt; threshold) &amp; (scores &lt; median))</span><br><span class="line">    <span class="comment"># 取全部疑似错误字的index</span></span><br><span class="line">    result = [<span class="built_in">int</span>(i) <span class="keyword">for</span> i <span class="keyword">in</span> maybe_error_indices[<span class="number">0</span>]]</span><br><span class="line">    <span class="keyword">return</span> result</span><br></pre></td></tr></table></figure>
+
+
+<ol>
+<li>按照<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E5%B9%B3%E5%9D%87%E7%BB%9D%E5%AF%B9%E7%A6%BB%E5%B7%AE/7624189">百度百科平均绝对离差</a>的定义：<code>平均绝对离差定义为各数据与平均值的离差的绝对值的平均数</code>，那作者这里的计算方式貌似就不一样了。</li>
+<li>作者这里的计算方式不是求平均值，而是每个值减去中位数，然后再求中位数，这样做的好处更多是防止数据分布比较大，就比如大家的平均工资都很高～</li>
+<li>作者接着使用两个比较，（1）ratio * np.abs(score - median) &#x2F; 平均绝对离差<br>(2)scores 小于 中位数的，这地方看的迷迷糊糊，总有种凭经验的感觉。</li>
+<li>获取对应的错字index。</li>
+</ol>
+<p>至此获取到的可能错误列表是：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[[<span class="string">&#x27;因该&#x27;</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="string">&#x27;word&#x27;</span>], [<span class="string">&#x27;坐&#x27;</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="string">&#x27;char&#x27;</span>]]</span><br></pre></td></tr></table></figure>
+
+<h3 id="纠错"><a href="#纠错" class="headerlink" title="纠错"></a>纠错</h3><h4 id="1-获取纠错候选集"><a href="#1-获取纠错候选集" class="headerlink" title="1. 获取纠错候选集"></a>1. 获取纠错候选集</h4><p>假设当前输入word是<code>因该</code>：</p>
+<ul>
+<li>一、获取词粒度的候选集</li>
+</ul>
+<ol>
+<li>获取相同拼音的（不包含声调） <code>_confusion_word_set</code></li>
+<li>自定义混淆集 <code>_confusion_custom_set</code></li>
+</ol>
+<p>他这个获取相同拼音的写法就让我觉得emo，直接在self.known(自定义词典)里找长度相同，然后判断拼音一样不就得了～</p>
+<p>自定义混淆集就是自定义一些经验进行。比如{“因该”: “应该”}这种，增大候选集。</p>
+<ul>
+<li>二、获取基于字粒度的候选集</li>
+</ul>
+<p>这地方分成三部分：</p>
+<ol>
+<li>如果word的长度等于1。获取相同拼音的<code>same pinyin 加载同音的列表</code>，以及加载形似字<code>same stroke 加载形似字</code>。</li>
+<li>如果word的长度等于2。截取第一个字符，如<code>因</code>，然后获取相同拼音的<code>same pinyin 加载同音的列表</code>，以及加载形似字<code>same stroke 加载形似字</code>，然后和<code>该</code>进行拼接，获取新的候选集。第二个字<code>该</code>执行相同操作。</li>
+<li>如果word的长度大于2。同理上述操作，只不过粒度不同（此处忽略）。</li>
+</ol>
+<ul>
+<li>三、对候选集进行排序，以word_freq进行排序，然后只截取前K个候选集</li>
+</ul>
+<h4 id="2-从候选集里面进行筛选"><a href="#2-从候选集里面进行筛选" class="headerlink" title="2. 从候选集里面进行筛选"></a>2. 从候选集里面进行筛选</h4><p>这个地方就有意思了，如何获取最正确的那个呢？看下面代码。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">get_lm_correct_item</span>(<span class="params">self, cur_item, candidates, before_sent, after_sent, threshold=<span class="number">57</span>, cut_type=<span class="string">&#x27;char&#x27;</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    通过语言模型纠正字词错误</span></span><br><span class="line"><span class="string">    :param cur_item: 当前词</span></span><br><span class="line"><span class="string">    :param candidates: 候选词</span></span><br><span class="line"><span class="string">    :param before_sent: 前半部分句子</span></span><br><span class="line"><span class="string">    :param after_sent: 后半部分句子</span></span><br><span class="line"><span class="string">    :param threshold: ppl阈值, 原始字词替换后大于该ppl值则认为是错误</span></span><br><span class="line"><span class="string">    :param cut_type: 切词方式, 字粒度</span></span><br><span class="line"><span class="string">    :return: str, correct item, 正确的字词</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    result = cur_item</span><br><span class="line">    <span class="keyword">if</span> cur_item <span class="keyword">not</span> <span class="keyword">in</span> candidates:</span><br><span class="line">        candidates.append(cur_item)</span><br><span class="line">    <span class="comment"># 对每个候选集进行拼接成新句子，然后进行计算ppl_score。</span></span><br><span class="line">    ppl_scores = &#123;i: self.ppl_score(segment(before_sent + i + after_sent, cut_type=cut_type)) <span class="keyword">for</span> i <span class="keyword">in</span> candidates&#125;</span><br><span class="line">    sorted_ppl_scores = <span class="built_in">sorted</span>(ppl_scores.items(), key=<span class="keyword">lambda</span> d: d[<span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 增加正确字词的修正范围，减少误纠</span></span><br><span class="line">    top_items = []</span><br><span class="line">    top_score = <span class="number">0.0</span></span><br><span class="line">    <span class="keyword">for</span> i, v <span class="keyword">in</span> <span class="built_in">enumerate</span>(sorted_ppl_scores):</span><br><span class="line">        v_word = v[<span class="number">0</span>]</span><br><span class="line">        v_score = v[<span class="number">1</span>]</span><br><span class="line">        <span class="keyword">if</span> i == <span class="number">0</span>:</span><br><span class="line">            top_score = v_score</span><br><span class="line">            top_items.append(v_word)</span><br><span class="line">        <span class="comment"># 通过阈值修正范围</span></span><br><span class="line">        <span class="keyword">elif</span> v_score &lt; top_score + threshold:</span><br><span class="line">            top_items.append(v_word)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">if</span> cur_item <span class="keyword">not</span> <span class="keyword">in</span> top_items:</span><br><span class="line">        result = top_items[<span class="number">0</span>]</span><br><span class="line">    <span class="keyword">return</span> result</span><br></pre></td></tr></table></figure>
+
+<p>核心的地方在<code>self.ppl_score</code>那里，代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">ppl_score</span>(<span class="params">self, words</span>):</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    words比如：[&#x27;少&#x27;, &#x27;先&#x27;, &#x27;队&#x27;, &#x27;员&#x27;, &#x27;应&#x27;, &#x27;该&#x27;, &#x27;为&#x27;, &#x27;老&#x27;, &#x27;人&#x27;, &#x27;让&#x27;, &#x27;坐&#x27;]</span></span><br><span class="line"><span class="string">    取语言模型困惑度得分，越小句子越通顺</span></span><br><span class="line"><span class="string">    :param words: list, 以词或字切分</span></span><br><span class="line"><span class="string">    :return:</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    self.check_detector_initialized()</span><br><span class="line">    <span class="keyword">return</span> self.lm.perplexity(<span class="string">&#x27; &#x27;</span>.join(words))</span><br></pre></td></tr></table></figure>
+
+<p>看作者注释，说的很明白了，如果这个句子越是流畅的，那么他的score就会更高。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">pprint(sorted_ppl_scores)</span><br><span class="line">[(<span class="string">&#x27;应该&#x27;</span>, <span class="number">144.39704182754554</span>),</span><br><span class="line"> (<span class="string">&#x27;因改&#x27;</span>, <span class="number">236.80615502078768</span>),</span><br><span class="line"> (<span class="string">&#x27;因该&#x27;</span>, <span class="number">284.14769660593794</span>),</span><br><span class="line"> (<span class="string">&#x27;听该&#x27;</span>, <span class="number">357.8835799332408</span>),</span><br><span class="line"> (<span class="string">&#x27;因盖&#x27;</span>, <span class="number">360.68106481988417</span>),</span><br><span class="line"> (<span class="string">&#x27;因核&#x27;</span>, <span class="number">365.9438178618582</span>),</span><br><span class="line"> <span class="comment"># 这里只截取一部分！！</span></span><br><span class="line">]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>最后一步，作者以score最高的那个加了一个threshold，如果得分在这个阈值内的，添加到候选的top_items里面。<br>如果当前的cur_item,即<code>因该</code>不在这个候选集里，那么取第一个<code>top_items</code>，如果在，那么就返回当前的cur_item。</p>
+<p>这步的目的在于防止误判。</p>
+<h3 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h3><ol>
+<li>对于时间日期、人名这种，个人感觉应该先用命名实体剔除掉。</li>
+<li>自定义词典、形近词那里会是个问题，比如量少或者有歧义怎么解决，另外<code>因该</code>也是有可能作为一个单独的词，只是出现的可能性较小。</li>
+<li>默认加载的是5-gram，关于这里为什么用5-gram没细研究。</li>
+<li>关于字粒度纠错，那里我感觉真统计。。。</li>
+<li>不过我喜欢纠错那里，方式简单直接。不过候选集那里可能会是个瓶颈。</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/02/23/pycorrector%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E5%92%8C%E7%BA%A0%E9%94%99%E4%B8%80%E4%BA%9B%E6%80%9D%E8%80%83/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-SIFRank-zh与关键词提取" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1215,81 +1392,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2021/12/24/self-attention%E8%A7%A3%E6%9E%90/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-静态词向量之word2vec-cbow" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/12/24/%E9%9D%99%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8Bword2vec-cbow/">静态词向量之word2vec-cbow</a>
-    </h1>
-  
-
-        
-        <a href="/2021/12/24/%E9%9D%99%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8Bword2vec-cbow/" class="archive-article-date">
-  	<time datetime="2021-12-24T06:25:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-24</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>如果你看懂了skipgram和cbow的区别，那么实现上面就很简单了。skipgram是中心词预测周围词，cbow是周围词预测中心词，即dataset那里更换下input和target即可。</p>
-<p>具体就不细讲了，大家看源码吧～。</p>
-<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># Defined in Section 5.2.3.1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torch.nn.functional <span class="keyword">as</span> F</span><br><span class="line"><span class="keyword">import</span> torch.optim <span class="keyword">as</span> optim</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> Dataset</span><br><span class="line"><span class="keyword">from</span> torch.nn.utils.rnn <span class="keyword">import</span> pad_sequence</span><br><span class="line"><span class="keyword">from</span> tqdm.auto <span class="keyword">import</span> tqdm</span><br><span class="line"><span class="keyword">from</span> utils <span class="keyword">import</span> BOS_TOKEN, EOS_TOKEN, PAD_TOKEN</span><br><span class="line"><span class="keyword">from</span> utils <span class="keyword">import</span> load_reuters, save_pretrained, get_loader, init_weights</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">CbowDataset</span>(<span class="title class_ inherited__">Dataset</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, corpus, vocab, context_size=<span class="number">2</span></span>):</span><br><span class="line">        self.data = []</span><br><span class="line">        self.bos = vocab[BOS_TOKEN]</span><br><span class="line">        self.eos = vocab[EOS_TOKEN]</span><br><span class="line">        <span class="keyword">for</span> sentence <span class="keyword">in</span> tqdm(corpus, desc=<span class="string">&quot;Dataset Construction&quot;</span>):</span><br><span class="line">            sentence = [self.bos] + sentence+ [self.eos]</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">len</span>(sentence) &lt; context_size * <span class="number">2</span> + <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(context_size, <span class="built_in">len</span>(sentence) - context_size):</span><br><span class="line">                <span class="comment"># 模型输入：左右分别取context_size长度的上下文</span></span><br><span class="line">                context = sentence[i-context_size:i] + sentence[i+<span class="number">1</span>:i+context_size+<span class="number">1</span>]</span><br><span class="line">                <span class="comment"># 模型输出：当前词</span></span><br><span class="line">                target = sentence[i]</span><br><span class="line">                self.data.append((context, target))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__len__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">len</span>(self.data)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__getitem__</span>(<span class="params">self, i</span>):</span><br><span class="line">        <span class="keyword">return</span> self.data[i]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">collate_fn</span>(<span class="params">self, examples</span>):</span><br><span class="line">        inputs = torch.tensor([ex[<span class="number">0</span>] <span class="keyword">for</span> ex <span class="keyword">in</span> examples])</span><br><span class="line">        targets = torch.tensor([ex[<span class="number">1</span>] <span class="keyword">for</span> ex <span class="keyword">in</span> examples])</span><br><span class="line">        <span class="keyword">return</span> (inputs, targets)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">CbowModel</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, vocab_size, embedding_dim</span>):</span><br><span class="line">        <span class="built_in">super</span>(CbowModel, self).__init__()</span><br><span class="line">        <span class="comment"># 词嵌入层</span></span><br><span class="line">        self.embeddings = nn.Embedding(vocab_size, embedding_dim)</span><br><span class="line">        <span class="comment"># 线性变换：隐含层-&gt;输出层</span></span><br><span class="line">        self.output = nn.Linear(embedding_dim, vocab_size)</span><br><span class="line">        init_weights(self)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, inputs</span>):</span><br><span class="line">        embeds = self.embeddings(inputs)</span><br><span class="line">        <span class="comment"># 计算隐含层：对上下文词向量求平均</span></span><br><span class="line">        hidden = embeds.mean(dim=<span class="number">1</span>)</span><br><span class="line">        output = self.output(hidden)</span><br><span class="line">        log_probs = F.log_softmax(output, dim=<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> log_probs</span><br><span class="line"></span><br><span class="line">embedding_dim = <span class="number">64</span></span><br><span class="line">context_size = <span class="number">2</span></span><br><span class="line">hidden_dim = <span class="number">128</span></span><br><span class="line">batch_size = <span class="number">1024</span></span><br><span class="line">num_epoch = <span class="number">10</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 读取文本数据，构建CBOW模型训练数据集</span></span><br><span class="line">corpus, vocab = load_reuters()</span><br><span class="line">dataset = CbowDataset(corpus, vocab, context_size=context_size)</span><br><span class="line">data_loader = get_loader(dataset, batch_size)</span><br><span class="line"></span><br><span class="line">nll_loss = nn.NLLLoss()</span><br><span class="line"><span class="comment"># 构建CBOW模型，并加载至device</span></span><br><span class="line">device = torch.device(<span class="string">&#x27;cuda&#x27;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&#x27;cpu&#x27;</span>)</span><br><span class="line">model = CbowModel(<span class="built_in">len</span>(vocab), embedding_dim)</span><br><span class="line">model.to(device)</span><br><span class="line">optimizer = optim.Adam(model.parameters(), lr=<span class="number">0.001</span>)</span><br><span class="line"></span><br><span class="line">model.train()</span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epoch):</span><br><span class="line">    total_loss = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> batch <span class="keyword">in</span> tqdm(data_loader, desc=<span class="string">f&quot;Training Epoch <span class="subst">&#123;epoch&#125;</span>&quot;</span>):</span><br><span class="line">        inputs, targets = [x.to(device) <span class="keyword">for</span> x <span class="keyword">in</span> batch]</span><br><span class="line">        optimizer.zero_grad()</span><br><span class="line">        log_probs = model(inputs)</span><br><span class="line">        loss = nll_loss(log_probs, targets)</span><br><span class="line">        loss.backward()</span><br><span class="line">        optimizer.step()</span><br><span class="line">        total_loss += loss.item()</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Loss: <span class="subst">&#123;total_loss:<span class="number">.2</span>f&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 保存词向量（model.embeddings）</span></span><br><span class="line">save_pretrained(vocab, model.embeddings.weight.data, <span class="string">&quot;cbow.vec&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/12/24/%E9%9D%99%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8Bword2vec-cbow/">展开全文 >></a>
         </p>
       
 

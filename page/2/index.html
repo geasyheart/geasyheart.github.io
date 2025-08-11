@@ -206,6 +206,100 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-SHAP机器学习模型解释" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2024/06/19/SHAP%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E8%A7%A3%E9%87%8A/">SHAP机器学习模型解释</a>
+    </h1>
+  
+
+        
+        <a href="/2024/06/19/SHAP%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E8%A7%A3%E9%87%8A/" class="archive-article-date">
+  	<time datetime="2024-06-19T01:53:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2024-06-19</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>分享个模型可解释的库<a target="_blank" rel="noopener" href="https://github.com/shap/shap">SHAP</a>，其可以对XGBoost等机器学习库进行结果解释。</p>
+<p>更多还有类似Paddle中的<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/TrustAI/tree/main">TrustAI</a>。</p>
+<h3 id="什么是SHAP？"><a href="#什么是SHAP？" class="headerlink" title="什么是SHAP？"></a>什么是SHAP？</h3><p>SHAP（SHapley Additive exPlanations）是用来解释机器学习模型的工具。它告诉我们每个特征对模型预测结果的贡献有多大。想象一下你和几个朋友一起干活，最后得到了一笔报酬。你想知道每个人应该分多少钱，SHAP就是在做类似的事情，只不过它是在告诉你每个特征对模型预测结果的贡献。</p>
+<h3 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h3><h4 id="1-Shapley值："><a href="#1-Shapley值：" class="headerlink" title="1. Shapley值："></a>1. Shapley值：</h4><p>   想象一个团队在完成任务后得到一笔奖金，我们想公平地分配这笔奖金。Shapley值就是一种分配方法，告诉我们每个成员（在机器学习中是每个特征）应得的报酬（对预测结果的贡献）。</p>
+<h4 id="2-边际贡献："><a href="#2-边际贡献：" class="headerlink" title="2. 边际贡献："></a>2. 边际贡献：</h4><p>   假设我们在玩一个游戏，每次加入一个新成员（特征），看看他们对团队成绩（模型预测）的贡献有多大。边际贡献就是每次新加入的成员对总成绩的额外贡献。</p>
+<h3 id="SHAP如何工作？"><a href="#SHAP如何工作？" class="headerlink" title="SHAP如何工作？"></a>SHAP如何工作？</h3><p>SHAP计算每个特征的贡献时，会考虑所有可能的加入顺序。这是因为不同的加入顺序可能会导致不同的贡献。举个例子：</p>
+<ul>
+<li>如果你和你的朋友们一起完成一个项目，每个朋友加入的顺序不同，他们的贡献也可能不同。</li>
+<li>SHAP通过计算所有可能顺序中的平均贡献来确定每个特征的Shapley值。</li>
+</ul>
+<h3 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤"></a>具体步骤</h3><h4 id="1-考虑所有可能的特征子集："><a href="#1-考虑所有可能的特征子集：" class="headerlink" title="1. 考虑所有可能的特征子集："></a>1. 考虑所有可能的特征子集：</h4><p>   对于每个特征，计算它加入不同特征子集时，对模型预测结果的边际贡献。</p>
+<h4 id="2-计算平均贡献："><a href="#2-计算平均贡献：" class="headerlink" title="2. 计算平均贡献："></a>2. 计算平均贡献：</h4><p>   对于每个特征，计算它在所有可能子集中的平均贡献，这就是这个特征的Shapley值。</p>
+<h3 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h3><p>假设我们有一个模型在预测一个人是否会购买某产品，模型用到了年龄、收入和是否有孩子三个特征。SHAP会做以下事情：</p>
+<h4 id="1-计算每个特征的贡献："><a href="#1-计算每个特征的贡献：" class="headerlink" title="1. 计算每个特征的贡献："></a>1. 计算每个特征的贡献：</h4><ul>
+<li>先只考虑收入，再加上年龄，看看预测结果有多大变化。再加上是否有孩子，看看预测结果再变化多少。</li>
+<li>再换个顺序，先考虑年龄，再加上收入，然后加上是否有孩子。</li>
+<li>如此继续，考虑所有可能的加入顺序。</li>
+</ul>
+<h4 id="2-计算平均值："><a href="#2-计算平均值：" class="headerlink" title="2. 计算平均值："></a>2. 计算平均值：</h4><p>   对于每个特征，计算它在所有顺序中的平均贡献，这个平均值就是该特征的Shapley值。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>SHAP通过考虑每个特征在不同组合中的贡献，并取平均值，来告诉我们每个特征对模型预测的影响有多大。这样，我们就能清楚地知道模型是如何做出预测的，每个特征在其中起了多大作用。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/blob/m2/python/shap_demo.ipynb">演示代码</a>：<a target="_blank" rel="noopener" href="https://github.com/geasyheart/algo/blob/m2/python/shap_demo.ipynb">https://github.com/geasyheart/algo/blob/m2/python/shap_demo.ipynb</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2024/06/19/SHAP%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%E8%A7%A3%E9%87%8A/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-DPO" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1082,124 +1176,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2023/10/16/%E5%A4%9A%E6%A8%A1%E6%80%81-%E5%AD%97%E5%B9%95%E7%94%9F%E6%88%90/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-多模态-CLIP" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/">多模态-CLIP</a>
-    </h1>
-  
-
-        
-        <a href="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/" class="archive-article-date">
-  	<time datetime="2023-10-11T08:10:42.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2023-10-11</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>多模态如何做融合，本文是对CLIP模型理解做个记录。</p>
-<h3 id="前提"><a href="#前提" class="headerlink" title="前提"></a>前提</h3><p>目前业界有中文开源版本的，例如<a target="_blank" rel="noopener" href="https://github.com/OFA-Sys/Chinese-CLIP">Chinese-CLIP</a>以及<a target="_blank" rel="noopener" href="https://fengshenbang-doc.readthedocs.io/zh/latest/docs/%E5%A4%AA%E4%B9%99%E7%B3%BB%E5%88%97/index.html">IDEA&#x2F;Fengshenbang-LM太乙系列</a>，本文采用<a target="_blank" rel="noopener" href="https://github.com/OFA-Sys/Chinese-CLIP">Chinese-CLIP</a>来梳理其流程。</p>
-<p>数据集采用<a target="_blank" rel="noopener" href="https://wukong-dataset.github.io/wukong-dataset/">wukong-dataset</a>，预训练模型使用<a target="_blank" rel="noopener" href="https://huggingface.co/OFA-Sys/chinese-clip-vit-base-patch16">chinese-clip-vit-base-patch16</a>来进行实验。</p>
-<h3 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h3><h4 id="1-文本处理"><a href="#1-文本处理" class="headerlink" title="1. 文本处理"></a>1. 文本处理</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">from</span> datasets <span class="keyword">import</span> Dataset</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> ChineseCLIPProcessor, ChineseCLIPModel, Trainer, TrainingArguments</span><br><span class="line"></span><br><span class="line">model_name_or_path = <span class="string">&quot;chinese-clip-vit-base-patch16&quot;</span></span><br><span class="line"></span><br><span class="line">model = ChineseCLIPModel.from_pretrained(model_name_or_path)</span><br><span class="line">processor = ChineseCLIPProcessor.from_pretrained(model_name_or_path)</span><br><span class="line"></span><br><span class="line">text_str = [<span class="string">&#x27;中国&#x27;</span>, <span class="string">&#x27;哈哈哈，我在这里&#x27;</span>]</span><br><span class="line">text_res = processor(text=text_str)</span><br><span class="line"><span class="built_in">print</span>(text_res)</span><br></pre></td></tr></table></figure>
-
-<p>基于<a target="_blank" rel="noopener" href="https://github.com/OFA-Sys/Chinese-CLIP">ChineseClip官方说明</a>，知道其text-encoder部分都使用了<code>chinese-roberta-wwm</code>，另外一个可验证点是其<code>vocab.txt</code>的md5值和<code>chinese-roberta-wwm</code>是一样的。所以文本处理，就是找了中文版的bert来做中文的支持，故这部分到此就结束啦～</p>
-<h4 id="2-图像处理"><a href="#2-图像处理" class="headerlink" title="2. 图像处理"></a>2. 图像处理</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">from</span> datasets <span class="keyword">import</span> Dataset</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> ChineseCLIPProcessor, ChineseCLIPModel, Trainer, TrainingArguments</span><br><span class="line"></span><br><span class="line">model_name_or_path = <span class="string">&quot;chinese-clip-vit-base-patch16&quot;</span></span><br><span class="line"></span><br><span class="line">model = ChineseCLIPModel.from_pretrained(model_name_or_path)</span><br><span class="line">processor = ChineseCLIPProcessor.from_pretrained(model_name_or_path)</span><br><span class="line"></span><br><span class="line">image_str = <span class="string">&#x27;00010405-0083.jpg&#x27;</span></span><br><span class="line">image_input = Image.<span class="built_in">open</span>(image_str)</span><br><span class="line">img_res = processor(images=image_input)</span><br><span class="line"><span class="built_in">print</span>(img_res)</span><br></pre></td></tr></table></figure>
-
-<p>其流程如下所示，包括转RGB、resize、rescale、normalize、然后转CHW通道。</p>
-<img src="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/p1.png" class="">
-
-<p>注意resize那里将图片调整为(224, 224)，这里对后面处理有用。</p>
-<h4 id="3-融合"><a href="#3-融合" class="headerlink" title="3. 融合"></a>3. 融合</h4><p>重点来喽～</p>
-<p>其整理流程如下所示。</p>
-<img src="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/p2.png" class="">
-
-<h5 id="3-1-vision-model"><a href="#3-1-vision-model" class="headerlink" title="3.1  vision model"></a>3.1  vision model</h5><p>其vision_model下获取embedding如下。</p>
-<img src="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/p3.png" class="">
-
-<p>其<code>patch_embeds</code>经过conv2d，转成成了<code>torch.Size([10, 768, 14, 14])</code><strong>(224-16)&#x2F;16+1</strong>，接着<br><a target="_blank" rel="noopener" href="https://github.com/huggingface/transformers/blob/1e3c9ddacc7fc4142253bc9ddcba85c4d5b977e7/src/transformers/models/chinese_clip/modeling_chinese_clip.py#L201">201行代码</a>为：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">patch_embeds = patch_embeds.flatten(<span class="number">2</span>).transpose(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><code>14*14=196</code>,最终转换成了<code>(10, 196, 768)</code>，到这里就清晰了～</p>
-<p>不过在patch_embeds结束后，引入了一个class_embeds，这个就是类似bert中的[CLS]位置，用以做下游分类的。</p>
-<p>在拿到vision embedding之后，后面就是encoder部分啦，这里对应<code>ChineseCLIPVisionEncoder</code>，这部分本文先忽略。</p>
-<h5 id="3-2-text-model"><a href="#3-2-text-model" class="headerlink" title="3.2 text model"></a>3.2 text model</h5><p>这部分就是bert处理流程了，作者也写的很明白，就是bert那一套。</p>
-<img src="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/p4.png" class="">
-
-
-<h5 id="3-3-融合"><a href="#3-3-融合" class="headerlink" title="3.3 融合"></a>3.3 融合</h5><p>至此拿到vision_outputs和text_outputs，其vision_outputs为：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">last_hidden_state=(<span class="number">10</span>, <span class="number">197</span>, <span class="number">768</span>)</span><br><span class="line">pooler_output=(<span class="number">10</span>, <span class="number">768</span>)</span><br></pre></td></tr></table></figure>
-
-<p>其text_outputs为:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">last_hidden_state=(<span class="number">10</span>, <span class="number">64</span>, <span class="number">768</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><strong>好奇：至此768维已经对齐了，为啥还要各自经过一个<code>self.visual_projection</code>和<code>self.text_projection</code>将其转为512维。。。</strong></p>
-<h5 id="3-4-计算loss"><a href="#3-4-计算loss" class="headerlink" title="3.4 计算loss"></a>3.4 计算loss</h5><img src="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/l1.png" class="">
-
-<p>这里处理跟<a target="_blank" rel="noopener" href="https://github.com/PaddlePaddle/PaddleNLP/blob/d1e060fa88c147495572d5ffc23675d858b8d9d8/examples/text_matching/simcse/model.py#L102">simcse计算loss流程</a>蛮类似的，不过这里计算loss还是蛮有意思的：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">chinese_clip_loss</span>(<span class="params">similarity: torch.Tensor</span>) -&gt; torch.Tensor:</span><br><span class="line">    caption_loss = contrastive_loss(similarity)</span><br><span class="line">    image_loss = contrastive_loss(similarity.t())</span><br><span class="line">    <span class="keyword">return</span> (caption_loss + image_loss) / <span class="number">2.0</span></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>正常来讲，我们只需要计算一次即可，这里分别进行计算，也算是一个有意思的点。</p>
-<p>至此，模型整体流程大致完成。能够用来基于文本找图像。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 备忘</span></span><br><span class="line">new_steps = (steps - kernel_size + 2padding) / strides + 1</span><br></pre></td></tr></table></figure>
-
-<p><strong>那是否有一种文本跟图像语义对齐的呢？留给以后～</strong></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2023/10/11/%E5%A4%9A%E6%A8%A1%E6%80%81-CLIP/">展开全文 >></a>
         </p>
       
 

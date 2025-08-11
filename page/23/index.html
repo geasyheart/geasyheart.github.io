@@ -206,6 +206,131 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-14-01-2-grub2引导修复" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/05/14-01-2-grub2%E5%BC%95%E5%AF%BC%E4%BF%AE%E5%A4%8D/">14_01_2_grub2引导修复</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/05/14-01-2-grub2%E5%BC%95%E5%AF%BC%E4%BF%AE%E5%A4%8D/" class="archive-article-date">
+  	<time datetime="2015-04-05T03:30:06.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-05</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <ol>
+<li>插入引导盘，或者不插，只要能进grub，一切好说(不过要看看有grub可用的命令么，例如kernel什么的(这个是grub))。 </li>
+<li>find (hdx,x)&#x2F;<br> 这一步就是找出rootfs所在的位置，更多不赘述，可参考前面grub的配置文档。。 </li>
+<li>这一步，就比较个性了，在用命令载入内核时，grub是kernel<br>例如:</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">grub&gt;kernel (hdx,x)/boot/vmlinuz-version  ro root=/dev/rootfs_position </span><br><span class="line">grub&gt;initrd (hdx,x)/boot/initramfs-version </span><br><span class="line">grub&gt;boot </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>但是grub2就不是这样了，示例二:   <br>帮好友引导OpenSUSE时， </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">grub&gt;linux (hdx,x)/boot/vmlinuz-version </span><br><span class="line">grub&gt;initrd (hdx,x)/boot/initramfs-version </span><br><span class="line">grub&gt;boot </span><br></pre></td></tr></table></figure>
+
+<p>不过fedora貌似就不是这样:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">grub&gt;linux16 (hdx,x)/vmlinuz-version ro root=/dev/sdax </span><br><span class="line">grub&gt;initrd16 (hdx,x)/initramfs-version </span><br><span class="line">grub&gt;boot </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>其实还可能不同，因为忘记当时怎么写的了，这两个是后来查看grub.cfg得到的，肯定不是这样的，不过内核肯定是linux开头，initramfs是init开头的，自行补全。哈哈，后来觉得，可能是由于grub2在对待i386和x86_64时加载命令有点不同，不过我想强调的是:<br>使用help命令 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grub&gt;help </span><br></pre></td></tr></table></figure>
+
+<p>查看可用的命令，，不要随意看网上的教程就拿来操作，当然知道原理除外。。 </p>
+<ol start="4">
+<li>系统起来了，这又有问题了，怎么生成配置文件，这个也是最为重要的。。</li>
+</ol>
+<p>示例一:<br>OpenSUSE: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#grub2-install /dev/sda </span><br><span class="line">#grub-mkconfig -o /boot/grub2/grub.cfg </span><br><span class="line">#reboot </span><br></pre></td></tr></table></figure>
+
+<p>但是fedora不是这样: </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#grub2-install /dev/sda </span><br></pre></td></tr></table></figure>
+
+<p>grub2-install：错误： &#x2F;usr&#x2F;lib&#x2F;grub&#x2F;x86_64&#x2F;modinfo.sh doesn’t exist. Please specify –target or –directory.<br>当时就好奇了，为什么OpenSUSE写这么简单就可以，为什么fedora就不行，后来觉得，还是没掌握更深的，你懂得。。<br>既然没有这个文件，我就要看看这个目录下有什么东西， </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#ls /usr/lib/grub/ </span><br></pre></td></tr></table></figure>
+
+<p>tab补全试试，会发现有个i386-pc文件， </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#ls /usr/lib/grub/i386-pc | grep modinfo.sh </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>真会有这个文件啊，看样子知道怎么解决了。。 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#grub2-install --target=i386-pc /dev/sda </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>没报错，爽！ </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#grub2-mkconfig -o /boot/grub2/grub.cfg </span><br><span class="line">#reboot </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>引导就成功了!!! </p>
+<p>#补充，当重新启动时，可以看到选项栏，但是当随便启动一个，可能会提示No linuxefi和initefi(貌似这两个命令)，反正我是遇到了，<br>重新引导进系统，再 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#grub2-install -target=i386-pc /dev/sda </span><br><span class="line">#grub2-mkconfig -o /boot/grub2/grub.cfg </span><br><span class="line">#vim /boot/grub2/grub.cfg </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>可以看到加载内核和initramfs的命令变了，， </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#reboot </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>至此搞定。。。 </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/05/14-01-2-grub2%E5%BC%95%E5%AF%BC%E4%BF%AE%E5%A4%8D/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-38-04-2-实验利用haresources进行资源管理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1096,185 +1221,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/03/27/37-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%85%AD-LVS%E6%8C%81%E4%B9%85%E8%BF%9E%E6%8E%A5/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-18-02SSL协议及OpenSSL及创建私有CA" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/27/18-02SSL%E5%8D%8F%E8%AE%AE%E5%8F%8AOpenSSL%E5%8F%8A%E5%88%9B%E5%BB%BA%E7%A7%81%E6%9C%89CA/">18_02SSL协议及OpenSSL及创建私有CA</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/27/18-02SSL%E5%8D%8F%E8%AE%AE%E5%8F%8AOpenSSL%E5%8F%8A%E5%88%9B%E5%BB%BA%E7%A7%81%E6%9C%89CA/" class="archive-article-date">
-  	<time datetime="2015-03-27T09:30:36.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-27</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p>PKI: Public Key Infrastructure<br>证书撤销列表CRL 这个很重要，保证安全性<br>证书格式  ： x.509,pkcs12 ….<br>x.509:</p>
-<blockquote>
-<p>公钥及其有效期限	<br>证书的合法拥有者<br>证书该如何被使用<br>CA的信息（如颁发机构等）<br>CA签名的校验码</p>
-</blockquote>
-<p>PKI：TLS&#x2F;SSL&#x2F;openGPG ：使用的是x.509</p>
-<p>TLS&#x2F;SSL:</p>
-<blockquote>
-<p>SSL:		SSL： Secure Socket Layer   版本SSLv1(#) SSLv2 TLSv3<br>        网络上进行安全传输，使用https：443(和http协议不同)<br>        在链路层和应用层”间“加上SSL功能，如传输给http的数据经过SSL进行加密变成了https；</p>
-<pre><code>    SSL由于不完全开放，所以出现了TLS
-</code></pre>
-<p>TLS：	   TLS的v1版本类似SSL的v3版本<br>        Transport Layer Security</p>
-</blockquote>
-<p>在http进行访问时，实现三次握手<br>而在https进行访问时，先互相协商建立SSL&#x2F;TLS协议（以此为例）<br>然后服务器发送证书给客户端，然后客户端进行验证证书的完整性，进行协商加密机制然后发送给服务器，然后进行通信；</p>
-<h2 id="加密方式种类"><a href="#加密方式种类" class="headerlink" title="加密方式种类"></a>加密方式种类</h2><ol>
-<li><p>对称加密：</p>
-<blockquote>
-<p>DES(Data Encrption Standard):源于IBM公司DES算法把64位的明文输入块变为64位的密文输出块,它所使用的密钥也是64位。<br>3DES:<a target="_blank" rel="noopener" href="http://baike.baidu.com/view/350958.htm">http://baike.baidu.com/view/350958.htm</a><br>AES:高级加密标准，使用128位的秘钥，有256位，512，默认是128位，位数长意味运行速度慢;(目前用的多)，这个标准用来替代原先的DES，已经被多方分析且广为全世界所使用。<br>Blowfish:BlowFish是一个容易使用的文件和文件夹加密软件，只要用鼠标把文件或文件夹拖到加密的文档地方。</p>
-</blockquote>
-</li>
-<li><p>单项加密：</p>
-<blockquote>
-<p>MD4<br>MD5 （128位）<br>SHA1 （160位）<br>SHA192 SHA256 SHA384<br>CRC-32（循环冗余校验码）（这个提供校验功能，不实现加密，意味着不提供安全性）</p>
-</blockquote>
-</li>
-<li><p>公钥加密 （核心功能: 加密&#x2F;签名）</p>
-<blockquote>
-<p>身份验证（数字签名）<br>数据加密<br>密钥交换</p>
-</blockquote>
-</li>
-<li><p>常用的加密算法:	</p>
-<blockquote>
-<p>RSA:加密，签名<a target="_blank" rel="noopener" href="http://baike.baidu.com/view/10613.htm?fromtitle=RSA&fromid=210678&type=syn">http://baike.baidu.com/view/10613.htm?fromtitle=RSA&amp;fromid=210678&amp;type=syn</a><br>DSA:签名<br>ELGamal(商业的，只做了解)</p>
-</blockquote>
-</li>
-<li><p>实现加密的工具:</p>
-<blockquote>
-<p>openssl<br>gpg</p>
-</blockquote>
-</li>
-</ol>
-<h2 id="OpenSSL"><a href="#OpenSSL" class="headerlink" title="OpenSSL"></a>OpenSSL</h2><p>OpenSSL：SSL的开源实现,三部分组成：<br>1.	libcrypto:加密库<br>2.	libssl   :TLS&#x2F;SSL的实现 基于会话的，实现了身份认证、数据机密性和会话的TLS&#x2F;SSL库；<br>3.	openssl  :多用途命令行工具，并可以实现CA的功能</p>
-<p>openssl help显示所有子命令(命令help虽然错误，但可显示所有子命令)</p>
-<p>如speed，可以实现对当前主机各类加密速度的小测试,如:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">#openssl speed des	</span><br><span class="line">#openssl version                  #####查看版本 </span><br><span class="line">#openssl crl                      #####证书吊销列表 </span><br><span class="line">openssl passwd （如果不知道passwd的意思，可以先whatis passwd， 然后man sslpasswd（括弧内的））</span><br><span class="line"></span><br><span class="line">openssl passwd:</span><br><span class="line">Passwd 命令计算在运行时输入密码的哈希值或</span><br><span class="line">在列表中的每个密码的哈希值。密码列表是取自</span><br><span class="line">命名的文件选项-在文件中，从 stdin 中的选项-stdin 或</span><br><span class="line">从命令行中，或从其他终端。</span><br><span class="line">http://www.51cto.com/art/200803/68014_3.htm</span><br><span class="line">#openssl passwd -1 -salt easy（需要输入两次密码）</span><br><span class="line">#echo &quot;easyheart&quot; | openssl passwd -1 -salt easy -stdin(一步完成)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="对称加密举例"><a href="#对称加密举例" class="headerlink" title="对称加密举例:"></a>对称加密举例:</h3><ol>
-<li>例子一:</li>
-</ol>
-<p>	</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">openssl enc -des3 -salt -a -in inittab -out inittab.des3</span><br><span class="line">	-e加密，不指明默认加密，然后输入密码</span><br><span class="line">	-a：输出的为ASCII码</span><br><span class="line"></span><br><span class="line">解密：</span><br><span class="line">openssl  enc -des3 -d -salt -a -in inittab.des32 -out inittab</span><br><span class="line">	输入密码进行解密</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>例子二:</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;Hello,Linux&quot; | openssl enc -base64 -des</span><br><span class="line">&gt; U2FsdGVkX1+i4/SniSpAMfIq+G7DNY9kkbmhlQSJ188=</span><br><span class="line"></span><br><span class="line">#echo &quot;U2FsdGVkX1+i4/SniSpAMfIq+G7DNY9kkbmhlQSJ188=&quot; | openssl enc -d -des -base64</span><br><span class="line"># enter des-cbc decryption password:</span><br><span class="line"></span><br><span class="line">&gt; Hello Linux</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>关于对文件和目录进行加密可参考:<br>    <a target="_blank" rel="noopener" href="http://netsecurity.51cto.com/art/201301/378513.htm">链接</a></p>
-<h3 id="单向加密举例"><a href="#单向加密举例" class="headerlink" title="单向加密举例:"></a>单向加密举例:</h3><p>如进行验证：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">openssl dgst -md5 inittab</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>当然也可以用md5sum inittab</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">openssl dgst -sha1 inittab</span><br><span class="line">sha1sum inittab</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>rsautl:实现rsa加密解密的工具<br>rand:伪随机数生成器 </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#openssl rand -base64 100(100位)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>-base64：使用base64进行编码，默认输出的是二进制</p>
-</blockquote>
-<p>关于sort的功能:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">sort是用来搅混密码的，防止被破解，如果想看sort往加密结果中添加什么，如:</span><br><span class="line">#openssl passwd -1</span><br><span class="line">输入两次密码</span><br><span class="line">$1$C3wr.Shw$MZNm/R6V1l5rAPRfn2CQL.</span><br><span class="line">C3wr.Shw这个就是sort添加的东西，当然你也可以手动指定往sort中添加什么:</span><br><span class="line">#openssl passwd -1 -sort C3wr.Shw</span><br><span class="line">输入密码</span><br><span class="line">$1$C3wr.Shw$MZNm/R6V1l5rAPRfn2CQL.</span><br><span class="line">得到的密码串和上面一样。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>##openssl实现私有CA</p>
-<p>openssl实现私有CA</p>
-<ol>
-<li>先生成一对密钥</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">openssl genrsa -out /path/ number(位数)生成私钥</span><br><span class="line">openssl genrsa  -out server1024.key 1024</span><br><span class="line">openssl rsa -in /path/ -pubout 生成公钥</span><br><span class="line">openssl rsa -in server1024.key -pubout</span><br></pre></td></tr></table></figure>
-
-<ol start="2">
-<li>生成自签署证书</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">openssl req -new -x509 -key server1024.key -out server.crt -days 365</span><br><span class="line">国家 省份 地址 公司 组织 hostname（自己的server&#x27;s name,这个至关重要）</span><br><span class="line">查看信息：</span><br><span class="line">openssl　x509 -text -in server.crt</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<ol start="3">
-<li>使其生效，需要编辑&#x2F;etc&#x2F;pki&#x2F;tls&#x2F;openssl.cnf</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">[ca]</span><br><span class="line">default_ca	=CA_default</span><br><span class="line"></span><br><span class="line">[CA_default]</span><br><span class="line"></span><br><span class="line">dir	      =/etc/pki/CA</span><br><span class="line">certs	      =$dir/certs	证书路径</span><br><span class="line">crl_dir       =$dir/crl		证书吊销列表路径</span><br><span class="line">database      =$dir/index.txt 	发给别人的证书存放位置</span><br><span class="line">new_certs_dir =$dir/newcerts</span><br><span class="line">certificate   =$dir/cacert.pem</span><br><span class="line">serial	      =$dir/serial	序列号</span><br><span class="line">crlnumber     =$dir/crlnumber	证书吊销列表的工作号</span><br><span class="line">crl	      =$dir/crl.pem	证书吊销文件</span><br><span class="line">private_key   =$dir/private/cakey.pem CA自己的私钥</span><br><span class="line">RANDFILE      =$dir/private/.rand	会自己创建</span><br><span class="line"></span><br><span class="line">defaults_days =365	证书默认时间</span><br><span class="line">defaults_crl_days =30	在证书吊销列表中存放世界</span><br><span class="line">default_md    =sha1	单向加密使用算法</span><br><span class="line">preserve      =no	</span><br><span class="line"></span><br><span class="line">countryName_default	     =GB</span><br><span class="line">state0rProvinceName_default  =Berkshire</span><br><span class="line">localityName_default	     =Newbury</span><br><span class="line">0.organizationName_default   =My Company Ltd</span><br><span class="line">organizationlUnitName	     =Organizational Unit Name</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h2 id="生成自签证书的一个完整的步骤"><a href="#生成自签证书的一个完整的步骤" class="headerlink" title="生成自签证书的一个完整的步骤"></a>生成自签证书的一个完整的步骤</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">		cd /etc/pki/CA</span><br><span class="line">		(umask 077 ; openssl genrsa -out private/cakey.pem 2048)</span><br><span class="line">		/etc/pki/tls/openssl.cnf 如上 </span><br><span class="line">		openssl req -new -x509 （-x509是生成自签证书）-key private/cakey.pem -out cacert.pem -days 3655</span><br><span class="line">		由于这个是发给自己的自签证书，所以在填写Commonname时可以：如：ca.域名.com</span><br><span class="line">		mkdir certs newcerts crl</span><br><span class="line">		touch index.txt</span><br><span class="line">		touch serial</span><br><span class="line">		echo 01 &gt;serial</span><br><span class="line">	</span><br><span class="line">		########为请求者的主机颁发证书#######</span><br><span class="line">		yum　install mod_ssl</span><br><span class="line">		mkdir /etc/httpd/ssl（CA颁发机构）</span><br><span class="line">		cd ssl/</span><br><span class="line">		(umask 077; openssl genrsa -out httpd.key 1024)生成私钥</span><br><span class="line">		openssl req -new -key httpd.key -out httpd.csr 生成申请</span><br><span class="line">		在Common name那填写你要发送主机的域名（请求者的域名）</span><br><span class="line">		然后在你的（被请求者的）主机上许可这个CA请求</span><br><span class="line">		（httpd.csr这个重要，要给请求的主机,如在本机给虚拟主机的话。可以scp httpd.csr ip:/tmp</span><br><span class="line">		颁发机构主机上：</span><br><span class="line">		openssl ca -in /path/httd.csr -out /path/httpd.crt  -days 365（时间）</span><br><span class="line">		再把httpd.crt返回给请求者  scp ip:/tmp/httpd.crt ./</span><br><span class="line">		#cat /etc/pki/CA/index.txt  </span><br><span class="line">		可以看到增加了一个签署的证书</span><br><span class="line"></span><br><span class="line">	Redhat提供了一个方式可以快速生成证书，不过仅用于测试使用:</span><br><span class="line">		#cd /etc/pki/tls/certs</span><br><span class="line">		#make httpd.pem</span><br><span class="line">		因含有私钥，所以不能作为线上环境。</span><br><span class="line">			他是根据makefile生成的。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">		此时要确保你主机上安装了mod_ssl模块，</span><br><span class="line">		然后在/etc/httpd/conf.d/ssl.conf编写VIrtualHost主机的域名，</span><br><span class="line">		DocumentRoot，SSlEngine =on 表示启用ssl，证书的存放位置.crt&lt;SSLCertificateFile&gt;、私钥的存放位置.key&lt;SSLCertificateKeyFile&gt;等；）</span><br><span class="line">		可以先备份一下/etc/httpd/conf.d/ssl_conf,防止出错恢复；</span><br><span class="line">		最后把cacert.pem(这个是颁发机构的证书)拷贝到客户机上，并将其改为cacert.crt,安装此证书；即可实现https访问</span><br><span class="line"></span><br><span class="line">```		</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>更多可参考这个:<br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/AloneSword/p/3809002.html">http://www.cnblogs.com/AloneSword/p/3809002.html</a><br><a target="_blank" rel="noopener" href="http://www.2cto.com/os/201108/99753.html">http://www.2cto.com/os/201108/99753.html</a></p>
-<p> 但是为了为了两个初次通信的用户能彼此知道对方的公钥，采用了IKE（internet key exchange）机制，这样两个用户在internet上传输数据的时候就知道彼此的公钥，然后使用对方的公钥来解密发来的加密的数据，而如何在通信的过程中来确定对方的身份，这就需要借助PKI（公钥基础设施），也就是说通过第三方来出示证明，在这里也就是使用证书机制来验证用户的信息，通常一个证书中存放着通信人的公钥。所以接下来就从加密开始，然后到颁发证书，最终实现验证的实验过程。</p>
-<p>openssl支持的加密算法:</p>
-<blockquote>
-<p> 3 Standard commands<br>  4 asn1parse         ca                ciphers           cms<br>  5 crl               crl2pkcs7         dgst              dh<br>  6 dhparam           dsa               dsaparam          ec<br>  7 ecparam           enc               engine            errstr<br>  8 gendh             gendsa            genpkey           genrsa<br>  9 nseq              ocsp              passwd            pkcs12<br> 10 pkcs7             pkcs8             pkey              pkeyparam<br> 11 pkeyutl           prime             rand              req<br> 12 rsa               rsautl            s_client          s_server<br> 13 s_time            sess_id           smime             speed<br> 14 spkac             ts                verify            version<br> 15 x509<br> 17 Message Digest commands 消息摘要命令(see the <code>dgst&#39; command for more details)  18 md2               md4               md5               rmd160  19 sha               sha1  21 Cipher commands密码命令 (see the </code>enc’ command for more details)<br> 22 aes-128-cbc       aes-128-ecb       aes-192-cbc       aes-192-ecb<br> 23 aes-256-cbc       aes-256-ecb       base64            bf<br> 24 bf-cbc            bf-cfb            bf-ecb            bf-ofb<br> 25 camellia-128-cbc  camellia-128-ecb  camellia-192-cbc  camellia-192-ecb<br> 26 camellia-256-cbc  camellia-256-ecb  cast              cast-cbc<br> 27 cast5-cbc         cast5-cfb         cast5-ecb         cast5-ofb<br> 28 des               des-cbc           des-cfb           des-ecb<br> 29 des-ede           des-ede-cbc       des-ede-cfb       des-ede-ofb<br> 30 des-ede3          des-ede3-cbc      des-ede3-cfb      des-ede3-ofb<br> 31 des-ofb           des3              desx              idea<br> 32 idea-cbc          idea-cfb          idea-ecb          idea-ofb<br> 33 rc2               rc2-40-cbc        rc2-64-cbc        rc2-cbc<br> 34 rc2-cfb           rc2-ecb           rc2-ofb           rc4<br> 35 rc4-40            seed              seed-cbc          seed-cfb<br> 36 seed-ecb          seed-ofb          zlib</p>
-</blockquote>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/27/18-02SSL%E5%8D%8F%E8%AE%AE%E5%8F%8AOpenSSL%E5%8F%8A%E5%88%9B%E5%BB%BA%E7%A7%81%E6%9C%89CA/">展开全文 >></a>
         </p>
       
 

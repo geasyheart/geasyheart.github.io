@@ -206,6 +206,126 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-06-03bash编程之五-字符串测试及for语句" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/10/06-03bash%E7%BC%96%E7%A8%8B%E4%B9%8B%E4%BA%94-%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%B5%8B%E8%AF%95%E5%8F%8Afor%E8%AF%AD%E5%8F%A5/">06_03bash编程之五-字符串测试及for语句</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/10/06-03bash%E7%BC%96%E7%A8%8B%E4%B9%8B%E4%BA%94-%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%B5%8B%E8%AF%95%E5%8F%8Afor%E8%AF%AD%E5%8F%A5/" class="archive-article-date">
+  	<time datetime="2015-02-10T15:41:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-10</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="字符串测试"><a href="#字符串测试" class="headerlink" title="字符串测试"></a>字符串测试</h2><blockquote>
+<p>&#x3D;&#x3D;：测试字符串是否相等 (其实 &#x3D; 也可以，不过一般不用这种)<br>such as: A&#x3D;hello B&#x3D;hi [ $A &#x3D;&#x3D; $B ] echo $?(注意，等号前后A和B要有空格)<br>!&#x3D;:用来测试是否不等，不等为真，否则为假；<br>&gt;: 大于<br>&lt;: 小于（一般这两个不用）<br>-n string:测试指定字符串是否为空，空则真，不空为假；<br>-s string:测试指定字符串是否不空，不空为真，空为假； </p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"><span class="keyword">if</span> ! <span class="built_in">id</span> <span class="variable">$1</span> &amp;&gt;/dev/null ; <span class="keyword">then</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;No such user&quot;</span> </span><br><span class="line"><span class="built_in">exit</span> 10 </span><br><span class="line"><span class="keyword">fi</span> </span><br><span class="line"><span class="keyword">if</span> [ `<span class="built_in">id</span> -n -u $!` == `<span class="built_in">id</span> -n -g $!` ];<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;yiyang&quot;</span> </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;NO&quot;</span> </span><br><span class="line"><span class="keyword">fi</span> </span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>传递三个参数给脚本，第一个为整数，第二个为算数运算符，第三个为整数，将其结果显示出来，要求保留两位精度；形如：.&#x2F;cal.sh 5&#x2F;2 </p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">a=<span class="variable">$1</span> </span><br><span class="line"><span class="built_in">shift</span> </span><br><span class="line">b=<span class="variable">$1</span> </span><br><span class="line"><span class="built_in">shift</span> </span><br><span class="line">c=<span class="variable">$1</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot; `echo &quot;</span>scale=2;$a$b<span class="variable">$c</span><span class="string">&quot; bc` &quot;</span> </span><br><span class="line">or <span class="built_in">echo</span> <span class="string">&quot; `bc&lt;&lt;&lt;&quot;</span>scale=2;$a$b<span class="variable">$c</span><span class="string">&quot;` &quot;</span> </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="for-循环"><a href="#for-循环" class="headerlink" title="for 循环"></a>for 循环</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">for</span> <span class="keyword">while</span> <span class="keyword">until</span> </span><br><span class="line"> <span class="keyword">for</span> 变量 <span class="keyword">in</span> 列表;<span class="keyword">do</span> </span><br><span class="line"> 循环体 </span><br><span class="line"> <span class="keyword">done</span> </span><br><span class="line"><span class="comment"># 或者: </span></span><br><span class="line"> <span class="keyword">for</span> 变量 <span class="keyword">in</span> 列表 </span><br><span class="line"> <span class="keyword">do</span> </span><br><span class="line"> 循环体 </span><br><span class="line"> <span class="keyword">done</span> </span><br><span class="line">如何生成列表： </span><br><span class="line"> &#123;1..100&#125;:1~100 </span><br><span class="line"> <span class="built_in">seq</span> 100  (<span class="built_in">seq</span> 2 10 <span class="built_in">seq</span>起始数 步进长度 结束数) </span><br></pre></td></tr></table></figure>
+<p>   </p>
+<h2 id="练习"><a href="#练习" class="headerlink" title="练习"></a>练习</h2><ol>
+<li>1~100加和</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"><span class="built_in">declare</span> -i <span class="built_in">sum</span> = 0  </span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span>  `<span class="built_in">seq</span> 100`; <span class="keyword">do</span> </span><br><span class="line"><span class="built_in">sum</span>=$[<span class="variable">$sum</span>+<span class="variable">$x</span>] </span><br><span class="line"><span class="keyword">done</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;<span class="variable">$sum</span>&quot;</span> </span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>向系统中所有用户问好</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line">USER=<span class="built_in">cat</span> /etc/passwd | <span class="built_in">cut</span> -d: -f1 </span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> <span class="variable">$USER</span>;<span class="keyword">do</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Hello ,<span class="variable">$x</span>&quot;</span> </span><br><span class="line"><span class="keyword">done</span> </span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>写一个脚本，添加10个用户，user1<del>user10，密码同用户名<br> 扩展：<br> 输入add,添加用户use1</del>user10<br> 输入del，删除用户user1~user10</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$1</span> == add ];<span class="keyword">then</span> </span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> `<span class="built_in">seq</span> 10`;<span class="keyword">do</span> </span><br><span class="line">useradd -m user<span class="variable">$x</span> &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;user<span class="variable">$x</span>&quot;</span> | passwd --stdin user<span class="variable">$x</span> &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;user<span class="variable">$x</span> founded&quot;</span> </span><br><span class="line"><span class="keyword">done</span> </span><br><span class="line"><span class="keyword">elif</span> [ <span class="variable">$1</span> == del ];<span class="keyword">then</span> </span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> `<span class="built_in">seq</span> 10`;<span class="keyword">do</span> </span><br><span class="line">userdel -r user<span class="variable">$x</span> &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;deleted&quot;</span> </span><br><span class="line"><span class="keyword">done</span> </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;./user.sh add or del.&quot;</span> </span><br><span class="line"><span class="keyword">fi</span> </span><br></pre></td></tr></table></figure>
+
+<p>(补充说明，这个脚本不完善，准确来说，这个脚本即使在用户存在的条件下也可以跳过执行其他的) </p>
+<ol start="4">
+<li>计算100以内所有能被3整除的正整数的和</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"><span class="built_in">declare</span> -i <span class="built_in">sum</span>=0 </span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> `<span class="built_in">seq</span> 100`;<span class="keyword">do</span> </span><br><span class="line">yu=$[ 100%<span class="variable">$x</span> ] </span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$yu</span> -eq 0 ];<span class="keyword">then</span> </span><br><span class="line">shang=$[ 100/<span class="variable">$x</span> ] </span><br><span class="line"><span class="built_in">sum</span>=$[ <span class="variable">$sum</span> + <span class="variable">$shang</span> ] </span><br><span class="line"><span class="keyword">fi</span> </span><br><span class="line"><span class="keyword">done</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;<span class="variable">$sum</span>&quot;</span> </span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>计算100以内所有奇数的和以及所有偶数的和，分别显示</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"><span class="built_in">declare</span> -i <span class="built_in">sum</span>=0 SUM=0 </span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> `<span class="built_in">seq</span> 100`;<span class="keyword">do</span> </span><br><span class="line">yu=$[ <span class="variable">$x</span>/2 ] </span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$yu</span> -eq 0 ];<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">sum</span>=$[ <span class="variable">$sum</span> + <span class="variable">$x</span> ] </span><br><span class="line"><span class="keyword">else</span> </span><br><span class="line">SUM=$[　<span class="variable">$SUM</span> + <span class="variable">$x</span> ] </span><br><span class="line"><span class="keyword">fi</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;ji:<span class="variable">$sum</span>&quot;</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;ou:<span class="variable">$SUM</span>&quot;</span> </span><br></pre></td></tr></table></figure>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/10/06-03bash%E7%BC%96%E7%A8%8B%E4%B9%8B%E4%BA%94-%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%B5%8B%E8%AF%95%E5%8F%8Afor%E8%AF%AD%E5%8F%A5/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-06-02sed命令" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     

@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://geasyheart.github.io/2025/08/11/VIT%E5%8D%87%E7%BA%A7%E7%89%88Swin-Transformer-%E4%B8%80%E7%9C%BC%E7%9C%8B%E7%A9%BF%E4%BD%A0%E7%9A%84%E7%85%A7%E7%89%87%E6%AD%AA%E6%B2%A1/</loc>
+    
+    <lastmod>2025-08-11</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://geasyheart.github.io/2025/08/06/%E8%AE%A9YOLOv11%E7%A7%92%E6%87%82%E5%8F%A3%E7%BD%A9-%E6%89%8B%E5%A5%97-%E9%98%B2%E6%8A%A4%E6%9C%8D%EF%BC%9ACPPE5%E6%95%B0%E6%8D%AE%E9%9B%86%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97/</loc>
     
     <lastmod>2025-08-07</lastmod>
@@ -2506,7 +2515,7 @@
 
   <url>
     <loc>https://geasyheart.github.io/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -2514,98 +2523,98 @@
   
   <url>
     <loc>https://geasyheart.github.io/tags/linux/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/tags/%E6%8A%80%E6%9C%AF/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/tags/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/tags/MySQL/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/tags/flutter/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/tags/%E7%AE%97%E6%B3%95/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/tags/machine-learning/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/tags/SQLAlchemy/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/tags/python/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/tags/CI/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/tags/git/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/tags/go/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/tags/grpc/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
@@ -2614,84 +2623,84 @@
   
   <url>
     <loc>https://geasyheart.github.io/categories/linux/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/categories/%E6%8A%80%E6%9C%AF/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/categories/%E5%B0%8F%E6%A1%A5%E6%B5%81%E6%B0%B4%E4%BA%BA%E5%AE%B6/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/categories/MySQL/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/categories/machine-learning/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/categories/SQLAlchemy/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/categories/python/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/categories/CI/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/categories/git/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/categories/go/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/categories/grpc/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://geasyheart.github.io/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/</loc>
-    <lastmod>2025-08-07</lastmod>
+    <lastmod>2025-08-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
