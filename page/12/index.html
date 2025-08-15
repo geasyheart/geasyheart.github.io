@@ -206,6 +206,121 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-使用ipdb调试python代码" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/03/20/%E4%BD%BF%E7%94%A8ipdb%E8%B0%83%E8%AF%95python%E4%BB%A3%E7%A0%81/">使用ipdb调试python代码</a>
+    </h1>
+  
+
+        
+        <a href="/2019/03/20/%E4%BD%BF%E7%94%A8ipdb%E8%B0%83%E8%AF%95python%E4%BB%A3%E7%A0%81/" class="archive-article-date">
+  	<time datetime="2019-03-20T05:18:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-03-20</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>IPDB是什么？IPDB（Ipython Debugger），和GDB类似，是一款集成了Ipython的Python代码命令行调试工具，可以看做PDB的升级版。这篇文章总结IPDB的使用方法，主要是若干命令的使用。更多详细的教程或文档还请参考Google。</p>
+<h2 id="安装与使用"><a href="#安装与使用" class="headerlink" title="安装与使用"></a>安装与使用</h2><p>IPDB以Python第三方库的形式给出，使用<code>pip install ipdb</code>即可轻松安装。</p>
+<p>在使用时，有两种常见方式。</p>
+<h2 id="集成到源代码中"><a href="#集成到源代码中" class="headerlink" title="集成到源代码中"></a>集成到源代码中</h2><p>通过在代码开头导入包，可以直接在代码指定位置插入断点。如下所示：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> ipdb</span><br><span class="line"><span class="comment"># some code</span></span><br><span class="line">x = <span class="number">10</span></span><br><span class="line">ipdb.set_trace()</span><br><span class="line">y = <span class="number">20</span></span><br><span class="line"><span class="comment"># other code</span></span><br></pre></td></tr></table></figure>
+
+<p>则程序会在执行完x &#x3D; 10这条语句之后停止，展开Ipython环境，就可以自由地调试了。</p>
+<h2 id="命令式"><a href="#命令式" class="headerlink" title="命令式"></a>命令式</h2><p>上面的方法很方便，但是也有不灵活的缺点。对于一段比较棘手的代码，我们可能需要按步执行，边运行边跟踪代码流并进行调试，这时候使用交互式的命令式调试方法更加有效。启动IPDB调试环境的方法也很简单：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -m ipdb your_code.py</span><br></pre></td></tr></table></figure>
+
+<h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2><p>IPDB调试环境提供的常见命令有：</p>
+<h3 id="帮助"><a href="#帮助" class="headerlink" title="帮助"></a>帮助</h3><p>帮助文档就是这样一个东西：当你写的时候觉得这TM也要写？当你看别人的东西的时候觉得这TM都没写？</p>
+<p>使用h即可调出IPDB的帮助。可以使用help command的方法查询特定命令的具体用法。</p>
+<h3 id="下一条语句"><a href="#下一条语句" class="headerlink" title="下一条语句"></a>下一条语句</h3><p>使用n(next)执行下一条语句。注意一个函数调用也是一个语句。如何能够实现类似“进入函数内部”的功能呢？</p>
+<p>进入函数内部<br>使用s(step into)进入函数调用的内部。</p>
+<h3 id="打断点"><a href="#打断点" class="headerlink" title="打断点"></a>打断点</h3><p>使用b line_number(break)的方式给指定的行号位置加上断点。使用b file_name:line_number的方法给指定的文件（还没执行到的代码可能在外部文件中）中指定行号位置打上断点。</p>
+<p>另外，打断点还支持指定条件下进入，可以查询帮助文档。</p>
+<p>一直执行直到遇到下一个断点<br>使用c(continue)执行代码直到遇到某个断点或程序执行完毕。</p>
+<p>一直执行直到返回<br>使用r(return)执行代码直到当前所在的这个函数返回。</p>
+<h3 id="跳过某段代码"><a href="#跳过某段代码" class="headerlink" title="跳过某段代码"></a>跳过某段代码</h3><p>使用j line_number(jump)可以跳过某段代码，直接执行指定行号所在的代码。</p>
+<h3 id="更多上下文"><a href="#更多上下文" class="headerlink" title="更多上下文"></a>更多上下文</h3><p>在IPDB调试环境中，默认只显示当前执行的代码行，以及其上下各一行的代码。如果想要看到更多的上下文代码，可以使用l first<a href="list">, second</a>命令。</p>
+<p>其中first指示向上最多显示的行号，second指示向下最多显示的行号（可以省略）。当second小于first时，second指的是从first开始的向下的行数（相对值vs绝对值）。</p>
+<p>根据SO上的这个问题，你还可以修改IPDB的源码，一劳永逸地改变上下文的行数。</p>
+<h3 id="我在哪里"><a href="#我在哪里" class="headerlink" title="我在哪里"></a>我在哪里</h3><p>调试兴起，可能你会忘了自己目前所在的行号。例如在打印了若干变量值后，屏幕完全被这些值占据。使用w或者where可以打印出目前所在的行号位置以及上下文信息。</p>
+<h3 id="这是啥"><a href="#这是啥" class="headerlink" title="这是啥"></a>这是啥</h3><p>我们可以使用whatis variable_name的方法，查看变量的类别（感觉有点鸡肋，用type也可以办到）。</p>
+<h3 id="列出当前函数的全部参数"><a href="#列出当前函数的全部参数" class="headerlink" title="列出当前函数的全部参数"></a>列出当前函数的全部参数</h3><p>当你身处一个函数内部的时候，可以使用a(argument)打印出传入函数的所有参数的值。</p>
+<h3 id="打印"><a href="#打印" class="headerlink" title="打印"></a>打印</h3><p>使用p(print)和pp(pretty print)可以打印表达式的值。</p>
+<h3 id="清除断点"><a href="#清除断点" class="headerlink" title="清除断点"></a>清除断点</h3><p>使用cl或者clear file:line_number清除断点。如果没有参数，则清除所有断点。</p>
+<h3 id="再来一次"><a href="#再来一次" class="headerlink" title="再来一次"></a>再来一次</h3><p>使用restart重新启动调试器，断点等信息都会保留。restart实际是run的别名，使用run args的方式传入参数。</p>
+<h3 id="退出"><a href="#退出" class="headerlink" title="退出"></a>退出</h3><p>使用q退出调试，并清除所有信息。</p>
+<p><a target="_blank" rel="noopener" href="https://xmfbit.github.io/2017/08/21/debugging-with-ipdb/">转自</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2019/03/20/%E4%BD%BF%E7%94%A8ipdb%E8%B0%83%E8%AF%95python%E4%BB%A3%E7%A0%81/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-上海豫园" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1062,104 +1177,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2018/06/29/%E5%BC%82%E6%AD%A5mq%E7%9A%84%E7%AA%98%E5%A2%83/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-python中不得不说的装饰器" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/06/19/python%E4%B8%AD%E4%B8%8D%E5%BE%97%E4%B8%8D%E8%AF%B4%E7%9A%84%E8%A3%85%E9%A5%B0%E5%99%A8/">python中不得不说的装饰器</a>
-    </h1>
-  
-
-        
-        <a href="/2018/06/19/python%E4%B8%AD%E4%B8%8D%E5%BE%97%E4%B8%8D%E8%AF%B4%E7%9A%84%E8%A3%85%E9%A5%B0%E5%99%A8/" class="archive-article-date">
-  	<time datetime="2018-06-19T06:41:24.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-06-19</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="常用以及常看见的写法"><a href="#常用以及常看见的写法" class="headerlink" title="常用以及常看见的写法"></a>常用以及常看见的写法</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">from</span> functools <span class="keyword">import</span> wraps</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">cal_time</span>(<span class="params">func</span>):</span><br><span class="line"><span class="meta">    @wraps(<span class="params">func</span>)</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">wrapper</span>(<span class="params">*args, **kwargs</span>):</span><br><span class="line">        <span class="keyword">return</span> func(*args, **kwargs)</span><br><span class="line">    <span class="keyword">return</span> wrapper</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
-
-
-<h2 id="给装饰器传参"><a href="#给装饰器传参" class="headerlink" title="给装饰器传参"></a>给装饰器传参</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">from</span> functools <span class="keyword">import</span> wraps</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">cal_time</span>(<span class="params">max_time</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">wrapper_func</span>(<span class="params">func</span>):</span><br><span class="line"><span class="meta">        @wraps(<span class="params">func</span>)</span></span><br><span class="line">        <span class="keyword">def</span> <span class="title function_">wrapper</span>(<span class="params">*args, **kwargs</span>):</span><br><span class="line">            <span class="keyword">return</span> func(*args, **kwargs)</span><br><span class="line">        <span class="keyword">return</span> wrapper</span><br><span class="line">    <span class="keyword">return</span> wrapper_func</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>但是今天将介绍另外两种不同的写法，而这两种写法也在库中比较常见　</p>
-<h2 id="wrapper-callback"><a href="#wrapper-callback" class="headerlink" title="wrapper callback"></a>wrapper callback</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">App</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        self.exc = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_server_error</span>(<span class="params">self, callback</span>):</span><br><span class="line">        <span class="comment"># 在这个地方可以做一些其他的东西</span></span><br><span class="line">        self.exc = callback</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    app = App()</span><br><span class="line"></span><br><span class="line"><span class="meta">    @app.on_server_error</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">deal_server_error</span>():</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;deal server error&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">&quot;服务出现异常&quot;</span>)</span><br><span class="line">    <span class="keyword">except</span> Exception:</span><br><span class="line">        app.exc()</span><br></pre></td></tr></table></figure>
-
-<h2 id="flask-like-decorator"><a href="#flask-like-decorator" class="headerlink" title="flask-like decorator"></a>flask-like decorator</h2><p>为什么叫flask-like呢？因为我也没有想到好的名字来叫，另外这种写法也是在flask中见，因为他没有包装func(*args, **kwargs)这层，而是仅给func传递参数．</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">App</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        self.exc = []</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">errorhandler</span>(<span class="params">self, code</span>):</span><br><span class="line">        <span class="keyword">def</span> <span class="title function_">decorator</span>(<span class="params">f</span>):</span><br><span class="line">            self.exc.append(f)</span><br><span class="line">            <span class="keyword">return</span> f</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> decorator</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    app = App()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">    @app.errorhandler(<span class="params"><span class="number">403</span></span>)</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">deal_error</span>(<span class="params">e</span>):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;403 error.&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">deal_exception</span>(<span class="params">e</span>):</span><br><span class="line">        exc_type, exc_value, tb = sys.exc_info()</span><br><span class="line">        <span class="keyword">assert</span> exc_value <span class="keyword">is</span> e</span><br><span class="line">        <span class="built_in">print</span>(exc_type, exc_value, tb)</span><br><span class="line">        <span class="keyword">for</span> deco <span class="keyword">in</span> app.exc:</span><br><span class="line">            deco(exc_type)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">raise</span> ValueError(<span class="string">&quot;dddd&quot;</span>)</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        deal_exception(e)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/python//" class="article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/06/19/python%E4%B8%AD%E4%B8%8D%E5%BE%97%E4%B8%8D%E8%AF%B4%E7%9A%84%E8%A3%85%E9%A5%B0%E5%99%A8/">展开全文 >></a>
         </p>
       
 

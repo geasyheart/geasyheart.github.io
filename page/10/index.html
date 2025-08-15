@@ -206,6 +206,82 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-bert以首字表示词向量(2)" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/06/25/bert%E4%BB%A5%E9%A6%96%E5%AD%97%E8%A1%A8%E7%A4%BA%E8%AF%8D%E5%90%91%E9%87%8F(2)/">bert以首字表示词向量(2)</a>
+    </h1>
+  
+
+        
+        <a href="/2021/06/25/bert%E4%BB%A5%E9%A6%96%E5%AD%97%E8%A1%A8%E7%A4%BA%E8%AF%8D%E5%90%91%E9%87%8F(2)/" class="archive-article-date">
+  	<time datetime="2021-06-25T11:31:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-06-25</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>第二篇文章，通过一种新的方式来实现以首字表示词向量<br>也可以看这里：<a href="/2021/09/27/%E4%B8%80%E4%BA%9Bmask%E7%9A%84%E6%93%8D%E4%BD%9C%E7%90%86%E8%A7%A3/" title="一些mask的操作理解">一些mask的操作理解</a> gather部分。</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># -*- coding: utf8 -*-</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">List</span></span><br><span class="line"><span class="keyword">from</span> unittest <span class="keyword">import</span> TestCase</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch.nn.utils.rnn <span class="keyword">import</span> pad_sequence</span><br><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> AutoTokenizer, AutoModel, PreTrainedTokenizerBase</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">tokenize</span>(<span class="params">form: <span class="type">List</span>[<span class="type">List</span>[<span class="built_in">str</span>]], tokenizer: PreTrainedTokenizerBase, max_length: <span class="built_in">int</span>, char_base: <span class="built_in">bool</span> = <span class="literal">False</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        form:</span></span><br><span class="line"><span class="string">        tokenizer:</span></span><br><span class="line"><span class="string">        max_length:</span></span><br><span class="line"><span class="string">        char_base: 这里指的是form[即 word]是否是字级别的</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    res = tokenizer.batch_encode_plus(</span><br><span class="line">        form,</span><br><span class="line">        is_split_into_words=<span class="literal">True</span>,</span><br><span class="line">        max_length=max_length,</span><br><span class="line">        truncation=<span class="literal">True</span>,</span><br><span class="line">    )</span><br><span class="line">    result = res.data</span><br><span class="line">    <span class="comment"># 可用于长度大于指定长度过滤, overflow指字长度大于指定max_length，如果有cls,sep，那么就算上这个</span></span><br><span class="line">    result[<span class="string">&#x27;overflow&#x27;</span>] = [<span class="built_in">len</span>(encoding.overflowing) &gt; <span class="number">0</span> <span class="keyword">for</span> encoding <span class="keyword">in</span> res.encodings]</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> char_base:</span><br><span class="line">        word_index = []</span><br><span class="line">        <span class="keyword">for</span> encoding <span class="keyword">in</span> res.encodings:</span><br><span class="line">            word_index.append([])</span><br><span class="line"></span><br><span class="line">            last_word_idx = -<span class="number">1</span></span><br><span class="line">            current_length = <span class="number">0</span></span><br><span class="line">            <span class="keyword">for</span> word_idx <span class="keyword">in</span> encoding.word_ids[<span class="number">1</span>:-<span class="number">1</span>]:</span><br><span class="line">                <span class="keyword">if</span> word_idx != last_word_idx:</span><br><span class="line">                    word_index[-<span class="number">1</span>].append(current_length)</span><br><span class="line"></span><br><span class="line">                current_length += <span class="number">1</span></span><br><span class="line">                last_word_idx = word_idx</span><br><span class="line">        result[<span class="string">&#x27;word_index&#x27;</span>] = word_index</span><br><span class="line">        result[<span class="string">&#x27;word_attention_mask&#x27;</span>] = [[<span class="literal">True</span>] * <span class="built_in">len</span>(index) <span class="keyword">for</span> index <span class="keyword">in</span> word_index]</span><br><span class="line">    <span class="keyword">return</span> result</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TestSample</span>(<span class="title class_ inherited__">TestCase</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">test_max_length</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        测试max_length overflow情况</span></span><br><span class="line"><span class="string">        :return:</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">test_sample</span>(<span class="params">self</span>):</span><br><span class="line">        form = [</span><br><span class="line">            [<span class="string">&#x27;我&#x27;</span>, <span class="string">&#x27;呀&#x27;</span>],</span><br><span class="line">            [<span class="string">&#x27;我&#x27;</span>, <span class="string">&#x27;小明&#x27;</span>, <span class="string">&#x27;呀&#x27;</span>]</span><br><span class="line">        ]</span><br><span class="line"></span><br><span class="line">        tokenizer = AutoTokenizer.from_pretrained(<span class="string">&#x27;hfl/chinese-electra-180g-small-discriminator&#x27;</span>)</span><br><span class="line">        result = tokenize(form, tokenizer, <span class="number">6</span>)</span><br><span class="line">        model = AutoModel.from_pretrained(<span class="string">&#x27;hfl/chinese-electra-180g-small-discriminator&#x27;</span>)</span><br><span class="line"></span><br><span class="line">        input_ids = pad_sequence([torch.tensor(input_ids) <span class="keyword">for</span> input_ids <span class="keyword">in</span> result[<span class="string">&#x27;input_ids&#x27;</span>]], batch_first=<span class="literal">True</span>)</span><br><span class="line">        token_type_ids = pad_sequence([torch.tensor(token_type_ids) <span class="keyword">for</span> token_type_ids <span class="keyword">in</span> result[<span class="string">&#x27;token_type_ids&#x27;</span>]],</span><br><span class="line">                                      batch_first=<span class="literal">True</span>)</span><br><span class="line">        attention_mask = pad_sequence([torch.tensor(attention_mask) <span class="keyword">for</span> attention_mask <span class="keyword">in</span> result[<span class="string">&#x27;attention_mask&#x27;</span>]],</span><br><span class="line">                                      batch_first=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># tensor([[ 101, 2769, 1435,  102,    0,    0],</span></span><br><span class="line">        <span class="comment">#         [ 101, 2769, 2207, 3209, 1435,  102]])</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 1. 获取bert output.</span></span><br><span class="line">        bert_out = model(input_ids=input_ids, token_type_ids=token_type_ids, attention_mask=attention_mask)</span><br><span class="line">        seq_out = bert_out[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">        word_index = pad_sequence([torch.tensor(word_index) <span class="keyword">for</span> word_index <span class="keyword">in</span> result[<span class="string">&#x27;word_index&#x27;</span>]], batch_first=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 2. 获取词首字向量，包括cls开头</span></span><br><span class="line">        word_out = torch.cat([seq_out[:, :<span class="number">1</span>, :], torch.gather(</span><br><span class="line">            seq_out[:, <span class="number">1</span>:, :], dim=<span class="number">1</span>, index=word_index.unsqueeze(-<span class="number">1</span>).expand(-<span class="number">1</span>, -<span class="number">1</span>, seq_out.size(-<span class="number">1</span>))</span><br><span class="line">        )], dim=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        word_attention_mask = pad_sequence(</span><br><span class="line">            [torch.tensor(word_attention_mask) <span class="keyword">for</span> word_attention_mask <span class="keyword">in</span> result[<span class="string">&#x27;word_attention_mask&#x27;</span>]],</span><br><span class="line">            batch_first=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 这里方便view</span></span><br><span class="line">        <span class="comment"># 1. [&#x27;我&#x27;, &#x27;呀&#x27;]</span></span><br><span class="line">        self.assertTrue((seq_out[<span class="number">0</span>][<span class="number">0</span>] == word_out[<span class="number">0</span>][<span class="number">0</span>]).<span class="built_in">all</span>())  <span class="comment"># cls</span></span><br><span class="line">        self.assertTrue((seq_out[<span class="number">0</span>][<span class="number">1</span>] == word_out[<span class="number">0</span>][<span class="number">1</span>]).<span class="built_in">all</span>())  <span class="comment"># 我</span></span><br><span class="line">        self.assertTrue((seq_out[<span class="number">0</span>][<span class="number">2</span>] == word_out[<span class="number">0</span>][<span class="number">2</span>]).<span class="built_in">all</span>())  <span class="comment"># 呀</span></span><br><span class="line"></span><br><span class="line">        self.assertTrue((word_out[<span class="number">0</span>][<span class="number">1</span>] == word_out[<span class="number">0</span>][<span class="number">3</span>]).<span class="built_in">all</span>())  <span class="comment"># 填充位</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 2. [&#x27;我&#x27;, &#x27;小明&#x27;, &#x27;呀&#x27;]</span></span><br><span class="line">        self.assertTrue((seq_out[<span class="number">1</span>][<span class="number">0</span>] == word_out[<span class="number">1</span>][<span class="number">0</span>]).<span class="built_in">all</span>())  <span class="comment"># cls</span></span><br><span class="line">        self.assertTrue((seq_out[<span class="number">1</span>][<span class="number">1</span>] == word_out[<span class="number">1</span>][<span class="number">1</span>]).<span class="built_in">all</span>())  <span class="comment"># 我</span></span><br><span class="line">        self.assertTrue((seq_out[<span class="number">1</span>][<span class="number">2</span>] == word_out[<span class="number">1</span>][<span class="number">2</span>]).<span class="built_in">all</span>())  <span class="comment"># 小明</span></span><br><span class="line">        self.assertTrue((seq_out[<span class="number">1</span>][<span class="number">4</span>] == word_out[<span class="number">1</span>][<span class="number">3</span>]).<span class="built_in">all</span>())  <span class="comment"># 呀</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 3. Note: word_out的时候concat了seq_out[:, :1, :](cls)，所以word_out的长度比word_attention_mask大1</span></span><br><span class="line">        self.assertEqual(word_out.size(<span class="number">1</span>), word_attention_mask.size(<span class="number">1</span>) + <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 4. 获取每个词对应的向量</span></span><br><span class="line">        result = word_out[:, <span class="number">1</span>:, :][word_attention_mask]</span><br><span class="line">        result2 = result.split(word_attention_mask.<span class="built_in">sum</span>(<span class="number">1</span>).tolist())</span><br><span class="line">        self.assertEqual(<span class="built_in">len</span>(result2[<span class="number">0</span>]), <span class="number">2</span>)</span><br><span class="line">        self.assertEqual(<span class="built_in">len</span>(result2[<span class="number">1</span>]), <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/06/25/bert%E4%BB%A5%E9%A6%96%E5%AD%97%E8%A1%A8%E7%A4%BA%E8%AF%8D%E5%90%91%E9%87%8F(2)/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-bert以平均、首字、尾字表示词向量(1)" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1074,86 +1150,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2020/02/29/%E5%B7%AE%E7%82%B9%E6%BC%8F%E6%8E%89%E4%BA%86/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-miniconda" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/02/20/miniconda/">miniconda</a>
-    </h1>
-  
-
-        
-        <a href="/2020/02/20/miniconda/" class="archive-article-date">
-  	<time datetime="2020-02-20T12:27:26.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-02-20</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="miniconda快速创建python环境"><a href="#miniconda快速创建python环境" class="headerlink" title="miniconda快速创建python环境"></a>miniconda快速创建python环境</h1><h2 id="1-下载"><a href="#1-下载" class="headerlink" title="1.下载"></a>1.下载</h2><p><a target="_blank" rel="noopener" href="https://docs.conda.io/en/latest/miniconda.html">https://docs.conda.io/en/latest/miniconda.html</a></p>
-<h2 id="2-安装"><a href="#2-安装" class="headerlink" title="2. 安装"></a>2. 安装</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">chmod</span> +x /code/packages/Miniconda3-latest-Linux-x86_64.sh &amp;&amp; \</span><br><span class="line">     /code/packages/Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda &amp;&amp; \</span><br><span class="line">     /opt/conda/bin/conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/ &amp;&amp; \</span><br><span class="line">     /opt/conda/bin/conda install -y python=3.8</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<h2 id="3-使用"><a href="#3-使用" class="headerlink" title="3. 使用"></a>3. 使用</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/opt/conda/bin/python3.8 -m venv ~/venv</span><br><span class="line"><span class="comment"># https://download.pytorch.org/whl/lts/1.8/torch_lts.html</span></span><br><span class="line">wget -c https://download.pytorch.org/whl/lts/1.8/cu102/torch-1.8.1%2Bcu102-cp38-cp38-linux_x86_64.whl</span><br></pre></td></tr></table></figure>
-
-<h1 id="cuda安装源（强烈推荐）"><a href="#cuda安装源（强烈推荐）" class="headerlink" title="cuda安装源（强烈推荐）"></a>cuda安装源（强烈推荐）</h1><p><a target="_blank" rel="noopener" href="http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64/">http://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1604/x86_64/</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/02/20/miniconda/">展开全文 >></a>
         </p>
       
 

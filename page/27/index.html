@@ -206,6 +206,120 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-09-04linux压缩与归档" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/02/15/09-04linux%E5%8E%8B%E7%BC%A9%E4%B8%8E%E5%BD%92%E6%A1%A3/">09_04linux压缩与归档</a>
+    </h1>
+  
+
+        
+        <a href="/2015/02/15/09-04linux%E5%8E%8B%E7%BC%A9%E4%B8%8E%E5%BD%92%E6%A1%A3/" class="archive-article-date">
+  	<time datetime="2015-02-15T15:37:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-15</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>默认压缩后删除原文件，解压亦然，另外下面的三个只能压缩文件，不能压缩目录，zip可以。 </p>
+<ol>
+<li><p>gzip: .gz<br> gzip &#x2F;PATH&#x2F;TO&#x2F;FILE,压缩完成后将会删除原文件<br>   -d：解压<br>   -#(1~9):指定压缩比，默认是6，9最大 </p>
+</li>
+<li><p>gunzip:<br> 解压完成后会删除原文件 </p>
+</li>
+<li><p>zcat &#x2F;path&#x2F;to&#x2F;file.gz：在不解压的情况下，查看文本文件内容 </p>
+</li>
+<li><p>bzip2：.bz2<br> bzip2:<br> -d：解压<br> -#(1-9):指定压缩比，默认是6，9最大<br> -k:保留原文件<br>bunzip2:解压<br>bzcat &#x2F;path&#x2F;to&#x2F;file.bz2  </p>
+</li>
+<li><p>xz:.xz<br> xz &#x2F;path&#x2F;to&#x2F;file <br> -d：解压<br> -#(1-9):指定压缩比，默认是6，9最大<br> -k：压缩保留原文件<br>unxz：解压<br>xzcat：在不解压的情况下，查看文本文件。。 </p>
+</li>
+<li><p>zip:既归档又压缩的工具<br> zip FILENAME.zip  file1,file2,file3…压缩后不删除原文件<br>unzip:解压 </p>
+</li>
+<li><p>tar:<br> -c:创建归档文件<br> -f FILE.tar：操作的归档文件<br> -x：展开归档<br> -t:不展开归档，直接查看归档了哪些文件</p>
+</li>
+</ol>
+<p> xzvf:解压归档文件.tar.gz<br> czvf:创建归档文件并压缩.gz </p>
+<p> xzjf:解压归档文件.tar.bz2<br> czjf:创建归档文件并压缩.tar.bz2 </p>
+<ol start="8">
+<li>cpio:也是一个归档工具</li>
+</ol>
+<p>read name age<br>user1 18<br>如果读入的内容的格式和提示的格式相同，就会很正常<br>如果是:<br>user1 18 19<br>就会输出<br>user1 18 19<br>这样就会和你所期望的有点不同<br>read：<br> -p:给出提示 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line"> </span><br><span class="line">read -p &quot;Three files:&quot; FILE1 FILE2 FILE3 </span><br><span class="line">read -p &quot;Destination:&quot; DEST </span><br><span class="line">read -p &quot;Compress[zip|bzip2|gzip]:&quot; COMP </span><br><span class="line">case $COMP in </span><br><span class="line">gzip) </span><br><span class="line"> tar czf $&#123;DEST&#125;.tar.gz  $FILE1 $FILE2 $FILE3 </span><br><span class="line"> ;; </span><br><span class="line">bzip2) </span><br><span class="line"> tar cjf $&#123;DEST&#125;.tar.bz2  $FILE1 $FILE2 $FILE3 </span><br><span class="line"> ;; </span><br><span class="line">xz) </span><br><span class="line"> tar cf $&#123;DEST&#125;.tar  $FILE1 $FILE2 $FILE3 </span><br><span class="line"> xz $&#123;DEST&#125;.tar  </span><br><span class="line"> ;; </span><br><span class="line">*) </span><br><span class="line"> echo &quot;Unknown Error.&quot; </span><br><span class="line"> exit 7 </span><br><span class="line"> ;; </span><br><span class="line">esac </span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">while循环:使用于循环次数位置的场景 </span><br><span class="line"> while CONDITION; do </span><br><span class="line"> startment  </span><br><span class="line"> ... </span><br><span class="line"> done </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">read -p &quot;Input something:&quot;STRING </span><br><span class="line">while [ $STRING != &#x27;quit&#x27; ];do </span><br><span class="line"> echo &quot;$STRING | tr a-z A-Z&quot; </span><br><span class="line"> read -p &quot;Input something:&quot;STRING </span><br><span class="line">done </span><br></pre></td></tr></table></figure>
+<h2 id="1"><a href="#1" class="headerlink" title="1"></a>1</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">who | grep $1 &amp;&gt;/dev/null </span><br><span class="line">RET=$? </span><br><span class="line">while [ RET -ne 1 ];do </span><br><span class="line"> echo &quot;`date`,$1 is not login.&quot; </span><br><span class="line"> sleep 5 </span><br><span class="line"> who | grep $1 &amp;&gt;/dev/null </span><br><span class="line"> RET=$? </span><br><span class="line">done </span><br><span class="line">echo &quot;$1 is logged in &quot; </span><br></pre></td></tr></table></figure>
+
+<h2 id="2"><a href="#2" class="headerlink" title="2"></a>2</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#!/bin/bash </span><br><span class="line">RAN=$RANDOM </span><br><span class="line">echo &quot;guess a number:&quot; </span><br><span class="line">read NUM </span><br><span class="line">[ $RAN -ne $NUM　] </span><br><span class="line">while [ $? -ne 1 ]do </span><br><span class="line"> if [ $RAN -lt $NUM ];then </span><br><span class="line"> echo &quot;Try lower.&quot; </span><br><span class="line"> fi </span><br><span class="line"> if [ $RAN -gt $NUM ];then </span><br><span class="line"> echo &quot;Try higher.&quot; </span><br><span class="line"> fi </span><br><span class="line"> read NUM </span><br><span class="line"> [ $RAN -ne $NUM ] </span><br><span class="line">done </span><br><span class="line">echo &quot;you guessed right!!&quot; </span><br></pre></td></tr></table></figure>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/02/15/09-04linux%E5%8E%8B%E7%BC%A9%E4%B8%8E%E5%BD%92%E6%A1%A3/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-09-02磁盘及文件系统管理详解之四" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1114,109 +1228,6 @@ else
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/02/11/07-02bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%85%AD-%E4%BD%BF%E7%94%A8%E8%84%9A%E6%9C%AC%E9%80%89%E9%A1%B9%E5%8F%8A%E7%BB%84%E5%90%88%E6%9D%A1%E4%BB%B6%E6%B5%8B%E8%AF%95/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-07-01Vim编辑器详解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/02/11/07-01Vim%E7%BC%96%E8%BE%91%E5%99%A8%E8%AF%A6%E8%A7%A3/">07_01Vim编辑器详解</a>
-    </h1>
-  
-
-        
-        <a href="/2015/02/11/07-01Vim%E7%BC%96%E8%BE%91%E5%99%A8%E8%AF%A6%E8%A7%A3/" class="archive-article-date">
-  	<time datetime="2015-02-11T13:55:47.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-02-11</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>末行模式下：<br> .:表示当前行<br> $:最后一行<br> +#:向下的#行<br> 1，$ y 复制1至最后一行<br>c:修改:<br> cc + 新内容 这种方式是会直接把行内容删除，然后再插入模式下添加新内容<br>r:替换：<br> r + 内容   这个一般用于单字符的修改<br> 6r + a: 就会把当前字符的后6个替换成a<br>R:替换：<br> 在文本中直接替换，这个用的多！！！！！！！！！！<br>u：撤销<br> 最多撤销50次；；；<br>ctrl + r:还原撤销<br>. :重复前一次编辑操作 </p>
-<p>&#x2F;PATTERN：查找<br>?PATTERN：向前查找<br>敲n指向下一个 </p>
-<p>可视化模式<br> v：按单个字符进行选取<br> V：按整行进行选取 </p>
-<p>查找并替换：<br> 和sed命令一样<br> 1，5s&#x2F;PATTERN1&#x2F;PARRERN2&#x2F;gi(i是忽略大小写)<br> s&#x2F;#&#x2F;&#x2F;<br> s&#x2F;#&#x2F;&#x2F;g<br> %：表示全文 </p>
-<p>vim file1 file2<br>:next 切换下一个<br>:prev 切换上一个<br>:last 最后一个<br>:first 第一个<br>:qa 全部退出 </p>
-<p>分屏显示：<br> 即windows下words的分屏操作<br> ctrl + w,s :水平分割，先按ctrl+w，松开，再按s<br> ctrl +w ,v:垂直分割(Vertical)<br> 实现窗口的切换 ctrl + w+ 方向键  </p>
-<p>分窗口显示多个文件：<br>vim -o 水平分割<br> -O 垂直分割<br> 实现窗口的切换 ctrl + w+ 方向键  </p>
-<p>将另外一个文件的内容填充到当前文件中<br> :r file<br> <br> :set ic （忽略大小写）<br> :set noic（取消忽略大小写）<br> :set autoindent or set ai （设置自动缩进）<br> :set noai（取消自动缩进） </p>
-<p> 查找到的为虐你高亮显示或取消<br> set hlsearch<br> set nohlsearch<br> 语法高亮<br> syntax on<br> syntax off<br> <br> <br> 练习： </p>
-<ol>
-<li>将 &#x2F;etc&#x2F;yum.repo.d&#x2F;server.repo文件中<a href="ftp://instructor.example.com/pub%E6%9B%BF%E6%8D%A2%E4%B8%BAhttp://172.16.0.1/yum">ftp://instructor.example.com/pub替换为http://172.16.0.1/yum</a> <blockquote>
-<p>%s&#x2F;ftp://instructor.example.com/pub&#x2F;http://172.16.0.1/yum&#x2F;g </p>
-</blockquote>
-</li>
-<li>将 &#x2F;etc&#x2F;fstab中的5-9行保存至新文件~&#x2F;fstab <blockquote>
-<p>vim &#x2F;etc&#x2F;fstab ,然后 :5,9 w ~&#x2F;fstab</p>
-</blockquote>
-</li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/02/11/07-01Vim%E7%BC%96%E8%BE%91%E5%99%A8%E8%AF%A6%E8%A7%A3/">展开全文 >></a>
         </p>
       
 

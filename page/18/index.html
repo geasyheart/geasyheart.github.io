@@ -206,6 +206,142 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-42-04-2-mysql-proxy实验" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/10/03/42-04-2-mysql-proxy%E5%AE%9E%E9%AA%8C/">42_04_2_mysql-proxy实验</a>
+    </h1>
+  
+
+        
+        <a href="/2015/10/03/42-04-2-mysql-proxy%E5%AE%9E%E9%AA%8C/" class="archive-article-date">
+  	<time datetime="2015-10-03T03:12:53.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-10-03</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="环境设置"><a href="#环境设置" class="headerlink" title="环境设置"></a>环境设置</h2><blockquote>
+<p>Master MySQL服务器：192.168.122.220    node1.test.com node1<br>Slave MySQL服务器：   192.168.122.14    node2.test.com node2<br>MySQL Proxy服务器：   192.168.122.25    nfs.test.com    nfs </p>
+</blockquote>
+<ol>
+<li>安装配置MySQL-Proxy(这里我没有使用编译安装)</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@nfs ~]<span class="comment"># tar xf mysql-proxy-0.8.5-linux-el6-x86-64bit.tar.gz -C /usr/local </span></span><br><span class="line">[root@nfs ~]<span class="comment"># cd /usr/local </span></span><br><span class="line">[root@nfs <span class="built_in">local</span>]<span class="comment">#ln -sv mysql-proxy-0.8.5-linux-el6-x86-64bit/ mysql-proxy </span></span><br><span class="line">[root@nfs <span class="built_in">local</span>]<span class="comment">#vim /etc/profile.d/mysql-proxy.sh </span></span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:/usr/local/mysql-proxy/bin </span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>给用户授权<br>在Master&#x2F;Slave建立一个测试用户，因为以后客户端发送的SQL都是通过mysql-proxy服务器来转发，所以要确保可以从mysql-proxy服务器上登录MySQL主从库，分别在主机MySQL和从机MySQL上执行如下命令；</li>
+</ol>
+<p>主机MySQL上执行命令如下： </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">grant</span> <span class="keyword">all</span> <span class="keyword">on</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">to</span> <span class="string">&#x27;test&#x27;</span>@<span class="string">&#x27;192.168.122.25&#x27;</span> identified <span class="keyword">by</span> <span class="string">&#x27;redhat&#x27;</span>; </span><br></pre></td></tr></table></figure>
+
+<p>从机MySQL上执行命令如下： </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">grant</span> <span class="keyword">all</span> <span class="keyword">on</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">to</span> <span class="string">&#x27;test&#x27;</span>@<span class="string">&#x27;192.168.122.25&#x27;</span> identified <span class="keyword">by</span> <span class="string">&#x27;redhat&#x27;</span>; </span><br></pre></td></tr></table></figure>
+<p>在这一步，如果前面已经配置了主从复制的话，没必要写两遍； </p>
+<ol start="3">
+<li>复制admin.lua脚本：<br>这一步必有，因为mysql-proxy会到这个目录下找脚本： <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> -p /usr/local/mysql-proxy/lib/mysql-proxy/lua/admin.lua /usr/local/mysql-proxy/share/doc/mysql-proxy/ </span><br><span class="line"> </span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>mysql-proxy的配置文件： </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@nfs <span class="built_in">local</span>]<span class="comment"># vim /etc/sysconfig/mysql-proxy </span></span><br><span class="line">ADMIN_USER=<span class="string">&quot;admin&quot;</span> </span><br><span class="line">ADMIN_PASSWD=<span class="string">&quot;admin&quot;</span> </span><br><span class="line">PROXY_PID=/var/run/mysql-proxy.pid </span><br><span class="line">PROXY_USER=<span class="string">&quot;mysql-proxy&quot;</span> </span><br><span class="line">RW=<span class="string">&quot;192.168.122.220:3306&quot;</span> </span><br><span class="line">RO=<span class="string">&quot;192.168.122.14:3306&quot;</span> </span><br><span class="line"><span class="built_in">split</span>=<span class="string">&quot;/usr/local/mysql-proxy/share/doc/mysql-proxy/rw-splitting.lua&quot;</span> </span><br><span class="line">ADMINSO=<span class="string">&quot;/usr/local/mysql-proxy/share/doc/mysql-proxy/admin.lua&quot;</span> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">[root@nfs <span class="built_in">local</span>]<span class="comment">#chmod 0600 /etc/sysconfig/mysql-proxy </span></span><br><span class="line">如下所示：否则不能启动；具体信息可查看/var/log/mysql-proxy </span><br><span class="line">[root@nfs lua]<span class="comment"># ls -al /etc/sysconfig/mysql-proxy </span></span><br><span class="line">-rw------- 1 root root 360 10月  3 10:38 /etc/sysconfig/mysql-proxy </span><br></pre></td></tr></table></figure>
+<p>mysql-proxy的启动脚本： </p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="comment">#set default mysql-proxy configuration </span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="comment">#chkconfig: - 78 30 </span></span><br><span class="line">. /etc/rc.d/init.d/functions </span><br><span class="line"> </span><br><span class="line">prog=<span class="string">&quot;/usr/local/mysql-proxy/bin/mysql-proxy&quot;</span> </span><br><span class="line"> </span><br><span class="line"><span class="keyword">if</span> [ -f /etc/sysconfig/network ];<span class="keyword">then</span> </span><br><span class="line">    . /etc/sysconfig/network </span><br><span class="line"><span class="keyword">fi</span> </span><br><span class="line">[ <span class="variable">$&#123;NETWORKING&#125;</span> = <span class="string">&quot;no&quot;</span> ] &amp;&amp; <span class="built_in">exit</span> 0 </span><br><span class="line"><span class="comment">#Source mysql-proxy configuraion. </span></span><br><span class="line"><span class="keyword">if</span> [ -f /etc/sysconfig/mysql-proxy ];<span class="keyword">then</span> </span><br><span class="line">    . /etc/sysconfig/mysql-proxy </span><br><span class="line"><span class="keyword">fi</span> </span><br><span class="line"> </span><br><span class="line">RETVAL=0 </span><br><span class="line"><span class="function"><span class="title">start</span></span>() &#123; </span><br><span class="line">    <span class="built_in">echo</span> -n $<span class="string">&quot;Stating <span class="variable">$prog</span>: &quot;</span> </span><br><span class="line">    daemon <span class="variable">$prog</span> --daemon --log-level=debug --pid-file=<span class="variable">$PROXY_PID</span> --log-file=/var/log/mysql-proxy.log   --plugins=<span class="string">&quot;proxy&quot;</span> --proxy-backend-addresses=<span class="variable">$RW</span> --proxy-read-only-backend-addresses=<span class="variable">$RO</span>  --proxy-lua-script=<span class="variable">$split</span> --plugins=<span class="string">&quot;admin&quot;</span> --admin-username=<span class="variable">$ADMIN_USER</span> --admin-password=<span class="variable">$ADMIN_PASSWD</span> --admin-lua-script=<span class="variable">$ADMINSO</span> --proxy-address=<span class="string">&quot;0.0.0.0:3306&quot;</span> --user=<span class="variable">$PROXY_USER</span> --keepalive </span><br><span class="line"> </span><br><span class="line">    RETVAL=$? </span><br><span class="line">    <span class="built_in">echo</span> </span><br><span class="line">    <span class="keyword">if</span> [ <span class="variable">$RETVAL</span> -eq 0 ];<span class="keyword">then</span> </span><br><span class="line">        <span class="built_in">touch</span> /var/lock/subsys/mysql-proxy </span><br><span class="line">    <span class="keyword">fi</span> </span><br><span class="line">&#125; </span><br><span class="line"><span class="function"><span class="title">stop</span></span>() &#123; </span><br><span class="line">    <span class="built_in">echo</span> -n $<span class="string">&quot;Stopping <span class="variable">$prog</span>: &quot;</span> </span><br><span class="line">    killproc -p <span class="variable">$PROXY_PID</span> -d 3 <span class="variable">$prog</span> </span><br><span class="line">    RETVAL=$? </span><br><span class="line">    <span class="built_in">echo</span> </span><br><span class="line">    <span class="keyword">if</span> [ <span class="variable">$RETVAL</span> -eq 0 ];<span class="keyword">then</span> </span><br><span class="line">        <span class="built_in">rm</span> -f /var/lock/subsys/mysql-proxy </span><br><span class="line">        <span class="built_in">rm</span> -f <span class="variable">$PROXY_PID</span> </span><br><span class="line">    <span class="keyword">fi</span> </span><br><span class="line">&#125; </span><br><span class="line"><span class="comment">#See how we were called </span></span><br><span class="line"><span class="keyword">case</span> <span class="string">&quot;<span class="variable">$1</span>&quot;</span> <span class="keyword">in</span> </span><br><span class="line">    start) </span><br><span class="line">        start </span><br><span class="line">        ;; </span><br><span class="line">    stop) </span><br><span class="line">        stop </span><br><span class="line">        ;; </span><br><span class="line">    restart) </span><br><span class="line">        stop </span><br><span class="line">        start </span><br><span class="line">        ;; </span><br><span class="line">    condrestart|try-restart) </span><br><span class="line">        <span class="keyword">if</span> status -p <span class="variable">$PROXY_PIDFILE</span> <span class="variable">$porg</span> &amp;&gt;/dev/null;<span class="keyword">then</span> </span><br><span class="line">            stop </span><br><span class="line">            start </span><br><span class="line">        <span class="keyword">fi</span> </span><br><span class="line">        ;; </span><br><span class="line">    status) </span><br><span class="line">        status -p <span class="variable">$PROXY_PID</span> <span class="variable">$prog</span> </span><br><span class="line">        ;; </span><br><span class="line">    *) </span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;Usage: <span class="variable">$0</span> &#123;start|stop|restart|reload|status|condrestart|try-restart&#125;&quot;</span> </span><br><span class="line">        RETVAL=1 </span><br><span class="line">        ;; </span><br><span class="line"><span class="keyword">esac</span> </span><br><span class="line"><span class="built_in">exit</span> <span class="variable">$RETVAL</span> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">[root@nfs <span class="built_in">local</span>]<span class="comment">#chmod +x /etc/rc.d/init.d/mysql-proxy </span></span><br><span class="line">[root@nfs <span class="built_in">local</span>]<span class="comment">#chkconfig --add mysql-proxy </span></span><br><span class="line">[root@nfs <span class="built_in">local</span>]<span class="comment">#service mysql-proxy start </span></span><br></pre></td></tr></table></figure>
+
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>测试一</p>
+<ul>
+<li>tail &#x2F;var&#x2F;log&#x2F;mysql-proxy </li>
+<li>进行查看启动信息</li>
+</ul>
+<p>    <br>测试二： </p>
+<ul>
+<li>mysql -utest -h192.168.122.25 -p </li>
+<li>redhat </li>
+<li>实现读写分离；</li>
+</ul>
+<p>    <br>测试三：进行监管 </p>
+<ul>
+<li>mysql -uadmin -h 192.168.122.25 -p –port&#x3D;4041 </li>
+<li>admin    </li>
+<li>select * from backends;</li>
+</ul>
+<p>      </p>
+<h2 id="测试遇到的问题"><a href="#测试遇到的问题" class="headerlink" title="测试遇到的问题"></a>测试遇到的问题</h2><ol>
+<li>MySQL Proxy默认最小4个最大8个的客户端才会实现读写分离，所以可以将其改为最小1个最大2个:</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> not proxy.global.config.rwsplit <span class="keyword">then</span> </span><br><span class="line">        proxy.global.config.rwsplit = &#123; </span><br><span class="line">                min_idle_connections = 4,           1, </span><br><span class="line">                max_idle_connections = 8,             2, </span><br><span class="line"> </span><br><span class="line">                is_debug = <span class="literal">false</span> </span><br><span class="line">        &#125; </span><br><span class="line">end </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>MySQL Proxy服务启动后，看到网页全是乱码，可以将主从数据库的配置文件my.cnf中加入如下代码：</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[mysqld] </span><br><span class="line">skip-character-set-client-handshake </span><br><span class="line">init-connect=&#x27;SET NAMES utf8&#x27; </span><br><span class="line">default-character-set=utf8 </span><br></pre></td></tr></table></figure>
+<p>本文有参考《构建高可用Linux服务器》5.2.3，但是有一点没能明白的是本书第二步，故而改成如上所示；<br>以后可直接从25这个主机上操作，不需考虑后面主机；；；</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/10/03/42-04-2-mysql-proxy%E5%AE%9E%E9%AA%8C/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-42-04利用mysql-proxy实现读写分离-第一版" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1184,109 +1320,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/09/29/41-01Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E4%B9%9D-ISCSI%E5%8D%8F%E8%AE%AE%E3%80%81%E6%9E%B6%E6%9E%84%E5%8F%8A%E5%85%B6%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-cacti使用实验-2-对远程MySQL进行监控" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/09/29/cacti%E4%BD%BF%E7%94%A8%E5%AE%9E%E9%AA%8C-2-%E5%AF%B9%E8%BF%9C%E7%A8%8BMySQL%E8%BF%9B%E8%A1%8C%E7%9B%91%E6%8E%A7/">cacti使用实验_2_对远程MySQL进行监控</a>
-    </h1>
-  
-
-        
-        <a href="/2015/09/29/cacti%E4%BD%BF%E7%94%A8%E5%AE%9E%E9%AA%8C-2-%E5%AF%B9%E8%BF%9C%E7%A8%8BMySQL%E8%BF%9B%E8%A1%8C%E7%9B%91%E6%8E%A7/" class="archive-article-date">
-  	<time datetime="2015-09-29T02:17:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-29</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>被监控主机:192.168.122.103<br>监控主机:192.168.122.117 </p>
-<h2 id="被监控主机"><a href="#被监控主机" class="headerlink" title="被监控主机"></a>被监控主机</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">yum -y install net-snmp </span><br><span class="line"> </span><br><span class="line"> vim /etc/snmp/snmpd.conf </span><br><span class="line">com2sec notConfigUser  192.168.122.117    public  <span class="comment">#允许被监控的IP地址 </span></span><br><span class="line">group   notConfigGroup v1           notConfigUser </span><br><span class="line">group   notConfigGroup v2c           notConfigUser </span><br><span class="line">view    systemview    included   .1.3.6.1.2.1.1 </span><br><span class="line">view    systemview    included   .1.3.6.1.2.1.25.1.1 </span><br><span class="line">access  notConfigGroup <span class="string">&quot;&quot;</span>      any       noauth    exact   all  none none  <span class="comment">#all </span></span><br><span class="line">view all    included  .1                               80   <span class="comment">#这个地方 </span></span><br><span class="line">syslocation Unknown (edit /etc/snmp/snmpd.conf) </span><br><span class="line">syscontact Root &lt;root@localhost&gt; (configure /etc/snmp/snmp.local.conf) </span><br><span class="line">dontLogTCPWrappersConnects <span class="built_in">yes</span> </span><br><span class="line"> </span><br><span class="line">service snmpd start &amp;&amp; chkconfig snmpd on </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
-<h2 id="监控主机"><a href="#监控主机" class="headerlink" title="监控主机"></a>监控主机</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"> yum -y install httpd php php-mysql php-snmp php-xml php-gd mysql mysql-server epel-release  rrdtool   </span><br><span class="line">yum -y install net-snmp-utils </span><br><span class="line"> </span><br><span class="line">wget -c http://www.cacti.net/downloads/cacti-0.8.8f.tar.gz </span><br><span class="line">tar xf cacti-0.8.8f.tar.gz -C /var/www/html </span><br><span class="line"> <span class="built_in">mv</span> /var/www/html/cacti-0.8.8f/ /var/www/html/cacti </span><br><span class="line">  </span><br><span class="line"> service mysqld start </span><br><span class="line">  </span><br><span class="line">&gt;CREATE DATABASE cactidb; </span><br><span class="line">&gt;USE cactidb; </span><br><span class="line">&gt;SOURCE /var/www/html/cacti/cacti.sql; </span><br><span class="line">&gt;GRANT ALL ON cactidb.* TO cactiuser@localhost IDENTIFIED  BY <span class="string">&#x27;cactiuser&#x27;</span>; </span><br><span class="line">  </span><br><span class="line"> vim /var/www/html/cacti/include/config.php </span><br><span class="line"><span class="variable">$database_type</span> = <span class="string">&quot;mysql&quot;</span>; </span><br><span class="line"><span class="variable">$database_default</span> = <span class="string">&quot;cactidb&quot;</span>; </span><br><span class="line"><span class="variable">$database_hostname</span> = <span class="string">&quot;localhost&quot;</span>; </span><br><span class="line"><span class="variable">$database_username</span> = <span class="string">&quot;cactiuser&quot;</span>; </span><br><span class="line"><span class="variable">$database_password</span> = <span class="string">&quot;cactiuser&quot;</span>; </span><br><span class="line"><span class="variable">$database_port</span> = <span class="string">&quot;3306&quot;</span>; </span><br><span class="line"><span class="variable">$database_ssl</span> = <span class="literal">false</span>; </span><br><span class="line"> </span><br><span class="line">vim /var/www/html/cacti/include/global.php </span><br><span class="line"><span class="variable">$database_type</span> = <span class="string">&quot;mysql&quot;</span>; </span><br><span class="line"><span class="variable">$database_default</span> = <span class="string">&quot;cactidb&quot;</span>; </span><br><span class="line"><span class="variable">$database_hostname</span> = <span class="string">&quot;localhost&quot;</span>; </span><br><span class="line"><span class="variable">$database_username</span> = <span class="string">&quot;cactiuser&quot;</span>; </span><br><span class="line"><span class="variable">$database_password</span> = <span class="string">&quot;cactiuser&quot;</span>; </span><br><span class="line"><span class="variable">$database_port</span> = <span class="string">&quot;3306&quot;</span>; </span><br><span class="line"><span class="variable">$database_ssl</span> = <span class="literal">false</span>; </span><br><span class="line"> </span><br><span class="line">  </span><br><span class="line"> useradd cactiuser &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;cactiuser &quot;</span> | passwd --stdin cactiuser </span><br><span class="line"> <span class="built_in">chown</span> -R cactiuser.cactiuser /var/www/html/cacti/&#123;rra,<span class="built_in">log</span>&#125; </span><br><span class="line"> yum -y install crontabs      <span class="comment">#这个看需要；； </span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;*/1 * * * * cactiuser /usr/bin/php  /var/www/html/cacti/poller.php &amp;&gt;/dev/null&quot;</span>&gt;&gt;/etc/crontab </span><br><span class="line">service crond restart </span><br><span class="line">vim /etc/php.ini </span><br><span class="line">date.timezone = Asia/Shanghai </span><br><span class="line">service httpd restart </span><br></pre></td></tr></table></figure>
-<p><a target="_blank" rel="noopener" href="http://ip/cacti">http://IP/cacti</a>  admin&#x2F;admin<br> <br>(1)添加设备，这个就是103远程主机 </p>
-<p> (2)添加103这个设备的相关信息 
-  </p>
-<p>  一定要保存，然后为其创建图形模板<br>(3)选中所有的模板(图为已经选中过的) </p>
-<p> (4)在图形树这add所有的模板，然后save </p>
-<p> (5)然后查看，等待数据 </p>
-<p>  </p>
-<h2 id="对远端数据库进行监控"><a href="#对远端数据库进行监控" class="headerlink" title="对远端数据库进行监控"></a>对远端数据库进行监控</h2><p> </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"> １、安装percona-mysql-monitor插件 </span><br><span class="line">wget -c https://www.percona.com/downloads/percona-monitoring-plugins/1.1.5/percona-monitoring-plugins-1.1.5.tar.gz </span><br><span class="line">tar xf percona-monitoring-plugins-1.1.5.tar.gz </span><br><span class="line"><span class="built_in">cd</span> percona-monitoring-plugins-1.1.5/cacti/scripts/ </span><br><span class="line"><span class="built_in">cp</span> ss_get_mysql_stats.php /var/www/html/cacti/scripts/ </span><br><span class="line"> </span><br><span class="line">vim /var/www/html/cacti/scripts/ss_get_mysql_stats.php </span><br><span class="line"><span class="variable">$mysql_user</span> = <span class="string">&#x27;cactiuser&#x27;</span>; </span><br><span class="line"><span class="variable">$mysql_pass</span> = <span class="string">&#x27;cactiuser&#x27;</span>; </span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line"> 被监控主机进行授权： </span><br><span class="line"> mysql&gt; grant all on *.* to <span class="string">&#x27;cactiuser&#x27;</span>@<span class="string">&#x27;192.168.122.117&#x27;</span> identified by <span class="string">&#x27;cactiuser&#x27;</span>; </span><br><span class="line">  </span><br><span class="line">(1)添加模板 </span><br><span class="line"> </span><br><span class="line"> (2)在设备那添加想要监控的信息，添加相应的模板 </span><br><span class="line"> </span><br><span class="line">  </span><br><span class="line"> (3)注意，一定要save,然后create Graphs <span class="keyword">for</span> this host </span><br><span class="line"> </span><br><span class="line">  </span><br><span class="line"> (4)在Graph Trees添加相应的模板，注意：所有的操作，一定要save! </span><br><span class="line"> </span><br><span class="line">  </span><br><span class="line"> (5)最后的条目: </span><br><span class="line"> </span><br><span class="line">  (6)出数据了： </span><br></pre></td></tr></table></figure>
-<p> <br> <br>总结：<br> 对于被监控主机，安装net-snmp服务即可，剩下的操作在监控主机上做，对于被监控端的数据库，要进行授权，否则监控主机这是没有办法连接远程数据库的，这个地方要注意； </p>
-<p>另外：我在这个地方所有的用户名和密码都是cactiuser,cactiuser,这个地方自己要注意修改，cacti安装需要本地有数据库，所以那个地方是一个授权，另外远程数据库的授权，是一个完全独立的授权，自己修改监控主机的&#x2F;var&#x2F;www&#x2F;html&#x2F;cacti&#x2F;scripts&#x2F;ss_get_mysql_stats.php即可；；；； 
-  </p>
-<p> 如果出错：<br> smpwalk -v 2c -c public 192.168.122.103 </p>
-<p> 如果不出数据:(不一定在那个时间点出，等会即可)<br> rrdtool fetch &#x2F;var&#x2F;www&#x2F;html&#x2F;cacti&#x2F;rra&#x2F;**** AVERAGE 
-  </p>
-<p>注意：<br>如果在安装cacti，向本地数据库导入cacti.sql时，如果出现错误，一定不会成功，注意查看相关信息；</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/09/29/cacti%E4%BD%BF%E7%94%A8%E5%AE%9E%E9%AA%8C-2-%E5%AF%B9%E8%BF%9C%E7%A8%8BMySQL%E8%BF%9B%E8%A1%8C%E7%9B%91%E6%8E%A7/">展开全文 >></a>
         </p>
       
 

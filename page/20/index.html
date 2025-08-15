@@ -206,6 +206,120 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-34-01MySQL系列之九－MySQL事务和隔离级别" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/07/06/34-01MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B9%9D%EF%BC%8DMySQL%E4%BA%8B%E5%8A%A1%E5%92%8C%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/">34_01MySQL系列之九－MySQL事务和隔离级别</a>
+    </h1>
+  
+
+        
+        <a href="/2015/07/06/34-01MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B9%9D%EF%BC%8DMySQL%E4%BA%8B%E5%8A%A1%E5%92%8C%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/" class="archive-article-date">
+  	<time datetime="2015-07-06T01:17:14.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-07-06</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>管理器： </p>
+<blockquote>
+<p>接受请求<br>创建线程(线程是否回收？放到线程池重用)<br>认证用户<br>建立安全连接(是否使用加密传输，默认明文传输)<br>    <br>缓存<br>是否应该缓存(数据的有效性)<br>权限(哪些可以查看这些缓存)<br>缓存带来的性能影响<br>…<br>    <br>并发控制 (例如同时访问一个文件或数据)<br>MVCC:多版本并发控制 </p>
+</blockquote>
+<p>基本原理:        <br> 在事务中保存数据的快照，这意味着在一个事物里能够看到数据一致的视图，而不用担心这个事务运行多长时间，同时也意味着在同一个时刻不同事务看到的相同表里的数据可能是不同的。    <br> <br> MVCC的基本特征： </p>
+<blockquote>
+<p>    每行数据都存在一个版本，每次数据更新时都更新该版本<br>    修改时Copy出当前版本随意修改，个事务之间无干扰<br>    保存时比较版本号，如果成功（commit），则覆盖原记录；失败则放弃copy（rollback）     <br>读锁：共享锁<br>写锁：独占锁    <br>LOCK TABLES tb_name {READ|WRITE}<br>UNLOCK TABLES </p>
+</blockquote>
+<p>锁粒度: 从大到小，MySQL服务器仅支持表级锁，行锁需要由存储引擎完成 </p>
+<blockquote>
+<p> 表锁<br> 页锁<br> 行锁 </p>
+</blockquote>
+<p>例如:     </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> mysql<span class="operator">&gt;</span>LOCK TABLES xueyuan READ; </span><br><span class="line"> mysql<span class="operator">&gt;</span> <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> xueyuan;  可以正常查看数据 </span><br><span class="line"> mysql<span class="operator">&gt;</span><span class="keyword">INSERT</span> <span class="keyword">INTO</span> xueyuan(学院)<span class="keyword">VALUES</span>(<span class="string">&#x27;信息安全专业&#x27;</span>); </span><br><span class="line"> ERROR <span class="number">1099</span> (HY000): <span class="keyword">Table</span> <span class="string">&#x27;xueyuan&#x27;</span> was locked <span class="keyword">with</span> a READ lock <span class="keyword">and</span> can<span class="string">&#x27;t be updated </span></span><br></pre></td></tr></table></figure>
+
+<p>RDBMS: 要支持事务，必须满足ACID; </p>
+<blockquote>
+<p>原子性（Autmic）：事务在执行性，要做到“要么不做，要么全做！”，就是说不允许事务部分执行。即使因为故障而使事务不能完成，在rollback时也要消除对数据库的影响！<br>一致性（Consistency）：事务的操作应该使数据库从一个一致状态转变到另一个一致的状态！就拿网上购物来说吧，你只有即让商品出库，又让商品进入顾客的购物篮才能构成事务！<br>隔离性（Isolation）：如果多个事务并发执行，应像各个事务独立执行一样！<br>持久性（Durability）：一个成功执行得事务对数据库的作用是持久的，即使数据库因故障出错，也应该能够恢复！<br> <br> 而关系型数据库要根据事务日志来保证ACID。 </p>
+</blockquote>
+<p>事务日志:<br>    重做日志<br>        redo log ： 就算崩溃，也可根据日志无限的进行重做；<br>    撤销日志<br>        undo log：把原来的状态记录下来，以后可进行撤销到原来的状态；<br>        <br>所有的事务操作，都会先写入到事务日志中(内存)，然后再写入到数据文件(硬盘)上；<br>几乎在所有事务引擎上的操作，都会执行两遍，日志中一次，数据文件中一次；<br>日志中的操作仅是操作过程，所以叫做redo。然后事务日志提交写入到数据文件中，所以在整个操作过程中，数据文件的操作慢于日志操作。 </p>
+<p>事务–&gt;事务日志–&gt;同步到硬盘上 </p>
+<p>但是，比如说：<br>    一个事务有4个语句，并且已经提交到日志中，如果硬盘突然崩溃了，就会要根据日志重做这些语句;<br>    如果在执行这些语句时，突然崩溃了，语句还没有完整写入到日志组中，这个事物就会撤销;<br>    日志文件一般不需要太大，例如5M,当这个日志文件已经满的时候，就会提交到硬盘上，但是不应该只有一个日志文件，这个叫做日志组（轮流写入到硬盘）<br>    当然日志的大小应该根据事物的大小进行定义； </p>
+<p>事务日志不应该和数据文件存放到同一个物理设备上；<br> <br>隔离性:<br>    隔离级别   从小到大<br>        READ-UNCOMMITTED     读未提交            读别人尚未提交的数据，这边一修改，就能看到<br>        READ-COMMITTED      读提交          提交以后才能看到，读提交后的数据，但是会出现“幻读”；<br>        REPEATABLE- READ    可重读(default) 无论提不提交，和我这次事务没有影响，但是仍会出现“幻读”；<br>        SERIALIZABLE        可串行<br>        <br>        隔离级别越高，并发能力越低。<br>        <br>        应根据业务进行调整，有时会是飞跃性的；<br>        <br>    SHOW GLOBAL VARIABLES LIKE ‘%iso%’    ; 可查看默认隔离级别； 
+         </p>
+<p>服务器变量:    <br>    全局变量:<br>        修改后不影响当前会话，只对新建的会话有效<br>    会话变量:<br>        仅对当前会话有效，立即生效<br>    永久有效:<br>        修改配置文件         
+         </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">         </span><br><span class="line"><span class="keyword">SET</span>  tx_isolation<span class="operator">=</span><span class="string">&#x27;READ-UNCOMMITTED&#x27;</span>; </span><br><span class="line"><span class="keyword">SELECT</span> @<span class="variable">@tx_isolcation</span>; </span><br><span class="line"> </span><br><span class="line"><span class="keyword">SET</span> tx_isolation<span class="operator">=</span><span class="string">&#x27;REPEATABLE-READ&#x27;</span> </span><br><span class="line"><span class="keyword">SHOW</span> <span class="keyword">GLOBAL</span> VARIABLES <span class="keyword">LIKE</span> &quot;%ISO%&quot;; </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">实验:体验四种隔离级别; </span><br><span class="line"> </span><br><span class="line">需要注意的是，每次都应该更改事务级别都应该断开重连，然后进行修改 </span><br><span class="line"><span class="keyword">SET</span> tx_isolation<span class="operator">=</span><span class="string">&#x27;READ-UNCOMMITTED&#x27;</span>; </span><br><span class="line"><span class="keyword">SELECT</span> @<span class="variable">@tx_isolcation</span>; </span><br><span class="line">A事务没提交，B也可以看到变化; </span><br><span class="line"> </span><br><span class="line"><span class="keyword">SET</span> tx_isolation<span class="operator">=</span><span class="string">&#x27;READ-COMMITTED&#x27;</span>; </span><br><span class="line"><span class="keyword">SELECT</span> @<span class="variable">@tx_isolcation</span>; </span><br><span class="line">只有A事务提交后，B也已看到变化; </span><br><span class="line"> </span><br><span class="line"><span class="keyword">SET</span> tx_isolation<span class="operator">=</span><span class="string">&#x27;REPEATABLE-READ&#x27;</span>; </span><br><span class="line"><span class="keyword">SELECT</span> @<span class="variable">@tx_isolcation</span>; </span><br><span class="line">只有B提交后，再次查看才能看到变化 </span><br><span class="line"> </span><br><span class="line"><span class="keyword">SET</span> tx_isolation<span class="operator">=</span><span class="string">&#x27;SERIALIABLE&#x27;</span>; </span><br><span class="line"><span class="keyword">SELECT</span> @<span class="variable">@tx_isolcation</span>; </span><br><span class="line">A不提交不能进行查看 </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+<p>        <br>MVCC的介绍:<br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/wenfeng762/archive/2011/11/06/2238108.html">http://www.cnblogs.com/wenfeng762/archive/2011/11/06/2238108.html</a><br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/dongqingswt/p/3460440.html">http://www.cnblogs.com/dongqingswt/p/3460440.html</a> </p>
+<p>事务日志:<br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/wangkongming/p/3684950.html">http://www.cnblogs.com/wangkongming/p/3684950.html</a>         </p>
+<p>隔离级别:  建议多读这个。。。<br><a target="_blank" rel="noopener" href="http://xm-king.iteye.com/blog/770721">http://xm-king.iteye.com/blog/770721</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/07/06/34-01MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B9%9D%EF%BC%8DMySQL%E4%BA%8B%E5%8A%A1%E5%92%8C%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-33-04MySQL系列之八－多表查询、子查询及视图" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1105,103 +1219,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/05/14/31-02bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%9C%A8bash%E8%84%9A%E6%9C%AC%E4%B8%AD%E4%BD%BF%E7%94%A8%E9%80%89%E9%A1%B9/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-30-04nss" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/05/10/30-04nss/">30_04nss</a>
-    </h1>
-  
-
-        
-        <a href="/2015/05/10/30-04nss/" class="archive-article-date">
-  	<time datetime="2015-05-10T15:10:02.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-05-10</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>————————————————–常用模块简介———————————————————-<br>&#x2F;etc&#x2F;pam.d&#x2F;* : 每个程序个别的PAM配置文件<br>&#x2F;lib(64)&#x2F;security&#x2F;* : PAM模块文件的实际放置目录<br>&#x2F;etc&#x2F;secutiry&#x2F;* : 其他PAM环境的配置文件 </p>
-<p>1、实现指定组用户可以登录系统<br>&#x2F;etc&#x2F;pam.d&#x2F;login实际上指向 &#x2F;etc&#x2F;pam.d&#x2F;system-auth,所以，修改<br>#vim &#x2F;etc&#x2F;pam.d&#x2F;system-auth<br>在auth    required pam_env.so后面添加，因为这行做环境变量等操作<br>auth    required pam_listfile.so item&#x3D;group sense&#x3D;allow file&#x3D;&#x2F;etc&#x2F;pam_allowgroups<br>#vim &#x2F;etc&#x2F;pam_allowgroups  (把权限改成700)<br>root<br>allowgrp<br>#groupadd allowgrp<br>#usermod -a -G allowgrp fedora<br>即可实现某些运行的组可以登录（这种需要用户名和密码） </p>
-<p>方式二:<br>vim &#x2F;etc&#x2F;pam.d&#x2F;su<br>#auth    sufficient    pam_wheel.so trust use_uid<br>把这行启用，另外添加用户到wheel组中，用户可以直接su到root。 </p>
-<p>个人觉得挺重要的是&#x2F;etc&#x2F;security&#x2F;limits.conf文件: </p>
-<p>domain:<br>    a user name<br>    a group name,with @group syntax<br>    …<br>    <br>type:<br>    soft:软限制<br>    hard:硬限制<br>    -   :表示软硬都包含 </p>
-<p>item:<br>    fsize :文件的最大值(KB)<br>    nofile:最大文件个数 ulimit -n<br>    nproc:最大进程个数 ulimit -u<br>    data  :最大数据大小<br>如果内容多，可以建立保存到&#x2F;etc&#x2F;security&#x2F;limit.d&#x2F;*.conf </p>
-<p>ulimit:<br>-a      显示所有限制<br>-d      进程数据段大小的上限<br>-f      shell所能创建的文件大小的上限<br>-m      驻留内存大小的上限<br>-n      打开文件数的上限<br>-u      进程数的上限<br>-v      虚拟内存的上限 </p>
-<p>示例:<br>    <br>1、限制test用户只能新建100M的文件，且大于90M便会有警告<br>    #vim &#x2F;etc&#x2F;security&#x2F;limits.conf<br>    test    soft    fsize    90000<br>    test    hard    fsize    100000<br>    $ulimit -a 可以看到有限制<br>    $dd if&#x3D;&#x2F;dev&#x2F;zero of&#x3D;test bs&#x3D;1M count&#x3D;110<br>    File size limit exceeded<br>2、限制pro1这个组，每次只能有一个用户登录系统<br>    #vim &#x2F;etc&#x2F;security&#x2F;limits.conf<br>    @pro1    hard    maxlogins    1 </p>
-<p>另外想说明，在设置文件最大打开数的时候，不可以直接设置成unlimited,否则会无法验证登录。 </p>
-<p>ulimit unlimited 不限制用户可以使用的资源，但本设置对可打开的最大文件数（max open files） 　　<br>和可同时运行的最大进程数（max user processes）无效 　　 </p>
-<p>另外在设置最大打开文件数时，看到《构建Linux高可用服务器》P56说道在&#x2F;etc&#x2F;security&#x2F;limits.conf中开机后不会生效，这个我在实验时没有遇到，<br>不知道是不是6+版本什么其他的原因。。 </p>
-<p>个人觉得这篇文章不错:<br><a target="_blank" rel="noopener" href="http://blog.itpub.net/22418990/viewspace-715239/">http://blog.itpub.net/22418990/viewspace-715239/</a><br>更多关于这个文件和ulimit命令，可以参考这个文章!! </p>
-<p>关于常见模块的介绍，可以直接如下。<br>这篇文章主要参考《鸟哥的Linux私房菜》，更多可直接参阅原书。。 </p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/05/10/30-04nss/">展开全文 >></a>
         </p>
       
 

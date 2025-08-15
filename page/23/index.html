@@ -206,6 +206,95 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-20-01-实验-DNS简单配置主从" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/04/05/20-01-%E5%AE%9E%E9%AA%8C-DNS%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE%E4%B8%BB%E4%BB%8E/">20_01_实验_DNS简单配置主从</a>
+    </h1>
+  
+
+        
+        <a href="/2015/04/05/20-01-%E5%AE%9E%E9%AA%8C-DNS%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE%E4%B8%BB%E4%BB%8E/" class="archive-article-date">
+  	<time datetime="2015-04-05T06:34:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-04-05</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>环境说明:<br> 主DNS：192.168.122.104<br> 副DNS：192.168.122.64 </p>
+<p>yum -y install bind*<br>chkconfig –level 2345 named on         &#x2F;&#x2F;两个都做；；； </p>
+<p>主DNS服务器: </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#cp /etc/named.conf /etc/named.conf.bak </span></span><br><span class="line"><span class="comment">#vim /etc/named.conf </span></span><br><span class="line">options &#123; </span><br><span class="line">        directory <span class="string">&quot;/var/named&quot;</span>; </span><br><span class="line">        notify <span class="built_in">yes</span>; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone <span class="string">&quot;.&quot;</span> IN &#123; </span><br><span class="line">        <span class="built_in">type</span> hint; </span><br><span class="line">        file <span class="string">&quot;named.ca&quot;</span>; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone <span class="string">&quot;localhost&quot;</span> IN &#123; </span><br><span class="line">        <span class="built_in">type</span> master; </span><br><span class="line">        file <span class="string">&quot;named.localhost&quot;</span>; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone <span class="string">&quot;0.0.127.in-addr-arpa&quot;</span> IN &#123; </span><br><span class="line">        <span class="built_in">type</span> master; </span><br><span class="line">        file <span class="string">&quot;named.loopback&quot;</span>; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone <span class="string">&quot;geasyheart.com&quot;</span> IN &#123; </span><br><span class="line">        <span class="built_in">type</span> master; </span><br><span class="line">        allow-transfer &#123; 192.168.122.64; &#125;; </span><br><span class="line">        file <span class="string">&quot;geasyheart.com.zone&quot;</span>; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone <span class="string">&quot;122.168.192.in-addr-arpa&quot;</span> IN &#123; </span><br><span class="line">        <span class="built_in">type</span> master; </span><br><span class="line">        file <span class="string">&quot;122.168.192.zone&quot;</span>; </span><br><span class="line">&#125;; </span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"><span class="comment">#vim /var/named/geasyheart.com.zone </span></span><br><span class="line"><span class="variable">$TTL</span>    68400; </span><br><span class="line">@       IN      SOA     ns1.geasyheart.com.        admin.geasyheart.com.( </span><br><span class="line"> 20150101 </span><br><span class="line">                1H </span><br><span class="line">                2M </span><br><span class="line">                2D </span><br><span class="line">                6H) </span><br><span class="line">        IN       NS      ns1 </span><br><span class="line">        IN       NS      ns2 </span><br><span class="line">        IN       MX      10      mail </span><br><span class="line">ns1     IN       A       192.168.122.104 </span><br><span class="line">ns2     IN       A       　　192.168.122.64 </span><br><span class="line">www     IN       A       192.168.122.64 </span><br><span class="line">ww IN     CNAME  www </span><br><span class="line">mail IN A 192.168.122.104 </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">#chmod 640 /var/named/geasyheart.com.zone  </span></span><br><span class="line"><span class="comment">#chown root:named /var/named/geasyheart.com.zone  </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#vim /var/named/122.168.192.zone </span></span><br><span class="line"> </span><br><span class="line"><span class="variable">$TTL</span> 86400; </span><br><span class="line">@       IN      SOA     ns1.geasyheart.com.     admin.geasyheart.com. ( </span><br><span class="line">                20150105 </span><br><span class="line">                1H </span><br><span class="line">                2M </span><br><span class="line">                2D </span><br><span class="line">                6H) </span><br><span class="line">        　IN      NS      ns1.geasyheart.com. </span><br><span class="line">        　IN      NS      ns2.geasyheart.com. </span><br><span class="line">104     IN      PTR     ns1.geasyheart.com. </span><br><span class="line">64    　IN      PTR     ns2.geasyheart.com. </span><br><span class="line">104     IN      PTR     www.geasyheart.com. </span><br><span class="line">104     IN      PTR     mail.geasyheart.com. </span><br><span class="line"> </span><br><span class="line"><span class="built_in">chmod</span> 640 /var/named/106.17.172.zone  </span><br><span class="line"><span class="built_in">chown</span> root:named /var/named/106.17.172.zone  </span><br><span class="line"><span class="comment">#service named start </span></span><br><span class="line"> </span><br><span class="line">从DNS服务器: </span><br><span class="line"><span class="comment">#yum install bind </span></span><br><span class="line"><span class="comment">#cp /etc/named.conf /etc/named.conf.bak </span></span><br><span class="line"><span class="comment">#vim /etc/named.conf </span></span><br><span class="line">options &#123; </span><br><span class="line">        directory <span class="string">&quot;/var/named&quot;</span>; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone <span class="string">&quot;geasyheart.com&quot;</span> IN   &#123; </span><br><span class="line">        <span class="built_in">type</span> slave; </span><br><span class="line">        file <span class="string">&quot;slaves/geasyheart.com.zone&quot;</span>; </span><br><span class="line">        masters &#123; 192.168.122.104; &#125;; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line">zone <span class="string">&quot;122.168.192.in-addr-arpa&quot;</span> IN &#123; </span><br><span class="line">        <span class="built_in">type</span> slave; </span><br><span class="line">        file <span class="string">&quot;slaves/192.168.122.zone&quot;</span>; </span><br><span class="line">        masters &#123; 192.168.122.104; &#125;; </span><br><span class="line">&#125;; </span><br><span class="line"> </span><br><span class="line"><span class="comment">#chown root.named /etc/named.cof </span></span><br><span class="line"><span class="comment">#chmod 640 /etc/named.conf </span></span><br><span class="line"><span class="comment">#service named start </span></span><br><span class="line">就会完成主从DNS传送 （更多细节参考文档说明） </span><br></pre></td></tr></table></figure>
+<p>&#x2F;&#x2F;注意：如果DNS的记录被更新了，那么版本号应该更新；；；这个需要注意；； </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/04/05/20-01-%E5%AE%9E%E9%AA%8C-DNS%E7%AE%80%E5%8D%95%E9%85%8D%E7%BD%AE%E4%B8%BB%E4%BB%8E/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-14-01-2-grub2引导修复" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1127,100 +1216,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/03/27/18-01%E5%8A%A0%E5%AF%86%E7%B1%BB%E5%9E%8B%E5%8F%8A%E5%85%B6%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-37-03Linux集群系列之六-LVS持久连接" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/27/37-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%85%AD-LVS%E6%8C%81%E4%B9%85%E8%BF%9E%E6%8E%A5/">37_03Linux集群系列之六--LVS持久连接</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/27/37-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%85%AD-LVS%E6%8C%81%E4%B9%85%E8%BF%9E%E6%8E%A5/" class="archive-article-date">
-  	<time datetime="2015-03-27T10:19:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-27</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>LVS健康检查脚本: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">vim health.sh </span><br><span class="line"><span class="comment">#!/bin/bash </span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line">VIP=192.168.100.1 </span><br><span class="line">FAIL_BACK=127.0.0.1  <span class="comment">#定义全挂了上director; </span></span><br><span class="line">RS=(<span class="string">&quot;192.168.100.7&quot;</span> <span class="string">&quot;192.168.100.8&quot;</span>) </span><br><span class="line">CPORT=80 </span><br><span class="line">RW=(<span class="string">&quot;2&quot;</span>,<span class="string">&quot;1&quot;</span>)   <span class="comment">#定义权重 </span></span><br><span class="line">RPORT=80 </span><br><span class="line"><span class="built_in">declare</span> -a RSSTATUS </span><br><span class="line">TYPE=g </span><br><span class="line">CHKLOOP=3 </span><br><span class="line">LOG=/var/log/ipvsmonitor.log </span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="title">addrs</span></span>() &#123; </span><br><span class="line">    ipvsadm -a -t <span class="variable">$VIP</span>:<span class="variable">$CPORT</span> -r <span class="variable">$1</span>:<span class="variable">$RPORT</span> -<span class="variable">$TYPE</span> -w <span class="variable">$2</span> </span><br><span class="line">    [ $? -eq 0 ] &amp;&amp; <span class="built_in">return</span> 0 || <span class="built_in">return</span> 1 </span><br><span class="line">&#125; </span><br><span class="line"><span class="function"><span class="title">delrs</span></span>() &#123; </span><br><span class="line">    ipvsadm -d -t <span class="variable">$VIP</span>:<span class="variable">$CPORT</span> -r <span class="variable">$1</span>:<span class="variable">$RPORT</span> </span><br><span class="line">    [ $? -eq 0 ]&amp;&amp; <span class="built_in">return</span> 0 || <span class="built_in">return</span> 1 </span><br><span class="line">&#125; </span><br><span class="line"><span class="function"><span class="title">checkrs</span></span>() &#123; </span><br><span class="line">    <span class="built_in">local</span> I=1 </span><br><span class="line">    <span class="keyword">while</span> [ <span class="variable">$I</span> -le <span class="variable">$CHKLOOP</span> ];<span class="keyword">do</span> </span><br><span class="line">        <span class="keyword">if</span> curl --connect-timeout 1 http://<span class="variable">$1</span> &amp;&gt;/dev/null;<span class="keyword">then</span> </span><br><span class="line">             <span class="built_in">return</span> 0 </span><br><span class="line">         <span class="keyword">fi</span> </span><br><span class="line">         <span class="built_in">let</span> I++ </span><br><span class="line">    <span class="keyword">done</span> </span><br><span class="line">    <span class="built_in">return</span> 1 </span><br><span class="line">&#125; </span><br><span class="line"><span class="function"><span class="title">initstatus</span></span>()&#123; </span><br><span class="line">    <span class="built_in">local</span> I </span><br><span class="line">    <span class="built_in">local</span> COUNT=0 </span><br><span class="line">    <span class="keyword">for</span> I <span class="keyword">in</span> <span class="variable">$&#123;RS[*]&#125;</span>;<span class="keyword">do</span> </span><br><span class="line">        <span class="keyword">if</span>  ipvsadm -L -n | grep <span class="string">&quot;<span class="variable">$I</span>:<span class="variable">$RPORT</span>&quot;</span> &amp;&amp; &gt;/dev/null;<span class="keyword">then</span> </span><br><span class="line">            RSSTATUS [<span class="variable">$COUNT</span>]=1 </span><br><span class="line">        <span class="keyword">else</span> </span><br><span class="line">            RSSTATUS[<span class="variable">$COUNT</span>]=0 </span><br><span class="line">        <span class="keyword">fi</span> </span><br><span class="line">    <span class="built_in">let</span> COUNT++ </span><br><span class="line">    <span class="keyword">done</span> </span><br><span class="line">&#125; </span><br><span class="line">initstatus </span><br><span class="line"><span class="keyword">while</span> :; <span class="keyword">do</span> </span><br><span class="line"><span class="built_in">let</span> COUNT=0 </span><br><span class="line"><span class="keyword">for</span> I <span class="keyword">in</span> <span class="variable">$&#123;RS[*]&#125;</span>;<span class="keyword">do</span> </span><br><span class="line">    <span class="keyword">if</span>   checkrs <span class="variable">$I</span>;<span class="keyword">then</span> </span><br><span class="line">        <span class="keyword">if</span>  [ <span class="variable">$&#123;RSSTATUS[$COUNT]&#125;</span> -eq 0 ];<span class="keyword">then</span> </span><br><span class="line">            addrs <span class="variable">$I</span> <span class="variable">$RW</span>[<span class="variable">$COUNT</span>] </span><br><span class="line">            [ $? -eq 0 ] &amp;&amp; RSSTATUS[<span class="variable">$COUNT</span>]=1 &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;`date +%F %H:%M:%S`,<span class="variable">$I</span> is back.&quot;</span> &gt;&gt; <span class="variable">$LOG</span> </span><br><span class="line">        <span class="keyword">fi</span> </span><br><span class="line">    <span class="keyword">else</span> </span><br><span class="line">        <span class="keyword">if</span>  [ <span class="variable">$&#123;RSSTATUS[$COUNT]&#125;</span> -eq 1 ];<span class="keyword">then</span> </span><br><span class="line">            delrs <span class="variable">$I</span> </span><br><span class="line">            [ $? -eq 0 ] &amp;&amp; RSSTATUS[<span class="variable">$COUNT</span>]=0 &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;`date +%F %H:%M:%S`,<span class="variable">$I</span> is gone.&quot;</span> &gt;&gt; <span class="variable">$LOG</span> </span><br><span class="line">        <span class="keyword">fi</span> </span><br><span class="line">    <span class="keyword">fi</span> </span><br><span class="line">    <span class="built_in">let</span> COUNT++ </span><br><span class="line"><span class="keyword">done</span> </span><br><span class="line"><span class="built_in">sleep</span> 5 </span><br><span class="line"><span class="keyword">done</span> </span><br></pre></td></tr></table></figure>
-
-<p>LVS持久连接:<br>    无论使用什么算法，LVS持久都能实现在一定时间内，将来自同一个客户端请求派发至此前选定的RS; </p>
-<p>    持久连接模板(内存缓冲区):<br>        每一个客户端及分配给它的RS的映射关系；以实现持久连接； </p>
-<p>在基于SSL,需要用到持久连接 </p>
-<p>PPC(持久端口连接):将来自于同一个客户端对同一个集群服务的请求，始终定向至此前选定的RS:    <br>PCC(持久客户端连接):将来自于同一个客户端对所有端口的请求，始终定向至此前选定的RS;<br>    把所有端口统统定义为集群服务，一律向RS转发；<br>PNMPP:持久防火墙标记连接 </p>
-<p>1、例如把telnet做成LVS均衡 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">PPC: </span><br><span class="line">100.7: </span><br><span class="line">    chkconfig telnet on </span><br><span class="line">    service xinetd start </span><br><span class="line">    useradd <span class="string">&quot;hadoop&quot;</span> &amp;&amp; passwd --stdin <span class="string">&quot;hadoop&quot;</span> hadoop </span><br><span class="line">100.8: </span><br><span class="line">    chkconfig telnet on </span><br><span class="line">    service xinetd start </span><br><span class="line">    useradd <span class="string">&quot;hadoop&quot;</span> &amp;&amp; passwd --stdin <span class="string">&quot;hadoop&quot;</span> hadoop </span><br><span class="line"> </span><br><span class="line">100.3: </span><br><span class="line">    ipvsadm  -A -t 192.168.100.3:23 -s rr </span><br><span class="line">    ipvsadm -a -t 192.168.100.3:23 -r 192.168.100.7 -g </span><br><span class="line">    ipvsadm -a -t 192.168.100.3:23 -r 192.168.100.8 -g </span><br><span class="line"> </span><br><span class="line">如果此时改为持久连接 </span><br><span class="line">    ipvsadm -E -t 192.168.100.3:23 -s rr  -p 3600 </span><br><span class="line">会发现一直连接一个主机。 </span><br><span class="line"> </span><br><span class="line">PCC:    :0 的意思指所有的端口都设为集群服务 </span><br><span class="line">    ipvsadm -C </span><br><span class="line">    ipvsadm -A -t 192.168.100.3:0 -s rr  -p 600 </span><br><span class="line">    ipvsadm -a -t 192.168.100.3:0 -r 192.168.100.7 -g -w 2 </span><br><span class="line">    ipvsadm -a -t 192.168.100.3:0 -r 192.168.100.8 -g -w 1 </span><br><span class="line"> </span><br><span class="line">比如我想让80端口和22端口组合成一个集群服务，如上所示，PPC只能对一个服务做集群，而PCC是对所有端口做集群服务，那么，可以使用一种方法，将这两者归并成一个服务，那么这种方式就叫做防火墙标记； </span><br><span class="line">防火墙标记: </span><br><span class="line">    PREROUTING : </span><br><span class="line">        80:8 </span><br><span class="line">        443:8 </span><br><span class="line">将80和443端口标记成同一个防火墙标记，那么在写规则的时候，可以将两者绑定到一起，实现防火墙标记持久连接。 </span><br><span class="line"> </span><br><span class="line">ipvsadm -C </span><br><span class="line">iptables -t mangle -A PREROUTING -d 192.168.100.3  -i eth0 -p tcp --dport 80 -j MARK --set-mark 8 </span><br><span class="line">iptables -t mangle -A PREROUTING -d 192.168.100.3 -i eth0 -p tcp --dport 443 -j  MARK --set-mark 8 </span><br><span class="line">ipvsadm -A -f 8 -s rr -p 600 </span><br><span class="line">ipvsadm -a -f 8 -r 192.168.100.7 -g -w 2 </span><br><span class="line">ipvsadm -a -f 8 -r 192.168.100.8 -g -w 5 </span><br><span class="line"> </span><br><span class="line">inotify+rsync </span><br><span class="line">sersync(同步工具，可以使用这个) </span><br><span class="line">https://code.google.com/p/sersync/ </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">如果有时间，建议看下这个组合。 </span><br><span class="line">ldirectord＋LVS </span><br><span class="line">    ldirectord: </span><br><span class="line">    生成规则 </span><br><span class="line">    实现健康状况检查 </span><br></pre></td></tr></table></figure>
-<p>m.blog.csdn.net&#x2F;blog&#x2F;wyzxg&#x2F;17171223</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/27/37-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%85%AD-LVS%E6%8C%81%E4%B9%85%E8%BF%9E%E6%8E%A5/">展开全文 >></a>
         </p>
       
 

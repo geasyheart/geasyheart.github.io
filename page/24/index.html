@@ -206,6 +206,100 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-37-03Linux集群系列之六-LVS持久连接" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/03/27/37-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%85%AD-LVS%E6%8C%81%E4%B9%85%E8%BF%9E%E6%8E%A5/">37_03Linux集群系列之六--LVS持久连接</a>
+    </h1>
+  
+
+        
+        <a href="/2015/03/27/37-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%85%AD-LVS%E6%8C%81%E4%B9%85%E8%BF%9E%E6%8E%A5/" class="archive-article-date">
+  	<time datetime="2015-03-27T10:19:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-27</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>LVS健康检查脚本: </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">vim health.sh </span><br><span class="line"><span class="comment">#!/bin/bash </span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line">VIP=192.168.100.1 </span><br><span class="line">FAIL_BACK=127.0.0.1  <span class="comment">#定义全挂了上director; </span></span><br><span class="line">RS=(<span class="string">&quot;192.168.100.7&quot;</span> <span class="string">&quot;192.168.100.8&quot;</span>) </span><br><span class="line">CPORT=80 </span><br><span class="line">RW=(<span class="string">&quot;2&quot;</span>,<span class="string">&quot;1&quot;</span>)   <span class="comment">#定义权重 </span></span><br><span class="line">RPORT=80 </span><br><span class="line"><span class="built_in">declare</span> -a RSSTATUS </span><br><span class="line">TYPE=g </span><br><span class="line">CHKLOOP=3 </span><br><span class="line">LOG=/var/log/ipvsmonitor.log </span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="title">addrs</span></span>() &#123; </span><br><span class="line">    ipvsadm -a -t <span class="variable">$VIP</span>:<span class="variable">$CPORT</span> -r <span class="variable">$1</span>:<span class="variable">$RPORT</span> -<span class="variable">$TYPE</span> -w <span class="variable">$2</span> </span><br><span class="line">    [ $? -eq 0 ] &amp;&amp; <span class="built_in">return</span> 0 || <span class="built_in">return</span> 1 </span><br><span class="line">&#125; </span><br><span class="line"><span class="function"><span class="title">delrs</span></span>() &#123; </span><br><span class="line">    ipvsadm -d -t <span class="variable">$VIP</span>:<span class="variable">$CPORT</span> -r <span class="variable">$1</span>:<span class="variable">$RPORT</span> </span><br><span class="line">    [ $? -eq 0 ]&amp;&amp; <span class="built_in">return</span> 0 || <span class="built_in">return</span> 1 </span><br><span class="line">&#125; </span><br><span class="line"><span class="function"><span class="title">checkrs</span></span>() &#123; </span><br><span class="line">    <span class="built_in">local</span> I=1 </span><br><span class="line">    <span class="keyword">while</span> [ <span class="variable">$I</span> -le <span class="variable">$CHKLOOP</span> ];<span class="keyword">do</span> </span><br><span class="line">        <span class="keyword">if</span> curl --connect-timeout 1 http://<span class="variable">$1</span> &amp;&gt;/dev/null;<span class="keyword">then</span> </span><br><span class="line">             <span class="built_in">return</span> 0 </span><br><span class="line">         <span class="keyword">fi</span> </span><br><span class="line">         <span class="built_in">let</span> I++ </span><br><span class="line">    <span class="keyword">done</span> </span><br><span class="line">    <span class="built_in">return</span> 1 </span><br><span class="line">&#125; </span><br><span class="line"><span class="function"><span class="title">initstatus</span></span>()&#123; </span><br><span class="line">    <span class="built_in">local</span> I </span><br><span class="line">    <span class="built_in">local</span> COUNT=0 </span><br><span class="line">    <span class="keyword">for</span> I <span class="keyword">in</span> <span class="variable">$&#123;RS[*]&#125;</span>;<span class="keyword">do</span> </span><br><span class="line">        <span class="keyword">if</span>  ipvsadm -L -n | grep <span class="string">&quot;<span class="variable">$I</span>:<span class="variable">$RPORT</span>&quot;</span> &amp;&amp; &gt;/dev/null;<span class="keyword">then</span> </span><br><span class="line">            RSSTATUS [<span class="variable">$COUNT</span>]=1 </span><br><span class="line">        <span class="keyword">else</span> </span><br><span class="line">            RSSTATUS[<span class="variable">$COUNT</span>]=0 </span><br><span class="line">        <span class="keyword">fi</span> </span><br><span class="line">    <span class="built_in">let</span> COUNT++ </span><br><span class="line">    <span class="keyword">done</span> </span><br><span class="line">&#125; </span><br><span class="line">initstatus </span><br><span class="line"><span class="keyword">while</span> :; <span class="keyword">do</span> </span><br><span class="line"><span class="built_in">let</span> COUNT=0 </span><br><span class="line"><span class="keyword">for</span> I <span class="keyword">in</span> <span class="variable">$&#123;RS[*]&#125;</span>;<span class="keyword">do</span> </span><br><span class="line">    <span class="keyword">if</span>   checkrs <span class="variable">$I</span>;<span class="keyword">then</span> </span><br><span class="line">        <span class="keyword">if</span>  [ <span class="variable">$&#123;RSSTATUS[$COUNT]&#125;</span> -eq 0 ];<span class="keyword">then</span> </span><br><span class="line">            addrs <span class="variable">$I</span> <span class="variable">$RW</span>[<span class="variable">$COUNT</span>] </span><br><span class="line">            [ $? -eq 0 ] &amp;&amp; RSSTATUS[<span class="variable">$COUNT</span>]=1 &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;`date +%F %H:%M:%S`,<span class="variable">$I</span> is back.&quot;</span> &gt;&gt; <span class="variable">$LOG</span> </span><br><span class="line">        <span class="keyword">fi</span> </span><br><span class="line">    <span class="keyword">else</span> </span><br><span class="line">        <span class="keyword">if</span>  [ <span class="variable">$&#123;RSSTATUS[$COUNT]&#125;</span> -eq 1 ];<span class="keyword">then</span> </span><br><span class="line">            delrs <span class="variable">$I</span> </span><br><span class="line">            [ $? -eq 0 ] &amp;&amp; RSSTATUS[<span class="variable">$COUNT</span>]=0 &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;`date +%F %H:%M:%S`,<span class="variable">$I</span> is gone.&quot;</span> &gt;&gt; <span class="variable">$LOG</span> </span><br><span class="line">        <span class="keyword">fi</span> </span><br><span class="line">    <span class="keyword">fi</span> </span><br><span class="line">    <span class="built_in">let</span> COUNT++ </span><br><span class="line"><span class="keyword">done</span> </span><br><span class="line"><span class="built_in">sleep</span> 5 </span><br><span class="line"><span class="keyword">done</span> </span><br></pre></td></tr></table></figure>
+
+<p>LVS持久连接:<br>    无论使用什么算法，LVS持久都能实现在一定时间内，将来自同一个客户端请求派发至此前选定的RS; </p>
+<p>    持久连接模板(内存缓冲区):<br>        每一个客户端及分配给它的RS的映射关系；以实现持久连接； </p>
+<p>在基于SSL,需要用到持久连接 </p>
+<p>PPC(持久端口连接):将来自于同一个客户端对同一个集群服务的请求，始终定向至此前选定的RS:    <br>PCC(持久客户端连接):将来自于同一个客户端对所有端口的请求，始终定向至此前选定的RS;<br>    把所有端口统统定义为集群服务，一律向RS转发；<br>PNMPP:持久防火墙标记连接 </p>
+<p>1、例如把telnet做成LVS均衡 </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">PPC: </span><br><span class="line">100.7: </span><br><span class="line">    chkconfig telnet on </span><br><span class="line">    service xinetd start </span><br><span class="line">    useradd <span class="string">&quot;hadoop&quot;</span> &amp;&amp; passwd --stdin <span class="string">&quot;hadoop&quot;</span> hadoop </span><br><span class="line">100.8: </span><br><span class="line">    chkconfig telnet on </span><br><span class="line">    service xinetd start </span><br><span class="line">    useradd <span class="string">&quot;hadoop&quot;</span> &amp;&amp; passwd --stdin <span class="string">&quot;hadoop&quot;</span> hadoop </span><br><span class="line"> </span><br><span class="line">100.3: </span><br><span class="line">    ipvsadm  -A -t 192.168.100.3:23 -s rr </span><br><span class="line">    ipvsadm -a -t 192.168.100.3:23 -r 192.168.100.7 -g </span><br><span class="line">    ipvsadm -a -t 192.168.100.3:23 -r 192.168.100.8 -g </span><br><span class="line"> </span><br><span class="line">如果此时改为持久连接 </span><br><span class="line">    ipvsadm -E -t 192.168.100.3:23 -s rr  -p 3600 </span><br><span class="line">会发现一直连接一个主机。 </span><br><span class="line"> </span><br><span class="line">PCC:    :0 的意思指所有的端口都设为集群服务 </span><br><span class="line">    ipvsadm -C </span><br><span class="line">    ipvsadm -A -t 192.168.100.3:0 -s rr  -p 600 </span><br><span class="line">    ipvsadm -a -t 192.168.100.3:0 -r 192.168.100.7 -g -w 2 </span><br><span class="line">    ipvsadm -a -t 192.168.100.3:0 -r 192.168.100.8 -g -w 1 </span><br><span class="line"> </span><br><span class="line">比如我想让80端口和22端口组合成一个集群服务，如上所示，PPC只能对一个服务做集群，而PCC是对所有端口做集群服务，那么，可以使用一种方法，将这两者归并成一个服务，那么这种方式就叫做防火墙标记； </span><br><span class="line">防火墙标记: </span><br><span class="line">    PREROUTING : </span><br><span class="line">        80:8 </span><br><span class="line">        443:8 </span><br><span class="line">将80和443端口标记成同一个防火墙标记，那么在写规则的时候，可以将两者绑定到一起，实现防火墙标记持久连接。 </span><br><span class="line"> </span><br><span class="line">ipvsadm -C </span><br><span class="line">iptables -t mangle -A PREROUTING -d 192.168.100.3  -i eth0 -p tcp --dport 80 -j MARK --set-mark 8 </span><br><span class="line">iptables -t mangle -A PREROUTING -d 192.168.100.3 -i eth0 -p tcp --dport 443 -j  MARK --set-mark 8 </span><br><span class="line">ipvsadm -A -f 8 -s rr -p 600 </span><br><span class="line">ipvsadm -a -f 8 -r 192.168.100.7 -g -w 2 </span><br><span class="line">ipvsadm -a -f 8 -r 192.168.100.8 -g -w 5 </span><br><span class="line"> </span><br><span class="line">inotify+rsync </span><br><span class="line">sersync(同步工具，可以使用这个) </span><br><span class="line">https://code.google.com/p/sersync/ </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">如果有时间，建议看下这个组合。 </span><br><span class="line">ldirectord＋LVS </span><br><span class="line">    ldirectord: </span><br><span class="line">    生成规则 </span><br><span class="line">    实现健康状况检查 </span><br></pre></td></tr></table></figure>
+<p>m.blog.csdn.net&#x2F;blog&#x2F;wyzxg&#x2F;17171223</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/03/27/37-03Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%85%AD-LVS%E6%8C%81%E4%B9%85%E8%BF%9E%E6%8E%A5/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-18-02SSL协议及OpenSSL及创建私有CA" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1365,96 +1459,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/03/22/03-bash%E7%89%B9%E6%80%A7%E8%AE%B2%E8%A7%A3/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-19-01DNS服务相关概念简介" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/03/21/19-01DNS%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%E7%AE%80%E4%BB%8B/">19_01DNS服务相关概念简介</a>
-    </h1>
-  
-
-        
-        <a href="/2015/03/21/19-01DNS%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%E7%AE%80%E4%BB%8B/" class="archive-article-date">
-  	<time datetime="2015-03-21T14:51:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-03-21</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>历史:<br>IANA:美国政府机构<br>    一开始域名解析服务由美国政府所监管，不过后来为了各种原因(自行揣测)，出现了下面的民间管理机构<br>ICANN进行专门管理。<br> <br>TLD：top level Domain:顶级域<br>    组织域：.com .net .org<br>    国家域：.cc  .tw  .hk  <br>    反向域：IP–&gt;FQDN<br> <br>主机名(FQDN Full Qualified Domain Name 完全合格域名)<br>主机名:<a target="_blank" rel="noopener" href="http://www.unravel.com/">www.unravel.com</a><br>域名： unravel.com<br> <br>DNS:名称解析，Name Resolving 名称转换(背后有查询过程，数据库)<br>            FQDN&lt;–&gt;IP  <br> <br> <br>1&#x2F;周期性任务<br>    早期的时候，联网的主机不是太多，只要写个hosts文件，不断的任务计划更新这个文件，别人拿去这个文件就可以实现域名解析。<br>2&#x2F;Server<br>    后来，随着联网的主机越来越多，需要统一管理，个人主机不再作为域名解析的关键所在，把请求发送给服务器。<br>3&#x2F;分布式数据库<br>    但是再厉害的主机，没法同时相应这么多的请求，或者说应该更为有效的管理，出现分布式以及层级结构。 
-  </p>
-<p>DNS查询流程:    <br>        客户机–&gt;<a target="_blank" rel="noopener" href="http://www.baidu.com/">www.baidu.com</a><br>    1&#x2F;客户端先会检查本机的&#x2F;etc&#x2F;hosts文件(具体可查看&#x2F;etc&#x2F;nisswitch.conf),查询是否有对应记录。<br>    2&#x2F;如果没有对应记录，则向DNS服务器A查询，如果A没有记录，则DNS服务器向根服务器查询。<br>    3&#x2F;根服务器判断被查询主机属于.com主机管辖，于是通知A去.com查询。<br>    4&#x2F;A查询.com,后者判断出.baidu.com管辖，于是告知A去baidu.com查询。<br>    5&#x2F;A查询.baidu.com，后者得到了对应的IP，并将IP和域名的对应关系存放在缓存中，同时告知客户端。A中的缓存数据将维持一段时间，在这段时间内，<br>      如果有任何主机向A查询<a target="_blank" rel="noopener" href="http://www.baidu.com的ip,a直接在缓存中将结果返回给发送查询请求的主机./">www.baidu.com的IP，A直接在缓存中将结果返回给发送查询请求的主机。</a> </p>
-<p>申请授权:<br>      比如有个学校的域名为abc.edu.com,而这个域名下有多台主机，如<a target="_blank" rel="noopener" href="http://www.abc.edu.com,ftp.abc.edu.com等,而且以后还有可能增加其他主机,那么/">www.abc.edu.com,ftp.abc.edu.com等，而且以后还有可能增加其他主机，那么</a><br>    这个学校就会需要DNS服务器来管理这些主机。<br>      在查询流程中可知，.abc.edu.com是应该被授权的，如果此处没有被授权，则查询工作将不会进行下去。<br> <br>DNS:        <br>        监听的协议及端口:<br>        53&#x2F;udp<br>        53&#x2F;tcp    <br>        953&#x2F;tcp,rndc </p>
-<p>一定要明白递归和迭代的概念(根服务器不会给其他任何主机提供迭代，只会递归,也意味着你给不给其他人递归，要看情况，给别人递归，要收费哦～)<br> <br>两段式：递归   迭代<br> <br>查询：<br>    递归：只发出一次请求，我就问你了，帮我找出来！！<br>    迭代：发出多次请求，不断的问别人，从别人给的参考中找下一个～～<br> <br> <br>DNS：<br>    分布式的数据库<br>    上级仅知道其直接下级<br>    下级只知道根的位置<br>    <br>DNS服务器：<br>    接收本地用户客户查询请求（递归）<br>    外部客户端请求：请求权威答案；<br>        肯定答案：TTL<br>        否定答案：TTL<br>    外部客户端请求：非权威答案<br>    stub resolver<br>    应该说只分为递归和不递归； </p>
-<p>######################################################################################################################<br>SELinux:Security Enhanced Linux        <br>由于SELinux的加入，使Linux在安全上更高，当然也取决于自身的定义，不过SELinux是在内核上定义，所以更多的是拿现成的框架来用。<br><a target="_blank" rel="noopener" href="http://baike.baidu.com/link?url=Yb3ZXN_63AsyFdojnEost4f21WeajDqcF-7xvY9f2CTQXc4sB5DhGCw157m8lr41YnwwXL90vNca4svFKqac_q%EF%BC%88SELinux%EF%BC%89">http://baike.baidu.com/link?url=Yb3ZXN_63AsyFdojnEost4f21WeajDqcF-7xvY9f2CTQXc4sB5DhGCw157m8lr41YnwwXL90vNca4svFKqac_q（SELinux）</a><br>   大部分使用 SELinux 的人使用的都是 SELinux 就绪的发行版，例如 Fedora、Red Hat Enterprise Linux (RHEL）、Debian或 Centos。它们都是在内核中启用 SELinux的，并且提供一个可定制的安全策略，还提供很多用户层的库和工具，它们都可以使用 SELinux 的功能。<br>    C2级别–&gt;SELinux–&gt;B1<br>########################################################################################################################################<br>    <br>有部分摘取:<br>    《完美应用红帽企业版Linux》</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/03/21/19-01DNS%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%E7%AE%80%E4%BB%8B/">展开全文 >></a>
         </p>
       
 

@@ -206,6 +206,140 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-bert融入外部特征" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/08/12/bert%E8%9E%8D%E5%85%A5%E5%A4%96%E9%83%A8%E7%89%B9%E5%BE%81/">bert融入外部特征</a>
+    </h1>
+  
+
+        
+        <a href="/2022/08/12/bert%E8%9E%8D%E5%85%A5%E5%A4%96%E9%83%A8%E7%89%B9%E5%BE%81/" class="archive-article-date">
+  	<time datetime="2022-08-12T03:40:38.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-12</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>此文不是对预训练模型融入实体信息、知识图谱等类似ERNIE,k-bert这种，而是在拿到bert输出后，突出指定位置信息进去，从而控制判定的结果。</p>
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>比如这句话：</p>
+<blockquote>
+<p>该报还报道，法国达能集团日前宣布将投资1亿欧元，加强在中国市场的奶粉生产和研发，并表示“我们对中国市场的长期增长能力充满信心”。</p>
+</blockquote>
+<p>谁加强和谁表示呢？是法国达能集团，而不是该报。</p>
+<table>
+<thead>
+<tr>
+<th>主体</th>
+<th>触发词</th>
+<th>客体</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>法国达能集团</td>
+<td>加强</td>
+<td>在中国市场的奶粉生产和研发</td>
+</tr>
+<tr>
+<td>法国达能集团</td>
+<td>表示</td>
+<td>“我们对中国市场的长期增长能力充满信心”</td>
+</tr>
+</tbody></table>
+<p>那假设，我们在知道<code>触发词</code>和<code>客体</code>的情况下，如何从原句中获取<code>主体</code>呢？</p>
+<h3 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h3><h4 id="1-引入其他layer和bert进行concat"><a href="#1-引入其他layer和bert进行concat" class="headerlink" title="1. 引入其他layer和bert进行concat"></a>1. 引入其他layer和bert进行concat</h4><p>这怕是最容易想到的方法了。比如将<code>句子</code>、<code>触发词</code>和<code>客体</code>分别输入到bert，然后将这三者concat。emmm，这也怕是最蠢的方法了。</p>
+<h4 id="2-修改触发词和客体所在bert输出索引的权重"><a href="#2-修改触发词和客体所在bert输出索引的权重" class="headerlink" title="2. 修改触发词和客体所在bert输出索引的权重"></a>2. 修改<code>触发词</code>和<code>客体</code>所在bert输出索引的权重</h4><p>比如一句话长度为128,拿到bert输出后为<code>(128, 768)</code>，假设<code>触发词</code>和<code>客体</code>对应的span为<code>(10,12)</code>和<code>(15, 30)</code>，那如何手动修改对应span的weight呢？？</p>
+<p>方法一，直接进行mask_fill，将对应span的值改为比如<code>0</code>。这种方式,,,emmmm，怎么说呢，看看就行。<br>方法二，也是操作对应span的weights，但是分成两步，第一是取<code>触发词</code>的权重，第二是取<code>客体</code>的权重，各自经过各自的linear，得到新的权重，然后再和bert output做一个交互，意思还是想突出<code>触发词</code>和<code>客体</code>的权重。和方法一一样，只不过对应的weight不是0，而是经过反向传播更新后的值。</p>
+<p>比如conditional layer norm（对原conditional layer norm做修改了哦）。</p>
+<p>伪代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">NewConditionalLayerNorm</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, normalized_shape1, normalized_shape2</span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        <span class="comment"># 触发词的</span></span><br><span class="line">        self.trigger_feature_weight = ...</span><br><span class="line">        self.trigger_feature_bias = ...</span><br><span class="line"></span><br><span class="line">        self.trigger_feature_weight_dense = ...</span><br><span class="line">        self.trigger_feature_bias_dense = ...</span><br><span class="line">        <span class="comment"># 客体的</span></span><br><span class="line">        self.object_feature_weight = ...</span><br><span class="line">        self.object_feature_bias = ...</span><br><span class="line">        self.object_feature_weight_dense = ...</span><br><span class="line">        self.object_feature_bias_dense = ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, bert_output, trigger_feature, object_feature</span>):</span><br><span class="line">        <span class="comment"># 1. 先计算bert_output的layer norm</span></span><br><span class="line">        <span class="comment"># 2. 计算trigger的weight和bias</span></span><br><span class="line">        <span class="comment"># 3. 计算object的weight和bias</span></span><br><span class="line">        <span class="comment"># 4. 三者相乘        </span></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>关于Conditional Layer Normalization，可看：<a href="/2022/08/08/%E8%AE%AF%E9%A3%9E2020%E5%B9%B4%E4%BA%8B%E4%BB%B6%E6%8F%90%E5%8F%96%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80%E5%90%8D-%E4%B8%BB%E5%AE%A2%E4%BD%93%E6%8F%90%E5%8F%96/" title="讯飞2020年事件提取比赛第一名-主客体提取">讯飞2020年事件提取比赛第一名-主客体提取</a>中Conditional Layer Normalization实现方式，难点在于变长罢了。</p>
+<p>效果没试，总感觉复杂了些。</p>
+<p>另外如果输入的feature个数是变化的，那这种方式就不可行了。</p>
+<h4 id="3-变化标注方式，还是利用bert本身"><a href="#3-变化标注方式，还是利用bert本身" class="headerlink" title="3. 变化标注方式，还是利用bert本身"></a>3. 变化标注方式，还是利用bert本身</h4><p>输入一句话，tokenizer后拿到<code>input_ids</code>,<code>token_type_ids</code>, <code>attention_mask</code>，那其中的<code>token_type_ids</code>是干嘛的呢？百度下就有结果，说是如果是<code>0</code>就表示第一句话，如果是<code>1</code>就表示第二句话。</p>
+<p>如果这样的话，那直接将<code>触发词</code>和<code>客体</code>的所对应的<code>token_type_ids</code>置为<code>1</code>不就又是一种方式么～，试了下效果出奇的不错。准确率嗖嗖的往上。而且还没引入额外的layer，相当拿bert就把这件事情搞定了。</p>
+<p>这也是我写这篇文章的动力。。。</p>
+<p>实现方式如下：</p>
+<p>比如一句话”我们喜欢晴天。”，label设计为如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 假设我们为主语</span></span><br><span class="line">input_tokens = [<span class="string">&#x27;我&#x27;</span>, <span class="string">&#x27;们&#x27;</span>, <span class="string">&#x27;喜&#x27;</span>, <span class="string">&#x27;欢&#x27;</span>, <span class="string">&#x27;晴&#x27;</span>, <span class="string">&#x27;天&#x27;</span>, <span class="string">&#x27;。&#x27;</span>]</span><br><span class="line"><span class="comment"># token_type_ids</span></span><br><span class="line">token_type_ids = [<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>]</span><br><span class="line"><span class="comment"># label</span></span><br><span class="line">label = [[<span class="number">1</span>, <span class="number">0</span>], [<span class="number">0</span>, <span class="number">1</span>], [<span class="number">0</span>, <span class="number">0</span>], [<span class="number">0</span>, <span class="number">0</span>], [<span class="number">0</span>, <span class="number">0</span>], [<span class="number">0</span>, <span class="number">0</span>], [<span class="number">0</span>, <span class="number">0</span>]]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>模型就是bert+linear，linear输出hidden_size为2,loss使用<code>binary_cross_entropy</code>即可。</p>
+<p>缺陷嘛就是它没有区分每个feature本身的label。客体就是客体，触发词就是触发词～～</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>所以通篇看下来，目的是想突出<code>触发词</code>和<code>客体</code>的weight，从而提取其对应的主体。前两者不同，那主体也有可能不同。</p>
+<p>实现下来呢，如果不区分触发词和客体的话呢，可以使用上面那种方式。如果区分呢，那貌似只能引入新的layer来解决。</p>
+<p>bert本身就够大的了，就不能一个预训练模型就能解决这种问题的么？比如下面这种方式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">预训练模型：</span><br><span class="line">&gt; 输入句子：*******</span><br><span class="line">&gt; 输入客体和触发词: *******</span><br><span class="line"></span><br><span class="line">返回:</span><br><span class="line">&gt; 主体：***</span><br></pre></td></tr></table></figure>
+
+
+<p>嘿嘿，现在也有这种，不过坑更大，而且消耗的资源也更多，，，以后有机会再聊。</p>
+<p>额外说一句，和本文无关，如果一个任务业界没有相关的研究，那你对这个任务进行建模、训练等，怎么评估这个模型是有效的呢？</p>
+<ol>
+<li>有一定量的标注数据，这个应该是必不可免的。但是也是操作可能性很低的地方。</li>
+<li>搭建一个简单的模型，试下基本效果。为后续方式作参考。</li>
+<li>变换一种建模方式，模型参数尽量行之有效，并且建模方式又足够巧妙。</li>
+<li>看loss走向和评估指标的变化。</li>
+</ol>
+<p>又水了一篇～</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/08/12/bert%E8%9E%8D%E5%85%A5%E5%A4%96%E9%83%A8%E7%89%B9%E5%BE%81/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-讯飞2020年事件提取比赛第一名-属性提取" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1350,100 +1484,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2022/03/14/%E8%85%BE%E8%AE%AFTexSmart%E5%A4%87%E5%BF%98/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-联邦学习介绍" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/03/10/%E8%81%94%E9%82%A6%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/">联邦学习介绍与分享</a>
-    </h1>
-  
-
-        
-        <a href="/2022/03/10/%E8%81%94%E9%82%A6%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/" class="archive-article-date">
-  	<time datetime="2022-03-10T01:07:32.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-03-10</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>最近应宋总提议，给各个部门的老大介绍联邦学习。</p>
-<p>** <code>点进去可以正常显示，此处可能是hexo-pdf插件问题</code> **</p>
-<p>把他们问的问题再记录下：</p>
-<ol>
-<li>领导A关注是<code>共同富裕</code>，比如大企业不愿意跟小企业玩。</li>
-<li>领导B只关注自己问问题，解决当下的问题。</li>
-<li>领导C在数据融合那里（横向、纵向）问了迁移学习问题。</li>
-<li>其他比如标注和不标注的问题，安全问题，联合模型是否能反推出他人数据。</li>
-</ol>
-<p>整体下来我觉得没有达到预期的最大的问题是在<code>规则</code>和<code>样本</code>那里，还有就是可能我写的还是太复杂了😂😂😂。</p>
-
-
-	<div class="row">
-    <embed src="./联邦学习介绍.pdf" width="100%" height="550" type="application/pdf">
-	</div>
-
-
-
-
-
-<p>所以还是把这个记录下来，当我某天站在另外一个高度时再回过头来看下，可能会有新的理解。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/03/10/%E8%81%94%E9%82%A6%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/">展开全文 >></a>
         </p>
       
 
