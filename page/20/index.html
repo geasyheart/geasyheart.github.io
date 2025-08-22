@@ -206,6 +206,120 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-34-03MySQL系列之十一－MySQL用户和权限管理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/07/06/34-03MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E4%B8%80%EF%BC%8DMySQL%E7%94%A8%E6%88%B7%E5%92%8C%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86/">34_03MySQL系列之十一－MySQL用户和权限管理</a>
+    </h1>
+  
+
+        
+        <a href="/2015/07/06/34-03MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E4%B8%80%EF%BC%8DMySQL%E7%94%A8%E6%88%B7%E5%92%8C%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86/" class="archive-article-date">
+  	<time datetime="2015-07-06T01:20:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-07-06</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>用户和权限管理 </p>
+<p>Information about account privileges is stored in the user,db,host,tables_priv,columns_priv and procs_priv tables in the mysql database,The MySQL server reads the contents of these tables into memory when it starts and reloads them under the circumstances,Access-control decision are based on the in-memory copies of the grant tables; </p>
+<p>user : Contains user accounts.global privileges ,and other non-privilege columns;<br>用户帐号、全局权限<br>db : Contains database-level privileges; </p>
+<p>    列库级别权限<br>host : Obsolete<br>废弃<br>tables_priv : Contains table-level privileges;<br>表级别权限<br>columns_priv : Contains column-level privileges;<br>列级别权限<br>procs_priv : Contains stored procedure and function privileges;<br>存储过程和存储函数相关的权限<br>proxies_priv : Contains proxy-user privileges<br>代理用户权限 </p>
+<p>There are several distinctions between the way user names and passwords are userd by MySQL and the way they are used by your oprating system; </p>
+<p>    User names, as used by MySQL for authentication purposes, have nothing to do with user names (login names) as userd by windows or Unix.<br>    MySQL user names can be up to 16 characters long.<br>    The server uses MySQL passwords stored in the user table to authenticate client connections using MySQL native authentication (against passwords stored in the mysql user table).<br>    MySQL encrypts passwords stored in the user table using its own algorithm. This encryption is the same as that implemented by the PASSWORD() SQL function but differs , It is possible to connect to the server regardless of character set settings if the user name and password contain only ASCII characters;<br>    <br>    <br>用户帐号:<br>    用户名@主机<br>        用户名:16字符以内<br>        主机:<br>            主机名:<a target="_blank" rel="noopener" href="http://www.test.com,mysql/">www.test.com,mysql</a><br>            IP: 192.168.0.109<br>            网络地址: 172.16.0.0&#x2F;255.255.0.0<br>            <br>        通配符: %, _ </p>
+<p>启动MySQL服务器时:            <br>–skip-name-resolve:略过名称解析,会提高用户连接速度 </p>
+<p>            <br>权限级别:<br>    全局级别: CREATE TABLESPACE,CREATE USER, PROCESS,PROXY,BELOAD,REPLICATION CLIENT,REPLICATION SLAVE,SHOW DATABASES,SHUTDOWN,SUPER,ALL[PRIVILEGES],USAGE<br>    库<br>    表<br>    存储过程和存储函数<br>        <br>            <br>            <br>临时表:内存表<br>    heap:16MB </p>
+<p>触发器:主动数据库<br>    INSERT，DELETE，UPDATE     </p>
+<p>!!!!!!!!!!!!!更多自行help!!!!!!!    <br>创建用户:        <br>1、mysql&gt;CREATE USER ‘jeffrey‘@’localhost’ [IDENTIFIED BY  ‘mypass’];现在会默认加密<br>2、mysql&gt;GRANT<br>3、mysql&gt;INSERT INTO mysql.user<br>    这种方式需要FLUSH PRIVILEGES; </p>
+<p>设置密码:<br>SET PASSWORD FOR ‘bob‘@’%.example.org’ &#x3D; PASSWORD(‘cleartext password’); </p>
+<p>查看授权:<br>mysql&gt;SHOW GRANTS FOR ‘jeffrey‘@’localhost’;<br>| GRANT USAGE ON <em>.</em> TO ‘dragon‘@’localhost’ IDENTIFIED BY PASSWORD ‘*08E03012EB25C19BCBB8BF6E12EB104AED8DE2C8’ |(USAGE默认没权限) </p>
+<p>            <br>进行授权:<br>object_type<br>    TABLE<br>    FUNCTION<br>    PROCEDURE </p>
+<p>priv_level:<br>    *<br>    <em>.</em><br>    db_name.*<br>    db_name.tb1.name<br>    tb1_name<br>    db_name.routine_name </p>
+<p>ssl_option:<br>    SSL<br>    X509<br>    CIPHER ‘cipher’<br>    ISSUER ‘issuer’<br>    SUBJECT ‘subject’<br>    <br>with_option:<br>    MAX_QUERIES_PER_HOUR count 每小时最大查询请求个数<br>    MAX_UPDATES_PER_HOUR count 每小时最大使用更新次数<br>    MAX_CONNECTIONS_PER_HOUR count 每小时最大连接次数<br>    MAX_USER_CONNECTIONS count 最大并发连接次数(同一个账号最大连接次数)<br>    当不想进行限定时，只要将值改为0即可； 
+         </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES  <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;username&#x27;</span>@<span class="string">&#x27;host&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;mypass&#x27;</span>; </span><br><span class="line">     </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> <span class="keyword">CREATE</span> <span class="keyword">ON</span> cactidb.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;jeffrey&#x27;</span>@<span class="string">&#x27;%&#x27;</span>; </span><br><span class="line"> </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> <span class="keyword">ALL</span> <span class="keyword">ON</span> db1.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;jeffrey&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>; </span><br><span class="line"> </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> db2.invoice <span class="keyword">TO</span> <span class="string">&#x27;jeffrey&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>; </span><br><span class="line"> </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> USAGE <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;jeffrey&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> <span class="keyword">WITH</span> MAX_QUERIES_PER_HOUR <span class="number">90</span>;     </span><br><span class="line">     </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> <span class="keyword">CREATE</span> <span class="keyword">INSERT</span> <span class="keyword">UPDATE</span> <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;username&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>; </span><br><span class="line"> </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> <span class="keyword">UPDATE</span>(Age) <span class="keyword">ON</span> TEST.TEST <span class="keyword">TO</span> <span class="string">&#x27;jeffrey&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>; </span><br><span class="line">     </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> SUPER <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;username&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;这个权限类似root </span><br><span class="line">```   </span><br><span class="line"> </span><br><span class="line">删除用户:     </span><br><span class="line"></span><br><span class="line">```<span class="keyword">sql</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">USER</span> <span class="string">&#x27;username&#x27;</span>@<span class="string">&#x27;host&#x27;</span> </span><br></pre></td></tr></table></figure>
+<p>重命名:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RENAME <span class="keyword">USER</span> old_name <span class="keyword">TO</span> new_name </span><br></pre></td></tr></table></figure>
+<p>取消授权: </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">REVOKE</span> <span class="keyword">INSERT</span> <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">FROM</span> <span class="string">&#x27;jeffrey&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>; </span><br><span class="line"><span class="keyword">REVOKE</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> <span class="string">&#x27;cactidb&#x27;</span>.<span class="operator">*</span> <span class="keyword">FROM</span> <span class="string">&#x27;cactiuder&#x27;</span>@<span class="string">&#x27;%&#x27;</span>; </span><br></pre></td></tr></table></figure>
+<p>修改密码: </p>
+<p>通过更新授权表的方式直接修改其密码，而后移除此两个选项重启服务器； </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#service mysqld stop </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#vim /etc/init.d/mysqld </span></span><br></pre></td></tr></table></figure>
+<p>找到start 那项:<br>添加成如下:<br>$bindir&#x2F;mysqld_safe –skip-grant-tables –skip-networking (添加这两个) –datadir…. </p>
+<p>–skip-grant-tables : 跳过授权表<br>–skip-networking : 跳过网络(因为如果此时有人通过网络连接你的数据库的话，那就比较悲剧了，只能本地登陆，所以一定要添加这一项) </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">update</span> <span class="keyword">user</span> <span class="keyword">SET</span> PASSWORD<span class="operator">=</span>PASSWORD(<span class="string">&#x27;mypass&#x27;</span>) <span class="keyword">WHERE</span> <span class="keyword">User</span><span class="operator">=</span><span class="string">&#x27;root&#x27;</span> ; </span><br></pre></td></tr></table></figure>
+<p>由于跳过了授权表，所以使用set就不会起作用，只有使用update; </p>
+<p>然后重新修改&#x2F;etc&#x2F;init.d&#x2F;mysqld,重启即可； </p>
+<p>    <br>    <br>;</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/07/06/34-03MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E4%B8%80%EF%BC%8DMySQL%E7%94%A8%E6%88%B7%E5%92%8C%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-34-01MySQL系列之九－MySQL事务和隔离级别" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1114,111 +1228,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/07/06/32-01MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E4%B8%80%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-31-02bash脚本编程之在bash脚本中使用选项" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/05/14/31-02bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%9C%A8bash%E8%84%9A%E6%9C%AC%E4%B8%AD%E4%BD%BF%E7%94%A8%E9%80%89%E9%A1%B9/">31_02bash脚本编程之在bash脚本中使用选项</a>
-    </h1>
-  
-
-        
-        <a href="/2015/05/14/31-02bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%9C%A8bash%E8%84%9A%E6%9C%AC%E4%B8%AD%E4%BD%BF%E7%94%A8%E9%80%89%E9%A1%B9/" class="archive-article-date">
-  	<time datetime="2015-05-14T09:56:04.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-05-14</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>例如我想创建一个脚本，可以让别人引用，例如: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"><span class="comment">#Name:mkscript </span></span><br><span class="line"><span class="comment">#Description:Create script </span></span><br><span class="line"><span class="comment">#Author:unravel </span></span><br><span class="line"><span class="comment">#Version:0.0.1 </span></span><br><span class="line"><span class="comment">#Datatime:05112015 </span></span><br><span class="line"><span class="comment">#Usage: mkscript FILENAME </span></span><br><span class="line"><span class="built_in">cat</span> &gt;<span class="variable">$1</span>&lt;&lt; <span class="string">EOF </span></span><br><span class="line"><span class="string">#!/bin/bash </span></span><br><span class="line"><span class="string">#Name:`basename $1` </span></span><br><span class="line"><span class="string">#Description: </span></span><br><span class="line"><span class="string">#Author:unravel </span></span><br><span class="line"><span class="string">#Version:0.0.1 </span></span><br><span class="line"><span class="string">#Datatime:`date +%F-%H-%M-%S` </span></span><br><span class="line"><span class="string">#Usage: </span></span><br><span class="line"><span class="string"> </span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim +8 $1 </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#chmod +x mkscript &amp;&amp; ./mkscript test.sh </span></span><br><span class="line">这样有个缺点，就是如果这个文件事先存在，则会抹除所有事先存在的内容，那么: </span><br><span class="line"><span class="comment">#!/bin/bash </span></span><br><span class="line"><span class="comment">#Name:mkscript </span></span><br><span class="line"><span class="comment">#Description:Create script </span></span><br><span class="line"><span class="comment">#Author:unravel </span></span><br><span class="line"><span class="comment">#Version:0.0.1 </span></span><br><span class="line"><span class="comment">#Datatime:05112015 </span></span><br><span class="line"><span class="comment">#Usage: mkscript FILENAME </span></span><br><span class="line"><span class="keyword">if</span> ! grep <span class="string">&quot;[^[:space:]]&quot;</span> <span class="variable">$1</span> &amp;&gt;/dev/null;<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">cat</span> &gt;<span class="variable">$1</span>&lt;&lt; <span class="string">EOF </span></span><br><span class="line"><span class="string">#!/bin/bash </span></span><br><span class="line"><span class="string">#Name:`basename $1` </span></span><br><span class="line"><span class="string">#Description: </span></span><br><span class="line"><span class="string">#Author:unravel </span></span><br><span class="line"><span class="string">#Version:0.0.1 </span></span><br><span class="line"><span class="string">#Datatime:`date +%F-%H-%M-%S` </span></span><br><span class="line"><span class="string">#Usage: </span></span><br><span class="line"><span class="string"> </span></span><br><span class="line"><span class="string">EOF</span> </span><br><span class="line"><span class="keyword">fi</span> </span><br></pre></td></tr></table></figure>
-
-<p>vim + $1 </p>
-<p>#cp &#x2F;etc&#x2F;fstab . &amp;&amp; .&#x2F;mkscript fstab<br> <br>如果我在编辑的时候有语法错误，没检测出来，当我保存退出的时候，希望可以帮我检测出来并提示:<br>#!&#x2F;bin&#x2F;bash<br>#Name:mkscript<br>#Description:Create script<br>#Author:unravel<br>#Version:0.0.1<br>#Datatime:05112015<br>#Usage: mkscript FILENAME<br>if ! grep “[^[:space:]]” $1 &amp;&gt;&#x2F;dev&#x2F;null;then<br>cat &gt;$1&lt;&lt; EOF<br>#!&#x2F;bin&#x2F;bash<br>#Name:<code>basename $1</code><br>#Description:<br>#Author:unravel<br>#Version:0.0.1<br>#Datatime:<code>date +%F-%H-%M-%S</code><br>#Usage: </p>
-<p>EOF<br>fi<br>vim + $1 </p>
-<p>until bash -n $1 &amp;&gt;&#x2F;dev&#x2F;null;do<br>    read -p “syntax error,q|Q quiting,others for editing:” OPT<br>    case $OPT in<br>        q|Q)<br>            echo “quit”<br>            exit 8<br>            ;;<br>        *)<br>            vim + $1<br>            ;;<br>    esac<br>done    <br>chmod +x $1 </p>
-<p>#.&#x2F;mkscript test.sh<br>可以专门把这个放到&#x2F;bin目录下，当作命令来用:<br>#cp &#x2F;tmp&#x2F;mkscript &#x2F;bin </p>
-<p>getopts:这个命令可以获取脚本的选项 </p>
-<p>getopts : getopts   optstring    name </p>
-<p>例如:<br>#vim opt.sh<br>getopts “abcd” OPT<br>echo $OPT    可以实现选项<br>#chmod +x opt.sh<br>#.&#x2F;opt.sh -a<br>a<br>#.&#x2F;opt.sh -b<br>b<br>但:<br>#.&#x2F;opt.sh -a -b<br>a </p>
-<p>#vim opt.sh<br>getopts “bd:” OPT<br>echo $OPT<br>echo $OPTARG   (这个默认就有这个变量)<br>#.&#x2F;opt.sh -d “haha”<br>d<br>haha   (所以这个:表示可以后接参数)<br>但是:<br>#.&#x2F;opt.sh -b “haha”<br>只会输出b,只接受最后一个参数。 </p>
-<p>所以，任何一个参数想带上参数，就在哪个参数后面加: , 例如:<br>getopts “b:d:” OPT<br>echo $OPT<br>echo $OPTARG<br>#.&#x2F;opt.sh -b “bb”<br>b<br>bb </p>
-<p>如果输入.&#x2F;opt.sh -e 就会报错，非法字符，就会感觉不友好:<br>getopts “:b:d:” OPT (在最前面添加:即可)<br>echo $OPT<br>echo $OPTARG </p>
-<p>接受多个参数:<br>USAGE() {<br>    echo “Usage:opt.sh [-b argu] [-b argu]”<br>        }<br>while getopts “:b:d:” SWITCH;do<br>    case $SWITCH in<br>        b)echo “The option is b”<br>          echo $OPTARG<br>          ;;<br>        d)echo “The option is d”<br>          echo $OPTARG<br>          ;;<br>        *)USAGE;;<br>       <br>    esac<br>done         </p>
-<p>#.&#x2F;opt.sh -b haha -d dada<br>The option is b<br>haha<br>The option is d<br>dada </p>
-<p>最终脚本: </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"><span class="comment">#Name:mkscript </span></span><br><span class="line"><span class="comment">#Description:Create script </span></span><br><span class="line"><span class="comment">#Author:unravel </span></span><br><span class="line"><span class="comment">#Version:0.0.1 </span></span><br><span class="line"><span class="comment">#Datatime:05112015 </span></span><br><span class="line"><span class="comment">#Usage: mkscript FILENAME </span></span><br><span class="line"><span class="keyword">while</span> <span class="built_in">getopts</span> <span class="string">&quot;:d:&quot;</span> SWITCH;<span class="keyword">do</span> </span><br><span class="line">    <span class="keyword">case</span> <span class="variable">$SWITCH</span> <span class="keyword">in</span> </span><br><span class="line">        d) </span><br><span class="line">            DESC=<span class="variable">$OPTARG</span> </span><br><span class="line">            ;; </span><br><span class="line">        *) </span><br><span class="line">            <span class="built_in">echo</span> <span class="string">&quot;Usage:&quot;</span>mkscript [-d Description]<span class="string">&quot;&quot;</span> </span><br><span class="line">            ;; </span><br><span class="line">    <span class="keyword">esac</span> </span><br><span class="line"><span class="keyword">done</span> </span><br><span class="line"><span class="built_in">shift</span> $[<span class="variable">$OPTIND</span> -1]    (OPTIND也是内置的，指向最后一个，所以到文件名那要-1) </span><br><span class="line"><span class="keyword">if</span> ! grep <span class="string">&quot;[^[:space:]]&quot;</span> <span class="variable">$1</span> &amp;&gt;/dev/null;<span class="keyword">then</span> </span><br><span class="line"><span class="built_in">cat</span> &gt;<span class="variable">$1</span>&lt;&lt; <span class="string">EOF </span></span><br><span class="line"><span class="string">#!/bin/bash </span></span><br><span class="line"><span class="string">#Name:`basename $1` </span></span><br><span class="line"><span class="string">#Description: $DESC </span></span><br><span class="line"><span class="string">#Author:unravel </span></span><br><span class="line"><span class="string">#Version:0.0.1 </span></span><br><span class="line"><span class="string">#Datatime:`date +%F-%H-%M-%S` </span></span><br><span class="line"><span class="string">#Usage: </span></span><br><span class="line"><span class="string"> </span></span><br><span class="line"><span class="string">EOF</span> </span><br><span class="line"><span class="keyword">fi</span> </span><br><span class="line">vim + <span class="variable">$1</span> </span><br><span class="line"> </span><br><span class="line"><span class="keyword">until</span> bash -n <span class="variable">$1</span> &amp;&gt;/dev/null;<span class="keyword">do</span> </span><br><span class="line">    <span class="built_in">read</span> -p <span class="string">&quot;syntax error,q|Q quiting,others for editing:&quot;</span> OPT </span><br><span class="line">    <span class="keyword">case</span> <span class="variable">$OPT</span> <span class="keyword">in</span> </span><br><span class="line">        q|Q) </span><br><span class="line">            <span class="built_in">echo</span> <span class="string">&quot;quit&quot;</span> </span><br><span class="line">            <span class="built_in">exit</span> 8 </span><br><span class="line">            ;; </span><br><span class="line">        *) </span><br><span class="line">            vim + <span class="variable">$1</span> </span><br><span class="line">            ;; </span><br><span class="line">    <span class="keyword">esac</span> </span><br><span class="line"><span class="keyword">done</span>     </span><br></pre></td></tr></table></figure>
-<p>大概更新到这个地方 </p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/05/14/31-02bash%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B%E4%B9%8B%E5%9C%A8bash%E8%84%9A%E6%9C%AC%E4%B8%AD%E4%BD%BF%E7%94%A8%E9%80%89%E9%A1%B9/">展开全文 >></a>
         </p>
       
 

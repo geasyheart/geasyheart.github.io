@@ -206,6 +206,138 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-41-01Linux集群系列之十九-ISCSI协议、架构及其安装配置" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/09/29/41-01Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E4%B9%9D-ISCSI%E5%8D%8F%E8%AE%AE%E3%80%81%E6%9E%B6%E6%9E%84%E5%8F%8A%E5%85%B6%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE/">41_01Linux集群系列之十九--ISCSI协议、架构及其安装配置</a>
+    </h1>
+  
+
+        
+        <a href="/2015/09/29/41-01Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E4%B9%9D-ISCSI%E5%8D%8F%E8%AE%AE%E3%80%81%E6%9E%B6%E6%9E%84%E5%8F%8A%E5%85%B6%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE/" class="archive-article-date">
+  	<time datetime="2015-09-29T05:33:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-29</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>实现ISCSI共享存储的所需的软件包： </p>
+<blockquote>
+<p>ISCSI Target   :  scsi-target-utils　　　　&#x2F;&#x2F;在此设置共享存储设备<br>ISCSI Initiator : 　iscsi-initiator-utils </p>
+</blockquote>
+<p>客户端认证方式: </p>
+<ol>
+<li>基于IP认证　　　            　&#x2F;&#x2F;允许哪个网段访问，单个主机，所有主机 </li>
+<li>基于用户，CHAP(双向认证)　　　　&#x2F;&#x2F;下面会演示单向认证</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">Target默认工作在3260端口； </span><br><span class="line"> </span><br><span class="line">tgtadm 模式化的命令: </span><br><span class="line">    --mode </span><br><span class="line">    常用模式:target、logicalunit、account </span><br><span class="line">        target --op </span><br><span class="line">            new,delete,show,update,bind,unbind </span><br><span class="line">        logicalunit --op </span><br><span class="line">            new,delete </span><br><span class="line">        account --op </span><br><span class="line">            new,delete,bind,unbind </span><br><span class="line"> </span><br><span class="line">    --lld,-L </span><br><span class="line">    --tid,-t </span><br><span class="line">    --lun,-l </span><br><span class="line">    --backing-store &lt;path&gt;,-b </span><br><span class="line">    --initiator-addess, -i </span><br><span class="line">    --targetname &lt;targetname&gt; , -T </span><br><span class="line"> </span><br><span class="line">targetname: </span><br><span class="line">    iqn.yyyy-mm.&lt;reversed domain name&gt;[:identifier] </span><br><span class="line">    iqn.2013-05.com.test:teststore.disk1&lt;例如命名，要详细&gt; </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+
+<p>target准备: </p>
+<ol>
+<li>分区，不要格式化，partprobe </li>
+<li>yum install scsi-target-utils </li>
+<li>service tgtd start </li>
+<li>chkconfig tgtd on </li>
+<li>tgtadm –lld iscsi –mode target –op new –targetname iqn.2013-05.com:teststore.disk1 –tid 1 </li>
+<li>tgtadm –lld iscsi –mode target –op show  可以进行查看 </li>
+<li>tgtadm –lld iscsi –mode logicalunit –op new –tid 1 –lun 1 –backing-store &#x2F;dev&#x2F;sda5    把&#x2F;dev&#x2F;sda5做成ISCSI设备； </li>
+<li>tgtadm –lld iscsi –mode target –op bind –tid 1 –initiator-addess 172.16.0.0&#x2F;16    　 把172那个网段做成共享;</li>
+</ol>
+<p>在这一步建议用配置文件的方式进行定义，因为不会生成配置文件，所以更多可以参考41_02; </p>
+<p>Initiator: </p>
+<ol>
+<li><p>iscsiadm模式化的命令: </p>
+<blockquote>
+<p>    -m {discovery|node|session|iface}<br>        discovery:发现某服务器是否有target输出，以及输出了哪些target;<br>        node:管理跟某target的关联关系;<br>        session:会话管理；<br>        iface:接口管理 </p>
+</blockquote>
+</li>
+<li><p>iscsiadm -m discovery [ -hV ] [ -d debug_level ] [ -P printlevel ] [ -I iface -t type -p ip:port [ -l ] ] | [ [ -p ip:port ] [ -l | -D ] ] </p>
+<blockquote>
+<p>    -d: 0~8            级别的越高看到的信息就越多，可以自己尝试；；<br>    -I:指定接口<br>    -t type:<br>        SendTargets(ST)<br>        SLP<br>        iSNS<br>    -p:IP:port </p>
+</blockquote>
+</li>
+<li><p>iscsiadm -m node [ -hV ] [ -d debug_level ] [  -P  printlevel  ]  [  -L all,manual,automatic  ]  [ -U all,manual,automatic ] [ -S ] [ [ -T targetname -p ip:port -I iface ] [ -l | -u | -R | -s] ] [ [ -o operation ] [ -n name ] [ -v value ] [ -p ip:port ] ] </p>
+<blockquote>
+<p>    -L:登陆<br>        all:登陆所有<br>        manual:手动指定<br>        automatic:自动登陆<br>    -U:登出</p>
+</blockquote>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="comment"># yum install iscsi-initiator-utils </span></span><br><span class="line"> </span><br><span class="line">iscsi-iname -p iqn.2013-05.com.teststore </span><br><span class="line">    会自动在最后面生成一串随机数，然后编辑这个文件;例如： </span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;InitiatorName=`iscsi-iname -p iqn.2013-05.com.teststore`&quot;</span>&gt; /etc/iscsi/initiatorname.iscsi </span><br><span class="line">InitiatorAlias=node1.test.com可以自己指定别名 </span><br><span class="line"> </span><br><span class="line">例如最终如下所示：(我在实验时，也可不改动这个文件，如果需要别名，建议两个都进行重新修改，以示区别) </span><br><span class="line">InitiatorName=iqn.2013-05.com.teststore:5e78d722a925 </span><br><span class="line">InitiatorAlias=node1.test.com </span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># iscsiadm -m discovery -t sendtargets -p 172.16.100.100 </span></span><br><span class="line"><span class="comment"># ls /var/lib/iscsi/send_targets </span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># iscsiadm -m node -T  iqn.2013-05.com:teststore.disk1 -p 172.16.100.100 -l </span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># fdisk -l 进行查看，就会多一个硬盘 </span></span><br><span class="line"> </span><br><span class="line">node1: </span><br><span class="line"><span class="comment"># cfdisk /dev/sdb </span></span><br><span class="line"><span class="comment"># mkfs.ext4 /dev/sdb1 </span></span><br><span class="line"><span class="comment"># partprobe /dev/sdb </span></span><br><span class="line"><span class="comment"># mount /dev/sdb1 /mnt </span></span><br><span class="line"> </span><br><span class="line">node2: </span><br><span class="line"><span class="comment"># partprobe /dev/sdb </span></span><br><span class="line"><span class="comment"># mount /dev/sdb1 /mnt </span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>再开一台主机，同样操作，当挂载了后，往里面写文件，会发现一个现象:<br>    node1上的文件有可能会在node2上看不到<br>    node2上的文件有可能会在node1上看不到<br>为什么?<br>    此时的操作还在内存中完成，没有同步到硬盘中，以至于多台主机共享这个共享存储的时候会面临一个问题:<br>        当多台主机对共享存储中的一个文件进行写操作的时候，肯定会发生数据紊乱，<br>        所以就要结合集群文件系统。。 </p>
+<p>CHAP简介:<br><a target="_blank" rel="noopener" href="http://baike.baidu.com/link?url=wG2j_YASipDjenXE3_BEdfW945FeO4GEqEETGz8As4wRX7daD4EJ89UckZSBHoC4X1qso3HKMH8itaO5Om8IF">http://baike.baidu.com/link?url=wG2j_YASipDjenXE3_BEdfW945FeO4GEqEETGz8As4wRX7daD4EJ89UckZSBHoC4X1qso3HKMH8itaO5Om8IF</a>_ </p>
+<p>ISCSI基于CHAP认证:这个讲的很详细，建议参考着看。。<br><a target="_blank" rel="noopener" href="http://blog.csdn.net/sinchb/article/details/8433994">http://blog.csdn.net/sinchb/article/details/8433994</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/linux//" class="article-tag-list-link color1">linux</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/09/29/41-01Linux%E9%9B%86%E7%BE%A4%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E4%B9%9D-ISCSI%E5%8D%8F%E8%AE%AE%E3%80%81%E6%9E%B6%E6%9E%84%E5%8F%8A%E5%85%B6%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-cacti使用实验-2-对远程MySQL进行监控" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1185,120 +1317,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/07/06/35-04MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E5%85%AD%EF%BC%8D%E4%BD%BF%E7%94%A8xtrabackup%E8%BF%9B%E8%A1%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E5%A4%87%E4%BB%BD/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-34-03MySQL系列之十一－MySQL用户和权限管理" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/07/06/34-03MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E4%B8%80%EF%BC%8DMySQL%E7%94%A8%E6%88%B7%E5%92%8C%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86/">34_03MySQL系列之十一－MySQL用户和权限管理</a>
-    </h1>
-  
-
-        
-        <a href="/2015/07/06/34-03MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E4%B8%80%EF%BC%8DMySQL%E7%94%A8%E6%88%B7%E5%92%8C%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86/" class="archive-article-date">
-  	<time datetime="2015-07-06T01:20:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-07-06</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>用户和权限管理 </p>
-<p>Information about account privileges is stored in the user,db,host,tables_priv,columns_priv and procs_priv tables in the mysql database,The MySQL server reads the contents of these tables into memory when it starts and reloads them under the circumstances,Access-control decision are based on the in-memory copies of the grant tables; </p>
-<p>user : Contains user accounts.global privileges ,and other non-privilege columns;<br>用户帐号、全局权限<br>db : Contains database-level privileges; </p>
-<p>    列库级别权限<br>host : Obsolete<br>废弃<br>tables_priv : Contains table-level privileges;<br>表级别权限<br>columns_priv : Contains column-level privileges;<br>列级别权限<br>procs_priv : Contains stored procedure and function privileges;<br>存储过程和存储函数相关的权限<br>proxies_priv : Contains proxy-user privileges<br>代理用户权限 </p>
-<p>There are several distinctions between the way user names and passwords are userd by MySQL and the way they are used by your oprating system; </p>
-<p>    User names, as used by MySQL for authentication purposes, have nothing to do with user names (login names) as userd by windows or Unix.<br>    MySQL user names can be up to 16 characters long.<br>    The server uses MySQL passwords stored in the user table to authenticate client connections using MySQL native authentication (against passwords stored in the mysql user table).<br>    MySQL encrypts passwords stored in the user table using its own algorithm. This encryption is the same as that implemented by the PASSWORD() SQL function but differs , It is possible to connect to the server regardless of character set settings if the user name and password contain only ASCII characters;<br>    <br>    <br>用户帐号:<br>    用户名@主机<br>        用户名:16字符以内<br>        主机:<br>            主机名:<a target="_blank" rel="noopener" href="http://www.test.com,mysql/">www.test.com,mysql</a><br>            IP: 192.168.0.109<br>            网络地址: 172.16.0.0&#x2F;255.255.0.0<br>            <br>        通配符: %, _ </p>
-<p>启动MySQL服务器时:            <br>–skip-name-resolve:略过名称解析,会提高用户连接速度 </p>
-<p>            <br>权限级别:<br>    全局级别: CREATE TABLESPACE,CREATE USER, PROCESS,PROXY,BELOAD,REPLICATION CLIENT,REPLICATION SLAVE,SHOW DATABASES,SHUTDOWN,SUPER,ALL[PRIVILEGES],USAGE<br>    库<br>    表<br>    存储过程和存储函数<br>        <br>            <br>            <br>临时表:内存表<br>    heap:16MB </p>
-<p>触发器:主动数据库<br>    INSERT，DELETE，UPDATE     </p>
-<p>!!!!!!!!!!!!!更多自行help!!!!!!!    <br>创建用户:        <br>1、mysql&gt;CREATE USER ‘jeffrey‘@’localhost’ [IDENTIFIED BY  ‘mypass’];现在会默认加密<br>2、mysql&gt;GRANT<br>3、mysql&gt;INSERT INTO mysql.user<br>    这种方式需要FLUSH PRIVILEGES; </p>
-<p>设置密码:<br>SET PASSWORD FOR ‘bob‘@’%.example.org’ &#x3D; PASSWORD(‘cleartext password’); </p>
-<p>查看授权:<br>mysql&gt;SHOW GRANTS FOR ‘jeffrey‘@’localhost’;<br>| GRANT USAGE ON <em>.</em> TO ‘dragon‘@’localhost’ IDENTIFIED BY PASSWORD ‘*08E03012EB25C19BCBB8BF6E12EB104AED8DE2C8’ |(USAGE默认没权限) </p>
-<p>            <br>进行授权:<br>object_type<br>    TABLE<br>    FUNCTION<br>    PROCEDURE </p>
-<p>priv_level:<br>    *<br>    <em>.</em><br>    db_name.*<br>    db_name.tb1.name<br>    tb1_name<br>    db_name.routine_name </p>
-<p>ssl_option:<br>    SSL<br>    X509<br>    CIPHER ‘cipher’<br>    ISSUER ‘issuer’<br>    SUBJECT ‘subject’<br>    <br>with_option:<br>    MAX_QUERIES_PER_HOUR count 每小时最大查询请求个数<br>    MAX_UPDATES_PER_HOUR count 每小时最大使用更新次数<br>    MAX_CONNECTIONS_PER_HOUR count 每小时最大连接次数<br>    MAX_USER_CONNECTIONS count 最大并发连接次数(同一个账号最大连接次数)<br>    当不想进行限定时，只要将值改为0即可； 
-         </p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES  <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;username&#x27;</span>@<span class="string">&#x27;host&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;mypass&#x27;</span>; </span><br><span class="line">     </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> <span class="keyword">CREATE</span> <span class="keyword">ON</span> cactidb.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;jeffrey&#x27;</span>@<span class="string">&#x27;%&#x27;</span>; </span><br><span class="line"> </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> <span class="keyword">ALL</span> <span class="keyword">ON</span> db1.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;jeffrey&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>; </span><br><span class="line"> </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> db2.invoice <span class="keyword">TO</span> <span class="string">&#x27;jeffrey&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>; </span><br><span class="line"> </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> USAGE <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;jeffrey&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> <span class="keyword">WITH</span> MAX_QUERIES_PER_HOUR <span class="number">90</span>;     </span><br><span class="line">     </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> <span class="keyword">CREATE</span> <span class="keyword">INSERT</span> <span class="keyword">UPDATE</span> <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;username&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>; </span><br><span class="line"> </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> <span class="keyword">UPDATE</span>(Age) <span class="keyword">ON</span> TEST.TEST <span class="keyword">TO</span> <span class="string">&#x27;jeffrey&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>; </span><br><span class="line">     </span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> SUPER <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;username&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>;这个权限类似root </span><br><span class="line">```   </span><br><span class="line"> </span><br><span class="line">删除用户:     </span><br><span class="line"></span><br><span class="line">```<span class="keyword">sql</span></span><br><span class="line"><span class="keyword">DROP</span> <span class="keyword">USER</span> <span class="string">&#x27;username&#x27;</span>@<span class="string">&#x27;host&#x27;</span> </span><br></pre></td></tr></table></figure>
-<p>重命名:</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RENAME <span class="keyword">USER</span> old_name <span class="keyword">TO</span> new_name </span><br></pre></td></tr></table></figure>
-<p>取消授权: </p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">REVOKE</span> <span class="keyword">INSERT</span> <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">FROM</span> <span class="string">&#x27;jeffrey&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span>; </span><br><span class="line"><span class="keyword">REVOKE</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> <span class="string">&#x27;cactidb&#x27;</span>.<span class="operator">*</span> <span class="keyword">FROM</span> <span class="string">&#x27;cactiuder&#x27;</span>@<span class="string">&#x27;%&#x27;</span>; </span><br></pre></td></tr></table></figure>
-<p>修改密码: </p>
-<p>通过更新授权表的方式直接修改其密码，而后移除此两个选项重启服务器； </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#service mysqld stop </span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#vim /etc/init.d/mysqld </span></span><br></pre></td></tr></table></figure>
-<p>找到start 那项:<br>添加成如下:<br>$bindir&#x2F;mysqld_safe –skip-grant-tables –skip-networking (添加这两个) –datadir…. </p>
-<p>–skip-grant-tables : 跳过授权表<br>–skip-networking : 跳过网络(因为如果此时有人通过网络连接你的数据库的话，那就比较悲剧了，只能本地登陆，所以一定要添加这一项) </p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">update</span> <span class="keyword">user</span> <span class="keyword">SET</span> PASSWORD<span class="operator">=</span>PASSWORD(<span class="string">&#x27;mypass&#x27;</span>) <span class="keyword">WHERE</span> <span class="keyword">User</span><span class="operator">=</span><span class="string">&#x27;root&#x27;</span> ; </span><br></pre></td></tr></table></figure>
-<p>由于跳过了授权表，所以使用set就不会起作用，只有使用update; </p>
-<p>然后重新修改&#x2F;etc&#x2F;init.d&#x2F;mysqld,重启即可； </p>
-<p>    <br>    <br>;</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/MySQL//" class="article-tag-list-link color1">MySQL</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/07/06/34-03MySQL%E7%B3%BB%E5%88%97%E4%B9%8B%E5%8D%81%E4%B8%80%EF%BC%8DMySQL%E7%94%A8%E6%88%B7%E5%92%8C%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86/">展开全文 >></a>
         </p>
       
 

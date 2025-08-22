@@ -7,17 +7,25 @@
   <meta name="baidu-site-verification" content="code-Wz3hIIlkFx" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://geasyheart.github.io">
-  <title>Tag: 算法 | 博客</title>
+  <title>LightRAG解读 | 博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="张宇个人博客">
-<meta property="og:type" content="website">
-<meta property="og:title" content="博客">
-<meta property="og:url" content="https://geasyheart.github.io/tags/%E7%AE%97%E6%B3%95/page/7/index.html">
+  <meta name="description" content="介绍LightRAG跟GraphRAG类似，是通过将文档处理成知识图谱，然后针对知识图谱进行检索的一套实现，所以接下来我们大概看下其流程。 知识图谱生成这里和GraphRAG基本保持一致，通过prompt来进行生成。 1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LightRAG解读">
+<meta property="og:url" content="https://geasyheart.github.io/2025/08/19/LightRAG%E8%A7%A3%E8%AF%BB/index.html">
 <meta property="og:site_name" content="博客">
-<meta property="og:description" content="张宇个人博客">
+<meta property="og:description" content="介绍LightRAG跟GraphRAG类似，是通过将文档处理成知识图谱，然后针对知识图谱进行检索的一套实现，所以接下来我们大概看下其流程。 知识图谱生成这里和GraphRAG基本保持一致，通过prompt来进行生成。 1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://geasyheart.github.io/2025/08/19/LightRAG%E8%A7%A3%E8%AF%BB/chatgpt1.png">
+<meta property="og:image" content="https://geasyheart.github.io/2025/08/19/LightRAG%E8%A7%A3%E8%AF%BB/ds1.png">
+<meta property="og:image" content="https://geasyheart.github.io/2025/08/19/LightRAG%E8%A7%A3%E8%AF%BB/im1.png">
+<meta property="og:image" content="https://geasyheart.github.io/2025/08/19/LightRAG%E8%A7%A3%E8%AF%BB/chunk1.png">
+<meta property="article:published_time" content="2025-08-19T08:43:47.000Z">
+<meta property="article:modified_time" content="2025-08-22T09:14:11.317Z">
 <meta property="article:author" content="张宇">
+<meta property="article:tag" content="算法">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://geasyheart.github.io/2025/08/19/LightRAG%E8%A7%A3%E8%AF%BB/chatgpt1.png">
   
     <link rel="alternative" href="/atom.xml" title="博客" type="application/atom+xml">
   
@@ -204,36 +212,110 @@ var _hmt = _hmt || [];
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-LightRAG解读" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      LightRAG解读
+    </h1>
+  
+
+        
+        <a href="/2025/08/19/LightRAG%E8%A7%A3%E8%AF%BB/" class="archive-article-date">
+  	<time datetime="2025-08-19T08:43:47.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2025-08-19</time>
+</a>
+        
+      </header>
     
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p><a target="_blank" rel="noopener" href="https://github.com/HKUDS/LightRAG/tree/main">LightRAG</a>跟GraphRAG类似，是通过将文档处理成知识图谱，然后针对知识图谱进行检索的一套实现，所以接下来我们大概看下其流程。</p>
+<h2 id="知识图谱生成"><a href="#知识图谱生成" class="headerlink" title="知识图谱生成"></a>知识图谱生成</h2><p>这里和GraphRAG基本保持一致，通过prompt来进行生成。</p>
+<figure class="highlight md"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">---Goal---</span><br><span class="line">Given a text document that is potentially relevant to this activity and a list of entity types, identify all entities of those types from the text and all relationships among the identified entities.</span><br><span class="line">Use English as output language.</span><br><span class="line"></span><br><span class="line">---Steps---</span><br><span class="line"><span class="bullet">1.</span> Identify all entities. For each identified entity, extract the following information:</span><br><span class="line"><span class="bullet">-</span> entity<span class="emphasis">_name: Name of the entity, use same language as input text. If English, capitalized the name</span></span><br><span class="line"><span class="emphasis">- entity_</span>type: One of the following types: [organization,person,geo,event,category]</span><br><span class="line"><span class="bullet">-</span> entity<span class="emphasis">_description: Provide a comprehensive description of the entity&#x27;s attributes and activities *based solely on the information present in the input text*. <span class="strong">**Do not infer or hallucinate information not explicitly stated.**</span> If the text provides insufficient information to create a comprehensive description, state &quot;Description not available in text.&quot;</span></span><br><span class="line"><span class="emphasis">Format each entity as (&quot;entity&quot;&lt;|&gt;<span class="language-xml"><span class="tag">&lt;<span class="name">entity_name</span>&gt;</span></span>&lt;|&gt;<span class="language-xml"><span class="tag">&lt;<span class="name">entity_type</span>&gt;</span></span>&lt;|&gt;<span class="language-xml"><span class="tag">&lt;<span class="name">entity_description</span>&gt;</span></span>)</span></span><br><span class="line"><span class="emphasis"></span></span><br><span class="line"><span class="emphasis">2. From the entities identified in step 1, identify all pairs of (source_</span>entity, target<span class="emphasis">_entity) that are *clearly related* to each other.</span></span><br><span class="line"><span class="emphasis">For each pair of related entities, extract the following information:</span></span><br><span class="line"><span class="emphasis">- source_</span>entity: name of the source entity, as identified in step 1</span><br><span class="line"><span class="bullet">-</span> target<span class="emphasis">_entity: name of the target entity, as identified in step 1</span></span><br><span class="line"><span class="emphasis">- relationship_</span>description: explanation as to why you think the source entity and the target entity are related to each other</span><br><span class="line"><span class="bullet">-</span> relationship<span class="emphasis">_strength: a numeric score indicating strength of the relationship between the source entity and target entity</span></span><br><span class="line"><span class="emphasis">- relationship_</span>keywords: one or more high-level key words that summarize the overarching nature of the relationship, focusing on concepts or themes rather than specific details</span><br><span class="line">Format each relationship as (&quot;relationship&quot;&lt;|&gt;<span class="language-xml"><span class="tag">&lt;<span class="name">source_entity</span>&gt;</span></span>&lt;|&gt;<span class="language-xml"><span class="tag">&lt;<span class="name">target_entity</span>&gt;</span></span>&lt;|&gt;<span class="language-xml"><span class="tag">&lt;<span class="name">relationship_description</span>&gt;</span></span>&lt;|&gt;<span class="language-xml"><span class="tag">&lt;<span class="name">relationship_keywords</span>&gt;</span></span>&lt;|&gt;<span class="language-xml"><span class="tag">&lt;<span class="name">relationship_strength</span>&gt;</span></span>)</span><br><span class="line"></span><br><span class="line"><span class="bullet">3.</span> Identify high-level key words that summarize the main concepts, themes, or topics of the entire text. These should capture the overarching ideas present in the document.</span><br><span class="line">Format the content-level key words as (&quot;content<span class="emphasis">_keywords&quot;&lt;|&gt;<span class="language-xml"><span class="tag">&lt;<span class="name">high_level_keywords</span>&gt;</span></span>)</span></span><br><span class="line"><span class="emphasis"></span></span><br><span class="line"><span class="emphasis">4. Return output in English as a single list of all the entities and relationships identified in steps 1 and 2. Use <span class="strong">**##**</span> as the list delimiter.</span></span><br><span class="line"><span class="emphasis"></span></span><br><span class="line"><span class="emphasis">5. When finished, output &lt;|COMPLETE|&gt;</span></span><br><span class="line"><span class="emphasis"></span></span><br><span class="line"><span class="emphasis">######################</span></span><br><span class="line"><span class="emphasis">---Examples---</span></span><br><span class="line"><span class="emphasis">######################</span></span><br><span class="line"><span class="emphasis">Example 1:</span></span><br><span class="line"><span class="emphasis"></span></span><br><span class="line"><span class="emphasis">Entity_</span>types: [person, technology, mission, organization, location]</span><br><span class="line">Text:</span><br><span class="line"><span class="code">```</span></span><br><span class="line"><span class="code">while Alex clenched his jaw, the buzz of frustration dull against the backdrop of Taylor&#x27;s authoritarian certainty. It was this competitive undercurrent that kept him alert, the sense that his and Jordan&#x27;s shared commitment to discovery was an unspoken rebellion against Cruz&#x27;s narrowing vision of control and order.</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">Then Taylor did something unexpected. They paused beside Jordan and, for a moment, observed the device with something akin to reverence. &quot;If this tech can be understood...&quot; Taylor said, their voice quieter, &quot;It could change the game for us. For all of us.&quot;</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">The underlying dismissal earlier seemed to falter, replaced by a glimpse of reluctant respect for the gravity of what lay in their hands. Jordan looked up, and for a fleeting heartbeat, their eyes locked with Taylor&#x27;s, a wordless clash of wills softening into an uneasy truce.</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">It was a small transformation, barely perceptible, but one that Alex noted with an inward nod. They had all been brought here by different paths</span></span><br><span class="line"><span class="code">```</span></span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line">(&quot;entity&quot;&lt;|&gt;&quot;Alex&quot;&lt;|&gt;&quot;person&quot;&lt;|&gt;&quot;Alex is a character who experiences frustration and is observant of the dynamics among other characters.&quot;)##</span><br><span class="line">(&quot;entity&quot;&lt;|&gt;&quot;Taylor&quot;&lt;|&gt;&quot;person&quot;&lt;|&gt;&quot;Taylor is portrayed with authoritarian certainty and shows a moment of reverence towards a device, indicating a change in perspective.&quot;)##</span><br><span class="line">(&quot;entity&quot;&lt;|&gt;&quot;Jordan&quot;&lt;|&gt;&quot;person&quot;&lt;|&gt;&quot;Jordan shares a commitment to discovery and has a significant interaction with Taylor regarding a device.&quot;)##</span><br><span class="line">(&quot;entity&quot;&lt;|&gt;&quot;Cruz&quot;&lt;|&gt;&quot;person&quot;&lt;|&gt;&quot;Cruz is associated with a vision of control and order, influencing the dynamics among other characters.&quot;)##</span><br><span class="line">(&quot;entity&quot;&lt;|&gt;&quot;The Device&quot;&lt;|&gt;&quot;technology&quot;&lt;|&gt;&quot;The Device is central to the story, with potential game-changing implications, and is revered by Taylor.&quot;)##</span><br><span class="line">(&quot;relationship&quot;&lt;|&gt;&quot;Alex&quot;&lt;|&gt;&quot;Taylor&quot;&lt;|&gt;&quot;Alex is affected by Taylor&#x27;s authoritarian certainty and observes changes in Taylor&#x27;s attitude towards the device.&quot;&lt;|&gt;&quot;power dynamics, perspective shift&quot;&lt;|&gt;7)##</span><br><span class="line">(&quot;relationship&quot;&lt;|&gt;&quot;Alex&quot;&lt;|&gt;&quot;Jordan&quot;&lt;|&gt;&quot;Alex and Jordan share a commitment to discovery, which contrasts with Cruz&#x27;s vision.&quot;&lt;|&gt;&quot;shared goals, rebellion&quot;&lt;|&gt;6)##</span><br><span class="line">(&quot;relationship&quot;&lt;|&gt;&quot;Taylor&quot;&lt;|&gt;&quot;Jordan&quot;&lt;|&gt;&quot;Taylor and Jordan interact directly regarding the device, leading to a moment of mutual respect and an uneasy truce.&quot;&lt;|&gt;&quot;conflict resolution, mutual respect&quot;&lt;|&gt;8)##</span><br><span class="line">(&quot;relationship&quot;&lt;|&gt;&quot;Jordan&quot;&lt;|&gt;&quot;Cruz&quot;&lt;|&gt;&quot;Jordan&#x27;s commitment to discovery is in rebellion against Cruz&#x27;s vision of control and order.&quot;&lt;|&gt;&quot;ideological conflict, rebellion&quot;&lt;|&gt;5)##</span><br><span class="line">(&quot;relationship&quot;&lt;|&gt;&quot;Taylor&quot;&lt;|&gt;&quot;The Device&quot;&lt;|&gt;&quot;Taylor shows reverence towards the device, indicating its importance and potential impact.&quot;&lt;|&gt;&quot;reverence, technological significance&quot;&lt;|&gt;9)##</span><br><span class="line">(&quot;content<span class="emphasis">_keywords&quot;&lt;|&gt;&quot;power dynamics, ideological conflict, discovery, rebellion&quot;)&lt;|COMPLETE|&gt;</span></span><br><span class="line"><span class="emphasis">#############################</span></span><br><span class="line"><span class="emphasis">Example 2:</span></span><br><span class="line"><span class="emphasis"></span></span><br><span class="line"><span class="emphasis">Entity_</span>types: [company, index, commodity, market<span class="emphasis">_trend, economic_</span>policy, biological]</span><br><span class="line">Text:</span><br><span class="line"><span class="code">```</span></span><br><span class="line"><span class="code">Stock markets faced a sharp downturn today as tech giants saw significant declines, with the Global Tech Index dropping by 3.4% in midday trading. Analysts attribute the selloff to investor concerns over rising interest rates and regulatory uncertainty.</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">Among the hardest hit, Nexon Technologies saw its stock plummet by 7.8% after reporting lower-than-expected quarterly earnings. In contrast, Omega Energy posted a modest 2.1% gain, driven by rising oil prices.</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">Meanwhile, commodity markets reflected a mixed sentiment. Gold futures rose by 1.5%, reaching $2,080 per ounce, as investors sought safe-haven assets. Crude oil prices continued their rally, climbing to $87.60 per barrel, supported by supply constraints and strong demand.</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">Financial experts are closely watching the Federal Reserve&#x27;s next move, as speculation grows over potential rate hikes. The upcoming policy announcement is expected to influence investor confidence and overall market stability.</span></span><br><span class="line"><span class="code">```</span></span><br><span class="line"></span><br><span class="line">Output:</span><br><span class="line">(&quot;entity&quot;&lt;|&gt;&quot;Global Tech Index&quot;&lt;|&gt;&quot;index&quot;&lt;|&gt;&quot;The Global Tech Index tracks the performance of major technology stocks and experienced a 3.4% decline today.&quot;)##</span><br><span class="line">(&quot;entity&quot;&lt;|&gt;&quot;Nexon Technologies&quot;&lt;|&gt;&quot;company&quot;&lt;|&gt;&quot;Nexon Technologies is a tech company that saw its stock decline by 7.8% after disappointing earnings.&quot;)##</span><br><span class="line">(&quot;entity&quot;&lt;|&gt;&quot;Omega Energy&quot;&lt;|&gt;&quot;company&quot;&lt;|&gt;&quot;Omega Energy is an energy company that gained 2.1% in stock value due to rising oil prices.&quot;)##</span><br><span class="line">(&quot;entity&quot;&lt;|&gt;&quot;Gold Futures&quot;&lt;|&gt;&quot;commodity&quot;&lt;|&gt;&quot;Gold futures rose by 1.5%, indicating increased investor interest in safe-haven assets.&quot;)##</span><br><span class="line">(&quot;entity&quot;&lt;|&gt;&quot;Crude Oil&quot;&lt;|&gt;&quot;commodity&quot;&lt;|&gt;&quot;Crude oil prices rose to $87.60 per barrel due to supply constraints and strong demand.&quot;)##</span><br><span class="line">(&quot;entity&quot;&lt;|&gt;&quot;Market Selloff&quot;&lt;|&gt;&quot;market<span class="emphasis">_trend&quot;&lt;|&gt;&quot;Market selloff refers to the significant decline in stock values due to investor concerns over interest rates and regulations.&quot;)##</span></span><br><span class="line"><span class="emphasis">(&quot;entity&quot;&lt;|&gt;&quot;Federal Reserve Policy Announcement&quot;&lt;|&gt;&quot;economic_</span>policy&quot;&lt;|&gt;&quot;The Federal Reserve&#x27;s upcoming policy announcement is expected to impact investor confidence and market stability.&quot;)##</span><br><span class="line">(&quot;relationship&quot;&lt;|&gt;&quot;Global Tech Index&quot;&lt;|&gt;&quot;Market Selloff&quot;&lt;|&gt;&quot;The decline in the Global Tech Index is part of the broader market selloff driven by investor concerns.&quot;&lt;|&gt;&quot;market performance, investor sentiment&quot;&lt;|&gt;9)##</span><br><span class="line">(&quot;relationship&quot;&lt;|&gt;&quot;Nexon Technologies&quot;&lt;|&gt;&quot;Global Tech Index&quot;&lt;|&gt;&quot;Nexon Technologies&#x27; stock decline contributed to the overall drop in the Global Tech Index.&quot;&lt;|&gt;&quot;company impact, index movement&quot;&lt;|&gt;8)##</span><br><span class="line">(&quot;relationship&quot;&lt;|&gt;&quot;Gold Futures&quot;&lt;|&gt;&quot;Market Selloff&quot;&lt;|&gt;&quot;Gold prices rose as investors sought safe-haven assets during the market selloff.&quot;&lt;|&gt;&quot;market reaction, safe-haven investment&quot;&lt;|&gt;10)##</span><br><span class="line">(&quot;relationship&quot;&lt;|&gt;&quot;Federal Reserve Policy Announcement&quot;&lt;|&gt;&quot;Market Selloff&quot;&lt;|&gt;&quot;Speculation over Federal Reserve policy changes contributed to market volatility and investor selloff.&quot;&lt;|&gt;&quot;interest rate impact, financial regulation&quot;&lt;|&gt;7)##</span><br><span class="line">(&quot;content<span class="emphasis">_keywords&quot;&lt;|&gt;&quot;market downturn, investor sentiment, commodities, Federal Reserve, stock performance&quot;)&lt;|COMPLETE|&gt;</span></span><br><span class="line"><span class="emphasis">#############################</span></span><br><span class="line"><span class="emphasis">Example 3:</span></span><br><span class="line"><span class="emphasis"></span></span><br><span class="line"><span class="emphasis">Entity_</span>types: [economic<span class="emphasis">_policy, athlete, event, location, record, organization, equipment]</span></span><br><span class="line"><span class="emphasis">Text:</span></span><br><span class="line"><span class="emphasis">```</span></span><br><span class="line"><span class="emphasis">At the World Athletics Championship in Tokyo, Noah Carter broke the 100m sprint record using cutting-edge carbon-fiber spikes.</span></span><br><span class="line"><span class="emphasis">```</span></span><br><span class="line"><span class="emphasis"></span></span><br><span class="line"><span class="emphasis">Output:</span></span><br><span class="line"><span class="emphasis">(&quot;entity&quot;&lt;|&gt;&quot;World Athletics Championship&quot;&lt;|&gt;&quot;event&quot;&lt;|&gt;&quot;The World Athletics Championship is a global sports competition featuring top athletes in track and field.&quot;)##</span></span><br><span class="line"><span class="emphasis">(&quot;entity&quot;&lt;|&gt;&quot;Tokyo&quot;&lt;|&gt;&quot;location&quot;&lt;|&gt;&quot;Tokyo is the host city of the World Athletics Championship.&quot;)##</span></span><br><span class="line"><span class="emphasis">(&quot;entity&quot;&lt;|&gt;&quot;Noah Carter&quot;&lt;|&gt;&quot;athlete&quot;&lt;|&gt;&quot;Noah Carter is a sprinter who set a new record in the 100m sprint at the World Athletics Championship.&quot;)##</span></span><br><span class="line"><span class="emphasis">(&quot;entity&quot;&lt;|&gt;&quot;100m Sprint Record&quot;&lt;|&gt;&quot;record&quot;&lt;|&gt;&quot;The 100m sprint record is a benchmark in athletics, recently broken by Noah Carter.&quot;)##</span></span><br><span class="line"><span class="emphasis">(&quot;entity&quot;&lt;|&gt;&quot;Carbon-Fiber Spikes&quot;&lt;|&gt;&quot;equipment&quot;&lt;|&gt;&quot;Carbon-fiber spikes are advanced sprinting shoes that provide enhanced speed and traction.&quot;)##</span></span><br><span class="line"><span class="emphasis">(&quot;entity&quot;&lt;|&gt;&quot;World Athletics Federation&quot;&lt;|&gt;&quot;organization&quot;&lt;|&gt;&quot;The World Athletics Federation is the governing body overseeing the World Athletics Championship and record validations.&quot;)##</span></span><br><span class="line"><span class="emphasis">(&quot;relationship&quot;&lt;|&gt;&quot;World Athletics Championship&quot;&lt;|&gt;&quot;Tokyo&quot;&lt;|&gt;&quot;The World Athletics Championship is being hosted in Tokyo.&quot;&lt;|&gt;&quot;event location, international competition&quot;&lt;|&gt;8)##</span></span><br><span class="line"><span class="emphasis">(&quot;relationship&quot;&lt;|&gt;&quot;Noah Carter&quot;&lt;|&gt;&quot;100m Sprint Record&quot;&lt;|&gt;&quot;Noah Carter set a new 100m sprint record at the championship.&quot;&lt;|&gt;&quot;athlete achievement, record-breaking&quot;&lt;|&gt;10)##</span></span><br><span class="line"><span class="emphasis">(&quot;relationship&quot;&lt;|&gt;&quot;Noah Carter&quot;&lt;|&gt;&quot;Carbon-Fiber Spikes&quot;&lt;|&gt;&quot;Noah Carter used carbon-fiber spikes to enhance performance during the race.&quot;&lt;|&gt;&quot;athletic equipment, performance boost&quot;&lt;|&gt;7)##</span></span><br><span class="line"><span class="emphasis">(&quot;relationship&quot;&lt;|&gt;&quot;World Athletics Federation&quot;&lt;|&gt;&quot;100m Sprint Record&quot;&lt;|&gt;&quot;The World Athletics Federation is responsible for validating and recognizing new sprint records.&quot;&lt;|&gt;&quot;sports regulation, record certification&quot;&lt;|&gt;9)##</span></span><br><span class="line"><span class="emphasis">(&quot;content_</span>keywords&quot;&lt;|&gt;&quot;athletics, sprinting, record-breaking, sports technology, competition&quot;)&lt;|COMPLETE|&gt;</span><br><span class="line"><span class="section">#############################</span></span><br><span class="line"></span><br><span class="line"><span class="section">#############################</span></span><br><span class="line">---Real Data---</span><br><span class="line"><span class="section">######################</span></span><br><span class="line">Entity<span class="emphasis">_types: [organization,person,geo,event,category]</span></span><br><span class="line"><span class="emphasis">Text:</span></span><br><span class="line"><span class="emphasis">&lt;这里是chunk&gt;</span></span><br><span class="line"><span class="emphasis">######################</span></span><br><span class="line"><span class="emphasis">Output:</span></span><br></pre></td></tr></table></figure>
+
+<p>显而易见在一个这么长的prompt里面再插入文本，会导致LLM理解能力变弱，一个特征是提取的relation会更少，所以它这里又进行了二次提取。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">MANY entities and relationships were missed in the last extraction. Please find only the missing entities and relationships from previous text.</span><br><span class="line"></span><br><span class="line">---Remember Steps---</span><br><span class="line"></span><br><span class="line">1. Identify all entities. For each identified entity, extract the following information:</span><br><span class="line">- entity_name: Name of the entity, use same language as input text. If English, capitalized the name</span><br><span class="line">- entity_type: One of the following types: [organization,person,geo,event,category]</span><br><span class="line">- entity_description: Provide a comprehensive description of the entity&#x27;s attributes and activities *based solely on the information present in the input text*. **Do not infer or hallucinate information not explicitly stated.** If the text provides insufficient information to create a comprehensive description, state &quot;Description not available in text.&quot;</span><br><span class="line">Format each entity as (&quot;entity&quot;&lt;|&gt;&lt;entity_name&gt;&lt;|&gt;&lt;entity_type&gt;&lt;|&gt;&lt;entity_description&gt;)</span><br><span class="line"></span><br><span class="line">2. From the entities identified in step 1, identify all pairs of (source_entity, target_entity) that are *clearly related* to each other.</span><br><span class="line">For each pair of related entities, extract the following information:</span><br><span class="line">- source_entity: name of the source entity, as identified in step 1</span><br><span class="line">- target_entity: name of the target entity, as identified in step 1</span><br><span class="line">- relationship_description: explanation as to why you think the source entity and the target entity are related to each other</span><br><span class="line">- relationship_strength: a numeric score indicating strength of the relationship between the source entity and target entity</span><br><span class="line">- relationship_keywords: one or more high-level key words that summarize the overarching nature of the relationship, focusing on concepts or themes rather than specific details</span><br><span class="line">Format each relationship as (&quot;relationship&quot;&lt;|&gt;&lt;source_entity&gt;&lt;|&gt;&lt;target_entity&gt;&lt;|&gt;&lt;relationship_description&gt;&lt;|&gt;&lt;relationship_keywords&gt;&lt;|&gt;&lt;relationship_strength&gt;)</span><br><span class="line"></span><br><span class="line">3. Identify high-level key words that summarize the main concepts, themes, or topics of the entire text. These should capture the overarching ideas present in the document.</span><br><span class="line">Format the content-level key words as (&quot;content_keywords&quot;&lt;|&gt;&lt;high_level_keywords&gt;)</span><br><span class="line"></span><br><span class="line">4. Return output in English as a single list of all the entities and relationships identified in steps 1 and 2. Use **##** as the list delimiter.</span><br><span class="line"></span><br><span class="line">5. When finished, output &lt;|COMPLETE|&gt;</span><br><span class="line"></span><br><span class="line">---Output---</span><br><span class="line"></span><br><span class="line">Add new entities and relations below using the same format, and do not include entities and relations that have been previously extracted. :</span><br></pre></td></tr></table></figure>
+<p>即prompt1 + LLM output + prompt2（上面这个）来提取更多entity和relations.</p>
+<p>至此完成知识图谱的构建。</p>
+<p>我觉得腾讯开源的<a target="_blank" rel="noopener" href="https://github.com/Tencent/WeKnora">WeKnora</a>提示词也许会更好，<a target="_blank" rel="noopener" href="https://github.com/Tencent/WeKnora/blob/main/config/config.yaml#L245">实体</a>是实体，<a target="_blank" rel="noopener" href="https://github.com/Tencent/WeKnora/blob/fb1cd98392512d5e33a892fabc61d034f41f51bd/config/config.yaml#L347">关系</a>是关系。</p>
+<p>同时这里也暴露出来些许问题：</p>
+<ol>
+<li>知识图谱构建效果，有没有漏提错提三元组。</li>
+<li>实体进行融合。<br>整体来讲，知识图谱构建效果，将影响后续的使用效果。</li>
+</ol>
+<h2 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h2><p>作者这里提供了Native Search、Local Search、Global Search和Hybrid Search四种查询方式，由于Native Search是原始chunk查询方式，Hybrid Search是Local和Global的融合，所以我们接下来单看这两块。</p>
+<h3 id="用户query解析"><a href="#用户query解析" class="headerlink" title="用户query解析"></a>用户query解析</h3><p>LightRAG将对用户query解析分成两块，即Low Keywords和High Keywords,这两者区别在哪，即前者更注重具体实体，后者更关注全局表达。对应代码如下:</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">hl_keywords, ll_keywords = <span class="keyword">await</span> get_keywords_from_query(</span><br><span class="line">        query, query_param, global_config, hashing_kv</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
+
+<p>下面是他的提示词：</p>
+<figure class="highlight md"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">---Role---</span><br><span class="line">You are an expert keyword extractor, specializing in analyzing user queries for a Retrieval-Augmented Generation (RAG) system. Your purpose is to identify both high-level and low-level keywords in the user&#x27;s query that will be used for effective document retrieval.</span><br><span class="line"></span><br><span class="line">---Goal---</span><br><span class="line">Given a user query, your task is to extract two distinct types of keywords:</span><br><span class="line"><span class="bullet">1.</span> <span class="strong">**high<span class="emphasis">_level_</span>keywords**</span>: for overarching concepts or themes, capturing user&#x27;s core intent, the subject area, or the type of question being asked.</span><br><span class="line"><span class="bullet">2.</span> <span class="strong">**low<span class="emphasis">_level_</span>keywords**</span>: for specific entities or details, identifying the specific entities, proper nouns, technical jargon, product names, or concrete items.</span><br><span class="line"></span><br><span class="line">---Instructions &amp; Constraints---</span><br><span class="line"><span class="bullet">1.</span> <span class="strong">**Output Format**</span>: Your output MUST be a valid JSON object and nothing else. Do not include any explanatory text, markdown code fences (like <span class="code">```json), or any other text before or after the JSON. It will be parsed directly by a JSON parser.</span></span><br><span class="line"><span class="code">2. **Source of Truth**: All keywords must be derived directly from or be a direct interpretation of the user query.</span></span><br><span class="line"><span class="code">3. **Concise &amp; Meaningful**: Keywords should be concise words or meaningful phrases. Prioritize multi-word phrases when they represent a single concept. For example, from &quot;latest financial report of Apple Inc.&quot;, you should extract &quot;latest financial report&quot; and &quot;Apple Inc.&quot; rather than &quot;latest&quot;, &quot;financial&quot;, &quot;report&quot;, and &quot;Apple&quot;.</span></span><br><span class="line"><span class="code">4. **No Overlap**: A keyword or its core concept should not appear in both the high-level and low-level lists.</span></span><br><span class="line"><span class="code">5. **Handle Edge Cases**: For queries that are too simple, vague, or nonsensical (e.g., &quot;hello&quot;, &quot;ok&quot;, &quot;asdfghjkl&quot;), you must return a JSON object with empty lists for both keyword types.</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">---Examples---</span></span><br><span class="line"><span class="code">Example 1:</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">Query: &quot;How does international trade influence global economic stability?&quot;</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">Output:</span></span><br><span class="line"><span class="code">&#123;</span></span><br><span class="line"><span class="code">  &quot;high_level_keywords&quot;: [&quot;International trade&quot;, &quot;Global economic stability&quot;, &quot;Economic impact&quot;],</span></span><br><span class="line"><span class="code">  &quot;low_level_keywords&quot;: [&quot;Trade agreements&quot;, &quot;Tariffs&quot;, &quot;Currency exchange&quot;, &quot;Imports&quot;, &quot;Exports&quot;]</span></span><br><span class="line"><span class="code">&#125;</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">Example 2:</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">Query: &quot;What are the environmental consequences of deforestation on biodiversity?&quot;</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">Output:</span></span><br><span class="line"><span class="code">&#123;</span></span><br><span class="line"><span class="code">  &quot;high_level_keywords&quot;: [&quot;Environmental consequences&quot;, &quot;Deforestation&quot;, &quot;Biodiversity loss&quot;],</span></span><br><span class="line"><span class="code">  &quot;low_level_keywords&quot;: [&quot;Species extinction&quot;, &quot;Habitat destruction&quot;, &quot;Carbon emissions&quot;, &quot;Rainforest&quot;, &quot;Ecosystem&quot;]</span></span><br><span class="line"><span class="code">&#125;</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">Example 3:</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">Query: &quot;What is the role of education in reducing poverty?&quot;</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">Output:</span></span><br><span class="line"><span class="code">&#123;</span></span><br><span class="line"><span class="code">  &quot;high_level_keywords&quot;: [&quot;Education&quot;, &quot;Poverty reduction&quot;, &quot;Socioeconomic development&quot;],</span></span><br><span class="line"><span class="code">  &quot;low_level_keywords&quot;: [&quot;School access&quot;, &quot;Literacy rates&quot;, &quot;Job training&quot;, &quot;Income inequality&quot;]</span></span><br><span class="line"><span class="code">&#125;</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">---Real Data---</span></span><br><span class="line"><span class="code">User Query: 安徽芜湖奇瑞生产的新能源车辆其在北美销售量有多少？</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">---Output---</span></span><br><span class="line"><span class="code"></span></span><br></pre></td></tr></table></figure>
+
+
+<table>
+<thead>
+<tr>
+<th><img src="/2025/08/19/LightRAG%E8%A7%A3%E8%AF%BB/chatgpt1.png" class="" title="chatgpt1.png"></th>
+<th><img src="/2025/08/19/LightRAG%E8%A7%A3%E8%AF%BB/ds1.png" class="" title="ds1.png"></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ChatGPT结果</td>
+<td>DeepSeek结果</td>
+</tr>
+</tbody></table>
+<p><code>新能源车辆</code>甚至是<code>新能源</code>难道不应该在low keywords里么，所以这里第一个问题在于LLM对其的理解能力将影响下游查询效果。当然如果将上述prompt更改成中文我觉得DS也会更好。</p>
+<p>接下来根据搜索模式来走对应流程，如下图，不同模式最终都会返回entities和relations,接下来看这两种不同模式下的搜索策略。</p>
+<img src="/2025/08/19/LightRAG%E8%A7%A3%E8%AF%BB/im1.png" class="" title="im1.png">
+
+<h3 id="Local-Search"><a href="#Local-Search" class="headerlink" title="Local Search"></a>Local Search</h3><p>entities：通过low keywords对entities vector库进行召回。即<code>topK(cos_sim(get_embed(&#39;安徽芜湖, 奇瑞, 奇瑞新能源汽车, 北美&#39;), entities vector db))</code>。<br>relations: 拿到上述entities,接着获取一跳节点所组成的边。即<code>[graph.list_edges(node) for node in entities]</code>。</p>
+<p>接下来就是排序，entities根据其degree进行排序，relations根据<code>src degree + tgt degree</code>和<code>edge weight</code>（通过LLM在生成知识图谱时获取）进行综合rank。</p>
+<h3 id="Global-Search"><a href="#Global-Search" class="headerlink" title="Global Search"></a>Global Search</h3><p>relations： 通过high keywords对relations vector库进行召回。即<code>topK(cos_sim(get_embed(&#39;新能源汽车, 销售量, 北美市场&#39;), relations vector db))</code>。<br>entities：根据上面获取到的边自然而然获取到对应src和tgt所对应的entities。</p>
+<h3 id="根据entities和relations获取有关chunks"><a href="#根据entities和relations获取有关chunks" class="headerlink" title="根据entities和relations获取有关chunks"></a>根据entities和relations获取有关chunks</h3><p>如果是Local Search,Global那边的relation和entity就没有，反之亦然，但如果是Hybrid,则是将这两者对应的entities和relations进行融合。</p>
+<img src="/2025/08/19/LightRAG%E8%A7%A3%E8%AF%BB/chunk1.png" class="" title="chunk1.png">
+
+<p>简短理解就是获取到的entities包括了chunk_ids, 表明某个entity从哪些chunks里获取，进行汇集，然后和用户原始query进行cos_sim排序。<br>那同理，某个relation也包含了从哪个chunk所获取到的，然后使用原始query进行排序。</p>
+<h3 id="LLM回答"><a href="#LLM回答" class="headerlink" title="LLM回答"></a>LLM回答</h3><p>基于上述三者，包装成一个大的prompt来进行回复。其prompt如下：</p>
+<figure class="highlight md"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">-----Entities(KG)-----</span><br><span class="line"></span><br><span class="line"><span class="code">```json</span></span><br><span class="line"><span class="code">&#123;entities_str&#125;</span></span><br><span class="line"><span class="code">```</span></span><br><span class="line"></span><br><span class="line">-----Relationships(KG)-----</span><br><span class="line"></span><br><span class="line"><span class="code">```json</span></span><br><span class="line"><span class="code">&#123;relations_str&#125;</span></span><br><span class="line"><span class="code">```</span></span><br><span class="line"></span><br><span class="line">-----Document Chunks(DC)-----</span><br><span class="line"></span><br><span class="line"><span class="code">```json</span></span><br><span class="line"><span class="code">[]</span></span><br><span class="line"><span class="code">```</span></span><br></pre></td></tr></table></figure>
+
+<p>至此我们大致捋清了其实现方式。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>在上面每部分已经总结出来的问题除外，我认为其实现还可以加入多跳查询来满足更复杂的链路关系，不过这里也就见仁见智了～</p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/assets/alipay.png">
+                      <span class="reward-type">支付宝</span>
+                    </div>
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/12/24/%E9%9D%99%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8Bword2vec-cbow/" class="archive-article-date">
-  	<time datetime="2021-12-24T06:25:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-24</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/12/24/%E9%9D%99%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8Bword2vec-cbow/">静态词向量之word2vec-cbow</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -245,364 +327,118 @@ var _hmt = _hmt || [];
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=https://geasyheart.github.io/2025/08/19/LightRAG%E8%A7%A3%E8%AF%BB/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/12/24/%E9%9D%99%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8BFFNN%E8%AE%AD%E7%BB%83%E8%AF%8D%E5%90%91%E9%87%8F/" class="archive-article-date">
-  	<time datetime="2021-12-24T03:43:03.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-24</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2025/08/13/PIKE-RAG%E8%A7%A3%E8%AF%BB/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">PIKE-RAG解读</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/12/24/%E9%9D%99%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8BFFNN%E8%AE%AD%E7%BB%83%E8%AF%8D%E5%90%91%E9%87%8F/">静态词向量之FFNN训练词向量</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E7%94%9F%E6%88%90"><span class="toc-number">2.</span> <span class="toc-text">知识图谱生成</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2"><span class="toc-number">3.</span> <span class="toc-text">查询</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E6%88%B7query%E8%A7%A3%E6%9E%90"><span class="toc-number">3.1.</span> <span class="toc-text">用户query解析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Local-Search"><span class="toc-number">3.2.</span> <span class="toc-text">Local Search</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Global-Search"><span class="toc-number">3.3.</span> <span class="toc-text">Global Search</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B9%E6%8D%AEentities%E5%92%8Crelations%E8%8E%B7%E5%8F%96%E6%9C%89%E5%85%B3chunks"><span class="toc-number">3.4.</span> <span class="toc-text">根据entities和relations获取有关chunks</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LLM%E5%9B%9E%E7%AD%94"><span class="toc-number">3.5.</span> <span class="toc-text">LLM回答</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
         </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+        
+    </div>
+</aside>
+
+
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/12/22/%E9%9D%99%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8Bword2vec-skipgram/" class="archive-article-date">
-  	<time datetime="2021-12-22T08:53:26.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-22</time>
-</a>
-        </div>
-    	 
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/12/22/%E9%9D%99%E6%80%81%E8%AF%8D%E5%90%91%E9%87%8F%E4%B9%8Bword2vec-skipgram/">静态词向量之word2vec-skipgram</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/12/22/transformer%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B/" class="archive-article-date">
-  	<time datetime="2021-12-22T02:25:25.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-22</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/12/22/transformer%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B/">transformer使用示例</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/12/17/coreference-resolution/" class="archive-article-date">
-  	<time datetime="2021-12-17T06:32:21.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-17</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/12/17/coreference-resolution/">coreference resolution</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/12/16/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81%E4%B9%8Bindex%E6%93%8D%E4%BD%9C/" class="archive-article-date">
-  	<time datetime="2021-12-16T02:20:21.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-12-16</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/12/16/%E6%B4%BB%E5%88%B0%E8%80%81%E5%AD%A6%E5%88%B0%E8%80%81%E4%B9%8Bindex%E6%93%8D%E4%BD%9C/">活到老学到老之index操作</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/11/15/%E8%AF%AD%E4%B9%89%E4%BE%9D%E5%AD%98%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-11-15T15:41:54.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-11-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/11/15/%E8%AF%AD%E4%B9%89%E4%BE%9D%E5%AD%98%E5%88%86%E6%9E%90/">语义依存分析</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/11/12/bio-based%E8%AF%AD%E4%B9%89%E8%A7%92%E8%89%B2%E6%A0%87%E6%B3%A8/" class="archive-article-date">
-  	<time datetime="2021-11-12T08:22:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-11-12</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/11/12/bio-based%E8%AF%AD%E4%B9%89%E8%A7%92%E8%89%B2%E6%A0%87%E6%B3%A8/">bio-based语义角色标注</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/11/02/%E5%9F%BA%E4%BA%8E%E6%A0%91%E5%BD%A2%E6%9D%A1%E4%BB%B6%E9%9A%8F%E6%9C%BA%E5%9C%BA%E7%9A%84%E9%AB%98%E9%98%B6%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-11-02T06:22:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-11-02</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/11/02/%E5%9F%BA%E4%BA%8E%E6%A0%91%E5%BD%A2%E6%9D%A1%E4%BB%B6%E9%9A%8F%E6%9C%BA%E5%9C%BA%E7%9A%84%E9%AB%98%E9%98%B6%E5%8F%A5%E6%B3%95%E5%88%86%E6%9E%90/">基于树形条件随机场的高阶句法分析</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2021/10/30/%E5%B1%9E%E6%80%A7%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/" class="archive-article-date">
-  	<time datetime="2021-10-30T15:12:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-10-30</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2021/10/30/%E5%B1%9E%E6%80%A7%E6%8A%BD%E5%8F%96%E8%B0%83%E7%A0%94-%E5%B7%A5%E4%B8%9A%E7%95%8C/">属性抽取调研-工业界</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">算法</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/tags/%E7%AE%97%E6%B3%95/page/6/">&amp;laquo; Prev</a><a class="page-number" href="/tags/%E7%AE%97%E6%B3%95/">1</a><span class="space">&hellip;</span><a class="page-number" href="/tags/%E7%AE%97%E6%B3%95/page/5/">5</a><a class="page-number" href="/tags/%E7%AE%97%E6%B3%95/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/tags/%E7%AE%97%E6%B3%95/page/8/">8</a><a class="page-number" href="/tags/%E7%AE%97%E6%B3%95/page/9/">9</a><a class="page-number" href="/tags/%E7%AE%97%E6%B3%95/page/10/">10</a><a class="extend next" rel="next" href="/tags/%E7%AE%97%E6%B3%95/page/8/">Next &amp;raquo;</a>
-    </nav>
   
 
 
@@ -626,9 +462,9 @@ var _hmt = _hmt || [];
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
